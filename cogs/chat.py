@@ -10,35 +10,28 @@ class Chat(commands.Cog):
         self.conversation_history = defaultdict(lambda: defaultdict(lambda: deque(maxlen=5)))
         self.use_history = True
 
-@commands.Cog.listener()
-async def on_message(self, message):
-    if message.author == self.bot.user:
-        return
-    if isinstance(message.channel, discord.DMChannel):
-        return
-    
-    if self.bot.user in message.mentions and message.content.split(None, 2)[1].startswith("'"):
-        guild_id = str(message.guild.id)
-        channel_id = str(message.channel.id)
-        user_id = str(message.author.id)
-        
-        user_input = message.content.split("'", 1)[1].strip()
-        
-        if not user_input:
-            await message.reply("Désolé, je n'ai pas compris votre demande. Pouvez-vous reformuler ?")
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author == self.bot.user:
+            return
+        if isinstance(message.channel, discord.DMChannel):
             return
         
-        async with message.channel.typing():
-            chat_cog = self.bot.get_cog('Chat')
-            bot_response = await get_chatbot_response(
-                guild_id, 
-                channel_id, 
-                user_id, 
-                user_input, 
-                chat_cog.use_history, 
-                chat_cog.conversation_history
-            )
-            await message.reply(bot_response)
+        if self.bot.user in message.mentions or (message.reference and message.reference.resolved.author == self.bot.user):
+            guild_id = str(message.guild.id)
+            channel_id = str(message.channel.id)
+            user_id = str(message.author.id)
+            
+            user_input = message.content.replace(f'<@{self.bot.user.id}>', '').strip()
+            user_input = user_input.replace(f'<@!{self.bot.user.id}>', '').strip()
+            
+            if not user_input:
+                await message.reply("Désolé, je n'ai pas compris votre demande. Pouvez-vous reformuler ?")
+                return
+            
+            async with message.channel.typing():
+                bot_response = await get_chatbot_response(guild_id, channel_id, user_id, user_input, self.use_history, self.conversation_history)
+                await message.reply(bot_response)
 
     @app_commands.command(name="toggle_history", description="Active/désactive l'historique des conversations")
     @app_commands.checks.has_permissions(administrator=True)
