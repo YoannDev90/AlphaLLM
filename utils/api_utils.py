@@ -14,7 +14,7 @@ async def get_chatbot_response(guild_id, channel_id, user_id, user_input, use_hi
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={"Authorization": f"Bearer {config.OPENROUTER_API_KEY}"},
             json={
-                "model": "mattshumer/reflection-70b:free",
+                "model": "mattshumer/reflection-70b",
                 "messages": messages
             },
             timeout=aiohttp.ClientTimeout(total=120)
