@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlphaLLM - Assistant IA Avancé</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+        }
+        nav {
+            background-color: #444;
+            color: #fff;
+            padding: 0.5rem;
+        }
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin-right: 10px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+        .feature {
+            background: #fff;
+            padding: 20px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s, transform 0.5s;
+        }
+        .feature.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        #chatbot {
+            background: #e6e6e6;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        #chatInput {
+            width: 80%;
+            padding: 10px;
+        }
+        #sendBtn {
+            padding: 10px;
+            background: #333;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>AlphaLLM</h1>
+        <p>L'assistant IA avancé pour vos besoins en traitement du langage naturel</p>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="#accueil">Accueil</a></li>
+            <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+            <li><a href="#demo">Démo</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <section id="accueil">
+            <h2>Bienvenue sur AlphaLLM</h2>
+            <p>AlphaLLM est un assistant IA de pointe conçu pour révolutionner vos interactions avec le langage naturel.</p>
+        </section>
+
+        <section id="fonctionnalites">
+            <h2>Fonctionnalités</h2>
+            <div class="feature">
+                <h3>Compréhension contextuelle avancée</h3>
+                <p>AlphaLLM comprend le contexte de vos conversations pour des réponses plus pertinentes.</p>
+            </div>
+            <div class="feature">
+                <h3>Génération de texte naturel</h3>
+                <p>Créez du contenu fluide et cohérent pour divers usages.</p>
+            </div>
+            <div class="feature">
+                <h3>Analyse de sentiment</h3>
+                <p>Détectez les nuances émotionnelles dans le texte pour une meilleure compréhension.</p>
+            </div>
+        </section>
+
+        <section id="demo">
+            <h2>Essayez AlphaLLM</h2>
+            <div id="chatbot">
+                <div id="chatOutput"></div>
+                <input type="text" id="chatInput" placeholder="Posez votre question ici...">
+                <button id="sendBtn">Envoyer</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Animation des fonctionnalités
+        function checkVisibility() {
+            var features = document.querySelectorAll('.feature');
+            features.forEach(function(feature) {
+                if (isElementInViewport(feature)) {
+                    feature.classList.add('visible');
+                }
+            });
+        }
+
+        function isElementInViewport(el) {
+            var rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+
+        window.addEventListener('scroll', checkVisibility);
+        window.addEventListener('load', checkVisibility);
+
+        // Fonctionnalité de chat simple
+        var chatOutput = document.getElementById('chatOutput');
+        var chatInput = document.getElementById('chatInput');
+        var sendBtn = document.getElementById('sendBtn');
+
+        sendBtn.addEventListener('click', function() {
+            var userMessage = chatInput.value;
+            if (userMessage.trim() !== '') {
+                chatOutput.innerHTML += '<p><strong>Vous:</strong> ' + userMessage + '</p>';
+                chatInput.value = '';
+                
+                // Simuler une réponse de l'IA
+                setTimeout(function() {
+                    var botResponse = "Merci pour votre message. Je suis AlphaLLM, un assistant IA en cours de développement. Comment puis-je vous aider aujourd'hui ?";
+                    chatOutput.innerHTML += '<p><strong>AlphaLLM:</strong> ' + botResponse + '</p>';
+                    chatOutput.scrollTop = chatOutput.scrollHeight;
+                }, 1000);
+            }
+        });
+
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>
