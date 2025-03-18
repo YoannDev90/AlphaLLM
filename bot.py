@@ -55,4 +55,3 @@ async def run_bot():
     except Exception as e:
         logger.error(f"Erreur inattendue : {e}")
         await bot.close()
-
