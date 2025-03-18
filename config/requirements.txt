@@ -1,0 +1,8 @@
+markitdown
+cerebras_cloud_sdk
+discord.py
+python-dotenv
+colorama
+requests
+matplotlib
+schedule

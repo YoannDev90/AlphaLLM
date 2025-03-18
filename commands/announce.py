@@ -1,42 +1,42 @@
 import discord
 import logging
 from dotenv import load_dotenv
+from utils.langs import get_translation
 import os
 
 load_dotenv()
-config = {
-    key: os.getenv(key)
-    for key in os.environ
-}
 
 logger = logging.getLogger('AlphaLLM')
 
+lang = "fr" #à corriger, doit récupérer la langue de l'utilisateur
+
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="announce", description="Envoie un message dans tous les serveurs")
+    @bot.tree.command(name="announce", description="Annonce un message sur tous les serveurs")
     async def announce(interaction: discord.Interaction, message_id: str):
         logger.info(f"Commande announce exécutée par {interaction.user.display_name} pour le message ID {message_id}")
-        if not str(interaction.user.id) == config["DEV_ID"]:
-            await interaction.response.send_message("Vous n'avez pas la permission d'exécuter cette commande administrateur.", ephemeral=True)
+        if not str(interaction.user.id) == os.getenv("DEV_ID"):
+            await interaction.response.send_message(get_translation(language=lang, key="admin_command_not_authorized"), ephemeral=True)
             return
         announced_count = 0
         failed_count = 0
+        await interaction.response.defer()
 
         try:
             message_id = int(message_id)
         except ValueError:
-            await interaction.response.send_message("L'ID du message doit être un nombre entier.", ephemeral=True)
+            await interaction.response.send_message(get_translation(language=lang, key="invalid_msg_id"), ephemeral=True)
             return
 
         try:
             message = await interaction.channel.fetch_message(message_id)
         except discord.NotFound:
-            await interaction.response.send_message("Message non trouvé dans ce canal.", ephemeral=True)
+            await interaction.response.send_message(get_translation(language=lang, key="msg_not_found"), ephemeral=True)
             return
         except discord.Forbidden:
-            await interaction.response.send_message("Je n'ai pas la permission de voir ce message.", ephemeral=True)
+            await interaction.response.send_message(get_translation(language=lang, key="msg_access_denied"), ephemeral=True)
             return
         except discord.HTTPException as e:
-            await interaction.response.send_message(f"Erreur lors de la récupération du message: {e}", ephemeral=True)
+            await interaction.response.send_message(get_translation(language=lang, key="other_except", e=str(e)), ephemeral=True)
             return
 
         for guild in bot.guilds:
@@ -67,6 +67,4 @@ async def setup(bot: discord.Client):
                 logger.error(f"Erreur lors de l'envoi du message sur le serveur {guild.name}: {e}")
                 failed_count += 1
 
-        await interaction.response.send_message(f"Annonce terminée.\n"
-                                                f"Succès: {announced_count} serveurs\n"
-                                                f"Échecs: {failed_count} serveurs", ephemeral=True)
+        await interaction.followup.send(get_translation(language=lang, key="announce_finished", announced_count=announced_count, failed_count=failed_count))

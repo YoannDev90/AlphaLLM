@@ -1,24 +1,20 @@
 import discord
 from discord import app_commands
-from cerebras_api import cerebras_response
-from polli_image_model import generate_image
+from models.polli_image_models import generate_image
 from io import BytesIO
 import logging
 from dotenv import load_dotenv
+from utils.langs import get_translation
 import random
 
 logger = logging.getLogger('AlphaLLM')
+
+PUBLIC_IMAGE_CHANNEL_ID = 1348356829985374328
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="image", description="Génère une image à partir d'un prompt")
     @app_commands.choices(model=[
         app_commands.Choice(name="Flux", value="flux"),
-        app_commands.Choice(name="Flux-Realism", value="flux-realism"),
-        app_commands.Choice(name="Flux-Cablyai", value="flux-cablyai"),
-        app_commands.Choice(name="Flux-Anime", value="flux-anime"),
-        app_commands.Choice(name="Flux-3d", value="flux-3d"),
-        app_commands.Choice(name="Any-Dark", value="any-dark"),
-        app_commands.Choice(name="Flux-Pro", value="flux-pro"),
         app_commands.Choice(name="Turbo", value="turbo")
     ])
     async def image(
@@ -28,7 +24,7 @@ async def setup(bot: discord.Client):
         width: int = 1024,
         height: int = 1024,
         nologo: bool = True,
-        private: bool = True,
+        private: bool = False,
         enhance: bool = False,
         safe: bool = True
     ):
@@ -50,6 +46,10 @@ async def setup(bot: discord.Client):
             view = RegenerateImageView(prompt, model, width, height, nologo, private, enhance, safe)
             await interaction.followup.send(file=file, view=view)
             logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
+            if not private:
+                public_channel = interaction.guild.get_channel(PUBLIC_IMAGE_CHANNEL_ID)
+                if public_channel:
+                    await public_channel.send(file=file)
         else:
             await interaction.followup.send("Impossible de générer l'image.")
             logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")

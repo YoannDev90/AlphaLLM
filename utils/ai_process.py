@@ -1,29 +1,51 @@
 #ai_process.py
 
 import logging
-from cerebras_api import cerebras_response
-from polli_text_model import pollinations_text_response
-from pplx import perplexity_response
+from models.cerebras import cerebras
+from models.openai import openai
+from models.openai_large import openai_large
+from utils.md_converter import md_conversion
+from utils.langs import get_translation
 import re
+from io import BytesIO
+import discord
+import random
 
 logger = logging.getLogger('AlphaLLM')
 
-async def process_ai_response(message, query, ai_choice):
-    if ai_choice["model_name"] == "perplexity":
-        response = await perplexity_response(query)
-    elif ai_choice["model_name"] == "llama 3.3 70b (fastest)":
-        response = cerebras_response(query)
-    else:
-        response = await pollinations_text_response(query, ai_choice["model_name"])
+async def process_ai_response(message, query):
+    if message.attachments:
+        images = []
+        docs = []
+        for attachment in message.attachments:
+            if attachment.content_type.endswith(('png', 'jpeg', 'jpg', 'gif', 'webp', 'bmp', 'tiff', 'svg', 'pdf')):
+                images.append(attachment.url)
+            else:
+                docs.append(attachment.url)
+        if images != []:
+            logger.info(f"Images trouvées dans le message")
+        if docs:
+            logger.info(f"Documents trouvés dans le message")
+            for doc in docs:
+                doc_to_md = await md_conversion(doc)
+                query += "\nHere is the content of the document:\n"
+                query += doc_to_md
+
+    response = await cerebras(query)
     await smart_long_messages(message.channel, response)
-    logger.info(f"Réponse envoyée pour {ai_choice['role_name']}")
+    #response = await openai(query, images)
+    #await smart_long_messages(message.channel, response)
+    #response = await openai_large(query, images)
+    #await smart_long_messages(message.channel, response)
+        
+    #await smart_long_messages(message.channel, response)
 
 async def smart_long_messages(channel, text: str, max_length: int = 2000):
     if len(text) <= max_length:
         await channel.send(text)
         return
 
-    code_block_regex = r"``````"
+    code_block_regex = r"```?```"
     code_blocks = list(re.finditer(code_block_regex, text))
     last_cut = 0
     in_code_block = False

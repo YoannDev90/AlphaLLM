@@ -1,10 +1,11 @@
 import aiohttp
 import logging
 import urllib.parse
+from utils.langs import get_translation
 
 logger = logging.getLogger('AlpaLLM')
 
-async def generate_image(prompt, model="flux", seed=None, width=1024, height=1024, nologo=False, private=False, enhance=False, safe=True):
+async def generate_image(prompt, model="flux", seed=None, width=1024, height=1024, nologo=True, private=False, enhance=False, safe=True):
     try:
         params = {
             "prompt": prompt,
