@@ -2,175 +2,115 @@
     {
     "name": "openai",
     "role_name" : "OpenAI GPT-4o Mini",
-    "type": "chat",
-    "censored": true,
     "description": "OpenAI GPT-4o-mini",
-    "baseModel": true,
-    "vision": true,
     "preset" : true
     },
     {
     "name": "openai-large",
     "role_name" : "OpenAI GPT-4o",
-    "type": "chat",
-    "censored": true,
     "description": "OpenAI GPT-4o",
-    "baseModel": true,
-    "vision": true,
     "preset" : false
     },
     {
     "name": "openai-reasoning",
     "role_name" : "OpenAI o3-mini",
-    "type": "chat",
-    "censored": true,
     "description": "OpenAI o3-mini",
-    "baseModel": true,
-    "reasoning": true,
     "preset" : false
     },
     {
     "name": "qwen-coder",
-    "role_name" : "Qwen 2.5 Coder",
-    "type": "chat",
-    "censored": true,
+    "role_name" : "Qwen Coder",
     "description": "Qwen 2.5 Coder 32B",
-    "baseModel": true,
     "preset" : false
     },
     {
     "name": "llama",
     "role_name" : "Llama 3.3 70B",
-    "type": "chat",
-    "censored": false,
     "description": "Llama 3.3 70B",
-    "baseModel": true,
     "preset" : false
     },
     {
     "name": "mistral",
-    "role_name" : "Mistral Nemo",
-    "type": "chat",
-    "censored": false,
-    "description": "Mistral Nemo",
-    "baseModel": true,
-    "preset" : false
+    "role_name" : "Mistral Small 3.1 2503",
+    "description": "Mistral Small",
+    "preset" : true
     },
     {
     "name": "rtist",
     "role_name" : "Rtist image generator",
-    "type": "chat",
-    "censored": true,
     "description": "Rtist image generator by @bqrio",
-    "baseModel": false,
     "preset" : false
     },
     {
     "name": "searchgpt",
     "role_name" : "SearchGPT",
-    "type": "chat",
-    "censored": true,
     "description": "SearchGPT with realtime news and web search",
-    "baseModel": false,
     "preset" : true
     },
     {
     "name": "evil",
     "role_name" : "Evil",
-    "type": "chat",
-    "censored": false,
     "description": "Evil Mode - Experimental",
-    "baseModel": false,
     "preset": false
     },
     {
     "name": "deepseek",
     "role_name" : "Deepseek-V3",
-    "type": "chat",
-    "censored": true,
     "description": "DeepSeek-V3",
-    "baseModel": true,
     "preset": false
     },
     {
     "name": "deepseek-reasoner",
-    "role_name": "Deepseek Reasoner",
-    "type": "chat",
-    "censored": true,
+    "role_name": "Deepseek R1",
     "description": "DeepSeek R1 - Full",
-    "baseModel": true,
-    "reasoning": true,
-    "provider": "deepseek",
-    "preset" : false
+    "preset" : true
     },
     {
     "name": "deepseek-r1-llama",
-    "role_name": "Deepseek R1",
-    "type": "chat",
-    "censored": true,
+    "role_name": "Deepseek Reasoner",
     "description": "DeepSeek R1 - Llama 70B",
-    "baseModel": true,
-    "reasoning": true,
-    "provider": "scaleway",
-    "preset" : true
+    "preset" : false
+    },
+    {
+    "name": "qwen-reasoning",
+    "role_name": "Qwen Reasoner",
+    "description": "Qwen 32B - Advanced Reasoning",
+    "preset": false 
     },
     {
     "name": "phi",
     "role_name": "Phi-4",
-    "type": "chat",
-    "censored": true,
     "description": "Phi-4 Instruct",
-    "baseModel": true,
-    "provider": "cloudflare",
     "preset": true
+    },
+    {
+    "name": "phi-mini",
+    "role_name": "Phi-4 Mini",
+    "description": "Phi-4 Mini Instruct",
+    "preset": false
     },
     {
     "name": "pixtral",
     "role_name": "Pixtral 12B",
-    "type": "chat",
-    "censored": false,
     "description": "Pixtral 12B",
-    "baseModel": true,
-    "provider": "scaleway",
-    "vision": true,
     "preset": true
     },
     {
     "name": "gemini",
     "role_name": "Gemini 2.0 Flash",
-    "type": "chat",
-    "censored": true,
     "description": "Gemini 2.0 Flash",
-    "baseModel": true,
-    "provider": "google",
     "preset": true
     },
     {
     "name": "gemini-thinking",
-    "role_name": "Gemini 2.0 Flash Thinking",
-    "type": "chat",
-    "censored": true,
+    "role_name": "Gemini 2.0 Thinking",
     "description": "Gemini 2.0 Flash Thinking",
-    "baseModel": true,
-    "provider": "google",
-    "preset": false
-    },
-    {
-    "name": "sur-mistral",
-    "role_name": "Mistral",
-    "type": "chat",
-    "censored": true,
-    "description": "Sur AI Assistant (Mistral)",
-    "baseModel": false,
     "preset": false
     },
     {
     "name": "llama-scaleway",
     "role_name": "Llama",
-    "type": "chat",
-    "censored": false,
     "description": "Llama (Scaleway)",
-    "baseModel": true,
     "preset": false
     }
 ]

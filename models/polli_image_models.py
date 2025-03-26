@@ -2,6 +2,7 @@ import aiohttp
 import logging
 import urllib.parse
 from utils.langs import get_translation
+import random
 
 logger = logging.getLogger('AlpaLLM')
 
@@ -19,6 +20,8 @@ async def generate_image(prompt, model="flux", seed=None, width=1024, height=102
         }
         if seed is not None:
             params["seed"] = seed
+        elif seed is None:
+            params["seed"] = random.randint(0, 1000000)
 
         url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
         url += "?" + urllib.parse.urlencode(params)

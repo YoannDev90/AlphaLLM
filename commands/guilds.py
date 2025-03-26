@@ -12,7 +12,7 @@ logger = logging.getLogger('AlphaLLM')
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="guilds", description="Affiche la liste des serveurs où le bot est présent")
-    async def guilds(interaction: discord.Interaction):
+    async def guilds(interaction: discord.Interaction, detailed: bool = False):
         try:
             if not str(interaction.user.id) == os.getenv("DEV_ID"):
                 await interaction.response.send_message("Vous n'avez pas la permission d'exécuter cette commande administrateur.", ephemeral=True)
@@ -23,25 +23,40 @@ async def setup(bot: discord.Client):
             await interaction.response.defer()
             await interaction.followup.send("Récupération des informations en cours...")
 
-            # Trier les serveurs par date d'ajout
             sorted_guilds = sorted(guilds, key=lambda guild: guild.me.joined_at if guild.me else discord.utils.utcnow())
 
-            for guild in sorted_guilds:
-                description = f"ID : `{guild.id}`\n"
-                description += f"Propriétaire : <@{guild.owner.id}>\n"
-                description += f"Date d'ajout du bot : {guild.me.joined_at.strftime('%d/%m/%Y %H:%M:%S') if guild.me else 'Inconnue'}\n"
-                description += f"Nombre de membres : {guild.member_count}\n"
-                description += f"Nombre de modèles activés : None\n"
-                description += f"Nombre d'images générées : Nonde\n"
-                description += f"Nombre de commandes exécutées : None\n"
-                description += f"Nombre de questions posées au bot : None\n"
+            if detailed:
+                for guild in sorted_guilds:
+                    description = f"ID : `{guild.id}`\n"
+                    description += f"Propriétaire : <@{guild.owner.id}>\n"
+                    description += f"Date d'ajout du bot : {guild.me.joined_at.strftime('%d/%m/%Y %H:%M:%S') if guild.me else 'Inconnue'}\n"
+                    description += f"Nombre de membres : {guild.member_count}\n"
+                    description += f"Nombre de modèles activés : None\n"
+                    description += f"Nombre d'images générées : None\n"
+                    description += f"Nombre de commandes exécutées : None\n"
+                    description += f"Nombre de questions posées au bot : None\n"
+                    embed = discord.Embed(
+                        title=f"Serveur : {guild.name}",
+                        description=description,
+                        color=discord.Color.default(),
+                        timestamp=discord.utils.utcnow()
+                    )
+                    embed.set_thumbnail(url=guild.icon.url if guild.icon else discord_logo)
+                    embed.set_footer(text=f"Demandé par {interaction.user.display_name}", icon_url=interaction.user.display_avatar.url)
+
+                    await interaction.followup.send(embed=embed)
+
+            else:
+                field = ""
+                for guild in sorted_guilds:
+                    field += f"**{guild.name}**\n"
                 embed = discord.Embed(
-                    title=f"Serveur : {guild.name}",
-                    description=description,
+                    title="Liste des serveurs où le bot est présent :",
+                    description=f"Le bot est actuellement présent sur {len(sorted_guilds)} serveurs suivants :",
                     color=discord.Color.default(),
                     timestamp=discord.utils.utcnow()
                 )
-                embed.set_thumbnail(url=guild.icon.url if guild.icon else discord_logo)
+                embed.add_field(name="Serveurs", value=field, inline=False)
                 embed.set_footer(text=f"Demandé par {interaction.user.display_name}", icon_url=interaction.user.display_avatar.url)
 
                 await interaction.channel.send(embed=embed)

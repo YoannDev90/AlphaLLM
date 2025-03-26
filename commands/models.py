@@ -39,5 +39,18 @@ async def setup(bot: discord.Client):
         view = discord.ui.View()
         for model in MODELS:
             view.add_item(ModelButton(bot, model, interaction.guild))
-        
-        await interaction.followup.send(view=view)
+
+        embed = discord.Embed(
+            title="Sélectionnez les modèles à installer sur le serveur :",
+            description="Si le bouton est vert, le modèle peut être installé.\n Si le bouton est bleu, il y a une erreur avec le rôle, qui sera résolue en cliquant dessus. \n Si le bouton est rouge, le modèle est déjà installé et sera supprimé.",
+            color=discord.Color.default(),
+            timestamp=discord.utils.utcnow()
+        )
+        embed.add_field(
+            name="Interaction limitée dans le temps",
+            value="Les boutons ne seront pas disponibles après 5 minutes.",
+            inline=False
+        )
+        embed.set_footer(text=f"Demandé par {interaction.user.display_name}", icon_url=interaction.user.display_avatar)
+
+        await interaction.followup.send(embed=embed, view=view)
