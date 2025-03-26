@@ -1,3 +1,9 @@
+"""
+vote.py
+
+This module defines the `/vote` command, which sends the Top.gg voting link for the bot.
+"""
+
 import discord
 from discord import app_commands
 from utils.langs import get_translation
@@ -6,8 +12,20 @@ import logging
 logger = logging.getLogger('AlphaLLM')
 
 async def setup(bot: discord.Client):
+    """
+    Sets up the `/vote` command for the bot.
+
+    Args:
+        bot (discord.Client): The Discord bot instance.
+    """
     @bot.tree.command(name="vote", description="Envoie le lien Top.gg")
     async def vote(interaction: discord.Interaction):
+        """
+        Sends the Top.gg voting link for the bot.
+
+        Args:
+            interaction (discord.Interaction): The interaction object for the command.
+        """
         link = "https://top.gg/bot/1286951908786962442#reviews"
         logger.info(f"Commande vote exécutée par {interaction.user.display_name}")
 

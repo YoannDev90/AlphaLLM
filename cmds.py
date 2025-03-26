@@ -1,3 +1,10 @@
+"""
+cmds.py
+
+This module dynamically loads and sets up commands for the bot from specified
+directories. It ensures that all commands are properly initialized and ready to use.
+"""
+
 import os
 import importlib
 import logging
@@ -5,6 +12,12 @@ import logging
 logger = logging.getLogger('AlphaLLM')
 
 async def setup_commands(bot):
+    """
+    Dynamically loads and sets up commands for the bot.
+
+    Args:
+        bot (discord.Client): The Discord bot instance.
+    """
     #commands_dir = ['commands', 'admin_commands']
     commands_dir = ['commands']
     for command in bot.commands:

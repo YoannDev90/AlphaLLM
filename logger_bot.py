@@ -1,3 +1,10 @@
+"""
+logger_bot.py
+
+This module initializes and runs a secondary bot dedicated to logging activities.
+It uses a custom logging handler to send logs to Discord.
+"""
+
 #logs/logger_bot.py
 
 import discord
@@ -23,9 +30,16 @@ logger = setup_logging("AlphaLLM", logger_bot)
 
 @logger_bot.event
 async def on_ready():
+    """
+    Event triggered when the logger bot is ready and connected to Discord.
+    Logs the bot's readiness.
+    """
     logger.info(f'{logger_bot.user} est connecté !')
     
 async def run_logger_bot():
+    """
+    Starts the logger bot and handles connection errors and unexpected exceptions.
+    """
     try:
         await logger_bot.start(LOGGER_TOKEN)
         logger.info('Logger bot est en cours d\'exécution...')

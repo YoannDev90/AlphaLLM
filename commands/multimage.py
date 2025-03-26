@@ -1,3 +1,10 @@
+"""
+multimage.py
+
+This module defines the `/multimage` command, which generates multiple images
+based on a given prompt and user-defined parameters.
+"""
+
 import discord
 from discord import app_commands
 from models.polli_image_models import generate_image
@@ -12,6 +19,12 @@ logger = logging.getLogger('AlphaLLM')
 PUBLIC_IMAGE_CHANNEL_ID = 1348356829985374328
 
 async def setup(bot: discord.Client):
+    """
+    Sets up the `/multimage` command for the bot.
+
+    Args:
+        bot (discord.Client): The Discord bot instance.
+    """
     @bot.tree.command(name="multimage", description="Génère plusieurs images à partir d'un prompt")
     @app_commands.choices(model=[
         app_commands.Choice(name="Flux", value="flux"),
@@ -29,6 +42,21 @@ async def setup(bot: discord.Client):
         enhance: bool = False,
         safe: bool = True
     ):
+        """
+        Generates multiple images based on the given prompt and parameters.
+
+        Args:
+            interaction (discord.Interaction): The interaction object for the command.
+            prompt (str): The prompt for image generation.
+            number (int, optional): The number of images to generate. Defaults to 4.
+            model (str, optional): The model to use for generation. Defaults to "flux".
+            width (int, optional): The width of the images. Defaults to 1024.
+            height (int, optional): The height of the images. Defaults to 1024.
+            nologo (bool, optional): Whether to exclude logos. Defaults to True.
+            private (bool, optional): Whether the images are private. Defaults to False.
+            enhance (bool, optional): Whether to enhance the images. Defaults to False.
+            safe (bool, optional): Whether to enable safe mode. Defaults to True.
+        """
         logger.info(f"Commande multimage exécutée par {interaction.user.display_name}")
         
         if width > 2048 or height > 2048:

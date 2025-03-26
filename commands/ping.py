@@ -1,3 +1,10 @@
+"""
+ping.py
+
+This module defines the `/ping` command, which displays the bot's latency and a graph
+of latency history over the past 24 hours.
+"""
+
 import discord
 import logging
 import json
@@ -8,12 +15,18 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from io import BytesIO
 from datetime import datetime
-from utils.langs import get_translation
+from utils.langs import get_translation as tlt
 
 
 logger = logging.getLogger('AlphaLLM')
 
 def save_ping(latence):
+    """
+    Saves the current latency to the ping data file.
+
+    Args:
+        latence (int): The latency in milliseconds.
+    """
     try:
         with open('config/ping_data.json', 'r') as file:
             data = json.load(file)
@@ -29,19 +42,31 @@ def save_ping(latence):
         json.dump(data, file, indent=4)
 
 def clean_old_data():
+    """
+    Removes latency data older than 24 hours from the ping data file.
+    """
     try:
         with open('config/ping_data.json', 'r') as file:
             data = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return
     
-    data['pings'] = [d for d in data['pings'] if time.time() - d['timestamp'] < 86400]
+    data['pings'] = [d for d in data['pings'] if time.time() - d['timestamp'] < 86460]
     
     with open('config/ping_data.json', 'w') as file:
         json.dump(data, file, indent=4)
 
 
 async def record_ping(bot):
+    """
+    Records the bot's current latency and cleans old data.
+
+    Args:
+        bot (discord.Client): The Discord bot instance.
+
+    Returns:
+        int: The current latency in milliseconds.
+    """
     latence = round(bot.latency * 1000)
     save_ping(latence)
     clean_old_data()
@@ -49,6 +74,12 @@ async def record_ping(bot):
     return latence
 
 async def plot_ping():
+    """
+    Generates a graph of latency history over the past 24 hours.
+
+    Returns:
+        BytesIO: A buffer containing the generated graph image.
+    """
     try:
         with open('config/ping_data.json', 'r') as file:
             data = json.load(file)
@@ -107,6 +138,12 @@ async def plot_ping():
     return buffer
 
 async def moyenne_ping():
+    """
+    Calculates the average latency over the past 24 hours.
+
+    Returns:
+        int or None: The average latency in milliseconds, or None if no data is available.
+    """
     try:
         with open('config/ping_data.json', 'r') as file:
             data = json.load(file)
@@ -122,6 +159,12 @@ async def moyenne_ping():
         
 
 async def schedule_tasks(bot):
+    """
+    Schedules periodic tasks to record the bot's latency every 30 seconds.
+
+    Args:
+        bot (discord.Client): The Discord bot instance.
+    """
     now = datetime.now()
     current_seconds = now.second
     if current_seconds < 30:
@@ -136,8 +179,20 @@ async def schedule_tasks(bot):
         await asyncio.sleep(1)
 
 async def setup(bot: discord.Client):
+    """
+    Sets up the `/ping` command for the bot.
+
+    Args:
+        bot (discord.Client): The Discord bot instance.
+    """
     @bot.tree.command(name="ping", description="Affiche la latence du bot")
     async def ping(interaction: discord.Interaction):
+        """
+        Displays the bot's current latency, average latency, and a latency history graph.
+
+        Args:
+            interaction (discord.Interaction): The interaction object for the command.
+        """
         latence = await record_ping(bot)
         latence_moyenne = await moyenne_ping()
     

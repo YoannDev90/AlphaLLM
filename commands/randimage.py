@@ -1,3 +1,9 @@
+"""
+randimage.py
+
+This module defines the `/randimage` command, which generates a random image using a prompt.
+"""
+
 import discord
 from discord import app_commands
 from models.polli_image_models import generate_image
@@ -12,8 +18,20 @@ logger = logging.getLogger('AlphaLLM')
 PUBLIC_IMAGE_CHANNEL_ID = 1348356829985374328
 
 async def setup(bot: discord.Client):
+    """
+    Sets up the `/randimage` command for the bot.
+
+    Args:
+        bot (discord.Client): The Discord bot instance.
+    """
     @bot.tree.command(name="randimage", description="Génère une image aléatoire")
     async def randimage(interaction: discord.Interaction):
+        """
+        Generates a random image using a prompt and sends it to the user.
+
+        Args:
+            interaction (discord.Interaction): The interaction object for the command.
+        """
         logger.info(f"Commande randimage exécutée par {interaction.user.display_name}")
 
         await interaction.response.defer()
