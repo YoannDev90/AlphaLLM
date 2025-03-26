@@ -66,23 +66,15 @@ Modèles textuels disponibles :
 
 - `OpenAI GPT 4o mini`
 - `OpenAI GPT 4o`
-- `Qwen 2.5 72B`
 - `Qwen 2.5 Coder 32B`
 - `Llama 3.3 70B`
-- `Mistral Nemo`
-- `Unity Mistral Large`
-- `Midijourney`
+- `Mistral Small`
 - `Rtist`
 - `SearchGPT`
 - `Evil`
-- `Claude Hybridspace`
 - `DeepSeek R1`
-- `Llama 3.1 8B Instruct`
-- `Llamaguard 7B AWQ`
 - `Gemini 2.0 Flash`
 - `Gemini 2.0 Flash Thinking`
-- `Hormoz 8B`
-- `Perplexity`
 - `Llama 3.3 70B (fast)`
 
 Modèles d'images disponibles :
