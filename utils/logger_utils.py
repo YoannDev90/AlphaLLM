@@ -100,6 +100,6 @@ def setup_logging(logger_name, bot):
 
     logger.addHandler(console_handler)
     logger.addHandler(file_handler)
-    #logger.addHandler(discord_handler)
+    logger.addHandler(discord_handler)
 
     return logger

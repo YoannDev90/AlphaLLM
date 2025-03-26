@@ -1,6 +1,7 @@
 import discord
 from discord import app_commands
 from models.polli_image_models import generate_image
+from utils.gallery import gallery
 from io import BytesIO
 import logging
 from dotenv import load_dotenv
@@ -8,8 +9,6 @@ from utils.langs import get_translation
 import random
 
 logger = logging.getLogger('AlphaLLM')
-
-PUBLIC_IMAGE_CHANNEL_ID = 1348356829985374328
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="image", description="Génère une image à partir d'un prompt")
@@ -46,12 +45,10 @@ async def setup(bot: discord.Client):
             view = RegenerateImageView(prompt, model, width, height, nologo, private, enhance, safe)
             await interaction.followup.send(file=file, view=view)
             logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
-            if not private:
-                public_channel = interaction.guild.get_channel(PUBLIC_IMAGE_CHANNEL_ID)
-                if public_channel:
-                    await public_channel.send(file=file)
+            if not private and safe:
+                await gallery(bot, image_data, prompt, interaction)
         else:
-            await interaction.followup.send("Impossible de générer l'image.")
+            await interaction.followup.send("Echec de la génération de l'image. Veuillez réessayer.")
             logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")
 
 class RegenerateImageView(discord.ui.View):
@@ -76,6 +73,8 @@ class RegenerateImageView(discord.ui.View):
             file = discord.File(BytesIO(image_data), filename="regenerated_image.png")
             await interaction.followup.send(file=file, view=self)
             logger.info(f"Image régénérée et envoyée à {interaction.user.display_name}")
+            if not self.private and self.safe:
+                await gallery(interaction.client, image_data, self.prompt, interaction)
         else:
-            await interaction.followup.send("Impossible de régénérer l'image.")
+            await interaction.followup.send("Echec de la régénération de l'image. Veuillez réessayer.")
             logger.error(f"Échec de la régénération d'image pour {interaction.user.display_name}")

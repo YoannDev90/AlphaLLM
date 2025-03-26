@@ -9,13 +9,15 @@ from discord import app_commands
 from models.polli_image_models import generate_image
 from models.cerebras import cerebras
 from utils.langs import get_translation
+from utils.gallery import gallery
 from io import BytesIO
 import logging
 import random
+import os
 
 logger = logging.getLogger('AlphaLLM')
 
-PUBLIC_IMAGE_CHANNEL_ID = 1348356829985374328
+PUBLIC_IMAGE_CHANNEL_ID = os.getenv("GALERIE_ID")
 
 async def setup(bot: discord.Client):
     """
@@ -55,10 +57,8 @@ async def setup(bot: discord.Client):
             file = discord.File(BytesIO(image_data), filename="generated_image.png")
             await interaction.followup.send(file=file)
             logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
-            if not private:
-                public_channel = interaction.guild.get_channel(PUBLIC_IMAGE_CHANNEL_ID)
-                if public_channel:
-                    await public_channel.send(file=file)
+            if not private and safe:
+                await gallery(bot, image_data, prompt, interaction)
         else:
             await interaction.followup.send("Impossible de générer l'image.")
             logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")

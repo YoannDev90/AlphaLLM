@@ -11,12 +11,14 @@ from models.polli_image_models import generate_image
 from models.cerebras import cerebras
 from io import BytesIO
 from utils.langs import get_translation
+from utils.gallery import gallery
 import logging
 import random
+import os
 
 logger = logging.getLogger('AlphaLLM')
 
-PUBLIC_IMAGE_CHANNEL_ID = 1348356829985374328
+PUBLIC_IMAGE_CHANNEL_ID = os.getenv("GALERIE_ID")
 
 async def setup(bot: discord.Client):
     """
@@ -33,7 +35,7 @@ async def setup(bot: discord.Client):
     async def multimage(
         interaction: discord.Interaction,
         prompt: str,
-        number: int = 4,
+        number: int = 2,
         model: str = "flux",
         width: int = 1024,
         height: int = 1024,
@@ -48,7 +50,7 @@ async def setup(bot: discord.Client):
         Args:
             interaction (discord.Interaction): The interaction object for the command.
             prompt (str): The prompt for image generation.
-            number (int, optional): The number of images to generate. Defaults to 4.
+            number (int, optional): The number of images to generate. Defaults to 2.
             model (str, optional): The model to use for generation. Defaults to "flux".
             width (int, optional): The width of the images. Defaults to 1024.
             height (int, optional): The height of the images. Defaults to 1024.
@@ -65,10 +67,10 @@ async def setup(bot: discord.Client):
             width = 2048
             height = 2048
         
-        if number > 10:
-            await interaction.response.send_message("Le nombre d'images générées doit être inférieur ou égal à 10.")
+        if number > 4:
+            await interaction.response.send_message("Le nombre d'images générées doit être inférieur ou égal à 4.")
             logger.error(f"Nombre d'images trop grand pour {interaction.user.display_name}")
-            number = 10
+            number = 4
 
         await interaction.response.defer()
 
@@ -91,10 +93,8 @@ async def setup(bot: discord.Client):
                 file = discord.File(BytesIO(image_data), filename=f"generated_image_{i+1}.png")
                 await interaction.followup.send(file=file)
                 logger.info(f"Image {i+1} générée et envoyée à {interaction.user.display_name}")
-                if not private:
-                    public_channel = interaction.guild.get_channel(PUBLIC_IMAGE_CHANNEL_ID)
-                    if public_channel:
-                        await public_channel.send(file=file)
+                if not private and safe:
+                    await gallery(bot, image_data, prompt, interaction)
             else:
                 await interaction.followup.send(f"Impossible de générer l'image {i+1}.")
                 logger.error(f"Échec de la génération de l'image {i+1} pour {interaction.user.display_name}")

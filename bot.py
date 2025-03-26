@@ -20,8 +20,8 @@ from datetime import datetime, timedelta
 
 load_dotenv()
 
-#TOKEN = os.getenv("TESTBOT_TOKEN")
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("TESTBOT_TOKEN")
+#TOKEN = os.getenv("BOT_TOKEN")
 PREFIX = os.getenv("BOT_PREFIX")
 
 intents = discord.Intents.all()
