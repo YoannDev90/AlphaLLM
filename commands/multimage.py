@@ -7,7 +7,7 @@ based on a given prompt and user-defined parameters.
 
 import discord
 from discord import app_commands
-from models.polli_image_models import generate_image
+from utils.image_gen import generate_image
 from models.cerebras import cerebras
 from io import BytesIO
 from utils.langs import get_translation
@@ -72,27 +72,19 @@ async def setup(bot: discord.Client):
             logger.error(f"Nombre d'images trop grand pour {interaction.user.display_name}")
             number = 4
 
-        await interaction.response.defer()
+        await interaction.response.send_message("Génération des images en cours...")
+        interaction_channel = interaction.channel
 
-        safe = True if interaction.guild.nsfw_level == discord.NSFWLevel.default else safe
-        files = []
-        if prompt == "*":
-            random_prompt = True
-        else:
-            random_prompt = False
+        safe = True if interaction.guild and interaction.guild.nsfw_level == discord.NSFWLevel.default and not interaction.channel.is_nsfw() else safe
+
         for i in range(number):
             seed = random.randint(0, 1000000)
-            if random_prompt:
-                try:
-                    prompt = await cerebras("Generate a random prompt image, only keywords, separated by commas")
-                except Exception as e:
-                    logger.error(f"Erreur lors de la génération du prompt pour {interaction.user.display_name}")
             image_data = await generate_image(prompt, model, seed, width, height, nologo, private, enhance, safe)
             
             if image_data:
                 file = discord.File(BytesIO(image_data), filename=f"generated_image_{i+1}.png")
-                await interaction.followup.send(file=file)
-                logger.info(f"Image {i+1} générée et envoyée à {interaction.user.display_name}")
+                await interaction_channel.send(file=file)
+                logger.info(f"Image {i+1}/{number} générée et envoyée à {interaction.user.display_name}")
                 if not private and safe:
                     await gallery(bot, image_data, prompt, interaction)
             else:

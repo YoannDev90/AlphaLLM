@@ -47,16 +47,12 @@ async def setup(bot: discord.Client):
                     await interaction.followup.send(embed=embed)
 
             else:
-                field = ""
-                for guild in sorted_guilds:
-                    field += f"**{guild.name}**\n"
                 embed = discord.Embed(
                     title="Liste des serveurs où le bot est présent :",
-                    description=f"Le bot est actuellement présent sur {len(sorted_guilds)} serveurs suivants :",
+                    description=f"Le bot est actuellement présent sur {len(sorted_guilds)} serveurs.",
                     color=discord.Color.default(),
                     timestamp=discord.utils.utcnow()
                 )
-                embed.add_field(name="Serveurs", value=field, inline=False)
                 embed.set_footer(text=f"Demandé par {interaction.user.display_name}", icon_url=interaction.user.display_avatar.url)
 
                 await interaction.channel.send(embed=embed)

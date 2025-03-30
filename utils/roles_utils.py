@@ -132,3 +132,26 @@ async def delete_role(role):
         await role.delete()
     except Exception as e:
         logger.error(f"Erreur lors de la suppression du rôle {role.name} : {e}")
+
+def get_model_from_role(guild_id, role_id):
+    """
+    Retrieve the model name associated with a role ID in the database.
+
+    Args:
+        guild_id (int): The ID of the Discord guild.
+        role_id (int): The ID of the Discord role.
+
+    Returns:
+        str: The model name associated with the role, or None if not found.
+    """
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT model FROM roles WHERE guild_id = ? AND role_id = ?", (guild_id, role_id))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération du modèle pour le rôle {role_id} : {e}")
+        return None
+    finally:
+        conn.close()

@@ -1,44 +1,70 @@
 #ai_process.py
 
 import logging
-from models.cerebras import cerebras
-from models.openai import openai
-from models.openai_large import openai_large
 from utils.md_converter import md_conversion
 from utils.langs import get_translation
+from utils.roles_utils import get_model_from_role
 import re
+import importlib
+import os
+from pathlib import Path
 from io import BytesIO
 import discord
 import random
 
 logger = logging.getLogger('AlphaLLM')
 
-async def process_ai_response(message, query):
-    if message.attachments:
-        images = []
-        docs = []
-        for attachment in message.attachments:
-            if attachment.content_type.endswith(('png', 'jpeg', 'jpg', 'gif', 'webp', 'bmp', 'tiff', 'svg', 'pdf')):
-                images.append(attachment.url)
-            else:
-                docs.append(attachment.url)
-        if images != []:
-            logger.info(f"Images trouvées dans le message")
-        if docs:
-            logger.info(f"Documents trouvés dans le message")
-            for doc in docs:
-                doc_to_md = await md_conversion(doc)
-                query += "\nHere is the content of the document:\n"
-                query += doc_to_md
+async def process_ai_response(message):
+    logger.info(f"Bot mentionné par {message.author.display_name}")
+    mentioned_roles = [role for role in message.role_mentions if role in message.guild.me.roles]
+    selected_role = mentioned_roles[0] if mentioned_roles else None
+    model_name = "cerebras"
+    if selected_role:
+        model_name = get_model_from_role(message.guild.id, selected_role.id)
+        if not model_name:
+            await message.channel.send(
+                f"Le rôle `{selected_role.name}` n'a pas de modèle associé. "
+                f"Veuillez utiliser la commande `/models` pour configurer un modèle."
+            )
+            return
 
-    response = await cerebras(query)
-    await smart_long_messages(message.channel, response)
-    #response = await openai(query, images)
-    #await smart_long_messages(message.channel, response)
-    #response = await openai_large(query, images)
-    #await smart_long_messages(message.channel, response)
-        
-    #await smart_long_messages(message.channel, response)
+    if selected_role:
+        query = message.content.replace(f"<@&{selected_role.id}>", "").strip()
+    else:
+        query = message.content.replace(f"<@{message.guild.me.id}>", "").strip()
+
+    images = []
+    docs = []
+    for attachment in message.attachments:
+        if attachment.content_type and attachment.content_type.startswith("image"):
+            images.append(attachment.url)
+        else:
+            docs.append(attachment.url)
+
+    if docs:
+        for doc_url in docs:
+            doc_content = await md_conversion(doc_url)
+            query += f"\nContenu du document :\n{doc_content}"
+
+    try:
+        module_name = model_name.replace("-", "_")
+        module_path = f"models.{module_name}"
+        model_module = importlib.import_module(module_path)
+
+        if not hasattr(model_module, module_name):
+            logger.error(f"Le modèle `{model_name}` n'est pas implémenté.")
+            await message.channel.send(f"Le modèle `{model_name}` n'est pas implémenté.")
+            return
+
+        response_function = getattr(model_module, module_name)
+        response = await response_function(query)
+
+        await smart_long_messages(message.channel, response)
+    
+    except Exception as e:
+        logger.error(f"Erreur lors du traitement avec le modèle {model_name} : {e}")
+        await message.channel.send(f"Une erreur s'est produite avec le modèle `{model_name}`.")
+
 
 async def smart_long_messages(channel, text: str, max_length: int = 2000):
     if len(text) <= max_length:

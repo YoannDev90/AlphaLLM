@@ -26,11 +26,9 @@ async def setup(bot: discord.Client):
                 "‎",
                 "Génère une image basée sur le prompt donné \n ```/image```",
                 "Génère plusieurs images basées sur le prompt donné \n ```/multimage```",
-                "Génère une image aléatoire \n ```/randimage```",
             ],
             "\n📊 Statistiques et Liens": [
                 "‎",
-                "Affiche les statistiques du bot [🚧]\n ```/stats```",
                 "Affiche le lien du serveur de support \n ```/support```",
                 "Affiche le lien de vote du bot \n ```/vote```",
                 "Affiche le lien d'invitation du bot \n ```/invite```",

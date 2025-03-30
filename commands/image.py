@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from models.polli_image_models import generate_image
+from utils.image_gen import generate_image
 from utils.gallery import gallery
 from io import BytesIO
 import logging
@@ -30,14 +30,14 @@ async def setup(bot: discord.Client):
         logger.info(f"Commande image exécutée par {interaction.user.display_name}")
     
         if width > 2048 or height > 2048:
-            await interaction.response.send_message("Les dimensions de l'image doivent être inférieures ou égales à 2048x2048.")
-            logger.error(f"Dimensions de l'image trop grandes pour {interaction.user.display_name}")
-            return
+            logger.warning(f"Dimensions de l'image trop grandes pour {interaction.user.display_name}")
+            width = 2048
+            height = 2048
 
         await interaction.response.defer()
 
         seed = None
-        safe = True if interaction.guild.nsfw_level == discord.NSFWLevel.default else safe
+        safe = True if interaction.guild and interaction.guild.nsfw_level == discord.NSFWLevel.default and not interaction.channel.is_nsfw() else safe
         image_data = await generate_image(prompt, model, seed, width, height, nologo, private, enhance, safe)
     
         if image_data:

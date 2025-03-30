@@ -36,6 +36,12 @@
     "preset" : true
     },
     {
+    "name": "rtist",
+    "role_name" : "Rtist image generator",
+    "description": "Rtist image generator by @bqrio",
+    "preset" : false
+    },
+    {
     "name": "searchgpt",
     "role_name" : "SearchGPT",
     "description": "SearchGPT with realtime news and web search",
@@ -45,6 +51,12 @@
     "name": "evil",
     "role_name" : "Evil",
     "description": "Evil Mode - Experimental",
+    "preset": false
+    },
+    {
+    "name": "deepseek",
+    "role_name" : "Deepseek-V3",
+    "description": "DeepSeek-V3",
     "preset": false
     },
     {
@@ -81,6 +93,12 @@
     "name": "pixtral",
     "role_name": "Pixtral 12B",
     "description": "Pixtral 12B",
+    "preset": true
+    },
+    {
+    "name": "gemini",
+    "role_name": "Gemini 2.0 Flash",
+    "description": "Gemini 2.0 Flash",
     "preset": true
     },
     {

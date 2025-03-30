@@ -6,7 +6,7 @@ This module defines the `/randimage` command, which generates a random image usi
 
 import discord
 from discord import app_commands
-from models.polli_image_models import generate_image
+from utils.image_gen import generate_image
 from models.cerebras import cerebras
 from utils.langs import get_translation
 from utils.gallery import gallery

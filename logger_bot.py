@@ -35,7 +35,25 @@ async def on_ready():
     Logs the bot's readiness.
     """
     logger.info(f'{logger_bot.user} est connecté !')
-    
+    await logger_bot.tree.sync()
+    logger.info("Synchronisation des commandes du bot Logger...")
+
+@logger_bot.tree.command(name="purge", description="Vide le MP avec le développeur")
+async def purge(interaction: discord.Interaction):
+    logger.info(f"Commande purge exécutée par {interaction.user.display_name}")
+    try:
+        dev_id = os.getenv("DEV_ID")
+        dev_user = await logger_bot.fetch_user(dev_id)
+        dm_channel = await dev_user.create_dm()  # Ensure DM channel is fetched
+        await interaction.response.send_message("Suppression des messages en cours...", ephemeral=True)
+        async for message in dm_channel.history(limit=None):
+            await message.delete()
+        logger.info("MP avec le développeur vidés avec succès.")
+        await interaction.followup.send("Purge effectuée avec succès.", ephemeral=True)
+    except discord.HTTPException as e:
+        logger.error(f"Erreur lors de la purge : {e}")
+        await interaction.followup.send("Une erreur est survenue lors de la purge.", ephemeral=True)
+
 async def run_logger_bot():
     """
     Starts the logger bot and handles connection errors and unexpected exceptions.

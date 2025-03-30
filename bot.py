@@ -20,8 +20,12 @@ from datetime import datetime, timedelta
 
 load_dotenv()
 
-#TOKEN = os.getenv("TESTBOT_TOKEN")
-TOKEN = os.getenv("BOT_TOKEN")
+IS_TESTBOT = True
+
+if IS_TESTBOT:
+    TOKEN = os.getenv("TESTBOT_TOKEN")
+else:
+    TOKEN = os.getenv("BOT_TOKEN")
 PREFIX = os.getenv("BOT_PREFIX")
 
 intents = discord.Intents.all()
@@ -54,18 +58,7 @@ async def on_message(message):
     """
     if not message.author.bot and message.channel.type == discord.ChannelType.text:
         logger.debug(f"Message reçu de {message.author}: {message.content}")
-
-        if f'<@{bot.user.id}>' in message.content:
-            query = message.content.replace(f'<@{bot.user.id}>', '').strip()
-
-            if query == "":
-                await message.channel.send("Prompt vide, veuillez entrer un prompt pour obtenir une réponse.")
-                logger.warning("Prompt vide, aucune réponse envoyée")
-                return
-
-            logger.debug(f"Query : {query}")
-            logger.info(f"Envoi de la requête pour {message.author.display_name}")
-            await process_ai_response(message, query)
+        await process_ai_response(message)
 
 async def run_bot():
     """

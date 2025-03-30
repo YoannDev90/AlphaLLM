@@ -7,9 +7,12 @@ logger bot concurrently.
 """
 
 import asyncio
+import warnings
 from bot import run_bot
 from logger_bot import run_logger_bot
 from utils.langs import load_language
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 async def main():
     """
