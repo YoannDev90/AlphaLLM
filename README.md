@@ -113,6 +113,13 @@ Modèles d'images disponibles :
    ```text
    /image prompt:'A minecraft landscape, plains biome, voxel, blocky style, smooth shaders, blocky trees' model:[] width:2048 height:1024 nologo:True private:True enhance:False safe:True
    ```
+   
+   ![image](https://github.com/user-attachments/assets/263e4a5a-abcb-437d-8a52-26c58c380ebf)
+   ![image](https://github.com/user-attachments/assets/8a1ee898-480e-4d15-bccb-c733b2743d15)
+   ![image](https://github.com/user-attachments/assets/cf9c6985-6e81-4bf1-be8b-527527bd8269)
+   ![image](https://github.com/user-attachments/assets/5e964ae0-8f8f-4210-8780-1bc6bb3ab545)
+   ![image](https://github.com/user-attachments/assets/a295e027-b6b9-45d2-b214-0985377d33bd)
+   ![image](https://github.com/user-attachments/assets/54539ba1-d086-4fe4-8ba3-abfbd1da1bed)
 
   Tous les paramètres à l'exception du prompt sont optionnels. Voici la valeur par défaut et la description de chaque paramètre :
   
