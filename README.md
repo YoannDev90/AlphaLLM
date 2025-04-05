@@ -115,6 +115,11 @@ Modèles d'images disponibles :
    ```
    
    ![image](https://github.com/user-attachments/assets/263e4a5a-abcb-437d-8a52-26c58c380ebf)
+   ![image](https://github.com/user-attachments/assets/8a1ee898-480e-4d15-bccb-c733b2743d15)
+   ![image](https://github.com/user-attachments/assets/cf9c6985-6e81-4bf1-be8b-527527bd8269)
+   ![image](https://github.com/user-attachments/assets/521e956a-3ac1-44b6-86da-b9d04ee0fb0d)
+   ![image](https://github.com/user-attachments/assets/a295e027-b6b9-45d2-b214-0985377d33bd)
+   ![image](https://github.com/user-attachments/assets/54539ba1-d086-4fe4-8ba3-abfbd1da1bed)
 
   Tous les paramètres à l'exception du prompt sont optionnels. Voici la valeur par défaut et la description de chaque paramètre :
   
