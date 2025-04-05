@@ -1,0 +1,89 @@
+{
+    "language": {
+        "description": "Language for the application",
+        "default": "fr",
+        "available": {
+            "en": "English",
+            "es": "Spanish",
+            "fr": "French",
+            "de": "German",
+            "it": "Italian",
+            "pt": "Portuguese",
+            "ru": "Russian",
+            "zh": "Chinese"
+        }
+    },
+    "model_api_timeout": {
+        "description": "Timeout for model API calls in seconds",
+        "default": 60,
+        "min": 15,
+        "max": 120
+    },
+    "def_model": {
+        "description": "Default model to use",
+        "default": "cerberas",
+        "filename": "models.json"
+    },
+    "fallback": {
+        "description": "Enable fallback to another model if the default model fails",
+        "default": true
+    },
+    "fallback_model": {
+        "description": "Fallback model to use if the default model fails",
+        "default": "openai",
+        "filename": "models.json"
+    },
+    "image_gen": {
+        "description": "Enable image generation",
+        "default": true
+    },
+    "image_model": {
+        "description": "Model to use for image generation",
+        "default": "flux",
+        "available": {
+            "flux": "Flux",
+            "turbo": "Turbo"
+        }
+    },
+    "image_size": {
+        "description": "Size of the generated image",
+        "default": "1024x1024",
+        "min": "128x128",
+        "max": "2048x2048"
+    },
+    "image_private": {
+        "description": "Enable private image generation",
+        "default": false
+    },
+    "image_enhance": {
+        "description": "Enable image enhancement",
+        "default": false
+    },
+    "audio": {
+        "description": "Enable audio generation",
+        "default": true
+    },
+    "audio_voice": {
+        "description": "Voice for audio generation",
+        "default": "echo",
+        "available": {
+            "alloy": "Alloy",
+            "echo": "Echo",
+            "fable": "Fable",
+            "onyx": "Onyx",
+            "nova": "Nova",
+            "shimmer": "Shimmer",
+            "coral": "Coral",
+            "verse": "Verse",
+            "ballad": "Ballad",
+            "ash": "Ash",
+            "sage": "Sage",
+            "amuch": "Amuch",
+            "dan": "Dan"
+        }
+    },
+    "announce": {
+        "description": "Enable announcements",
+        "default": true
+    }
+}

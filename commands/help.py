@@ -29,9 +29,7 @@ async def setup(bot: discord.Client):
             ],
             "\n📊 Statistiques et Liens": [
                 "‎",
-                "Affiche le lien du serveur de support \n ```/support```",
-                "Affiche le lien de vote du bot \n ```/vote```",
-                "Affiche le lien d'invitation du bot \n ```/invite```",
+                "Affiche les statistiques du bot \n ```/stats```",
             ],
         }
 

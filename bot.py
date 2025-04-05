@@ -58,7 +58,13 @@ async def on_message(message):
     """
     if not message.author.bot and message.channel.type == discord.ChannelType.text:
         logger.debug(f"Message reçu de {message.author}: {message.content}")
-        await process_ai_response(message)
+        bot_mentioned = (
+            bot.user.mentioned_in(message)
+            or any(role in message.role_mentions for role in message.guild.me.roles)
+        )
+
+        if bot_mentioned:
+            await process_ai_response(message)
 
 async def run_bot():
     """

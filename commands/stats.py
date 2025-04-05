@@ -34,9 +34,7 @@ async def setup(bot: discord.Client):
         embed.add_field(name="Version du bot", value="4.2.0", inline=False)
         embed.add_field(name="Langues", value="Français, Anglais", inline=False)
         embed.add_field(name="Propriétaire", value="<@1123534156626939945>", inline=False)
-        embed.add_field(name="Support", value="[Rejoindre le serveur](https://discord.gg/QGvyrUgwdK)", inline=False)
-        embed.add_field(name="Vote", value="[Voter pour le bot](https://top.gg/bot/123456789012345678/vote)", inline=False)
-        embed.add_field(name="Invite", value="[Inviter le bot](https://discord.com/oauth2/authorize?client_id=123456789012345678&scope=bot&permissions=8)", inline=False)
+        embed.add_field(name="Site", value="[Site Web](https://alphallm.fr.nf)", inline=False)
         embed.set_footer(text=f"Demandé par {interaction.user.display_name}", icon_url=interaction.user.display_avatar.url)
         
         await interaction.response.send_message(embed=embed)
