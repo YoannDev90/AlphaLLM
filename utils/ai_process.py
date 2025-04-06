@@ -5,6 +5,7 @@ from utils.md_converter import md_conversion
 from utils.langs import get_translation
 from utils.roles_utils import get_model_from_role
 from utils.speech_gen import send_voice_message
+from utils.web_process import get_text_from_url
 import re
 import importlib
 import os
@@ -12,8 +13,12 @@ from pathlib import Path
 from io import BytesIO
 import discord
 import random
+import re
+import importlib
+from typing import List
 
 logger = logging.getLogger('AlphaLLM')
+URL_REGEX = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\/?(?:\S*)'
 
 async def process_ai_response(message):
     logger.info(f"Bot mentionné par {message.author.display_name}")
@@ -36,6 +41,7 @@ async def process_ai_response(message):
 
     images = []
     docs = []
+    links = re.findall(URL_REGEX, message.content)
     for attachment in message.attachments:
         if attachment.content_type and attachment.content_type.startswith("image"):
             images.append(attachment.url)
@@ -46,6 +52,15 @@ async def process_ai_response(message):
         for doc_url in docs:
             doc_content = await md_conversion(doc_url)
             query += f"\nContenu du document :\n{doc_content}"
+
+    if links:
+        for link in links:
+            query += f"\n\nLien : {link}"
+            link_content = await get_text_from_url(link)
+            if link_content is not None:
+                query += f"\nContenu :\n{link_content}"
+            else:
+                query += f"\nLe lien `{link}` n'est pas accessible ou ne contient pas de texte."
 
     try:
         module_name = model_name.replace("-", "_")
