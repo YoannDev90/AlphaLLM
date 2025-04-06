@@ -5,7 +5,7 @@ import os
 
 logger = logging.getLogger('AlphaLLM')
 
-IS_TESTBOT = True
+IS_TESTBOT = False
 
 if IS_TESTBOT:
     PUBLIC_IMAGE_CHANNEL_ID = os.getenv("GALERIE_ID_TEST")

@@ -12,7 +12,7 @@ import logging
 from dotenv import load_dotenv
 
 load_dotenv()
-DISCORD_TOKEN = os.getenv("TESTBOT_TOKEN")
+DISCORD_TOKEN = os.getenv("BOT_TOKEN")
 logger = logging.getLogger('AlphaLLM')
 
 VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer", 
@@ -56,10 +56,7 @@ async def convert_to_opus(audio_bytes: BytesIO) -> tuple[BytesIO, float]:
             logger.error(f"Erreur FFmpeg : {stderr.decode()}")
             return None, 0.0
 
-        if duration <= 0:
-            logger.warning("Estimation durée via taille fichier")
-            duration = len(stdout) / (128 * 1024)
-
+        logger.debug(f"Conversion Opus réussie, durée : {duration} secondes")
         return BytesIO(stdout), round(duration, 1)
 
     except Exception as e:
@@ -79,21 +76,9 @@ def generate_waveform(audio_bytes: BytesIO) -> str:
     max_points = 100
     segment_size = len(y) // max_points
     waveform = [np.max(y[i*segment_size:(i+1)*segment_size]) * 255 for i in range(max_points)]
-    
+
+    logger.debug(f"Waveform généré avec {len(waveform)} points")
     return base64.b64encode(np.array(waveform, dtype=np.uint8).tobytes()).decode()
-
-
-async def test_send_voice_message(channel, text: str):
-    for voice in VOICES:
-        try:
-            logger.info(f"Envoi du message vocal avec la voix : {voice}")
-            response = await send_voice_message(channel, text, voice)
-            if response:
-                logger.debug("Message vocal envoyé avec succès")
-                return response
-        except Exception as e:
-            logger.error(f"Erreur lors de l'envoi du message vocal : {str(e)}")
-
 
 async def send_voice_message(channel, text: str, voice: str = "nova"):
     """Version avec gestion améliorée de la session HTTP"""
@@ -112,6 +97,7 @@ async def send_voice_message(channel, text: str, voice: str = "nova"):
         session = aiohttp.ClientSession()
         
         # Étape 1: Demande d'upload
+        logger.debug("Demande d'upload de fichier")
         upload_data = {
             "files": [{
                 "filename": "voice.ogg",
@@ -125,10 +111,12 @@ async def send_voice_message(channel, text: str, voice: str = "nova"):
             headers={"Authorization": f"Bot {DISCORD_TOKEN}"}
         ) as resp:
             if resp.status != 200:
+                logger.error(f"Erreur upload : {resp.status}")
                 return
             upload_info = await resp.json()
 
         # Étape 2: Upload fichier
+        logger.debug("Upload du fichier")
         opus_data.seek(0)
         async with session.put(
             upload_info['attachments'][0]['upload_url'],
@@ -136,9 +124,11 @@ async def send_voice_message(channel, text: str, voice: str = "nova"):
             headers={"Content-Type": "audio/ogg"}
         ) as resp:
             if resp.status != 200:
+                logger.error(f"Erreur upload fichier : {resp.status}")
                 return
 
         # Étape 3: Envoi final
+        logger.debug("Envoi du message avec le fichier audio")
         waveform = generate_waveform(audio_bytes)
         headers = {
             "Authorization": f"Bot {DISCORD_TOKEN}",
@@ -171,7 +161,7 @@ async def send_voice_message(channel, text: str, voice: str = "nova"):
             return await resp.json()
 
     except Exception as e:
-        logger.error(f"Erreur finale : {str(e)}")
+        logger.error(f"Erreur : {str(e)}")
     finally:
         if session:
             await session.close()
@@ -187,7 +177,7 @@ async def fetch_audio(session: aiohttp.ClientSession, text: str, voice: str) -> 
         async with session.get(
             url,
             params={"model": "openai-audio", "voice": voice},
-            timeout=aiohttp.ClientTimeout(total=20)
+            timeout=aiohttp.ClientTimeout(total=300)
         ) as response:
             if response.status == 200:
                 logger.debug("Audio récupéré avec succès")

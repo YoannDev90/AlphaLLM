@@ -20,14 +20,13 @@ async def setup(bot: discord.Client):
         interaction: discord.Interaction,
         prompt: str,
         model: str = "flux",
-        width: int = 1024,
-        height: int = 1024,
-        nologo: bool = True,
+        size: str = "1024x1024",
         private: bool = False,
         enhance: bool = False,
-        safe: bool = True
     ):
         logger.info(f"Commande image exécutée par {interaction.user.display_name}")
+
+        width, height = map(int, size.split("x"))
     
         if width > 2048 or height > 2048:
             logger.warning(f"Dimensions de l'image trop grandes pour {interaction.user.display_name}")
@@ -37,7 +36,8 @@ async def setup(bot: discord.Client):
         await interaction.response.defer()
 
         seed = None
-        safe = True if interaction.guild and interaction.guild.nsfw_level == discord.NSFWLevel.default and not interaction.channel.is_nsfw() else safe
+        nologo = True
+        safe = True if interaction.guild and interaction.guild.nsfw_level == discord.NSFWLevel.default and not interaction.channel.is_nsfw() else False
         image_data = await generate_image(prompt, model, seed, width, height, nologo, private, enhance, safe)
     
         if image_data:

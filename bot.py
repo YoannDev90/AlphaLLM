@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 
 load_dotenv()
 
-IS_TESTBOT = True
+IS_TESTBOT = False
 
 if IS_TESTBOT:
     TOKEN = os.getenv("TESTBOT_TOKEN")

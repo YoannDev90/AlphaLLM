@@ -4,7 +4,7 @@ import logging
 from utils.md_converter import md_conversion
 from utils.langs import get_translation
 from utils.roles_utils import get_model_from_role
-from utils.speech_gen import send_voice_message, test_send_voice_message
+from utils.speech_gen import send_voice_message
 import re
 import importlib
 import os
@@ -62,7 +62,7 @@ async def process_ai_response(message):
 
         await smart_long_messages(message.channel, response)
 
-        await test_send_voice_message(message.channel, response)
+        await send_voice_message(message.channel, response, "echo")
     
     except Exception as e:
         logger.error(f"Erreur lors du traitement avec le modèle {model_name} : {e}")
