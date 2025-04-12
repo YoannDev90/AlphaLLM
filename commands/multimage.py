@@ -1,10 +1,3 @@
-"""
-multimage.py
-
-This module defines the `/multimage` command, which generates multiple images
-based on a given prompt and user-defined parameters.
-"""
-
 import discord
 from discord import app_commands
 from utils.image_gen import generate_image

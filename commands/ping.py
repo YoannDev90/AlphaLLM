@@ -1,10 +1,3 @@
-"""
-ping.py
-
-This module defines the `/ping` command, which displays the bot's latency and a graph
-of latency history over the past 24 hours.
-"""
-
 import discord
 import logging
 import json
@@ -13,115 +6,108 @@ import time
 import asyncio
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from supabase import create_client, Client, ClientOptions
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timedelta
 from utils.langs import get_translation as tlt
+import os
+import numpy as np
 
 
 logger = logging.getLogger('AlphaLLM')
 
-def save_ping(latence):
-    """
-    Saves the current latency to the ping data file.
+url = os.getenv("DB_URL")
+key = os.getenv("DB_KEY")
+jwt = os.getenv("JWT_KEY")
+supabase: Client = create_client(url, key, options=ClientOptions(
+    schema="public",
+    headers={"Authorization": f"Bearer {jwt}"},
+    auto_refresh_token=True,
+    persist_session=True
+))
 
-    Args:
-        latence (int): The latency in milliseconds.
-    """
+
+def save_ping(latence):
     try:
-        with open('config/ping_data.json', 'r') as file:
-            data = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        data = {'pings': []}
-    
-    data['pings'].append({
-        'timestamp': time.time(),
-        'latence': latence
-    })
-    
-    with open('config/ping_data.json', 'w') as file:
-        json.dump(data, file, indent=4)
+        supabase.table("ping").insert({
+            "timestamp": datetime.now().isoformat(),
+            "latence": latence
+        }).execute()
+    except Exception as e:
+        logger.error(f"Exception while saving ping: {e}")
+
 
 def clean_old_data():
-    """
-    Removes latency data older than 24 hours from the ping data file.
-    """
     try:
-        with open('config/ping_data.json', 'r') as file:
-            data = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return
-    
-    data['pings'] = [d for d in data['pings'] if time.time() - d['timestamp'] < 86460]
-    
-    with open('config/ping_data.json', 'w') as file:
-        json.dump(data, file, indent=4)
+        cutoff_time = datetime.now() - timedelta(hours=24)
+        supabase.table("ping").delete().lt("timestamp", cutoff_time.isoformat()).execute()
+    except Exception as e:
+        logger.error(f"Exception while cleaning old data: {e}")
 
 
 async def record_ping(bot):
-    """
-    Records the bot's current latency and cleans old data.
-
-    Args:
-        bot (discord.Client): The Discord bot instance.
-
-    Returns:
-        int: The current latency in milliseconds.
-    """
     latence = round(bot.latency * 1000)
     save_ping(latence)
     clean_old_data()
     logger.debug(f"Ping enregistré : {latence} ms")
     return latence
 
-async def plot_ping():
-    """
-    Generates a graph of latency history over the past 24 hours.
 
-    Returns:
-        BytesIO: A buffer containing the generated graph image.
-    """
+async def plot_ping():
     try:
-        with open('config/ping_data.json', 'r') as file:
-            data = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
+        cutoff_time = datetime.now() - timedelta(hours=24)
+        response = supabase.table("ping").select("*").gte("timestamp", cutoff_time.isoformat()).execute()
+        data = response.data
+    except Exception as e:
+        logger.error(f"Exception while fetching ping data: {e}")
         return None
-    
+
+    if not data:
+        return None
+
     SEUIL_MAX = 150
-    
-    timestamps = [d['timestamp'] for d in data['pings']]
-    latences = [min(d['latence'], SEUIL_MAX) for d in data['pings']]
-    
+
+    timestamps = [datetime.fromisoformat(d['timestamp']) for d in data]
+    latences = [min(d['latence'], SEUIL_MAX) for d in data]
+
+    def moving_average(data, window_size):
+        kernel = np.ones(window_size) / window_size
+        return np.convolve(data, kernel, mode='same')
+
+    lissage_window = 3
+    latences_lissees = moving_average(latences, lissage_window)
+
     plt.figure(figsize=(10, 5))
     plt.gcf().set_facecolor('#2b2d31')
     plt.gca().set_facecolor('#2b2d31')
     plt.grid(visible=False)
     ax = plt.gca()
     ax.yaxis.set_major_locator(MaxNLocator(integer=True))
-    plt.plot(latences, color='#d01919', linewidth=1.125)
+    plt.plot(latences_lissees, color='#d01919', linewidth=1.125)
     plt.ylim(min(latences) - 2, max(latences) + 2)
-    
-    plt.fill_between(range(len(latences)), latences, color='#d01919', alpha=0.5)
+
+    plt.fill_between(range(len(latences)), latences_lissees, color='#d01919', alpha=0.5)
     for spine in plt.gca().spines.values():
         spine.set_visible(True)
-    
+
     plt.xlabel('', color='white')
     plt.ylabel('', color='white')
     plt.yticks(color='white')
-    
+
     relative_times = []
     for ts in timestamps:
-        delta = time.time() - ts
-        if delta < 60:
-            relative_times.append(f"{int(delta)}s")
-        elif delta < 3600:
-            relative_times.append(f"{int(delta / 60)}min {int(delta % 60)}s")
-        elif delta < 86400:
-            relative_times.append(f"{int(delta / 3600)}h {int((delta % 3600) / 60)}min")
+        delta = datetime.now() - ts
+        if delta.total_seconds() < 60:
+            relative_times.append(f"{int(delta.total_seconds())}s")
+        elif delta.total_seconds() < 3600:
+            relative_times.append(f"{int(delta.total_seconds() / 60)}min")
+        elif delta.total_seconds() < 86400:
+            relative_times.append(f"{int(delta.total_seconds() / 3600)}h")
         else:
-            relative_times.append(f"{int(delta / 86400)}j {int((delta % 86400) / 3600)}h")
-    
+            relative_times.append(f"{int(delta.total_seconds() / 86400)}j")
+
     ticks = range(len(timestamps))
-    
+
     if len(ticks) > 12:
         step = max(1, len(ticks) // 12)
         plt.xticks(ticks[::step], relative_times[::step], rotation=45, color='white')
@@ -129,42 +115,32 @@ async def plot_ping():
         plt.xticks(ticks, relative_times, rotation=45, color='white')
 
     plt.tight_layout()
-        
+
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
     plt.close()
-    
+
     return buffer
 
-async def moyenne_ping():
-    """
-    Calculates the average latency over the past 24 hours.
 
-    Returns:
-        int or None: The average latency in milliseconds, or None if no data is available.
-    """
+async def moyenne_ping():
     try:
-        with open('config/ping_data.json', 'r') as file:
-            data = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-            latence_moyenne = None
-    else:
-        if data['pings']:
-            latences = [d['latence'] for d in data['pings']]
-            latence_moyenne = round(sum(latences) / len(latences))
-        else:
-            latence_moyenne = None
-    return latence_moyenne
-        
+        cutoff_time = datetime.now() - timedelta(hours=24)
+        response = supabase.table("ping").select("latence").gte("timestamp", cutoff_time.isoformat()).execute()
+        data = response.data
+    except Exception as e:
+        logger.error(f"Exception while fetching ping data: {e}")
+        return None
+
+    if not data:
+        return None
+
+    latences = [d['latence'] for d in data]
+    return round(sum(latences) / len(latences))
+
 
 async def schedule_tasks(bot):
-    """
-    Schedules periodic tasks to record the bot's latency every 30 seconds.
-
-    Args:
-        bot (discord.Client): The Discord bot instance.
-    """
     now = datetime.now()
     current_seconds = now.second
     if current_seconds < 30:
@@ -173,35 +149,27 @@ async def schedule_tasks(bot):
         wait_seconds = 60 - current_seconds
     await asyncio.sleep(wait_seconds)
     schedule.every(30).seconds.do(lambda: asyncio.create_task(record_ping(bot)))
-    
+
     while True:
         schedule.run_pending()
         await asyncio.sleep(1)
 
-async def setup(bot: discord.Client):
-    """
-    Sets up the `/ping` command for the bot.
 
-    Args:
-        bot (discord.Client): The Discord bot instance.
-    """
+async def setup(bot: discord.Client):
     @bot.tree.command(name="ping", description="Affiche la latence du bot")
     async def ping(interaction: discord.Interaction):
-        """
-        Displays the bot's current latency, average latency, and a latency history graph.
 
-        Args:
-            interaction (discord.Interaction): The interaction object for the command.
-        """
+        await interaction.response.defer(thinking=True)
+
         latence = await record_ping(bot)
         latence_moyenne = await moyenne_ping()
-    
+
         text = (
             f"Latence actuelle : {latence} ms\n"
             f"Latence moyenne : {latence_moyenne if latence_moyenne else 'Non disponible'} ms\n"
             f"Historique sur 24h :"
         )
-    
+
         embed = discord.Embed(
             title=text,
             color=discord.Color.default(),
@@ -213,8 +181,8 @@ async def setup(bot: discord.Client):
         if image_buffer:
             file = discord.File(image_buffer, filename="ping_graph.png")
             embed.set_image(url="attachment://ping_graph.png")
-            await interaction.response.send_message(file=file, embed=embed)
+            await interaction.followup.send(file=file, embed=embed)
         else:
-            await interaction.response.send_message(embed=embed)
+            await interaction.followup.send(embed=embed)
 
     asyncio.create_task(schedule_tasks(bot))

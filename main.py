@@ -1,25 +1,35 @@
-"""
-main.py
-
-This module serves as the entry point for the application. It initializes the
-necessary components, such as roles and languages, and runs the main bot and
-logger bot concurrently.
-"""
-
 import asyncio
 import warnings
 from bot import run_bot
 from logger_bot import run_logger_bot
 from utils.langs import load_language
+import logging
+import sys
+
+logger = logging.getLogger("AlphaLLM")
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 async def main():
-    """
-    Main function to initialize roles, languages, and run the bots concurrently.
-    """
     load_language("en")
-    await asyncio.gather(run_bot(), run_logger_bot())
+    try:
+        await asyncio.gather(
+            run_bot(),
+            run_logger_bot()
+        )
+    except SystemExit:
+        logger.info("Arrêt complet du programme.")
+        sys.exit(0)
+    except Exception as e:
+        logger.error(f"Erreur non gérée : {str(e)}")
+    finally:
+        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Interruption manuelle - Arrêt du programme.")

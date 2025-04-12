@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import logging
 from dotenv import load_dotenv
 from utils.langs import get_translation as tlt
@@ -11,36 +12,47 @@ logger = logging.getLogger('AlphaLLM')
 lang = "en"
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="announce", description="Annonce un message sur tous les serveurs")
-    async def announce(interaction: discord.Interaction, message_id: str):
-        logger.info(f"Commande announce exécutée par {interaction.user.display_name} pour le message ID {message_id}")
-        if not str(interaction.user.id) == os.getenv("DEV_ID"):
-            await interaction.response.send_message(tlt(language=lang, key="admin_command_not_authorized"), ephemeral=True)
-            return
+    @bot.command(name="announce")
+    @commands.is_owner()
+    async def announce(ctx: commands.Context, message_id: str):
+        """
+        Commande pour annoncer un message sur tous les serveurs.
+        """
+
+        logger.info(f"Commande announce exécutée par {ctx.author.display_name}")
+        try:
+            await ctx.message.delete()
+        except discord.Forbidden:
+            logger.warning("Impossible de supprimer le message de commande. Vérifiez les permissions.")  
+
+
         announced_count = 0
         failed_count = 0
-        await interaction.response.defer()
 
+        # Vérification du format du message ID
         try:
             message_id = int(message_id)
         except ValueError:
-            await interaction.response.send_message(tlt(language=lang, key="invalid_message_id"), ephemeral=True)
+            await ctx.send("ID de message invalide.")
             return
 
+        # Récupération du message dans le canal actuel
         try:
-            message = await interaction.channel.fetch_message(message_id)
+            message = await ctx.channel.fetch_message(message_id)
         except discord.NotFound:
-            await interaction.response.send_message(tlt(language=lang, key="message_not_found"), ephemeral=True)
+            await ctx.send("Message introuvable.")
             return
         except discord.Forbidden:
-            await interaction.response.send_message(tlt(language=lang, key="message_access_denied"), ephemeral=True)
+            await ctx.send("Accès au message refusé.")
             return
         except discord.HTTPException as e:
-            await interaction.response.send_message(tlt(language=lang, key="other_exception", e=str(e)), ephemeral=True)
+            await ctx.send(f"Erreur lors de la récupération du message : {str(e)}")
             return
 
+        # Envoi du message sur tous les serveurs
         for guild in bot.guilds:
             try:
+                # Trouver un canal approprié dans le serveur
                 target_channel = None
                 for channel in guild.text_channels:
                     permissions = channel.permissions_for(guild.default_role)
@@ -56,7 +68,8 @@ async def setup(bot: discord.Client):
                     failed_count += 1
                     continue
 
-                await target_channel.send(content=message.content, embeds=message.embeds, files=[await f.to_file() for f in message.attachments])
+                # Envoyer le message dans le canal cible
+                await target_channel.send(content=message.content, embeds=message.embeds)
                 logger.info(f"Message envoyé sur le serveur {guild.name} dans le canal {target_channel.name}")
                 announced_count += 1
 
@@ -64,7 +77,8 @@ async def setup(bot: discord.Client):
                 logger.error(f"Permissions insuffisantes pour envoyer un message sur le serveur {guild.name}")
                 failed_count += 1
             except Exception as e:
-                logger.error(f"Erreur lors de l'envoi du message sur le serveur {guild.name}: {e}")
+                logger.error(f"Erreur lors de l'envoi du message sur le serveur {guild.name}: {str(e)}")
                 failed_count += 1
 
-        await interaction.followup.send(tlt(language=lang, key="announce_finished", announced_count=announced_count, failed_count=failed_count))
+        # Retourner un résumé à l'utilisateur
+        await ctx.send(f"Annonce terminée : {announced_count} réussites, {failed_count} échecs.")

@@ -1,36 +1,32 @@
-import sqlite3
 import logging
+import os
+from supabase import *
 
 logger = logging.getLogger("AlphaLLM")
 
-DATABASE_PATH = "config/alphallm.db"
+url: str = os.environ.get("DB_URL")
+key: str = os.environ.get("DB_KEY")
+jwt: str = os.environ.get("JWT_KEY")
+supabase: Client = create_client(url, key, 
+                                options=ClientOptions(
+                                    schema="public",
+                                    headers={"Authorization": f"Bearer {jwt}"},
+                                    auto_refresh_token=True,
+                                    persist_session=True
+                                ))
 
-def initialize_roles():
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS roles (
-            guild_id INTEGER,
-            model TEXT,
-            role_id INTEGER
-        )
-    """)
-    conn.commit()
-    logger.info("Database initialisée !")
-    conn.close()
-
-def initialize_langs():
-    conn = sqlite3.connect(DATABASE_PATH)
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER,
-            default_model TEXT,
-            lang TEXT,
-            nb_queries INTEGER,
-            nb_images INTEGER
-        )
-    """)
-    conn.commit()
-    logger.info("Database initialisée !")
-    conn.close()
+def get_models():
+    try:
+        response = supabase.table("models").select("*").execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des modèles : {str(e)}")
+        return None
+    
+def get_blacklist():
+    try:
+        response = supabase.table("blacklist").select("*").execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération de la liste noire : {str(e)}")
+        return None

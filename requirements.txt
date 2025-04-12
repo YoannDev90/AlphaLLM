@@ -9,3 +9,4 @@ schedule
 pydub
 librosa
 crawl4ai
+supabase
