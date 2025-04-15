@@ -107,6 +107,9 @@ Modèles d'images disponibles :
    @SearchGPT Peux-tu me résumer l'actualité d'aujourd'hui ?
    ```
 
+   ![image](https://github.com/user-attachments/assets/0f8bb424-f475-4ff9-ad21-fdfc3ba9e1e7)
+
+
 2. **Générer une image**
    Exemple avec tous les paramètres disponibles :
 
