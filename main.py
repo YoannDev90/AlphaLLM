@@ -11,7 +11,6 @@ logger = logging.getLogger("AlphaLLM")
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 async def main():
-    load_language("en")
     try:
         await asyncio.gather(
             run_bot(),

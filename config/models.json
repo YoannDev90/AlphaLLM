@@ -94,5 +94,8 @@
     "role_name": "Llama",
     "description": "Llama (Scaleway)",
     "preset": false
-    }
+    },
+    {"role_name":"Gemini 2.0 Flash"},
+    {"role_name":"Rtist image generator"},
+    {"role_name":"Deepseek-V3"}
 ]

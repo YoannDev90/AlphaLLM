@@ -10,3 +10,5 @@ pydub
 librosa
 crawl4ai
 supabase
+fastembed
+asyncpg

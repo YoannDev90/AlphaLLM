@@ -23,14 +23,14 @@ class DiscordLogHandler(logging.Handler):
             self.log_queue.task_done()
 
     async def mp_logs(self, message):
-        """         try:
+        try:
             dev_id = os.getenv("DEV_ID")
             dev_user = await self.bot.fetch_user(dev_id)
             await dev_user.send(message)
         except discord.HTTPException as e:
             print(f"Erreur lors de la récupération de l'utilisateur : {e}")
-        except Exception as e: """
-        pass
+        except Exception as e: 
+            pass
 
     def emit(self, record):
         message = self.format(record)

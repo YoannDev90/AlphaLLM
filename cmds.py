@@ -8,7 +8,7 @@ async def setup_commands(bot):
     """
     Charge dynamiquement les commandes depuis plusieurs répertoires.
     """
-    commands_dir = ['commands', 'admin_commands']
+    commands_dir = ['commands', 'admin_commands', 'config_commands']
     
     for commands_directory in commands_dir:
         for filename in os.listdir(commands_directory):

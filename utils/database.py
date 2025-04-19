@@ -30,3 +30,11 @@ def get_blacklist():
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la liste noire : {str(e)}")
         return None
+    
+def update_new_users(user_id):
+    try:
+        supabase.table("users_settings").upsert({
+            "id_discord": user_id
+        }).execute()
+    except Exception as e:
+        logger.error(f"Erreur lors de la mise à jour des nouveaux utilisateurs : {str(e)}")

@@ -44,7 +44,7 @@ async def purge(interaction: discord.Interaction):
     try:
         dev_id = os.getenv("DEV_ID")
         dev_user = await logger_bot.fetch_user(dev_id)
-        dm_channel = await dev_user.create_dm()  # Ensure DM channel is fetched
+        dm_channel = await dev_user.create_dm()
         await interaction.response.send_message("Suppression des messages en cours...", ephemeral=True)
         async for message in dm_channel.history(limit=None):
             await message.delete()

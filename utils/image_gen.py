@@ -54,7 +54,7 @@ class ImageGenerationQueue:
                 "private": str(private).lower(),
                 "enhance": str(enhance).lower(),
                 "safe": str(safe).lower(),
-                "referrer": "AlphaLLM - AI Discord Bot",
+                "referrer": "AlphaLLM",
             }
             if seed is not None:
                 params["seed"] = seed
