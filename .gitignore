@@ -5,6 +5,3 @@
 __pycache__
 .venv
 logs/logs.txt
-.db
-config/ping_data.json
-config/alphallm.db

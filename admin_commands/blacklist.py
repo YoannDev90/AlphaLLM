@@ -46,5 +46,10 @@ async def setup(bot: discord.Client):
             logger.error(f"Erreur lors de l'interaction avec Supabase : {str(e)}")
             await interaction.followup.send("Erreur interne : Impossible d'ajouter l'utilisateur à la liste noire.", ephemeral=True)
             return
+        
+        user = await bot.fetch_user(int(user_id))
+        if user is None:
+            await interaction.followup.send("Utilisateur introuvable.", ephemeral=True)
+            return
 
-        await interaction.followup.send(f"L'utilisateur avec l'ID `{user_id}` a été ajouté à la liste noire pour la raison : `{reason}`.", ephemeral=True)
+        await interaction.followup.send(f"L'utilisateur {user.name} (ID `{user_id}`) a été ajouté à la liste noire pour la raison : `{reason}`.")

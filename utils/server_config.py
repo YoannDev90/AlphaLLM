@@ -35,3 +35,14 @@ def get_allow_nsfw(server_id):
         logger.error(f"Erreur lors de la récupération du paramètre NSFW pour {server_id} : {str(e)}")
         return None
     
+def get_guild_language(server_id):
+    try:
+        response = supabase.table("server_settings").select("").eq("id_discord", server_id).execute()
+        if response.data:
+            return response.data[0]['lang']
+        else:
+            logger.warning(f"Aucun paramètre de langue pour le serveur {server_id}.")
+            return None
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération du paramètre de langue pour {server_id} : {str(e)}")
+        return None

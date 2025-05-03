@@ -1,0 +1,84 @@
+import discord
+from discord import app_commands
+from typing import Optional
+from supabase import Client, ClientOptions
+from utils.langs import get_language, get_translation as tlt
+import os
+import logging
+
+logger = logging.getLogger('AlphaLLM')
+
+# Configuration Supabase
+supabase = Client(
+    os.getenv("DB_URL"),
+    os.getenv("DB_KEY"),
+    options=ClientOptions(headers={"Authorization": f"Bearer {os.getenv('JWT_KEY')}"})
+)
+
+LANG_CHOICES = [
+    app_commands.Choice(name="Français 🇫🇷", value="FR"),
+    app_commands.Choice(name="English 🇬🇧", value="EN"),
+    app_commands.Choice(name="Español 🇪🇸", value="ES"),
+    app_commands.Choice(name="Deutsch 🇩🇪", value="DE"),
+    app_commands.Choice(name="Italiano 🇮🇹", value="IT"),
+    app_commands.Choice(name="Português 🇧🇷", value="PT"),
+    app_commands.Choice(name="Nederlands 🇳🇱", value="NL"),
+    app_commands.Choice(name="Русский 🇷🇺", value="RU"),
+    app_commands.Choice(name="日本語 🇯🇵", value="JA"),
+    app_commands.Choice(name="한국어 🇰🇷", value="KO"),
+    app_commands.Choice(name="中文 🇨🇳", value="ZH"),
+    app_commands.Choice(name="العربية 🇸🇦", value="AR"),
+    app_commands.Choice(name="हिन्दी 🇮🇳", value="HI")
+]
+
+NSFW_CHOICES = [
+    app_commands.Choice(name="Yes ✅", value=1),
+    app_commands.Choice(name="No ❌", value=0)
+]
+
+async def setup(bot: discord.Client):
+    @bot.tree.command(name="guild-config", description="Configure server language, announcement channel, and NSFW setting")
+    @app_commands.choices(langue=LANG_CHOICES, allow_nsfw=NSFW_CHOICES)
+    async def guild_config(
+        interaction: discord.Interaction,
+        langue: Optional[app_commands.Choice[str]] = None,
+        announce_channel: Optional[discord.TextChannel] = None,
+        allow_nsfw: Optional[app_commands.Choice[int]] = None
+    ):
+        logger.info(f"/guild-config executed by {interaction.user.display_name}")
+        await interaction.response.defer(thinking=True, ephemeral=True)
+
+        # Build the update dict only with provided parameters
+        update_data = {"id_discord": interaction.guild.id}
+        summary = []
+
+        if langue is not None:
+            update_data["lang"] = langue.value
+            summary.append(f"🌍 **Language:** {langue.name}")
+
+        if announce_channel is not None:
+            update_data["announce_channel"] = announce_channel.id
+            summary.append(f"📢 **Announcement Channel:** {announce_channel.mention}")
+
+        if allow_nsfw is not None:
+            update_data["allow_nsfw"] = allow_nsfw.value == 1
+            summary.append(f"🔞 **NSFW Allowed:** {'Yes' if allow_nsfw.value == 1 else 'No'}")
+
+        if len(update_data) == 1:
+            await interaction.followup.send("⚠️ No parameter provided. Nothing updated.", ephemeral=True)
+            return
+
+        try:
+            supabase.table("server_settings").upsert(update_data).execute()
+            user_lang = get_language(interaction.user.id)
+
+            embed = discord.Embed(
+                title="✅ Configuration updated",
+                description="\n".join(summary) if summary else "No changes made.",
+                color=discord.Color.green()
+            )
+            await interaction.followup.send(embed=embed, ephemeral=True)
+            logger.info(f"Guild config updated for {interaction.guild.name}: {update_data}")
+        except Exception as e:
+            logger.error(f"Error updating guild config: {str(e)}")
+            await interaction.followup.send("❌ An error occurred while updating the settings.", ephemeral=True)

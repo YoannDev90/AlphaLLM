@@ -7,7 +7,7 @@ from utils.ai_utils import load_preprompt
 
 logger = logging.getLogger('AlphaLLM')
 
-async def deepseek(prompt):
+async def deepseek_reasoning(prompt):
     preprompt = load_preprompt()
     
     data = {
@@ -15,7 +15,7 @@ async def deepseek(prompt):
             {"role": "system", "content": preprompt},
             {"role": "user", "content": prompt}
         ],
-        "model": 'deepseek'
+        "model": 'deepseek_reasoning'
     }
     
     
@@ -26,7 +26,7 @@ async def deepseek(prompt):
                 data = response.json()
             else:
                 data = response.text
-            logger.info("Réponse générée par DeepSeek")
+            logger.info("Réponse générée par DeepSeek Reasoner")
             return data
         else:
             logger.error(f"Erreur lors de la requête POST: {response.status_code} - {response.text}")

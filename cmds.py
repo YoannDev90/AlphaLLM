@@ -18,7 +18,7 @@ async def setup_commands(bot):
                     module = importlib.import_module(module_name)
                     if hasattr(module, 'setup'):
                         await module.setup(bot)
-                        logger.info(f"Commande {filename[:-3]} chargée")
+                        logger.debug(f"Commande {filename[:-3]} chargée")
                     else:
                         logger.warning(f"Le fichier {filename} n'a pas de fonction 'setup'")
                 except Exception as e:

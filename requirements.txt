@@ -1,4 +1,4 @@
-markitdown
+markitdown[all]
 cerebras_cloud_sdk
 discord.py
 python-dotenv
@@ -12,3 +12,6 @@ crawl4ai
 supabase
 fastembed
 asyncpg
+deep_translator
+markdown-analysis
+table2ascii
