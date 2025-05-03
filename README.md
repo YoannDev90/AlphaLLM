@@ -1,10 +1,13 @@
 # AlphaLLM - Documentation GitHub 🚀
 
-**AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs :  
+**AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs, ainsi que des projets non-officiels:  
 
 - Cerebras AI, un modèle de Llama 3.3 70B ultra-rapide et performant.
+- Together AI
 - Pollinations AI, qui fournit des modèles populaires tels que GPT 4o, Deepseek, ou encore Mistral.
 - Pollinations AI, qui fournit également plusieurs modèles d'image tels que Flux et Turbo.
+
+- Perplexity API by Hellalo...
 
 ---
 
