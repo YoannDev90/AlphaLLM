@@ -5,3 +5,5 @@
 __pycache__
 .venv
 logs/logs.txt
+temp
+translation_cache.json
