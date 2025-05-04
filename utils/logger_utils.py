@@ -87,7 +87,6 @@ class FileFormatter(logging.Formatter):
 
 def setup_logging(logger_name, bot):
     logger = logging.getLogger(logger_name)
-    logger.setLevel(logging.INFO)
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(ConsoleFormatter())

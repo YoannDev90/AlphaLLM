@@ -7,6 +7,7 @@ import logging
 import sys
 
 logger = logging.getLogger("AlphaLLM")
+logger.setLevel(logging.INFO)
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
