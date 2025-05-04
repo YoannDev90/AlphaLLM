@@ -17,14 +17,14 @@ URL_REGEX = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\/?(?:\S*)'
 async def process_ai_response(message):
     try:
         logger.info(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
-        print(f"[DEBUG] Bot mentionné par {message.author.display_name} ({message.author.id})")
+        logger.debug(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
         new_query(message.author.id)
         new_interaction(message.author.id)
         mentioned_roles = [role for role in message.role_mentions if role in message.guild.me.roles]
         selected_role = mentioned_roles[0] if mentioned_roles else None
         model_name = "cerebras"
         model_name = get_def_model(message.author.id) if get_def_model(message.author.id) else model_name
-        print(f"[DEBUG] Model name selected: {model_name}")
+        logger.debug(f"Model name selected: {model_name}")
         # if selected_role:
         #     model_name = get_model_from_role(message.guild.id, selected_role.id)
         #     if not model_name:
@@ -35,7 +35,7 @@ async def process_ai_response(message):
         #         return
 
         query = message.content.replace(f"<@{message.guild.me.id}>", "").strip()
-        print(f"[DEBUG] Query received: {query}")
+        logger.debug(f"Query received: {query}")
         if not query:
             await message.channel.send("Veuillez poser une question ou faire une demande.")
             return
@@ -48,29 +48,27 @@ async def process_ai_response(message):
                 attachments=message.attachments,
                 model_name=model_name
             )
-            print(f"[DEBUG] Response generated successfully.")
+            logger.debug(f"Response generated successfully.")
         except Exception as e:
             logger.error(f"Erreur lors de la génération de la réponse : {e}")
-            print(f"[ERROR] Error generating response: {e}")
             await message.channel.send("Une erreur s'est produite lors de la génération de la réponse.")
             return
 
         try:
             await smart_long_messages(message.channel, response)
-            print(f"[DEBUG] Response sent successfully.")
+            logger.debug(f"Response sent successfully.")
         except Exception as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")
-            print(f"[ERROR] Error sending message: {e}")
             await message.channel.send("Une erreur s'est produite lors de l'envoi du message.")
 
         # try:
         #     if get_audio_gen_active(message.author.id):
-        #         print(f"[DEBUG] Audio generation is active for user {message.author.id}.")
+        #         logger.debug(f"Audio generation is active for user {message.author.id}.")
         #         await send_voice_message(message.channel, response, get_audio_voice(message.author.id))
-        #         print(f"[DEBUG] Voice message sent successfully.")
+        #         logger.debug(f"Voice message sent successfully.")
         # except Exception as e:
         #     logger.error(f"Erreur lors de la génération de la voix : {e}")
-        #     print(f"[ERROR] Error generating voice message: {e}")
+        #     logger.error(f"Error generating voice message: {e}")
         #     await message.channel.send("Une erreur s'est produite lors de la génération de la voix.")
     except Exception as e:
         logger.error(f"Erreur lors de la génération : {e}")
