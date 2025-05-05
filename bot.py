@@ -5,7 +5,7 @@ import os
 from dotenv import load_dotenv
 from cmds import setup_commands
 from utils.ai_process import process_ai_response
-from utils.database import get_blacklist
+from utils.database import get_blacklist, update_new_users
 from utils.langs import get_translation as tlt
 from datetime import datetime, timedelta
 from supabase import create_client, Client, ClientOptions
@@ -45,7 +45,6 @@ async def on_ready():
     await bot.tree.sync(guild=guild)
     logger.info("Commandes synchronisées avec succès")
 
-    
 @bot.event
 async def on_message(message):
     if message.author.bot:

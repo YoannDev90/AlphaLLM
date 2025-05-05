@@ -48,7 +48,10 @@ async def setup(bot: discord.Client):
         seed = None
         nologo = True
         safe = True if interaction.guild and interaction.guild.nsfw_level == discord.NSFWLevel.default and not interaction.channel.is_nsfw() else False
-        safe = get_allow_nsfw(interaction.guild.id)  if get_allow_nsfw(interaction.guild.id) else True
+        print(f"Safe: {safe}")
+        print(get_allow_nsfw(interaction.guild.id))
+        safe = get_allow_nsfw(interaction.guild.id)
+        print(f"Safe: {safe}")
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
         image_data = await generate_image(prompt, model, seed, width, height, nologo, private, enhance, safe)
