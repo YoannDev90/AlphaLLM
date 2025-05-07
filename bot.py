@@ -33,6 +33,19 @@ supabase = Client(
 
 logger = logging.getLogger("AlphaLLM")
 
+def is_bot_mentioned(bot, message):
+    if not message.guild:
+        return bot.user.mentioned_in(message)
+    else:
+        if message.mention_everyone:
+            return False
+        if bot.user.mentioned_in(message):
+            return True
+        if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
+            return True
+        return False
+
+
 @bot.event
 async def on_ready():
     logger.info(f'{bot.user} connecté !')
@@ -50,12 +63,9 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    if not message.author.bot and message.channel.type == discord.ChannelType.text:
+    if not message.author.bot:
         logger.debug(f"Message reçu de {message.author}: {message.content}")
-        bot_mentioned = (
-            bot.user.mentioned_in(message)
-            or any(role in message.role_mentions for role in message.guild.me.roles)
-        )
+        bot_mentioned = is_bot_mentioned(bot, message)
 
         if bot_mentioned:
             try:
@@ -75,7 +85,7 @@ async def on_message(message):
                 logger.error(f"Erreur vérification liste noire : {str(e)}")
                 await message.channel.send("Erreur système - Veuillez réessayer plus tard", delete_after=10)
                 return
-            await process_ai_response(message)
+            await process_ai_response(bot,message)
 
 async def run_bot():
     logger.info("Démarrage du bot en cours...")

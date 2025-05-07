@@ -14,7 +14,7 @@ import re
 logger = logging.getLogger('AlphaLLM')
 URL_REGEX = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\/?(?:\S*)'
 
-async def process_ai_response(message):
+async def process_ai_response(bot,message):
     try:
         logger.info(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
         logger.debug(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
@@ -24,7 +24,7 @@ async def process_ai_response(message):
         selected_role = mentioned_roles[0] if mentioned_roles else None
         model_name = "cerebras"
         model_name = get_def_model(message.author.id) if get_def_model(message.author.id) else model_name
-        logger.debug(f"Model name selected: {model_name}")
+        logger.info(f"Model name selected: {model_name}")
         # if selected_role:
         #     model_name = get_model_from_role(message.guild.id, selected_role.id)
         #     if not model_name:
@@ -34,8 +34,8 @@ async def process_ai_response(message):
         #         )
         #         return
 
-        query = message.content.replace(f"<@{message.guild.me.id}>", "").strip()
-        logger.debug(f"Query received: {query}")
+        query = message.content.replace(f"<@{bot.user.id}>", "").strip()
+        logger.info(f"Query received: {query}")
         if not query:
             await message.channel.send("Veuillez poser une question ou faire une demande.")
             return
@@ -43,12 +43,12 @@ async def process_ai_response(message):
         try:
             response = await generate_response(
                 user_id=int(message.author.id),
-                server_id=int(message.guild.id),
+                server_id=int(message.channel.id if not message.guild else message.guild.id),
                 raw_content=query,
                 attachments=message.attachments,
                 model_name=model_name
             )
-            logger.debug(f"Response generated successfully.")
+            logger.info(f"Response generated successfully.")
         except Exception as e:
             logger.error(f"Erreur lors de la génération de la réponse : {e}")
             await message.channel.send("Une erreur s'est produite lors de la génération de la réponse.")
@@ -56,7 +56,7 @@ async def process_ai_response(message):
 
         try:
             await smart_long_messages(message.channel, response)
-            logger.debug(f"Response sent successfully.")
+            logger.info(f"Response sent successfully.")
         except Exception as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")
             await message.channel.send("Une erreur s'est produite lors de l'envoi du message.")
