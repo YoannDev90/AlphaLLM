@@ -9,12 +9,16 @@ from typing import List
 
 logger = logging.getLogger('AlphaLLM')
 
-supabase = Client(
-    os.getenv("DB_URL"),
-    os.getenv("DB_KEY"),
-    options=ClientOptions(headers={"Authorization": f"Bearer {os.getenv('JWT_KEY')}"})
-)
-
+url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
+key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
+jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
+supabase: Client = create_client(url, key, 
+                                options=ClientOptions(
+                                    schema="public",
+                                    headers={"Authorization": f"Bearer {jwt}"},
+                                    auto_refresh_token=True,
+                                    persist_session=True
+                                ))
 def new_interaction(user_id: int):
     try:
         supabase.table("users").upsert({

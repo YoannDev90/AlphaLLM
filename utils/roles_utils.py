@@ -4,9 +4,9 @@ from supabase import create_client, Client, ClientOptions
 import logging
 
 logger = logging.getLogger('AlphaLLM')
-url: str = os.environ.get("DB_URL")
-key: str = os.environ.get("DB_KEY")
-jwt: str = os.environ.get("JWT_KEY")
+url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
+key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
+jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
 supabase: Client = create_client(url, key, 
                                 options=ClientOptions(
                                     schema="public",

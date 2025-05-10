@@ -20,21 +20,27 @@ async def process_ai_response(bot,message):
         logger.debug(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
         new_query(message.author.id)
         new_interaction(message.author.id)
-        mentioned_roles = [role for role in message.role_mentions if role in message.guild.me.roles]
+        bot_roles = message.guild.me.roles if message.guild and message.guild.me else []
+
+        mentioned_roles = [role for role in message.role_mentions if role in bot_roles] if message.guild else []
         selected_role = mentioned_roles[0] if mentioned_roles else None
+
         model_name = "cerebras"
         model_name = get_def_model(message.author.id) if get_def_model(message.author.id) else model_name
         logger.info(f"Model name selected: {model_name}")
-        # if selected_role:
-        #     model_name = get_model_from_role(message.guild.id, selected_role.id)
-        #     if not model_name:
-        #         await message.channel.send(
-        #             f"Le rôle `{selected_role.name}` n'a pas de modèle associé. "
-        #             f"Veuillez utiliser la commande `/models` pour configurer un modèle."
-        #         )
-        #         return
 
-        query = message.content.replace(f"<@{bot.user.id}>", "").strip()
+        bot_mention = f"<@{bot.user.id}>"
+        role_mentions = [f"<@&{role.id}>" for role in bot_roles]
+
+        query = message.content
+        print(f"Query before processing: {query}")
+        query = query.replace(bot_mention, "")
+        print(f"Query after removing bot direct mention: {query}")
+        for role_mention in role_mentions:
+            query = query.replace(role_mention, "")
+            print(f"Query after removing role mention {role_mention}: {query}")
+        print(f"Query after removing all mentions: {query}")
+        query = query.strip()
         logger.info(f"Query received: {query}")
         if not query:
             await message.channel.send("Veuillez poser une question ou faire une demande.")
