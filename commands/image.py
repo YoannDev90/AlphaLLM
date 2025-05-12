@@ -4,7 +4,6 @@ from utils.image_gen import generate_image
 from utils.gallery import gallery
 from io import BytesIO
 import logging
-from dotenv import load_dotenv
 from utils.langs import get_language, get_translation as tlt
 from utils.user_config import get_image_model, get_image_size, get_image_private, get_image_enhance
 from utils.user_manager import new_interaction, new_image
@@ -17,11 +16,12 @@ async def setup(bot: discord.Client):
     @bot.tree.command(name="image", description="Génère une image à partir d'un prompt")
     @app_commands.choices(model=[
         app_commands.Choice(name="Flux (by BlackForestLabs)", value="flux"),
-        app_commands.Choice(name="SDXL (by Stability.AI)", value="turbo")
+        app_commands.Choice(name="Turbo", value="turbo")
     ])
     async def image(
         interaction: discord.Interaction,
         prompt: str,
+        number: int = 1,
         model: str = None,
         size: str = None,
         private: bool = None,
@@ -34,49 +34,53 @@ async def setup(bot: discord.Client):
         user_lang = get_language(interaction.user.id)
 
         model = get_image_model(interaction.user.id) if model is None else model
+        model = model if model is not None else 'flux'
+
         size = get_image_size(interaction.user.id) if size is None else size
+        size = size if size is not None else '1024x1024'
+
         private = get_image_private(interaction.user.id) if private is None else private
+        private = private if private is not None else False
+
         enhance = get_image_enhance(interaction.user.id) if enhance is None else enhance
+        enhance = enhance if enhance is not None else False
 
         width, height = map(int, size.split("x"))
-    
+
         if width > 2048 or height > 2048:
             logger.warning(f"Dimensions de l'image trop grandes pour {interaction.user.display_name}")
             width = 2048
             height = 2048
 
-        seed = None
-        nologo = True
-        safe = True if interaction.guild and interaction.guild.nsfw_level == discord.NSFWLevel.default and not interaction.channel.is_nsfw() else False
-        print(f"Safe: {safe}")
-        print(get_allow_nsfw(interaction.guild.id))
-        safe = get_allow_nsfw(interaction.guild.id)
-        print(f"Safe: {safe}")
+        #safe = False if interaction.channel.is_nsfw() else True
+        #safe = get_allow_nsfw(interaction.guild.id)
+
+        safe = True
+
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
-        image_data = await generate_image(prompt, model, seed, width, height, nologo, private, enhance, safe)
+        image_data = await generate_image(prompt, model, None, width, height, private, enhance, safe)
     
         if image_data:
             file = discord.File(BytesIO(image_data), filename="generated_image.png")
-            view = ImageView(prompt, model, width, height, nologo, private, enhance, safe, user_lang)
+            view = ImageView(prompt, model, width, height, private, enhance, safe, user_lang)
             await interaction.followup.send(file=file, view=view)
             logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
             if not private and safe:
                 await gallery(bot, image_data, prompt, interaction)
         else:
-            view = RetryImageView(prompt, model, width, height, nologo, private, enhance, safe, user_lang)
+            view = RetryImageView(prompt, model, width, height, private, enhance, safe, user_lang)
             await interaction.followup.send(tlt(language=user_lang, key="image_gen_error"), delete_after=10, view=view)
             logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")
 
 
 class ImageView(discord.ui.View):
-    def __init__(self, prompt, model, width, height, nologo, private, enhance, safe, user_lang):
+    def __init__(self, prompt, model, width, height, private, enhance, safe, user_lang):
         super().__init__()
         self.prompt = prompt
         self.model = model
         self.width = width
         self.height = height
-        self.nologo = nologo
         self.private = private
         self.enhance = enhance
         self.safe = safe
@@ -89,7 +93,7 @@ class ImageView(discord.ui.View):
         seed = random.randint(0, 1000000)
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
-        image_data = await generate_image(self.prompt, self.model, seed, self.width, self.height, self.nologo, self.private, self.enhance, self.safe)
+        image_data = await generate_image(self.prompt, self.model, seed, self.width, self.height, self.private, self.enhance, self.safe)
         
         if image_data:
             file = discord.File(BytesIO(image_data), filename="regenerated_image.png")
@@ -126,13 +130,12 @@ class ImageView(discord.ui.View):
 
 
 class RetryImageView(discord.ui.View):
-    def __init__(self, prompt, model, width, height, nologo, private, enhance, safe, user_lang):
+    def __init__(self, prompt, model, width, height, private, enhance, safe, user_lang):
         super().__init__()
         self.prompt = prompt
         self.model = model
         self.width = width
         self.height = height
-        self.nologo = nologo
         self.private = private
         self.enhance = enhance
         self.safe = safe
@@ -143,8 +146,8 @@ class RetryImageView(discord.ui.View):
         logger.info(f"Nouvelle tentative de génération d'image demandée par {interaction.user.display_name}")
         await interaction.response.defer()
         seed = random.randint(0, 1000000)
-        image_data = await generate_image(self.prompt, self.model, seed, self.width, self.height, self.nologo, self.private, self.enhance, self.safe)
-        
+        image_data = await generate_image(self.prompt, self.model, seed, self.width, self.height, self.private, self.enhance, self.safe)
+
         if image_data:
             file = discord.File(BytesIO(image_data), filename="generated_image.png")
             await interaction.followup.send(file=file, view=self)

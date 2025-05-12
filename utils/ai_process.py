@@ -1,48 +1,36 @@
 #ai_process.py
 
 import logging
-from utils.md_converter import md_conversion
-from utils.langs import get_translation
-#from utils.roles_utils import get_model_from_role
+from utils.langs import get_translation as tlt
 from utils.speech_gen import send_voice_message
-from utils.web_process import get_text_from_url
-from utils.user_config import get_def_model, get_audio_gen_active, get_audio_voice
+from utils.user_config import get_audio_gen_active, get_audio_voice
 from utils.user_manager import new_interaction, new_query
 from utils.ai_utils import generate_response
 import re
 
 logger = logging.getLogger('AlphaLLM')
-URL_REGEX = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\/?(?:\S*)'
 
 async def process_ai_response(bot,message):
     try:
         logger.info(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
-        logger.debug(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
         new_query(message.author.id)
         new_interaction(message.author.id)
-        bot_roles = message.guild.me.roles if message.guild and message.guild.me else []
-
-        mentioned_roles = [role for role in message.role_mentions if role in bot_roles] if message.guild else []
-        selected_role = mentioned_roles[0] if mentioned_roles else None
-
-        model_name = "cerebras"
-        model_name = get_def_model(message.author.id) if get_def_model(message.author.id) else model_name
-        logger.info(f"Model name selected: {model_name}")
 
         bot_mention = f"<@{bot.user.id}>"
-        role_mentions = [f"<@&{role.id}>" for role in bot_roles]
 
-        query = message.content
-        print(f"Query before processing: {query}")
-        query = query.replace(bot_mention, "")
-        print(f"Query after removing bot direct mention: {query}")
-        for role_mention in role_mentions:
-            query = query.replace(role_mention, "")
-            print(f"Query after removing role mention {role_mention}: {query}")
-        print(f"Query after removing all mentions: {query}")
-        query = query.strip()
-        logger.info(f"Query received: {query}")
-        if not query:
+        query = message.content.replace(bot_mention, "").strip()
+        parameters = {"history": True, "preprompt": True}
+
+        if "-nh" in query:
+            query = query.replace("-nh", "")
+            parameters["history"] = False
+        if "-np" in query:
+            query = query.replace("-np", "")
+            parameters["preprompt"] = False
+
+        logger.info(f"Message : {query}")
+        if not query or query.isspace():
+            logger.warning(f"Empty query from {message.author.display_name}")
             await message.channel.send("Veuillez poser une question ou faire une demande.")
             return
 
@@ -52,9 +40,9 @@ async def process_ai_response(bot,message):
                 server_id=int(message.channel.id if not message.guild else message.guild.id),
                 raw_content=query,
                 attachments=message.attachments,
-                model_name=model_name
+                parameters=parameters
             )
-            logger.info(f"Response generated successfully.")
+            logger.info(f"Réponse générée avec succès.")
         except Exception as e:
             logger.error(f"Erreur lors de la génération de la réponse : {e}")
             await message.channel.send("Une erreur s'est produite lors de la génération de la réponse.")
@@ -62,20 +50,19 @@ async def process_ai_response(bot,message):
 
         try:
             await smart_long_messages(message.channel, response)
-            logger.info(f"Response sent successfully.")
+            logger.info(f"Réponse envoyée avec succès.")
         except Exception as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")
             await message.channel.send("Une erreur s'est produite lors de l'envoi du message.")
 
-        # try:
-        #     if get_audio_gen_active(message.author.id):
-        #         logger.debug(f"Audio generation is active for user {message.author.id}.")
-        #         await send_voice_message(message.channel, response, get_audio_voice(message.author.id))
-        #         logger.debug(f"Voice message sent successfully.")
-        # except Exception as e:
-        #     logger.error(f"Erreur lors de la génération de la voix : {e}")
-        #     logger.error(f"Error generating voice message: {e}")
-        #     await message.channel.send("Une erreur s'est produite lors de la génération de la voix.")
+        try:
+            if get_audio_gen_active(message.author.id):
+                logger.debug(f"Audio generation is active for user {message.author.id}.")
+                await send_voice_message(message.channel, response, get_audio_voice(message.author.id))
+                logger.debug(f"Voice message sent successfully.")
+        except Exception as e:
+            logger.error(f"Erreur lors de la génération de la voix : {e}")
+            await message.channel.send("Une erreur s'est produite lors de la génération de la voix.")
     except Exception as e:
         logger.error(f"Erreur lors de la génération : {e}")
         await message.channel.send("Une erreur s'est produite lors de la génération.")

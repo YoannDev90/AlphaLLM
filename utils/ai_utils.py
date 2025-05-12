@@ -1,28 +1,14 @@
 # ai_utils.py
-import importlib
 import logging
 import re
-from datetime import datetime
-from typing import List, Dict
+from utils.ai_gen import chat
 from utils.md_converter import md_conversion
 from utils.web_process import get_text_from_url
 from utils.memory_ai import add_memory, get_history, initialize
+from utils.user_config import get_perso_preprompt
 
 logger = logging.getLogger('AlphaLLM')
 URL_REGEX = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\/?(?:[^\s]*[^\s.,])?'
-
-def load_preprompt() -> str:
-    """Charge le pré-prompt depuis un fichier"""
-    try:
-        with open("config/preprompt.txt", "r", encoding="utf-8") as file:
-            preprompt = file.read()
-        logger.debug("Preprompt loaded successfully")
-        now = datetime.now()
-        preprompt += f"\nDate: {now.strftime('%Y-%m-%d')}\nHour: CEST {now.strftime('%H:%M:%S')}\n"
-        return preprompt
-    except Exception as e:
-        logger.error(f"Error loading preprompt: {str(e)}")
-        raise
 
 async def process_attachments(raw_content: str, attachments: list) -> str:
     """Traite les pièces jointes et les liens avec journalisation détaillée"""
@@ -82,8 +68,7 @@ async def get_conversation_history(user_id: int, server_id: int) -> str:
             return ""
         
         # Formatage: 10 dernières entrées maximum
-        context = "\n".join([f"[{entry['created_at']}] {entry['content']}" 
-                           for entry in history[:10]])
+        context = "\n".join([f"[{entry['created_at']}] {entry['content']}" for entry in history[:10]])
         logger.debug(f"Historique chargé: {len(history)} entrées")
         return context
         
@@ -91,12 +76,10 @@ async def get_conversation_history(user_id: int, server_id: int) -> str:
         logger.error(f"🔴 Erreur historique: {str(e)}", exc_info=True)
         return ""
 
-async def generate_response(user_id: int, server_id: int, raw_content: str, attachments: list, model_name: str) -> str:
+async def generate_response(user_id: int, server_id: int, raw_content: str, attachments: list, parameters: dict) -> str:
     """
     Orchestre la génération de réponse avec gestion d'erreurs renforcée
-    """
-    logger.debug(f"Début génération réponse pour {user_id} avec {model_name}")
-    
+    """    
     try:
         # Initialisation globale si nécessaire
         if not getattr(initialize, '_initialized', False):
@@ -106,9 +89,15 @@ async def generate_response(user_id: int, server_id: int, raw_content: str, atta
         # Traitement du contenu
         processed_content = await process_attachments(raw_content, attachments)
         logger.debug(f"Contenu traité: {processed_content[:500]}...")
+
+        perso_preprompt = get_perso_preprompt(user_id) if get_perso_preprompt(user_id) else ""
         
         # Récupération contexte
-        history_context = await get_conversation_history(user_id, server_id)
+        if parameters.get("history", True):
+            logger.debug("Récupération de l'historique de conversation")
+            history_context = await get_conversation_history(user_id, server_id)
+        else:
+            history_context = ""
         
         # Construction du prompt
         full_prompt = f"""
@@ -120,31 +109,20 @@ async def generate_response(user_id: int, server_id: int, raw_content: str, atta
         """
         logger.debug(f"Prompt final:\n{full_prompt[:500]}...")
         
-        # Chargement dynamique du modèle
-        try:
-            module_name = model_name.replace("-", "_")
-            model_module = importlib.import_module(f"models.{module_name}")
-            generate_fn = getattr(model_module, module_name, None)
-            
-            if not generate_fn:
-                raise AttributeError(f"Fonction {module_name} manquante dans {module_name}")
-                
-        except Exception as e:
-            logger.critical(f"🔴 Erreur chargement modèle: {str(e)}")
-            return "⚠️ Erreur technique: modèle indisponible"
-        
         # Génération de la réponse
-        response = await generate_fn(full_prompt)
+        response = await chat(full_prompt, perso_preprompt, parameters)
         logger.debug(f"Réponse générée: {response[:500]}...")
-        
-        # Mise à jour mémoire (async fire-and-forget)
-        try:
-            combined_text = f"Utilisateur: {processed_content}\nAssistant: {response}"
-            await add_memory(int(user_id), int(server_id), combined_text)
 
-            logger.debug("Mémoire mise à jour avec succès")
-        except Exception as e:
-            logger.error(f"Erreur mise à jour mémoire: {str(e)}")
+        # Mise à jour mémoire (asynchrone fire-and-forget)
+        if parameters.get("history", True):
+            logger.debug("Mise à jour de la mémoire")
+            try:
+                combined_text = f"Utilisateur: {processed_content}\nAssistant: {response}"
+                await add_memory(int(user_id), int(server_id), combined_text)
+
+                logger.debug("Mémoire mise à jour avec succès")
+            except Exception as e:
+                logger.error(f"Erreur mise à jour mémoire: {str(e)}")
         
         return response
         

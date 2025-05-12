@@ -16,30 +16,6 @@ supabase: Client = create_client(url, key,
                                     persist_session=True
                                 ))
 
-def get_def_model(user_id):
-    try:
-        response = supabase.table("users_settings").select("def_model").eq("id_discord", user_id).execute()
-        if response.data:
-            return response.data[0]['def_model']
-        else:
-            logger.warning(f"Aucun modèle par défaut trouvé pour l'utilisateur {user_id}.")
-            return None
-    except Exception as e:
-        logger.error(f"Erreur lors de la récupération du modèle par défaut pour l'utilisateur {user_id} : {str(e)}")
-        return None
-    
-def get_fallback_model(user_id):
-    try:
-        response = supabase.table("users_settings").select("fallback_model").eq("id_discord", user_id).execute()
-        if response.data:
-            return response.data[0]['fallback_model']
-        else:
-            logger.warning(f"Aucun modèle de secours trouvé pour l'utilisateur {user_id}.")
-            return None
-    except Exception as e:
-        logger.error(f"Erreur lors de la récupération du modèle de secours pour l'utilisateur {user_id} : {str(e)}")
-        return None
-    
 def get_image_model(user_id):
     try:
         response = supabase.table("users_settings").select("image_model").eq("id_discord", user_id).execute()
@@ -110,18 +86,6 @@ def get_audio_voice(user_id):
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la voix pour l'utilisateur {user_id} : {str(e)}")
-        return None
-    
-def get_audio_fallback_voice(user_id):
-    try:
-        response = supabase.table("users_settings").select("audio_fallback").eq("id_discord", user_id).execute()
-        if response.data:
-            return response.data[0]['audio_fallback']
-        else:
-            logger.warning(f"Aucune voix de secours trouvé pour l'utilisateur {user_id}.")
-            return None
-    except Exception as e:
-        logger.error(f"Erreur lors de la récupération de la voix de secours pour l'utilisateur {user_id} : {str(e)}")
         return None
     
 def get_announce_mp_active(user_id):

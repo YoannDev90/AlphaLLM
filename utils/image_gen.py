@@ -94,7 +94,7 @@ async def generate_image(prompt: str, model="flux", seed=None, width=1024, heigh
                                         seed=seed,
                                         width=width,
                                         height=height,
-                                        nologo=nologo,
+                                        nologo=True,
                                         private=private,
                                         enhance=enhance,
                                         safe=safe)
