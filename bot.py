@@ -5,13 +5,9 @@ import os
 from dotenv import load_dotenv
 from cmds import setup_commands
 from utils.ai_process import process_ai_response
-from utils.database import get_blacklist, update_new_users
-from utils.langs import get_translation as tlt
-from datetime import datetime, timedelta
+from utils.database import get_blacklist
 from supabase import create_client, Client, ClientOptions
-from discord.ext import tasks
-import time
-import json
+
 
 load_dotenv()
 
