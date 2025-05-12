@@ -15,13 +15,12 @@ logger = logging.getLogger('AlphaLLM')
 async def setup(bot: discord.Client):
     @bot.tree.command(name="image", description="Génère une image à partir d'un prompt")
     @app_commands.choices(model=[
-        app_commands.Choice(name="Flux (by BlackForestLabs)", value="flux"),
+        app_commands.Choice(name="Flux", value="flux"),
         app_commands.Choice(name="Turbo", value="turbo")
     ])
     async def image(
         interaction: discord.Interaction,
         prompt: str,
-        number: int = 1,
         model: str = None,
         size: str = None,
         private: bool = None,
@@ -51,9 +50,6 @@ async def setup(bot: discord.Client):
             logger.warning(f"Dimensions de l'image trop grandes pour {interaction.user.display_name}")
             width = 2048
             height = 2048
-
-        #safe = False if interaction.channel.is_nsfw() else True
-        #safe = get_allow_nsfw(interaction.guild.id)
 
         safe = True
 

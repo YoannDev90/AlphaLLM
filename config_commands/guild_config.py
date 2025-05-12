@@ -35,19 +35,19 @@ LANG_CHOICES = [
     app_commands.Choice(name="हिन्दी 🇮🇳", value="HI")
 ]
 
-NSFW_CHOICES = [
-    app_commands.Choice(name="Yes ✅", value=1),
-    app_commands.Choice(name="No ❌", value=0)
-]
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="guild-config", description="Configure server language, announcement channel, and NSFW setting")
-    @app_commands.choices(langue=LANG_CHOICES, allow_nsfw=NSFW_CHOICES)
+    @bot.tree.command(name="guild-config", description="Configure server language and announcement channel")
+    @app_commands.describe(
+        langue="Language for the server",
+        announce_channel="Channel for bot announcements"
+    )
+    @app_commands.checks.has_permissions(manage_guild=True)
+    @app_commands.choices(langue=LANG_CHOICES)
     async def guild_config(
         interaction: discord.Interaction,
         langue: Optional[app_commands.Choice[str]] = None,
         announce_channel: Optional[discord.TextChannel] = None,
-        allow_nsfw: Optional[app_commands.Choice[int]] = None
     ):
         logger.info(f"/guild-config executed by {interaction.user.display_name}")
         await interaction.response.defer(thinking=True, ephemeral=True)
@@ -63,10 +63,6 @@ async def setup(bot: discord.Client):
         if announce_channel is not None:
             update_data["announce_channel"] = announce_channel.id
             summary.append(f"📢 **Announcement Channel:** {announce_channel.mention}")
-
-        if allow_nsfw is not None:
-            update_data["allow_nsfw"] = allow_nsfw.value == 1
-            summary.append(f"🔞 **NSFW Allowed:** {'Yes' if allow_nsfw.value == 1 else 'No'}")
 
         if len(update_data) == 1:
             await interaction.followup.send("⚠️ No parameter provided. Nothing updated.", ephemeral=True)

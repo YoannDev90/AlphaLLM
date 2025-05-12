@@ -2,7 +2,7 @@
 
 import logging
 from utils.langs import get_translation as tlt
-from utils.speech_gen import send_voice_message
+from temp.speech_gen import send_voice_message
 from utils.user_config import get_audio_gen_active, get_audio_voice
 from utils.user_manager import new_interaction, new_query
 from utils.ai_utils import generate_response
@@ -19,14 +19,44 @@ async def process_ai_response(bot,message):
         bot_mention = f"<@{bot.user.id}>"
 
         query = message.content.replace(bot_mention, "").strip()
-        parameters = {"history": True, "preprompt": True}
+        parameters = {"history": True, "preprompt": True, "tools": True, "streaming": True, "raw_content": False}
 
-        if "-nh" in query:
-            query = query.replace("-nh", "")
+        if query.endswith(" -h"):
+            query = query.replace("-h", "")
             parameters["history"] = False
-        if "-np" in query:
-            query = query.replace("-np", "")
+        if query.endswith(" -p"):
+            query = query.replace("-p", "")
             parameters["preprompt"] = False
+        if query.endswith(" -t"):
+            query = query.replace("-t", "")
+            parameters["tools"] = False
+        if query.endswith(" -s"):
+            query = query.replace("-s", "")
+            parameters["streaming"] = False
+        if query.endswith(" -r"):
+            query = query.replace("-r", "")
+            parameters["raw_content"] = True
+        if query.endswith(" -a"):
+            query = query.replace("-a", "")
+            parameters["tools"] = False
+            parameters["preprompt"] = False
+            parameters["history"] = False
+            parameters["streaming"] = False
+        if query.endswith(" +h"):
+            query = query.replace("+h", "")
+            parameters["history"] = True
+        if query.endswith(" +p"):
+            query = query.replace("+p", "")
+            parameters["preprompt"] = True
+        if query.endswith(" +t"):
+            query = query.replace("+t", "")
+            parameters["tools"] = True
+        if query.endswith(" +s"):
+            query = query.replace("+s", "")
+            parameters["streaming"] = True
+        if query.endswith(" +r"):
+            query = query.replace("+r", "")
+            parameters["raw_content"] = False
 
         logger.info(f"Message : {query}")
         if not query or query.isspace():

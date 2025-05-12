@@ -4,14 +4,10 @@ discord.py
 python-dotenv
 colorama
 requests
-matplotlib
-schedule
-pydub
-librosa
+# schedule
+# pydub
+# librosa
 crawl4ai
 supabase
 fastembed
-asyncpg
 deep_translator
-markdown-analysis
-table2ascii

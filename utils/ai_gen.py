@@ -44,3 +44,8 @@ async def chat(user_message, perso_preprompt, parameters):
     except Exception as e:
         logger.error(f"Erreur lors de la génération de la réponse Cerebras : {e}")
         return f"Erreur lors de la génération de la réponse : {e}"
+
+
+#TODO : Add tools calling
+#Tools calling : generate image, search, perform actions on the server, send embeds, etc
+#TODO : Add streaming support
