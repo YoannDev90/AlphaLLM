@@ -10,8 +10,6 @@ logger = logging.getLogger('AlphaLLM')
 
 _PG_POOL: Optional[asyncpg.pool.Pool] = None
 _EMBEDDER: Optional[TextEmbedding] = None
-import os
-import asyncpg
 
 async def connect_to_db() -> None:
     global _PG_POOL
