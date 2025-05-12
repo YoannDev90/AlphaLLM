@@ -5,7 +5,9 @@ from discord.ext import commands
 from utils.langs import get_translation as tlt
 import os
 
+# Load environment variables from .env file
 load_dotenv()
+
 logger = logging.getLogger('AlphaLLM')
 OWNER_ID = int(os.getenv('DEV_ID'))
 GUILD_ID = int(os.getenv('GUILD_ID'))

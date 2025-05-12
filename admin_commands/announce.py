@@ -7,7 +7,9 @@ from utils.langs import get_language, get_translation as tlt
 from utils.translator import translate_announcement_guild, translate_announcement_mp
 import os
 
+# Load environment variables from .env file
 load_dotenv()
+
 logger = logging.getLogger('AlphaLLM')
 OWNER_ID = int(os.getenv('DEV_ID'))
 GUILD_ID = int(os.getenv('GUILD_ID'))

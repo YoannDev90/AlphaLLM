@@ -2,7 +2,11 @@ import discord
 import logging
 from supabase import create_client, Client, ClientOptions
 import os
+from dotenv import load_dotenv
 from datetime import datetime
+
+# Load environment variables from .env file
+load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
 OWNER_ID = int(os.getenv('DEV_ID'))

@@ -5,8 +5,6 @@ This module initializes and runs a secondary bot dedicated to logging activities
 It uses a custom logging handler to send logs to Discord.
 """
 
-#logs/logger_bot.py
-
 import discord
 from discord.ext import commands
 import os

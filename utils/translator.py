@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger('AlphaLLM')
 
 CACHE_FILE = 'translation_cache.json'
-CACHE_TTL = 3600  # TTL en secondes (ex: 1 heure)
+CACHE_TTL = 3600
 _cache_lock = asyncio.Lock()
 _cache_data = None
 
@@ -51,7 +51,6 @@ async def _get_or_translate(text, lang):
     cache_key = f"{lang.lower()}|{text}"
     now = int(time.time())
 
-    # Vérifie si la traduction est en cache et non expirée
     if cache_key in cache:
         entry = cache[cache_key]
         if now < entry['expire_at']:

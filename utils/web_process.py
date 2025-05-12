@@ -49,13 +49,11 @@ class WebProcessor:
         try:
             soup = BeautifulSoup(html, 'html.parser')
             
-            # Suppression des éléments indésirables
             for element in soup(['script', 'style', 'nav', 'footer', 'header', 'noscript']):
                 element.decompose()
                 
-            # Extraction du texte principal
             text = soup.get_text(separator='\n', strip=True)
-            return ' '.join(text.split())  # Normalisation des espaces
+            return ' '.join(text.split())
         except Exception as e:
             logger.error(f"Erreur d'extraction: {str(e)}")
             return None

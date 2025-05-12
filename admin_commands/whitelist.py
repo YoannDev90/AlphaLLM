@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from datetime import datetime
 import logging
 
+load_dotenv()
+
 logger = logging.getLogger('AlphaLLM')
 OWNER_ID = int(os.getenv('DEV_ID'))
 GUILD_ID = int(os.getenv('GUILD_ID'))

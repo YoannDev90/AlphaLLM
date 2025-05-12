@@ -8,7 +8,6 @@ from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
 from supabase import create_client, Client, ClientOptions
 
-
 load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN")

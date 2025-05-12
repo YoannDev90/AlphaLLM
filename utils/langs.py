@@ -1,13 +1,20 @@
 import json
 import os
 import logging
+from dotenv import load_dotenv
 from supabase import Client, ClientOptions, create_client
+
+load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
 
-url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
-key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
-jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
+url: str = os.environ.get("DB_URL", "").encode('utf-8').decode('unicode-escape') if os.environ.get("DB_URL") else None
+key: str = os.environ.get("DB_KEY", "").encode('utf-8').decode('unicode-escape') if os.environ.get("DB_KEY") else None
+jwt: str = os.environ.get("JWT_KEY", "").encode('utf-8').decode('unicode-escape') if os.environ.get("JWT_KEY") else None
+
+if not url or not key or not jwt:
+    raise EnvironmentError("Missing required environment variables: DB_URL, DB_KEY, or JWT_KEY")
+
 supabase: Client = create_client(url, key, 
                                 options=ClientOptions(
                                     schema="public",

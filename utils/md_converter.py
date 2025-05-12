@@ -2,7 +2,6 @@ import requests
 import logging
 import os
 from markitdown import MarkItDown
-from utils.langs import get_translation
 
 logger = logging.getLogger('AlphaLLM')
 

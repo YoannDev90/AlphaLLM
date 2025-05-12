@@ -1,7 +1,10 @@
 import json
 import os
 import logging
+from dotenv import load_dotenv
 from supabase import create_client, Client, ClientOptions
+
+load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
 

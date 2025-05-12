@@ -7,6 +7,7 @@ colorama
 # schedule
 # pydub
 # librosa
+asyncpg
 crawl4ai
 supabase
 fastembed

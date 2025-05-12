@@ -1,10 +1,13 @@
 import discord
 from discord import app_commands
 from typing import Optional
+from dotenv import load_dotenv
 from supabase import Client, ClientOptions, create_client
 from utils.langs import get_language, get_translation as tlt
 import os
 import logging
+
+load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
 
@@ -98,8 +101,6 @@ async def setup(bot: discord.Client):
         logger.info(f"/user-config executed by {interaction.user.display_name}")
         await interaction.response.defer(thinking=True, ephemeral=True)
 
-        # Build the update dict only with provided parameters
-        #update_data = {"id_discord": interaction.guild.id}
         update_data = {}
         summary = []
 

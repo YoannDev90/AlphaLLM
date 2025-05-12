@@ -2,9 +2,11 @@ import discord
 from io import BytesIO
 import logging
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
-
 
 PUBLIC_IMAGE_CHANNEL_ID = os.getenv("GALERIE_ID")
 

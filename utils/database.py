@@ -1,8 +1,10 @@
 import logging
 import os
-from supabase import *
+from dotenv import load_dotenv
+from supabase import create_client, Client, ClientOptions
 
 logger = logging.getLogger("AlphaLLM")
+load_dotenv()
 
 url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
 key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')

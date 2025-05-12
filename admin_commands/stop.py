@@ -2,6 +2,9 @@ import discord
 import logging
 import sys
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
 OWNER_ID = int(os.getenv('DEV_ID'))

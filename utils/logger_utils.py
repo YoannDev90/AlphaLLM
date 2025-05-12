@@ -1,10 +1,11 @@
-#utils/logger_utils.py
-
 import logging
 from colorama import Fore, Back, Style
 import asyncio
 import os
+from dotenv import load_dotenv
 import discord
+
+load_dotenv()
 
 class DiscordLogHandler(logging.Handler):
     def __init__(self, bot):
