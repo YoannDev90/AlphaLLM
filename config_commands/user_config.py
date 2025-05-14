@@ -39,8 +39,8 @@ LANG_CHOICES = [
 ]
 
 IMAGE_MODEL_CHOICES = [
-    app_commands.Choice(name="Flux (by BlackForestLabs)", value="flux"),
-    app_commands.Choice(name="SDXL (by Stability.AI)", value="turbo")
+    app_commands.Choice(name="Flux", value="flux"),
+    app_commands.Choice(name="Turbo", value="turbo")
 ]
 
 IMAGE_PRIVATE_CHOICES = [
@@ -53,49 +53,24 @@ IMAGE_ENHANCE_CHOICES = [
     app_commands.Choice(name="No ❌", value=0)
 ]
 
-IMAGE_SIZE_CHOICES = [
-    app_commands.Choice(name="512x512", value="512x512"),
-    app_commands.Choice(name="640x640", value="640x640"),
-    app_commands.Choice(name="768x768", value="768x768"),
-    app_commands.Choice(name="896x896", value="896x896"),
-    app_commands.Choice(name="960x960", value="960x960"),
-    app_commands.Choice(name="1024x1024", value="1024x1024"),
-    app_commands.Choice(name="1280x1280", value="1280x1280"),
-    app_commands.Choice(name="1408x1408", value="1408x1408"),
-    app_commands.Choice(name="1536x1536", value="1536x1536"),
-    app_commands.Choice(name="1792x1792", value="1792x1792"),
-    app_commands.Choice(name="1920x1920", value="1920x1920"),
-    app_commands.Choice(name="2048x2048", value="2048x2048")
-]
-
-AUDIO_GEN_CHOICES = [
-    app_commands.Choice(name="Yes ✅", value=1),
-    app_commands.Choice(name="No ❌", value=0)
-]
-
-AUDIO_VOICE_CHOICES = [
-    app_commands.Choice(name="English 🇬🇧", value="en"),
-    app_commands.Choice(name="Français 🇫🇷", value="fr"),
-]
-
-ANNOUNE_MP_CHOICES = [
-    app_commands.Choice(name="Yes ✅", value=1),
-    app_commands.Choice(name="No ❌", value=0)
-]
-
 async def setup(bot: discord.Client):
     @bot.tree.command(name="user-config", description="Configure user language and preferences, image settings, and audio settings")
-    @app_commands.choices(langue=LANG_CHOICES, image_model=IMAGE_MODEL_CHOICES, image_private=IMAGE_PRIVATE_CHOICES, image_enhance=IMAGE_ENHANCE_CHOICES, image_size=IMAGE_SIZE_CHOICES, audio_gen=AUDIO_GEN_CHOICES, audio_voice=AUDIO_VOICE_CHOICES, announce_mp=ANNOUNE_MP_CHOICES)
+    @app_commands.choices(langue=LANG_CHOICES, image_model=IMAGE_MODEL_CHOICES, image_private=IMAGE_PRIVATE_CHOICES, image_enhance=IMAGE_ENHANCE_CHOICES)
+    @app_commands.describe(
+        langue="Language for the user",
+        image_model="Model for image generation",
+        image_size="Size for image generation (e.g., 512x512 or 1024x2048)",
+        image_private="Private image generation",
+        image_enhance="Enhance image generation",
+        perso_preprompt="Personal preprompt for text generation"
+    )
     async def user_config(
         interaction: discord.Interaction,
         langue: Optional[app_commands.Choice[str]] = None,
         image_model: Optional[app_commands.Choice[str]] = None,
-        image_size: Optional[app_commands.Choice[str]] = None,
+        image_size: Optional[str] = None,
         image_private: Optional[app_commands.Choice[int]] = None,
         image_enhance: Optional[app_commands.Choice[int]] = None,
-        audio_gen: Optional[app_commands.Choice[int]] = None,
-        audio_voice: Optional[app_commands.Choice[str]] = None,
-        announce_mp: Optional[app_commands.Choice[int]] = None,
         perso_preprompt: Optional[str] = None,
     ):
         logger.info(f"/user-config executed by {interaction.user.display_name}")
@@ -113,8 +88,8 @@ async def setup(bot: discord.Client):
             summary.append(f"🛠️ **Model:** {image_model.name}")
 
         if image_size is not None:
-            update_data["image_size"] = image_size.value
-            summary.append(f"📏 **Size:** {image_size.name}")
+            update_data["image_size"] = image_size
+            summary.append(f"📏 **Size:** {image_size}")
 
         if image_private is not None:
             update_data["image_private"] = True if image_private.value == 1 else False

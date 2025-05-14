@@ -4,6 +4,8 @@ from utils.langs import get_translation as tlt
 from utils.user_config import get_audio_gen_active, get_audio_voice
 from utils.user_manager import new_interaction, new_query
 from utils.ai_utils import generate_response
+import discord
+import io
 import re
 
 logger = logging.getLogger('AlphaLLM')
@@ -17,44 +19,21 @@ async def process_ai_response(bot,message):
         bot_mention = f"<@{bot.user.id}>"
 
         query = message.content.replace(bot_mention, "").strip()
-        parameters = {"history": True, "preprompt": True, "tools": True, "streaming": True, "raw_content": False}
+        parameters = {"history": True, "preprompt": True, "tools": True}
 
-        if query.endswith(" -h"):
-            query = query.replace("-h", "")
-            parameters["history"] = False
-        if query.endswith(" -p"):
-            query = query.replace("-p", "")
-            parameters["preprompt"] = False
-        if query.endswith(" -t"):
-            query = query.replace("-t", "")
-            parameters["tools"] = False
-        if query.endswith(" -s"):
-            query = query.replace("-s", "")
-            parameters["streaming"] = False
-        if query.endswith(" -r"):
-            query = query.replace("-r", "")
-            parameters["raw_content"] = True
-        if query.endswith(" -a"):
-            query = query.replace("-a", "")
-            parameters["tools"] = False
-            parameters["preprompt"] = False
-            parameters["history"] = False
-            parameters["streaming"] = False
-        if query.endswith(" +h"):
-            query = query.replace("+h", "")
-            parameters["history"] = True
-        if query.endswith(" +p"):
-            query = query.replace("+p", "")
-            parameters["preprompt"] = True
-        if query.endswith(" +t"):
-            query = query.replace("+t", "")
-            parameters["tools"] = True
-        if query.endswith(" +s"):
-            query = query.replace("+s", "")
-            parameters["streaming"] = True
-        if query.endswith(" +r"):
-            query = query.replace("+r", "")
-            parameters["raw_content"] = False
+        while True:
+            if query.endswith(" -h"):
+                query = query[:-3].rstrip()
+                parameters["history"] = False
+            elif query.endswith(" -p"):
+                query = query[:-3].rstrip()
+                parameters["preprompt"] = False
+            elif query.endswith(" -t"):
+                query = query[:-3].rstrip()
+                parameters["tools"] = False
+            else:
+                break
+
 
         logger.info(f"Message : {query}")
         if not query or query.isspace():
@@ -83,29 +62,33 @@ async def process_ai_response(bot,message):
             logger.error(f"Erreur lors de l'envoi du message : {e}")
             await message.channel.send("Une erreur s'est produite lors de l'envoi du message.")
 
-        try:
-            if get_audio_gen_active(message.author.id):
-                logger.debug(f"Audio generation is active for user {message.author.id}.")
-                await send_voice_message(message.channel, response, get_audio_voice(message.author.id))
-                logger.debug(f"Voice message sent successfully.")
-        except Exception as e:
-            logger.error(f"Erreur lors de la génération de la voix : {e}")
-            await message.channel.send("Une erreur s'est produite lors de la génération de la voix.")
+        # try:
+        #     if get_audio_gen_active(message.author.id):
+        #         logger.debug(f"Audio generation is active for user {message.author.id}.")
+        #         await send_voice_message(message.channel, response, get_audio_voice(message.author.id))
+        #         logger.debug(f"Voice message sent successfully.")
+        # except Exception as e:
+        #     logger.error(f"Erreur lors de la génération de la voix : {e}")
+        #     await message.channel.send("Une erreur s'est produite lors de la génération de la voix.")
     except Exception as e:
         logger.error(f"Erreur lors de la génération : {e}")
         await message.channel.send("Une erreur s'est produite lors de la génération.")
 
-async def smart_long_messages(channel, text: str, max_length: int = 2000):
+async def smart_long_messages(channel, response, max_length: int = 2000):
     """
     Sends a long message to Discord, preserving code blocks and never splitting inside a code block.
     """
-    pattern = re.compile(r"(```[\s\S]*?```)")
-    parts = pattern.split(text)
-    for part in parts:
-        if part.startswith("```") and part.endswith("```"):
-            await send_code_block(channel, part, max_length)
-        else:
-            await send_text_in_chunks(channel, part, max_length)
+    if isinstance(response, bytes):
+        # Envoi direct des données binaires comme fichier
+        await channel.send(file=discord.File(io.BytesIO(response), filename="image.png"))
+    else:
+        pattern = re.compile(r"(```[\s\S]*?```)")
+        parts = pattern.split(response)
+        for part in parts:
+            if part.startswith("```") and part.endswith("```"):
+                await send_code_block(channel, part, max_length)
+            else:
+                await send_text_in_chunks(channel, part, max_length)
 
 async def send_text_in_chunks(channel, text: str, max_length: int = 2000):
     """

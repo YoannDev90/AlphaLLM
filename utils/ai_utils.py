@@ -103,15 +103,16 @@ async def generate_response(user_id: int, server_id: int, raw_content: str, atta
         response = await chat(full_prompt, perso_preprompt, parameters)
         logger.debug(f"Réponse générée: {response[:500]}...")
 
-        if parameters.get("history", True):
-            logger.debug("Mise à jour de la mémoire")
-            try:
-                combined_text = f"Utilisateur: {processed_content}\nAssistant: {response}"
-                await add_memory(int(user_id), int(server_id), combined_text)
+        if not isinstance(response, bytes):
+            if parameters.get("history", True):
+                logger.debug("Mise à jour de la mémoire")
+                try:
+                    combined_text = f"Utilisateur: {processed_content}\nAssistant: {response}"
+                    await add_memory(int(user_id), int(server_id), combined_text)
 
-                logger.debug("Mémoire mise à jour avec succès")
-            except Exception as e:
-                logger.error(f"Erreur mise à jour mémoire: {str(e)}")
+                    logger.debug("Mémoire mise à jour avec succès")
+                except Exception as e:
+                    logger.error(f"Erreur mise à jour mémoire: {str(e)}")
         
         return response
         

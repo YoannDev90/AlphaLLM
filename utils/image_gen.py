@@ -77,13 +77,18 @@ class ImageGenerationQueue:
             logger.error(f"Error during image generation: {e}")
             return None
 
-# Initialize queue globally
 image_queue = ImageGenerationQueue()
 logger.debug("Global image queue initialized")
 
-# Start the queue processing task globally
-asyncio.create_task(image_queue.process_queue())
-logger.debug("Queue processing task started")
+queue_task = None
+
+def start_image_queue(loop):
+    """Fonction d'initialisation à appeler dans le main"""
+    global queue_task
+    queue_task = loop.create_task(image_queue.process_queue())
+    logger.debug("Queue processing task started")
+
+
 
 async def generate_image(prompt: str, model="flux", seed=None, width=1024, height=1024, nologo=True, private=False, enhance=False, safe=True):
     logger.debug(f"generate_image called with: prompt={prompt}, model={model}, seed={seed}, width={width}, height={height}, nologo={nologo}, private={private}, enhance={enhance}, safe={safe}")

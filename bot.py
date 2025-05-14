@@ -10,13 +10,13 @@ from supabase import create_client, Client, ClientOptions
 
 load_dotenv()
 
+#TOKEN = os.getenv("DEV_BOT_TOKEN")
 TOKEN = os.getenv("BOT_TOKEN")
-PREFIX = os.getenv("BOT_PREFIX")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 
 intents = discord.Intents.default()
 
-bot = commands.Bot(command_prefix=PREFIX,
+bot = commands.Bot(command_prefix="!",
                     owner_id=int(os.getenv("DEV_ID")),
                     intents=intents)
 
