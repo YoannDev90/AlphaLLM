@@ -5,7 +5,6 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 
-# Load environment variables from .env file
 load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')

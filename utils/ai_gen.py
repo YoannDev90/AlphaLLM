@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime
 import json
+import aiohttp
+from utils.gallery import gallery
 
 logger = logging.getLogger('AlphaLLM')
 
@@ -23,15 +25,24 @@ image_generation_tool = {
                 "prompt": {
                     "type": "string",
                     "description": "Description détaillée de l'image à générer"
+                    # comment préciser de traduire le prompt en anglais ?
                 },
                 "size": {
                     "type": "string", 
-                    "enum": ["1024x1024", "2048x1024", "2048x2048"],
-                    "description": "Taille de l'image à générer"
+                    "description": "Taille de l'image à générer en pixels (largeur x hauteur), maximum 2048x2048, minimum 512x512",
+                    # comment le faire utiliser une taille custom (2048x1024) ?
                 }
             },
-            "required": ["prompt"]
+            "required": ["prompt", "size"],
         }
+    }
+}
+
+doc_tool = {
+    "type": "function",
+    "function": {
+        "name": "doc_tools",
+        "description": "Envoie la documentation du bot",
     }
 }
 
@@ -49,7 +60,7 @@ def load_preprompt() -> str:
         logger.error(f"Error loading preprompt: {str(e)}")
         raise
 
-async def chat(user_message, perso_preprompt, parameters):
+async def chat(user_message, perso_preprompt, bot, user, parameters):
     try:
         if parameters.get("preprompt", True):
             preprompt = load_preprompt()
@@ -58,7 +69,7 @@ async def chat(user_message, perso_preprompt, parameters):
         else:
             preprompt = ""
 
-        tools = [image_generation_tool] if parameters.get("tools", True) else []
+        tools = [image_generation_tool, doc_tool] if parameters.get("tools", True) else []
 
         completion = cerebras_client.chat.completions.create(
             messages=[
@@ -77,36 +88,63 @@ async def chat(user_message, perso_preprompt, parameters):
                 if tool_call.function.name == "generate_image_tools":
                     try:
                         args = json.loads(tool_call.function.arguments)
-                        image_url = await generate_image_tools(
+                        image_data = await generate_image_tools(
                             prompt=args.get("prompt"),
+                            bot=bot,
+                            user=user,
                             parameters={
                                 "size": args.get("size", "1024x1024"),
                             }
                         )
-                        return image_url
+                        return image_data
                     except json.JSONDecodeError:
                         logger.error("Erreur de parsing JSON")
                     except ValueError as e:
                         logger.error(str(e))
+                if tool_call.function.name == "doc_tools":
+                    try:
+                        doc = await doc_tools(parameters)
+                        return doc
+                    except Exception as e:
+                        logger.error(f"Erreur lors de la génération du document : {e}")
+                        return f"Erreur lors de la génération du document : {e}"
         
         return response_message.content
     except Exception as e:
         logger.error(f"Erreur lors de la génération de la réponse Cerebras : {e}")
         return f"Erreur lors de la génération de la réponse : {e}"
 
-async def generate_image_tools(prompt: str, parameters: dict) -> str:
+async def generate_image_tools(prompt: str, bot, user, parameters: dict) -> str:
     try:
         if parameters.get("tools", True):
             size = parameters.get("size", "1024x1024")
             width, height = map(int, size.split('x'))
-            image_url = await generate_image(
+            image_data = await generate_image(
                 prompt=prompt,
                 width=width,
                 height=height
             )
-
             logger.info(f"Image générée (prompt:{prompt}, taille: {size})")
-            return image_url
+            await gallery(bot, image_data, prompt, user)
+            return image_data
     except Exception as e:
         logger.error(f"Erreur lors de la génération de l'image : {e}")
         return f"Erreur lors de la génération de l'image : {e}"
+
+async def doc_tools(parameters: dict) -> str:
+    try:
+        if parameters.get("tools", True):
+            url = "https://raw.githubusercontent.com/YoannDev90/AlphaLLM-Docs/ef53cd3f9692c7d2676950ded45d917426945f92/image-gen.md"
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        doc = await response.text()
+                    else:
+                        logger.error(f"Erreur lors de la récupération de la documentation : {response.status}")
+                        return f"Erreur lors de la récupération de la documentation : {response.status}"
+
+            logger.info("Documentation envoyée")
+            return doc
+    except Exception as e:
+        logger.error(f"Erreur lors de la génération du document : {e}")
+        return f"Erreur lors de la génération du document : {e}"

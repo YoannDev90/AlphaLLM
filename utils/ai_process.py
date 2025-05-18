@@ -47,6 +47,8 @@ async def process_ai_response(bot,message):
                 server_id=int(message.channel.id if not message.guild else message.guild.id),
                 raw_content=query,
                 attachments=message.attachments,
+                bot=bot,
+                user=message.author.display_name,
                 parameters=parameters
             )
             logger.info(f"Réponse générée avec succès.")

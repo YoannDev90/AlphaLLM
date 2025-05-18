@@ -5,7 +5,6 @@ from discord.ext import commands
 from utils.langs import get_translation as tlt
 import os
 
-# Load environment variables from .env file
 load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
@@ -15,7 +14,7 @@ GUILD_ID = int(os.getenv('GUILD_ID'))
 async def setup(bot: discord.Client):
     @bot.tree.command(name="reply", description="Envoie un message privé à un utilisateur")
     @discord.app_commands.guilds(discord.Object(id=GUILD_ID))
-    async def reply(interaction: discord.Interaction, user_id: int, message: str):
+    async def reply(interaction: discord.Interaction, user_id: str, message: str):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /reply exécutée par {interaction.user.display_name}")
 
@@ -24,6 +23,7 @@ async def setup(bot: discord.Client):
             return
 
         try:
+            user_id = int(user_id)
             asker = await bot.fetch_user(user_id)
             dev_id = os.getenv("DEV_ID")
             if not dev_id:

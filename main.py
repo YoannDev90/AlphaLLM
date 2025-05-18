@@ -27,7 +27,6 @@ async def main():
     except Exception as e:
         logger.error(f"Erreur non gérée : {str(e)}")
     finally:
-        # Nettoyage des tâches
         tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         for task in tasks:
             task.cancel()

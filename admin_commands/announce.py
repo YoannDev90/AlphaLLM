@@ -7,7 +7,6 @@ from utils.langs import get_language, get_translation as tlt
 from utils.translator import translate_announcement_guild, translate_announcement_mp
 import os
 
-# Load environment variables from .env file
 load_dotenv()
 
 logger = logging.getLogger('AlphaLLM')
@@ -40,31 +39,6 @@ class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
 
         announced_guilds = 0
         failed_guilds = 0
-        announced_users = 0
-        failed_users = 0
-
-        logger.info(f"Début de l'envoi de l'annonce en MP à tous les utilisateurs")
-        for user in self.bot.users:
-            if user.bot or user.id == self.bot.user.id:
-                logger.debug(f"Utilisateur ignoré (bot ou self) : {user} (ID: {user.id})")
-                continue
-            if get_announce_mp_active(user.id):
-                logger.debug(f"Envoi MP activé pour {user} (ID: {user.id})")
-                try:
-                    translated_content = await translate_announcement_mp(message, user)
-                    logger.info(f"Contenu traduit pour {user.display_name} (ID: {user.id})")
-                    if translated_content:
-                        await user.send(translated_content)
-                        logger.info(f"Annonce envoyée en MP à {user.display_name} (ID: {user.id})")
-                        announced_users += 1
-                    else:
-                        logger.warning(f"Message vide, non envoyé à {user.display_name} (ID: {user.id})")
-                        failed_users += 1
-                except Exception as e:
-                    logger.error(f"Erreur lors de l'envoi de l'annonce en MP à {user.display_name} (ID: {user.id}) : {e}")
-                    failed_users += 1
-            else:
-                logger.debug(f"Envoi MP désactivé pour {user} (ID: {user.id})")
 
         logger.info(f"Début de l'envoi de l'annonce sur tous les serveurs")
         for guild in self.bot.guilds:
@@ -126,11 +100,9 @@ class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
                 logger.error(f"Erreur lors de l'envoi sur {guild.name} (ID: {guild.id}) : {e}")
                 failed_guilds += 1
 
-        logger.info(f"Annonce terminée : {announced_guilds} serveurs réussis, {failed_guilds} échecs, {announced_users} utilisateurs MP, {failed_users} échecs MP")
+        logger.info(f"Annonce terminée : {announced_guilds} serveurs réussis, {failed_guilds} échecs")
         await interaction.response.send_message(
-            f"Annonce terminée :\n"
-            f"- Serveurs : {announced_guilds} réussites, {failed_guilds} échecs\n"
-            f"- Utilisateurs (MP) : {announced_users} réussites, {failed_users} échecs",
+            f"Annonce terminée : {announced_guilds} réussites, {failed_guilds} échecs\n",
             ephemeral=True
         )
 

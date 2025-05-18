@@ -71,7 +71,7 @@ async def get_conversation_history(user_id: int, server_id: int) -> str:
         logger.error(f"🔴 Erreur historique: {str(e)}", exc_info=True)
         return ""
 
-async def generate_response(user_id: int, server_id: int, raw_content: str, attachments: list, parameters: dict) -> str:
+async def generate_response(user_id: int, server_id: int, raw_content: str, attachments: list, bot, user, parameters: dict) -> str:
     """
     Orchestre la génération de réponse avec gestion d'erreurs renforcée
     """    
@@ -100,7 +100,7 @@ async def generate_response(user_id: int, server_id: int, raw_content: str, atta
         """
         logger.debug(f"Prompt final:\n{full_prompt[:500]}...")
         
-        response = await chat(full_prompt, perso_preprompt, parameters)
+        response = await chat(full_prompt, perso_preprompt, bot, user, parameters)
         logger.debug(f"Réponse générée: {response[:500]}...")
 
         if not isinstance(response, bytes):

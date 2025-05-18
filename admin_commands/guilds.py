@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from utils.langs import get_translation as tlt
 import os
 
-# Load environment variables from .env file
 load_dotenv()
 
 OWNER_ID = int(os.getenv('DEV_ID'))

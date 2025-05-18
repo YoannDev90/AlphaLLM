@@ -63,7 +63,7 @@ async def setup(bot: discord.Client):
             await interaction.followup.send(file=file, view=view)
             logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
             if not private and safe:
-                await gallery(bot, image_data, prompt, interaction)
+                await gallery(bot, image_data, prompt, interaction.user.display_name)
         else:
             view = RetryImageView(prompt, model, width, height, private, enhance, safe, user_lang)
             await interaction.followup.send(tlt(language=user_lang, key="image_gen_error"), delete_after=10, view=view)
