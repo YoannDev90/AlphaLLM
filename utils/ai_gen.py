@@ -18,34 +18,25 @@ image_generation_tool = {
     "type": "function",
     "function": {
         "name": "generate_image_tools",
-        "description": "Génère une image à partir d'un prompt textuel",
+        "description": "Generates an image from a text prompt",
         "parameters": {
             "type": "object",
             "properties": {
                 "prompt": {
-                    "type": "string",
-                    "description": "Description détaillée de l'image à générer"
-                    # comment préciser de traduire le prompt en anglais ?
+                    "type": "string", 
+                    "description": "Detailed description in English."
                 },
                 "size": {
                     "type": "string", 
-                    "description": "Taille de l'image à générer en pixels (largeur x hauteur), maximum 2048x2048, minimum 512x512",
-                    # comment le faire utiliser une taille custom (2048x1024) ?
+                    "description": "Image size to generate in pixels (width x height), maximum 2048x2048, minimum 512x512",
+                    "examples": ["512x512", "1024x1024", "2048x2048", "2048x1024", "1024x2048"],
+                    "default": "1024x1024",
                 }
             },
             "required": ["prompt", "size"],
         }
     }
 }
-
-doc_tool = {
-    "type": "function",
-    "function": {
-        "name": "doc_tools",
-        "description": "Envoie la documentation du bot",
-    }
-}
-
 
 def load_preprompt() -> str:
     """Charge le pré-prompt depuis un fichier"""
@@ -69,7 +60,7 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
         else:
             preprompt = ""
 
-        tools = [image_generation_tool, doc_tool] if parameters.get("tools", True) else []
+        tools = [image_generation_tool] if parameters.get("tools", True) else []
 
         completion = cerebras_client.chat.completions.create(
             messages=[
@@ -92,7 +83,8 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
                             prompt=args.get("prompt"),
                             bot=bot,
                             user=user,
-                            parameters={
+                            parameters=parameters,
+                            tool_parameters={
                                 "size": args.get("size", "1024x1024"),
                             }
                         )
@@ -101,23 +93,16 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
                         logger.error("Erreur de parsing JSON")
                     except ValueError as e:
                         logger.error(str(e))
-                if tool_call.function.name == "doc_tools":
-                    try:
-                        doc = await doc_tools(parameters)
-                        return doc
-                    except Exception as e:
-                        logger.error(f"Erreur lors de la génération du document : {e}")
-                        return f"Erreur lors de la génération du document : {e}"
         
         return response_message.content
     except Exception as e:
         logger.error(f"Erreur lors de la génération de la réponse Cerebras : {e}")
         return f"Erreur lors de la génération de la réponse : {e}"
 
-async def generate_image_tools(prompt: str, bot, user, parameters: dict) -> str:
+async def generate_image_tools(prompt: str, bot, user, parameters, tool_parameters) -> str:
     try:
         if parameters.get("tools", True):
-            size = parameters.get("size", "1024x1024")
+            size = tool_parameters.get("size", "1024x1024")
             width, height = map(int, size.split('x'))
             image_data = await generate_image(
                 prompt=prompt,
@@ -130,21 +115,3 @@ async def generate_image_tools(prompt: str, bot, user, parameters: dict) -> str:
     except Exception as e:
         logger.error(f"Erreur lors de la génération de l'image : {e}")
         return f"Erreur lors de la génération de l'image : {e}"
-
-async def doc_tools(parameters: dict) -> str:
-    try:
-        if parameters.get("tools", True):
-            url = "https://raw.githubusercontent.com/YoannDev90/AlphaLLM-Docs/ef53cd3f9692c7d2676950ded45d917426945f92/image-gen.md"
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    if response.status == 200:
-                        doc = await response.text()
-                    else:
-                        logger.error(f"Erreur lors de la récupération de la documentation : {response.status}")
-                        return f"Erreur lors de la récupération de la documentation : {response.status}"
-
-            logger.info("Documentation envoyée")
-            return doc
-    except Exception as e:
-        logger.error(f"Erreur lors de la génération du document : {e}")
-        return f"Erreur lors de la génération du document : {e}"

@@ -1,9 +1,17 @@
 # AlphaLLM - Documentation GitHub 🚀
 
-**AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs, ainsi que des projets non-officiels:  
+**AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs:  
 
 - Cerebras AI, un modèle de Llama 3.3 70B ultra-rapide et performant.
 - Pollinations AI, un générateur d'images basé sur des modèles de diffusion.
+- Mistral AI, un modèle de langage développé par Mistral.
+- Gemini AI, un modèle de langage développé par Google.
+- OpenRouter, une plateforme pour accéder à divers modèles de langage.
+- Markitdown, une librairie pour traiter les fichiers et les liens.
+- Crawl4AI, un outil pour crawler et extraire le contenu des liens.
+- Discord.py, une librairie pour interagir avec l'API de Discord.
+- PostgreSQL, une base de données relationnelle pour stocker les logs et les données.
+- Supabase, une plateforme de base de données en temps réel pour stocker les logs et les données.
 
 ---
 
@@ -24,7 +32,30 @@
 
 1. 🖥️ Python 3.11
 2. 🤖 Un bot Discord
-3. 🔑 Une clé API pour Cerebras Cloud SDK
+3. 🔑 Une clé API pour Cerebras Cloud SDK (obligatoire)
+4. 🔑 Une clé API pour Mistral AI (facultatif)
+5. 🔑 Une clé API pour Gemini AI (facultatif)
+6. 🔑 Une clé API pour OpenRouter (facultatif)
+7. 🔑 Une clé API pour Pollinations AI (facultatif)
+8. 📦 Une base de données PostgreSQL (optionnel, pour stocker les logs et les données)
+
+### Dépendances
+Le projet utilise les dépendances suivantes, qui seront installées automatiquement via le fichier `requirements.txt` :
+
+```txt
+# requirements.txt
+
+markitdown[all]
+cerebras_cloud_sdk
+discord.py
+python-dotenv
+colorama
+asyncpg
+crawl4ai
+supabase
+fastembed
+deep_translator
+```
 
 ### Étapes d'installation
 
@@ -43,8 +74,30 @@
 3. Configurez vos paramètres dans le fichier `.env` :
 
    ```venv
-    DISCORD_TOKEN=""
-    CEREBRAS_API_KEY=""
+   BOT_TOKEN=""                              # Token du bot Discord
+   LOGGER_BOT_TOKEN=""                       # Token du bot de log (optionnel, pour les logs en MP en temps réel)
+   DEV_BOT_TOKEN=""                          # Token du bot de développement (optionnel, pour les tests)
+
+   DEV_ID=                                   # ID de mon compte Discord
+   GALERIE_ID=                               # ID du salon #galerie sur le Discord de AlphaLLM
+   GUILD_ID=                                 # ID du serveur Discord AlphaLLM
+
+   CEREBRAS_API_KEY=""                       # Clé API pour Cerebras Cloud SDK
+   MISTRAL_API_KEY=""                        # Clé API pour Mistral AI
+   GEMINI_API_KEY=""                         # Clé API pour Gemini AI
+   OPENROUTER_API_KEY=""                     # Clé API pour OpenRouter
+   POLLINATIONS_API_KEY=""                   # Clé API pour Pollinations AI
+
+   DB_URL=""                                 # URL de la base de données (optionnel, pour stocker les logs et les données)
+   DB_KEY=""                                 # Clé de la base de données (optionnel)
+   JWT_KEY=""                                # Clé JWT pour l'authentification (optionnel)
+
+   DB_DIRECT_CONN=""                         # Connexion directe à la base de données (optionnel, pour la mémoire)
+   DB_HOST=                                  # Adresse de la base de données (optionnel)
+   DB_PORT=                                  # Port de la base de données (optionnel)
+   DB_USER=                                  # Nom d'utilisateur de la base de données (optionnel)
+   DB_PASSWORD=                              # Mot de passe de la base de données (optionnel)
+   DB_NAME=postgres                          # Nom de la base de données (optionnel)
    ```
 
 4. Lancez le bot :
@@ -57,43 +110,27 @@
 
 ## **Utilisation** 📚
 
-### Commandes principales
+Pour discuter avec le bot, il suffit de le mentionner dans un canal Discord. Par exemple :
 
-1. **Mentionner le bot**
-   Mentionnez le bot dans un message ou une réponse avec une question :
+```
+@AlphaLLM Quelle est la capitale de la France ?
+```
 
-   ```text
-   @AlphaLLM Peux-tu m'aider avec une commande Linux ?
-   ```
+Le bot répondra avec la réponse formatée en Markdown. Vous pouvez également lui envoyer des liens ou des fichiers pour qu'il les traite.
 
-   ![image](https://github.com/user-attachments/assets/0f8bb424-f475-4ff9-ad21-fdfc3ba9e1e7)
+Pour générer une image, utilisez la commande suivante :
 
+`/image` ou `@AlphaLLM generate`.
 
-2. **Générer une image**
-   Exemple avec tous les paramètres disponibles :
+```
+/image "Paysage naturel"
+```
 
-   ```text
-   /image prompt:'A minecraft landscape, plains biome, voxel, blocky style, smooth shaders, blocky trees' model:[] width:2048 height:1024 nologo:True private:True enhance:False safe:True
-   ```
-   
-   ![image](https://github.com/user-attachments/assets/263e4a5a-abcb-437d-8a52-26c58c380ebf)
-   ![image](https://github.com/user-attachments/assets/8a1ee898-480e-4d15-bccb-c733b2743d15)
-   ![image](https://github.com/user-attachments/assets/cf9c6985-6e81-4bf1-be8b-527527bd8269)
-   ![image](https://github.com/user-attachments/assets/5e964ae0-8f8f-4210-8780-1bc6bb3ab545)
-   ![image](https://github.com/user-attachments/assets/a295e027-b6b9-45d2-b214-0985377d33bd)
-   ![image](https://github.com/user-attachments/assets/54539ba1-d086-4fe4-8ba3-abfbd1da1bed)
+```
+@AlphaLLM génère une image de paysage naturel.
+```
 
-  Tous les paramètres à l'exception du prompt sont optionnels. Voici la valeur par défaut et la description de chaque paramètre :
-  
-  - `prompt` : le prompt décrivant l'image
-  - `model` : le nom du modèle parmi ceux disponible (défault = Flux)
-  - `size` : la taille de l'image (défault = 1024x1024)
-  - `private` : si l'image est publique ou non (rendre l'image privée => True) (défault = False)
-  - `enhance` : si le prompt doit être amélioré par un modèle particulier (défault = False)
-
-  Exceptions :
-
-  - si l'image est rendue publique, elle apparaitra dans le [feed public de Pollinations AI](https://image.pollinations.ai/feed) et dans le salon `#🎨-galerie` du serveur de support du bot.
+Note : Dans le second cas, le bot se charge d'éditer le prompt et de définir la taille de l'image, ne pas l'utiliser pour des prompts complexes.
 
 ---
 
