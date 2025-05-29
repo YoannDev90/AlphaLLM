@@ -92,7 +92,7 @@ def setup_logging(logger_name, bot):
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(ConsoleFormatter())
 
-    file_handler = logging.FileHandler('logs/logs.txt')
+    file_handler = logging.FileHandler('logs.log', mode='a', encoding='utf-8')
     file_handler.setFormatter(FileFormatter())
 
     discord_handler = DiscordLogHandler(bot)

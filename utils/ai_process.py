@@ -51,7 +51,7 @@ async def process_ai_response(bot,message):
                 user=message.author.display_name,
                 parameters=parameters
             )
-            logger.info(f"Réponse générée avec succès.")
+            logger.debug(f"Réponse générée avec succès.")
         except Exception as e:
             logger.error(f"Erreur lors de la génération de la réponse : {e}")
             await message.channel.send("Une erreur s'est produite lors de la génération de la réponse.")
@@ -59,7 +59,7 @@ async def process_ai_response(bot,message):
 
         try:
             await smart_long_messages(message.channel, response)
-            logger.info(f"Réponse envoyée avec succès.")
+            logger.debug(f"Réponse envoyée avec succès.")
         except Exception as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")
             await message.channel.send("Une erreur s'est produite lors de l'envoi du message.")

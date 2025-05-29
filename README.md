@@ -40,6 +40,7 @@
 8. 📦 Une base de données PostgreSQL (optionnel, pour stocker les logs et les données)
 
 ### Dépendances
+
 Le projet utilise les dépendances suivantes, qui seront installées automatiquement via le fichier `requirements.txt` :
 
 ```txt
@@ -112,7 +113,7 @@ deep_translator
 
 Pour discuter avec le bot, il suffit de le mentionner dans un canal Discord. Par exemple :
 
-```
+```markdown
 @AlphaLLM Quelle est la capitale de la France ?
 ```
 
@@ -122,11 +123,11 @@ Pour générer une image, utilisez la commande suivante :
 
 `/image` ou `@AlphaLLM generate`.
 
-```
+```markdown
 /image "Paysage naturel"
 ```
 
-```
+```markdown
 @AlphaLLM génère une image de paysage naturel.
 ```
 

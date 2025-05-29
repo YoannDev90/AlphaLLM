@@ -71,7 +71,6 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
             tool_choice="auto" if tools else None,
             model="llama3.3-70b"
         )
-        logger.info("Réponse générée par Cerebras")
         response_message = completion.choices[0].message
         
         if response_message.tool_calls:
@@ -109,7 +108,7 @@ async def generate_image_tools(prompt: str, bot, user, parameters, tool_paramete
                 width=width,
                 height=height
             )
-            logger.info(f"Image générée (prompt:{prompt}, taille: {size})")
+            logger.debug(f"Image générée (prompt:{prompt}, taille: {size})")
             await gallery(bot, image_data, prompt, user)
             return image_data
     except Exception as e:

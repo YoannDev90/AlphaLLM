@@ -10,8 +10,7 @@ from supabase import create_client, Client, ClientOptions
 
 load_dotenv()
 
-#TOKEN = os.getenv("DEV_BOT_TOKEN")
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("PHI_BOT_TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 
 intents = discord.Intents.default()
@@ -49,11 +48,8 @@ def is_bot_mentioned(bot, message):
 @bot.event
 async def on_ready():
     logger.info(f'{bot.user} connecté !')
-    activity = discord.CustomActivity(name="🤖 Use @AlphaLLM to chat")
+    activity = discord.CustomActivity(name="🚀 Powered by AlphaLLM")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
-    await bot.tree.sync()
-    guild = discord.Object(id=GUILD_ID)
-    await bot.tree.sync(guild=guild)
 
 @bot.event
 async def on_message(message):
@@ -84,7 +80,7 @@ async def on_message(message):
                 return
             await process_ai_response(bot,message)
 
-async def run_bot():
+async def run_phi_bot():
     await setup_commands(bot)
     try:
         await bot.start(TOKEN)
@@ -94,5 +90,5 @@ async def run_bot():
         logger.error(f"Erreur inattendue : {e}")
         await bot.close()
     finally:
-        logger.info("Arrêt du bot.")
+        logger.info("Arrêt du bot Phi.")
         raise SystemExit(0)

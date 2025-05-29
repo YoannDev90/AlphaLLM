@@ -4,6 +4,6 @@
 .env-test
 __pycache__
 .venv
-logs/logs.txt
+logs.log
 temp
 translation_cache.json
