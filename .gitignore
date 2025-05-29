@@ -1,7 +1,6 @@
 
 *.pyc
 .env
-.env-test
 __pycache__
 .venv
 logs.log
