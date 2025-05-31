@@ -16,6 +16,7 @@ async def setup(bot: discord.Client):
     @bot.tree.command(name="image", description="Génère une image à partir d'un prompt")
     @app_commands.choices(model=[
         app_commands.Choice(name="Flux", value="flux"),
+        app_commands.Choice(name="GPT Image", value="gptimage"),
         app_commands.Choice(name="Turbo", value="turbo")
     ])
     async def image(
@@ -28,7 +29,7 @@ async def setup(bot: discord.Client):
     ):
         await interaction.response.defer()
 
-        logger.info(f"Commande image exécutée par {interaction.user.display_name}")
+        logger.info(f"Commande image exécutée par {interaction.user.display_name} ({interaction.user.id})")
 
         user_lang = get_language(interaction.user.id)
 

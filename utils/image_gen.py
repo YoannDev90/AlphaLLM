@@ -3,8 +3,16 @@ import asyncio
 import logging
 import urllib.parse
 import random
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+POLLINATIONS_TOKEN = os.getenv("POLLINATIONS_API_KEY")
 
 logger = logging.getLogger('AlphaLLM')
+
+
 
 class ImageGenerationQueue:
     def __init__(self, max_per_minute=5):
@@ -52,7 +60,7 @@ class ImageGenerationQueue:
                 "private": str(private).lower(),
                 "enhance": str(enhance).lower(),
                 "safe": str(safe).lower(),
-                "referrer": "AlphaLLM",
+                "token": str(POLLINATIONS_TOKEN)
             }
             if seed is not None:
                 params["seed"] = seed

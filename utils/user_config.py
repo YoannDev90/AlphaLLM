@@ -25,7 +25,6 @@ def get_image_model(user_id):
         if response.data:
             return response.data[0]['image_model']
         else:
-            logger.warning(f"Aucun modèle d'image trouvé pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération du modèle d'image pour l'utilisateur {user_id} : {str(e)}")
@@ -37,7 +36,6 @@ def get_image_size(user_id):
         if response.data:
             return response.data[0]['image_size']
         else:
-            logger.warning(f"Aucune taille d'image trouvée pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la taille d'image pour l'utilisateur {user_id} : {str(e)}")
@@ -49,7 +47,6 @@ def get_image_private(user_id):
         if response.data:
             return response.data[0]['image_private']
         else:
-            logger.warning(f"Aucun statut d'image privée trouvé pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération du statut d'image privée pour l'utilisateur {user_id} : {str(e)}")
@@ -61,7 +58,6 @@ def get_image_enhance(user_id):
         if response.data:
             return response.data[0]['image_enhance']
         else:
-            logger.warning(f"Aucun statut d'amélioration d'image trouvé pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération du statut d'amélioration d'image pour l'utilisateur {user_id} : {str(e)}")
@@ -73,7 +69,6 @@ def get_audio_gen_active(user_id):
         if response.data:
             return response.data[0]['audio_gen']
         else:
-            logger.warning(f"Aucun statut de génération audio trouvé pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération du statut de génération audio pour l'utilisateur {user_id} : {str(e)}")
@@ -85,7 +80,6 @@ def get_audio_voice(user_id):
         if response.data:
             return response.data[0]['audio_voice']
         else:
-            logger.warning(f"Aucune voix trouvé pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la voix pour l'utilisateur {user_id} : {str(e)}")
@@ -97,7 +91,6 @@ def get_announce_mp_active(user_id):
         if response.data:
             return response.data[0]['announce_mp']
         else:
-            logger.warning(f"Aucun statut d'annonce MP trouvé pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération du statut d'annonce MP pour l'utilisateur {user_id} : {str(e)}")
@@ -109,7 +102,6 @@ def get_perso_preprompt(user_id):
         if response.data:
             return response.data[0]['perso_preprompt']
         else:
-            logger.warning(f"Aucun pré-prompt trouvé pour l'utilisateur {user_id}.")
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération du pré-prompt pour l'utilisateur {user_id} : {str(e)}")

@@ -1,5 +1,6 @@
-from cerebras.cloud.sdk import Cerebras
 from utils.image_gen import generate_image
+from models.mistral import mistral_chat
+from models.cerebras import cerebras_chat
 import logging
 from dotenv import load_dotenv
 import os
@@ -7,12 +8,9 @@ from datetime import datetime
 import json
 import aiohttp
 from utils.gallery import gallery
+import discord
 
 logger = logging.getLogger('AlphaLLM')
-
-load_dotenv()
-
-cerebras_client = Cerebras(api_key=os.getenv("CEREBRAS_API_KEY"),max_retries=3)
 
 image_generation_tool = {
     "type": "function",
@@ -41,7 +39,7 @@ image_generation_tool = {
 def load_preprompt() -> str:
     """Charge le pré-prompt depuis un fichier"""
     try:
-        with open("config/preprompt.txt", "r", encoding="utf-8") as file:
+        with open("preprompt.txt", "r", encoding="utf-8") as file:
             preprompt = file.read()
         logger.debug("Preprompt loaded successfully")
         now = datetime.now()
@@ -62,40 +60,22 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
 
         tools = [image_generation_tool] if parameters.get("tools", True) else []
 
-        completion = cerebras_client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": preprompt},
-                {"role": "user", "content": user_message}
-            ],
-            tools=tools,
-            tool_choice="auto" if tools else None,
-            model="llama3.3-70b"
-        )
-        response_message = completion.choices[0].message
-        
-        if response_message.tool_calls:
-            for tool_call in response_message.tool_calls:
-                if tool_call.function.name == "generate_image_tools":
-                    try:
-                        args = json.loads(tool_call.function.arguments)
-                        image_data = await generate_image_tools(
-                            prompt=args.get("prompt"),
-                            bot=bot,
-                            user=user,
-                            parameters=parameters,
-                            tool_parameters={
-                                "size": args.get("size", "1024x1024"),
-                            }
-                        )
-                        return image_data
-                    except json.JSONDecodeError:
-                        logger.error("Erreur de parsing JSON")
-                    except ValueError as e:
-                        logger.error(str(e))
-        
-        return response_message.content
+        bot_id = bot.user.id if isinstance(bot, discord.Client) else bot.id
+
+        match bot_id:
+            case 1370685184269352962: # Mistral bot ID
+                response = await mistral_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par Mistral")
+            #case 1370683258274185349: # Gemini bot ID
+                #gemini_chat(user_message, preprompt, tools, bot, user, parameters)
+            case _: # AlphaLLM bot ID
+                response = await cerebras_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par Cerebras")
+
+        return response
+
     except Exception as e:
-        logger.error(f"Erreur lors de la génération de la réponse Cerebras : {e}")
+        logger.error(f"Erreur lors de la génération de la réponse : {e}")
         return f"Erreur lors de la génération de la réponse : {e}"
 
 async def generate_image_tools(prompt: str, bot, user, parameters, tool_parameters) -> str:
@@ -107,10 +87,10 @@ async def generate_image_tools(prompt: str, bot, user, parameters, tool_paramete
                 prompt=prompt,
                 width=width,
                 height=height
-            )
-            logger.debug(f"Image générée (prompt:{prompt}, taille: {size})")
-            await gallery(bot, image_data, prompt, user)
-            return image_data
+        )
+        logger.debug(f"Image générée (prompt:{prompt}, taille: {size})")
+        await gallery(bot, image_data, prompt, user)
+        return image_data
     except Exception as e:
         logger.error(f"Erreur lors de la génération de l'image : {e}")
         return f"Erreur lors de la génération de l'image : {e}"
