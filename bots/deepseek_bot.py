@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 import os
 from dotenv import load_dotenv
-from cmds import setup_addons_commands
+from commands.cmds import setup_addons_commands
 from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
 from supabase import create_client, Client, ClientOptions

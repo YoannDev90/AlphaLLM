@@ -1,6 +1,6 @@
 import asyncio
 import warnings
-from bot import run_bot
+from bots.bot import run_bot
 from bots.logger_bot import run_logger_bot
 from bots.mistral_bot import run_mistral_bot
 from bots.gemini_bot import run_gemini_bot

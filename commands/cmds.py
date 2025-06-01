@@ -5,15 +5,14 @@ import os
 logger = logging.getLogger('AlphaLLM')
 
 async def setup_commands(bot):
-    """
-    Charge dynamiquement les commandes depuis plusieurs répertoires.
-    """
-    commands_dir = ['commands', 'global_commands', 'admin_commands']
+    commands_dir = ['global_commands', 'admin_commands']
+    current_dir = os.path.dirname(__file__)
 
     for commands_directory in commands_dir:
-        for filename in os.listdir(commands_directory):
+        directory_path = os.path.join(current_dir, commands_directory)
+        for filename in os.listdir(directory_path):
             if filename.endswith('.py') and filename != '__init__.py':
-                module_name = f'{commands_directory}.{filename[:-3]}'
+                module_name = f'commands.{commands_directory}.{filename[:-3]}'
                 try:
                     module = importlib.import_module(module_name)
                     if hasattr(module, 'setup'):
@@ -25,15 +24,14 @@ async def setup_commands(bot):
                     logger.error(f"Erreur lors du chargement de {filename}: {str(e)}")
 
 async def setup_addons_commands(bot):
-    """
-    Charge dynamiquement les commandes depuis plusieurs répertoires.
-    """
     commands_dir = ['addons_commands', 'global_commands']
+    current_dir = os.path.dirname(__file__)
 
     for commands_directory in commands_dir:
-        for filename in os.listdir(commands_directory):
+        directory_path = os.path.join(current_dir, commands_directory)
+        for filename in os.listdir(directory_path):
             if filename.endswith('.py') and filename != '__init__.py':
-                module_name = f'{commands_directory}.{filename[:-3]}'
+                module_name = f'commands.{commands_directory}.{filename[:-3]}'
                 try:
                     module = importlib.import_module(module_name)
                     if hasattr(module, 'setup'):
