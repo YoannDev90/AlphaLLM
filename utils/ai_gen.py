@@ -1,5 +1,14 @@
 from utils.image_gen import generate_image
 from models.mistral import mistral_chat
+from models.deepseek import deepseek_chat
+from models.phi import phi_chat
+from models.qwen import qwen_chat
+from models.openai import openai_chat
+from models.evilgpt import evilgpt_chat
+from models.llama import llama_chat
+#from models.gemini import gemini_chat
+#from models.perplexity import perplexity_chat
+from models.grok import grok_chat
 from models.cerebras import cerebras_chat
 import logging
 from dotenv import load_dotenv
@@ -66,8 +75,32 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
             case 1370685184269352962: # Mistral bot ID
                 response = await mistral_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par Mistral")
+            case 1370682029460684850: # DeepSeek bot ID
+                response = await deepseek_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par DeepSeek")
             #case 1370683258274185349: # Gemini bot ID
                 #gemini_chat(user_message, preprompt, tools, bot, user, parameters)
+            case 1370685419557224538: # Phi bot ID
+                response = await phi_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par Phi")
+            case 1370686144542539846: # Qwen bot ID
+                response = await qwen_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par Qwen")
+            case 1370683080892747796: # OpenAI bot ID
+                response = await openai_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par OpenAI")
+            case 1370685660326920252: # EvilGPT bot ID
+                response = await evilgpt_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par EvilGPT")
+            case 1370683169522847827: # Grok bot ID
+                response = await grok_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par Grok")
+            case 1370685321703854110: # Llama bot ID
+                response = await llama_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par Llama")
+            # case 1370681547740418079: #Perplexity bot ID
+            #     response = await perplexity_chat(user_message, preprompt, tools, bot, user, parameters)
+            #     logger.info("Réponse générée par Perplexity")
             case _: # AlphaLLM bot ID
                 response = await cerebras_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par Cerebras")
@@ -83,14 +116,17 @@ async def generate_image_tools(prompt: str, bot, user, parameters, tool_paramete
         if parameters.get("tools", True):
             size = tool_parameters.get("size", "1024x1024")
             width, height = map(int, size.split('x'))
-            image_data = await generate_image(
-                prompt=prompt,
-                width=width,
-                height=height
-        )
-        logger.debug(f"Image générée (prompt:{prompt}, taille: {size})")
+            try:
+                image_data = await generate_image(
+                    prompt=prompt,
+                    width=width,
+                    height=height
+                )
+            except Exception as e:
+                logger.error(f"Erreur lors de la génération de l'image : {e}")
+                return "ERROR, TRY AGAIN LATER"
         await gallery(bot, image_data, prompt, user)
         return image_data
     except Exception as e:
-        logger.error(f"Erreur lors de la génération de l'image : {e}")
-        return f"Erreur lors de la génération de l'image : {e}"
+        logger.error(f"Erreur lors de l'envoi de l'image : {e}")
+        return f"Erreur lors de l'envoi de l'image : {e}"

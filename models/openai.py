@@ -12,13 +12,13 @@ load_dotenv()
 
 POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
 
-async def llama_chat(user_message, preprompt, tools, bot, user, parameters):
+async def openai_chat(user_message, preprompt, tools, bot, user, parameters):
     encoded_prompt = urllib.parse.quote(user_message)
     url = f"https://text.pollinations.ai/{encoded_prompt}"
 
     params = {
         "system": preprompt,
-        "model": "llamascout",
+        "model": "openai",
         "token": POLLINATIONS_API_KEY,
     }
 
@@ -52,5 +52,5 @@ async def llama_chat(user_message, preprompt, tools, bot, user, parameters):
                 
                 return response_message
         except Exception as e:
-            logger.error(f"Erreur lors de la génération de la réponse EvilGPT : {e}")
+            logger.error(f"Erreur lors de la génération de la réponse OpenAI : {e}")
             return f"Erreur lors de la génération de la réponse : {e}"

@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 import os
 from dotenv import load_dotenv
-from cmds import setup_commands
+from cmds import setup_addons_commands
 from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
 from supabase import create_client, Client, ClientOptions
@@ -47,7 +47,7 @@ def is_bot_mentioned(bot, message):
 
 @bot.event
 async def on_ready():
-    logger.info(f'{bot.user} connecté !')
+
     activity = discord.CustomActivity(name="🚀 Powered by AlphaLLM")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
 
@@ -81,7 +81,7 @@ async def on_message(message):
             await process_ai_response(bot,message)
 
 async def run_gemini_bot():
-    await setup_commands(bot)
+    await setup_addons_commands(bot)
     try:
         await bot.start(TOKEN)
     except discord.LoginFailure as e:

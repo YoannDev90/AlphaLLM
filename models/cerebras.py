@@ -8,7 +8,7 @@ logger = logging.getLogger('AlphaLLM')
 
 load_dotenv()
 
-cerebras_client = Cerebras(api_key=os.getenv("CEREBRAS_API_KEY"),max_retries=3)
+cerebras_client = Cerebras(api_key=os.getenv("CEREBRAS_API_KEY"))
 
 async def cerebras_chat(user_message, preprompt, tools, bot, user, parameters):
     try:

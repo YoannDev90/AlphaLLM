@@ -48,7 +48,6 @@ def is_bot_mentioned(bot, message):
 
 @bot.event
 async def on_ready():
-    logger.info(f'{bot.user} connecté !')
     activity = discord.CustomActivity(name="🤖 Use @AlphaLLM to chat")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
@@ -85,6 +84,7 @@ async def on_message(message):
             await process_ai_response(bot,message)
 
 async def run_bot():
+    logger.info("Démarrage ...")
     await setup_commands(bot)
     try:
         await bot.start(TOKEN)
