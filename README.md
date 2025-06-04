@@ -3,14 +3,13 @@
 **AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs:  
 
 - Cerebras AI, un modèle de Llama 3.3 70B ultra-rapide et performant.
-- Pollinations AI, un générateur d'images basé sur des modèles de diffusion.
+- Pollinations AI, une API regroupant génération d'image et LLMs.
 - Mistral AI, un modèle de langage développé par Mistral.
 - Gemini AI, un modèle de langage développé par Google.
 - OpenRouter, une plateforme pour accéder à divers modèles de langage.
 - Markitdown, une librairie pour traiter les fichiers et les liens.
 - Crawl4AI, un outil pour crawler et extraire le contenu des liens.
 - Discord.py, une librairie pour interagir avec l'API de Discord.
-- PostgreSQL, une base de données relationnelle pour stocker les logs et les données.
 - Supabase, une plateforme de base de données en temps réel pour stocker les logs et les données.
 
 ---
