@@ -3,10 +3,10 @@ from discord.ext import commands
 import logging
 import os
 from dotenv import load_dotenv
-from commands.cmds import setup_addons_commands
 from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
 from supabase import create_client, Client, ClientOptions
+import datetime
 
 load_dotenv()
 
@@ -43,6 +43,20 @@ def is_bot_mentioned(bot, message):
         if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
             return True
         return False
+    
+@bot.tree.command(name="purge", description="Purge messages older than 48 hours in the dev DM channel")
+async def purge(interaction: discord.Interaction):
+    logger.info(f"Commande purge exécutée par {interaction.user.display_name}")
+    try:
+        dev_id = os.getenv("DEV_ID")
+        dev_user = await bot.fetch_user(dev_id)
+        dm_channel = await dev_user.create_dm()
+        async for message in dm_channel.history(limit=None):
+            if message.created_at < discord.utils.utcnow() - datetime.timedelta(hours=48):
+                await message.delete()
+    except discord.HTTPException as e:
+        logger.error(f"Erreur lors de la purge : {e}")
+        await interaction.followup.send("Une erreur est survenue lors de la purge.", ephemeral=True)
 
 
 @bot.event
@@ -80,7 +94,6 @@ async def on_message(message):
             await process_ai_response(bot,message)
 
 async def run_mistral_bot():
-    await setup_addons_commands(bot)
     try:
         await bot.start(TOKEN)
     except discord.LoginFailure as e:

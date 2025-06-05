@@ -3,7 +3,6 @@ from discord import app_commands
 from typing import Optional
 from dotenv import load_dotenv
 from supabase import Client, ClientOptions, create_client
-from utils.langs import get_language, get_translation as tlt
 import os
 import logging
 
@@ -35,7 +34,6 @@ LANG_CHOICES = [
     app_commands.Choice(name="한국어 🇰🇷", value="KO"),
     app_commands.Choice(name="中文 🇨🇳", value="ZH"),
     app_commands.Choice(name="العربية 🇸🇦", value="AR"),
-    app_commands.Choice(name="हिन्दी 🇮🇳", value="HI")
 ]
 
 IMAGE_MODEL_CHOICES = [
@@ -59,7 +57,7 @@ async def setup(bot: discord.Client):
     @app_commands.describe(
         langue="Language for the user",
         image_model="Model for image generation",
-        image_size="Size for image generation (e.g., 512x512 or 1024x2048)",
+        image_size="Size for image generation (e.g., 1024x2048, min 256x256, max 2048x2048)",
         image_private="Private image generation",
         image_enhance="Enhance image generation",
         perso_preprompt="Personal preprompt for text generation"
@@ -73,7 +71,7 @@ async def setup(bot: discord.Client):
         image_enhance: Optional[app_commands.Choice[int]] = None,
         perso_preprompt: Optional[str] = None,
     ):
-        logger.info(f"/user-config executed by {interaction.user.display_name}")
+        logger.info(f"Commande /user-config executed by {interaction.user.display_name}")
         await interaction.response.defer(thinking=True, ephemeral=True)
 
         update_data = {}
@@ -119,13 +117,18 @@ async def setup(bot: discord.Client):
                     logger.error(f"Error inserting user config: {str(e)}")
                     await interaction.followup.send("❌ An error occurred while inserting the settings.", ephemeral=True)
 
-            user_lang = get_language(interaction.user.id)
+            summary_text = "\n".join(summary)
+            if not summary_text:
+                summary_text = "No changes made."
 
             embed = discord.Embed(
                 title="✅ Configuration updated",
-                description="\n".join(summary) if summary else "No changes made.",
-                color=discord.Color.green()
+                description=summary_text,
+                color=discord.Color.green(),
+                timestamp=discord.utils.utcnow()
             )
+            embed.set_footer(text=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
+            
             await interaction.followup.send(embed=embed, ephemeral=True)
             logger.info(f"User config updated for {interaction.user.display_name}: {update_data}")
         except Exception as e:

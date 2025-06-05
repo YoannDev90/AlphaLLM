@@ -12,7 +12,6 @@ from bots.grok_bot import run_grok_bot
 from bots.perplexity_bot import run_perplexity_bot
 from bots.phi_bot import run_phi_bot
 from bots.qwen_bot import run_qwen_bot
-from utils.langs import load_language
 from utils.image_gen import start_image_queue, image_queue
 import logging
 import sys
@@ -28,16 +27,16 @@ async def main():
         await asyncio.gather(
             run_bot(),
             run_logger_bot(),
-            #run_mistral_bot(),
-            # run_gemini_bot(),
-            #run_evilgpt_bot(),
-            #run_llama_bot(),
-            #run_chatgpt_bot(),
-            #run_deepseek_bot(),
-            #run_grok_bot(),
-            # run_perplexity_bot(),
-            #run_phi_bot(),
-            #run_qwen_bot()
+            run_mistral_bot(),
+            run_gemini_bot(),
+            run_evilgpt_bot(),
+            run_llama_bot(),
+            run_chatgpt_bot(),
+            run_deepseek_bot(),
+            run_grok_bot(),
+            run_perplexity_bot(),
+            run_phi_bot(),
+            run_qwen_bot()
         )
 
     except SystemExit:

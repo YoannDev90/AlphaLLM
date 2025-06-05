@@ -2,7 +2,6 @@ import discord
 import logging
 from dotenv import load_dotenv
 from discord.ext import commands
-from utils.langs import get_translation as tlt
 import os
 
 load_dotenv()

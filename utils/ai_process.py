@@ -1,5 +1,4 @@
 import logging
-from utils.langs import get_translation as tlt
 #from temp.speech_gen import send_voice_message
 from utils.user_config import get_audio_gen_active, get_audio_voice
 from utils.user_manager import new_interaction, new_query

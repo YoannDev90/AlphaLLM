@@ -3,7 +3,6 @@ from discord import app_commands
 from typing import Optional
 from dotenv import load_dotenv
 from supabase import Client, ClientOptions, create_client
-from utils.langs import get_language, get_translation as tlt
 import os
 import logging
 
@@ -35,9 +34,7 @@ LANG_CHOICES = [
     app_commands.Choice(name="한국어 🇰🇷", value="KO"),
     app_commands.Choice(name="中文 🇨🇳", value="ZH"),
     app_commands.Choice(name="العربية 🇸🇦", value="AR"),
-    app_commands.Choice(name="हिन्दी 🇮🇳", value="HI")
 ]
-
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="guild-config", description="Configure server language and announcement channel")
@@ -52,8 +49,8 @@ async def setup(bot: discord.Client):
         langue: Optional[app_commands.Choice[str]] = None,
         announce_channel: Optional[discord.TextChannel] = None,
     ):
-        logger.info(f"/guild-config executed by {interaction.user.display_name}")
-        await interaction.response.defer(thinking=True, ephemeral=True)
+        logger.info(f"Commande /guild-config executed by {interaction.user.display_name}")
+        await interaction.response.defer()
 
         update_data = {"id_discord": interaction.guild.id}
         summary = []
@@ -69,16 +66,22 @@ async def setup(bot: discord.Client):
         if len(update_data) == 1:
             await interaction.followup.send("⚠️ No parameter provided. Nothing updated.", ephemeral=True)
             return
-
+        
         try:
             supabase.table("server_settings").upsert(update_data).execute()
-            user_lang = get_language(interaction.user.id)
+
+            summary_text = "\n".join(summary)
+            if not summary_text:
+                summary_text = "No changes made."
 
             embed = discord.Embed(
                 title="✅ Configuration updated",
-                description="\n".join(summary) if summary else "No changes made.",
-                color=discord.Color.green()
+                description=summary_text,
+                color=discord.Color.green(),
+                timestamp=discord.utils.utcnow()
             )
+            embed.set_thumbnail(url=interaction.guild.icon.url if interaction.guild.icon else None)
+            embed.set_footer(text=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
             await interaction.followup.send(embed=embed, ephemeral=True)
             logger.info(f"Guild config updated for {interaction.guild.name}: {update_data}")
         except Exception as e:

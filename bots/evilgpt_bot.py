@@ -3,7 +3,6 @@ from discord.ext import commands
 import logging
 import os
 from dotenv import load_dotenv
-from commands.cmds import setup_addons_commands
 
 from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
@@ -81,7 +80,6 @@ async def on_message(message):
             await process_ai_response(bot,message)
 
 async def run_evilgpt_bot():
-    await setup_addons_commands(bot)
     try:
         await bot.start(TOKEN)
     except discord.LoginFailure as e:

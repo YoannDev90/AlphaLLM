@@ -45,11 +45,11 @@ class DiscordLogHandler(logging.Handler):
 
 class ConsoleFormatter(logging.Formatter):
     FORMATS = {
-        logging.DEBUG: Fore.WHITE + Back.BLUE + Style.BRIGHT + '%(asctime)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
-        logging.INFO: Fore.WHITE + Back.GREEN + Style.BRIGHT + '%(asctime)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
-        logging.WARNING: Fore.WHITE + Back.YELLOW + Style.BRIGHT + '%(asctime)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
-        logging.ERROR: Fore.WHITE + Back.RED + Style.BRIGHT + '%(asctime)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
-        logging.CRITICAL: Fore.WHITE + Back.BLACK + Style.BRIGHT + '%(asctime)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
+        logging.DEBUG: Fore.WHITE + Back.BLUE + Style.BRIGHT + '%(asctime)s - %(filename)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
+        logging.INFO: Fore.WHITE + Back.GREEN + Style.BRIGHT + '%(asctime)s - %(filename)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
+        logging.WARNING: Fore.WHITE + Back.YELLOW + Style.BRIGHT + '%(asctime)s - %(filename)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
+        logging.ERROR: Fore.WHITE + Back.RED + Style.BRIGHT + '%(asctime)s - %(filename)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
+        logging.CRITICAL: Fore.WHITE + Back.BLACK + Style.BRIGHT + '%(asctime)s - %(filename)s - %(levelname)s - %(message)s' + Style.RESET_ALL,
     }
 
     def format(self, record):

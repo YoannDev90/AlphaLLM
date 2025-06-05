@@ -4,19 +4,26 @@ from utils.image_gen import generate_image
 from utils.gallery import gallery
 from io import BytesIO
 import logging
-from utils.langs import get_language, get_translation as tlt
 from utils.user_config import get_image_model, get_image_size, get_image_private, get_image_enhance
 from utils.user_manager import new_interaction, new_image
 from utils.server_config import get_allow_nsfw
+from utils.database import get_blacklist
 import random
 
 logger = logging.getLogger('AlphaLLM')
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="image", description="Génère une image à partir d'un prompt")
+    @bot.tree.command(name="image", description="Generate an image from a prompt")
+    @app_commands.describe(
+        prompt="The prompt to generate the image from",
+        model="The model to use for image generation (default: flux)",
+        size="The size of the image (default: 1024x1024)",
+        private="Whether the image should be private (default: No)",
+        enhance="Whether to enhance the image (default: No)"
+    )
     @app_commands.choices(model=[
         app_commands.Choice(name="Flux", value="flux"),
-        app_commands.Choice(name="GPT Image", value="gptimage"),
+        #app_commands.Choice(name="GPT Image", value="gptimage"),
         app_commands.Choice(name="Turbo", value="turbo")
     ])
     async def image(
@@ -29,9 +36,18 @@ async def setup(bot: discord.Client):
     ):
         await interaction.response.defer()
 
-        logger.info(f"Commande image exécutée par {interaction.user.display_name} ({interaction.user.id})")
 
-        user_lang = get_language(interaction.user.id)
+        blacklist_data = get_blacklist()
+                
+        # Vérifier si l'utilisateur est sur la liste noire et récupérer le motif
+        blacklist_entry = next((entry for entry in blacklist_data if entry.get('id_discord') == interaction.user.id), None)
+        if blacklist_entry:
+            reason = blacklist_entry.get('reason', 'Unspecified')
+            logger.info(f"Génération d'image de {interaction.user.display_name} (ID: {interaction.user.id}) ignorée - Liste noire - Motif: {reason}")
+            await interaction.followup.send(f"⛔️ You are blacklisted from the bot (<@{interaction.user.id}>) - Reason: **{reason}**")
+            return
+        
+        logger.info(f"Commande /image exécutée par {interaction.user.display_name} ({interaction.user.id})")
 
         model = get_image_model(interaction.user.id) if model is None else model
         model = model if model is not None else 'flux'
@@ -60,20 +76,22 @@ async def setup(bot: discord.Client):
     
         if image_data:
             file = discord.File(BytesIO(image_data), filename="generated_image.png")
-            view = ImageView(prompt, model, width, height, private, enhance, safe, user_lang)
-            await interaction.followup.send(file=file, view=view)
+            view = ImageView(prompt, model, width, height, private, enhance, safe)
+            message = await interaction.followup.send(file=file, view=view)
+            view.message = message  # Stocker le message dans la vue
             logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
             if not private and safe:
                 await gallery(bot, image_data, prompt, interaction.user.display_name)
         else:
-            view = RetryImageView(prompt, model, width, height, private, enhance, safe, user_lang)
-            await interaction.followup.send(tlt(language=user_lang, key="image_gen_error"), delete_after=10, view=view)
+            view = RetryImageView(prompt, model, width, height, private, enhance, safe)
+            message = await interaction.followup.send("❌ Image generation failed.", view=view)
+            view.message = message  # Stocker le message dans la vue
             logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")
 
 
 class ImageView(discord.ui.View):
-    def __init__(self, prompt, model, width, height, private, enhance, safe, user_lang):
-        super().__init__()
+    def __init__(self, prompt, model, width, height, private, enhance, safe):
+        super().__init__(timeout=30.0)  # Ajouter un timeout de 30 secondes
         self.prompt = prompt
         self.model = model
         self.width = width
@@ -81,7 +99,15 @@ class ImageView(discord.ui.View):
         self.private = private
         self.enhance = enhance
         self.safe = safe
-        self.user_lang = user_lang
+        self.message = None
+
+    async def on_timeout(self):
+        """Supprime les boutons lorsque la vue expire après 30 secondes"""
+        if self.message:
+            try:
+                await self.message.edit(view=None)
+            except:
+                logger.warning("Impossible de supprimer les boutons après expiration")
 
     @discord.ui.button(emoji="🔄", style=discord.ButtonStyle.blurple)
     async def regenerate(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -94,12 +120,14 @@ class ImageView(discord.ui.View):
         
         if image_data:
             file = discord.File(BytesIO(image_data), filename="regenerated_image.png")
-            await interaction.followup.send(file=file, view=self)
+            view = ImageView(self.prompt, self.model, self.width, self.height, self.private, self.enhance, self.safe)
+            message = await interaction.followup.send(file=file, view=view)
+            view.message = message
             logger.info(f"Image régénérée et envoyée à {interaction.user.display_name}")
             if not self.private and self.safe:
                 await gallery(interaction.client, image_data, self.prompt, interaction)
         else:
-            await interaction.followup.send(tlt(language=self.user_lang, key="image_regen_error"), delete_after=10)
+            await interaction.followup.send("Image regeneration failed.", delete_after=10)
             logger.error(f"Échec de la régénération d'image pour {interaction.user.display_name}")
 
     @discord.ui.button(emoji="👁️", style=discord.ButtonStyle.green)
@@ -115,10 +143,13 @@ class ImageView(discord.ui.View):
 
     @discord.ui.button(emoji="📌", style=discord.ButtonStyle.gray)
     async def pin(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if not interaction.channel.permissions_for(interaction.user).manage_messages:
+            await interaction.response.send_message("You do not have permission to pin messages.", ephemeral=True)
+            return
         logger.info(f"Epinglage d'image demandé par {interaction.user.display_name}")
         await interaction.response.defer()
         await interaction.message.pin()
-        await interaction.followup.send(tlt(language=self.user_lang, key="image_pinned"), ephemeral=True)
+        await interaction.followup.send("Image pinned.", delete_after=2)
 
     @discord.ui.button(emoji="🗑️", style=discord.ButtonStyle.red)
     async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -127,8 +158,8 @@ class ImageView(discord.ui.View):
 
 
 class RetryImageView(discord.ui.View):
-    def __init__(self, prompt, model, width, height, private, enhance, safe, user_lang):
-        super().__init__()
+    def __init__(self, prompt, model, width, height, private, enhance, safe):
+        super().__init__(timeout=30.0)  # Ajouter un timeout de 30 secondes
         self.prompt = prompt
         self.model = model
         self.width = width
@@ -136,7 +167,15 @@ class RetryImageView(discord.ui.View):
         self.private = private
         self.enhance = enhance
         self.safe = safe
-        self.user_lang = user_lang
+        self.message = None
+        
+    async def on_timeout(self):
+        """Supprime les boutons lorsque la vue expire après 30 secondes"""
+        if self.message:
+            try:
+                await self.message.edit(view=None)
+            except:
+                pass
 
     @discord.ui.button(emoji="🔄", style=discord.ButtonStyle.blurple)
     async def retry(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -147,10 +186,12 @@ class RetryImageView(discord.ui.View):
 
         if image_data:
             file = discord.File(BytesIO(image_data), filename="generated_image.png")
-            await interaction.followup.send(file=file, view=self)
+            view = ImageView(self.prompt, self.model, self.width, self.height, self.private, self.enhance, self.safe)
+            message = await interaction.followup.send(file=file, view=view)
+            view.message = message
             logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
             if not self.private and self.safe:
                 await gallery(interaction.client, image_data, self.prompt, interaction)
         else:
-            await interaction.followup.send(tlt(language=self.user_lang, key="image_gen_error"), delete_after=10)
+            await interaction.followup.send("❌ Image generation failed.", delete_after=10)
             logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")

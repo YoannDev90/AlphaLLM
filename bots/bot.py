@@ -7,11 +7,12 @@ from commands.cmds import setup_commands
 from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
 from supabase import create_client, Client, ClientOptions
+import datetime
 
 load_dotenv()
 
-#TOKEN = os.getenv("DEV_BOT_TOKEN")
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("DEV_BOT_TOKEN")
+#TOKEN = os.getenv("BOT_TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 
 intents = discord.Intents.default()
@@ -44,6 +45,19 @@ def is_bot_mentioned(bot, message):
         if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
             return True
         return False
+    
+@bot.tree.command(name="purge", description="Purge messages older than 48 hours in the dev DM channel")
+async def purge(interaction: discord.Interaction):
+    logger.info(f"Commande purge exécutée par {interaction.user.display_name}")
+    try:
+        user = await bot.fetch_user(interaction.user.id)
+        dm_channel = await user.create_dm()
+        async for message in dm_channel.history(limit=None):
+            if message.created_at < discord.utils.utcnow() - datetime.timedelta(hours=48):
+                await message.delete()
+    except discord.HTTPException as e:
+        logger.error(f"Erreur lors de la purge : {e}")
+        await interaction.followup.send("Une erreur est survenue lors de la purge.", ephemeral=True)
 
 
 @bot.event
@@ -64,23 +78,16 @@ async def on_message(message):
         bot_mentioned = is_bot_mentioned(bot, message)
 
         if bot_mentioned:
-            try:
-                blacklist_data = get_blacklist()
+            
+            blacklist_data = get_blacklist()
                 
-                if any(entry.get('id_discord') == message.author.id for entry in blacklist_data):
-                    logger.info(f"Message de {message.author} (ID: {message.author.id}) ignoré - Liste noire")
-                    
-                    try:
-                        await message.author.send("Vous êtes sur liste noire et ne pouvez pas interagir avec le bot.")
-                    except discord.Forbidden:
-                        logger.warning(f"Impossible de DM l'utilisateur {message.author.id}")
-                        await message.channel.send("Vous êtes sur liste noire et ne pouvez pas interagir avec le bot.")
-                    return
-
-            except Exception as e:
-                logger.error(f"Erreur vérification liste noire : {str(e)}")
-                await message.channel.send("Erreur système - Veuillez réessayer plus tard", delete_after=10)
+            blacklist_entry = next((entry for entry in blacklist_data if entry.get('id_discord') == message.author.id), None)
+            if blacklist_entry:
+                reason = blacklist_entry.get('reason', 'Unspecified')
+                logger.info(f"Message de {message.author.display_name} (ID: {message.author.id}) ignoré - Liste noire - Motif: {reason}")
+                await message.channel.send(f"⛔️ You are blacklisted from the bot (<@{message.author.id}>) - Reason: **{reason}**")
                 return
+
             await process_ai_response(bot,message)
 
 async def run_bot():

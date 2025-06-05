@@ -3,12 +3,9 @@ cerebras_cloud_sdk
 discord.py
 python-dotenv
 colorama
-# requests
-# schedule
-# pydub
-# librosa
 asyncpg
 crawl4ai
 supabase
 fastembed
-deep_translator
+mistralai
+google-genai

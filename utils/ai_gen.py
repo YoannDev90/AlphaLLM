@@ -6,8 +6,8 @@ from models.qwen import qwen_chat
 from models.openai import openai_chat
 from models.evilgpt import evilgpt_chat
 from models.llama import llama_chat
-#from models.gemini import gemini_chat
-#from models.perplexity import perplexity_chat
+from models.gemini import gemini_chat
+from models.perplexity import perplexity_chat
 from models.grok import grok_chat
 from models.cerebras import cerebras_chat
 import logging
@@ -35,9 +35,8 @@ image_generation_tool = {
                 },
                 "size": {
                     "type": "string", 
-                    "description": "Image size to generate in pixels (width x height), maximum 2048x2048, minimum 512x512",
+                    "description": "Image size to generate in pixels (width x height), max 2048x2048, min 512x512",
                     "examples": ["512x512", "1024x1024", "2048x2048", "2048x1024", "1024x2048"],
-                    "default": "1024x1024",
                 }
             },
             "required": ["prompt", "size"],
@@ -78,8 +77,9 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
             case 1370682029460684850: # DeepSeek bot ID
                 response = await deepseek_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par DeepSeek")
-            #case 1370683258274185349: # Gemini bot ID
-                #gemini_chat(user_message, preprompt, tools, bot, user, parameters)
+            case 1370683258274185349: # Gemini bot ID
+                response = await gemini_chat(user_message, preprompt, tools, bot, user, parameters)
+                logger.info("Réponse générée par Gemini")
             case 1370685419557224538: # Phi bot ID
                 response = await phi_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par Phi")
@@ -98,9 +98,9 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
             case 1370685321703854110: # Llama bot ID
                 response = await llama_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par Llama")
-            # case 1370681547740418079: #Perplexity bot ID
-            #     response = await perplexity_chat(user_message, preprompt, tools, bot, user, parameters)
-            #     logger.info("Réponse générée par Perplexity")
+            case 1370681547740418079: #Perplexity bot ID
+                response = await perplexity_chat(user_message)
+                logger.info("Réponse générée par Perplexity")
             case _: # AlphaLLM bot ID
                 response = await cerebras_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par Cerebras")
@@ -124,9 +124,9 @@ async def generate_image_tools(prompt: str, bot, user, parameters, tool_paramete
                 )
             except Exception as e:
                 logger.error(f"Erreur lors de la génération de l'image : {e}")
-                return "ERROR, TRY AGAIN LATER"
+                return "❌ Image generation failed."
         await gallery(bot, image_data, prompt, user)
         return image_data
     except Exception as e:
         logger.error(f"Erreur lors de l'envoi de l'image : {e}")
-        return f"Erreur lors de l'envoi de l'image : {e}"
+        return f"❌ Erreur lors de l'envoi de l'image : {e}"
