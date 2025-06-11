@@ -7,6 +7,7 @@ import logging
 from utils.user_config import get_image_model, get_image_size, get_image_private, get_image_enhance
 from utils.user_manager import new_interaction, new_image
 from utils.server_config import get_allow_nsfw
+from utils.ai_mod import is_nsfw
 from utils.database import get_blacklist
 import random
 
@@ -68,30 +69,36 @@ async def setup(bot: discord.Client):
             width = 2048
             height = 2048
 
-        safe = True
+        safe = False
 
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
-        image_data = await generate_image(prompt, model, None, width, height, private, enhance, safe)
+        image_data, nsfw = await generate_image(prompt, model, None, width, height, private, enhance, safe)
+
+        if nsfw and not interaction.channel.is_nsfw():
+            logger.warning(f"Image NSFW générée par {interaction.user.display_name} dans un canal non NSFW")
+            await interaction.followup.send("🔞 This image is NSFW and cannot be sent in a non-NSFW channel.")
+            return
     
-        if image_data:
-            file = discord.File(BytesIO(image_data), filename="generated_image.png")
-            view = ImageView(prompt, model, width, height, private, enhance, safe)
-            message = await interaction.followup.send(file=file, view=view)
-            view.message = message  # Stocker le message dans la vue
-            logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
-            if not private and safe:
-                await gallery(bot, image_data, prompt, interaction.user.display_name)
         else:
-            view = RetryImageView(prompt, model, width, height, private, enhance, safe)
-            message = await interaction.followup.send("❌ Image generation failed.", view=view)
-            view.message = message  # Stocker le message dans la vue
-            logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")
+            if image_data:
+                file = discord.File(BytesIO(image_data), filename="generated_image.png")
+                view = ImageView(prompt, model, width, height, private, enhance, safe)
+                message = await interaction.followup.send(file=file, view=view)
+                view.message = message
+                logger.info(f"Image générée et envoyée à {interaction.user.display_name}")
+                if not private and not nsfw:
+                    await gallery(bot, image_data, prompt, interaction.user.display_name)
+            else:
+                view = RetryImageView(prompt, model, width, height, private, enhance, safe)
+                message = await interaction.followup.send("❌ Image generation failed.", view=view)
+                view.message = message
+                logger.error(f"Échec de la génération d'image pour {interaction.user.display_name}")
 
 
 class ImageView(discord.ui.View):
     def __init__(self, prompt, model, width, height, private, enhance, safe):
-        super().__init__(timeout=30.0)  # Ajouter un timeout de 30 secondes
+        super().__init__(timeout=30.0)
         self.prompt = prompt
         self.model = model
         self.width = width
@@ -159,7 +166,7 @@ class ImageView(discord.ui.View):
 
 class RetryImageView(discord.ui.View):
     def __init__(self, prompt, model, width, height, private, enhance, safe):
-        super().__init__(timeout=30.0)  # Ajouter un timeout de 30 secondes
+        super().__init__(timeout=30.0)
         self.prompt = prompt
         self.model = model
         self.width = width

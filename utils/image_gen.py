@@ -4,6 +4,7 @@ import logging
 import urllib.parse
 import random
 from dotenv import load_dotenv
+from utils.ai_mod import is_nsfw
 import os
 
 load_dotenv()
@@ -56,17 +57,13 @@ class ImageGenerationQueue:
                 "model": model,
                 "width": width,
                 "height": height,
+                "seed": random.randint(0, 1000000),
                 "nologo": str(nologo).lower(),
                 "private": str(private).lower(),
                 "enhance": str(enhance).lower(),
                 "safe": str(safe).lower(),
                 "token": str(POLLINATIONS_TOKEN)
             }
-            if seed is not None:
-                params["seed"] = seed
-            elif seed is None:
-                params["seed"] = random.randint(0, 1000000)
-                logger.debug(f"Random seed generated: {params['seed']}")
 
             url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
             url += "?" + urllib.parse.urlencode(params)
@@ -76,7 +73,9 @@ class ImageGenerationQueue:
                 async with session.get(url) as response:
                     if response.status == 200:
                         logger.debug("Image generation request successful")
-                        return await response.read()
+                        image_data = await response.read()
+                        nsfw = is_nsfw(url)
+                        return image_data, nsfw
                     else:
                         error_message = await response.text()
                         logger.error(f"Error generating image. Status: {response.status} - {error_message}")
@@ -96,7 +95,7 @@ def start_image_queue(loop):
     queue_task = loop.create_task(image_queue.process_queue())
     logger.debug("Queue processing task started")
 
-async def generate_image(prompt: str, model="flux", seed=None, width=1024, height=1024, nologo=True, private=False, enhance=False, safe=True):
+async def generate_image(prompt: str, model="flux", seed=None, width=1024, height=1024, nologo=True, private=False, enhance=False, safe=False):
     logger.debug(f"generate_image called with: prompt={prompt}, model={model}, seed={seed}, width={width}, height={height}, nologo={nologo}, private={private}, enhance={enhance}, safe={safe}")
     future = await image_queue.enqueue(prompt=prompt,
                                         model=model,

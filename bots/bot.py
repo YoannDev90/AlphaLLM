@@ -17,9 +17,7 @@ GUILD_ID = int(os.getenv("GUILD_ID"))
 
 intents = discord.Intents.default()
 
-bot = commands.Bot(command_prefix="!",
-                    owner_id=int(os.getenv("DEV_ID")),
-                    intents=intents)
+bot = commands.Bot(command_prefix="!", owner_id=int(os.getenv("DEV_ID")), intents=intents)
 
 url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
 key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')

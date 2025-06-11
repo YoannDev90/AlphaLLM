@@ -24,11 +24,10 @@ async def on_ready():
     await logger_bot.tree.sync()
     while True:
         await auto_purge()
-        await asyncio.sleep(3600)
+        await asyncio.sleep(60)
 
 async def auto_purge():
     try:
-        print("Auto purge en cours...")
         dev_id = os.getenv("DEV_ID")
         dev_user = await logger_bot.fetch_user(dev_id)
         dm_channel = await dev_user.create_dm()
@@ -37,7 +36,6 @@ async def auto_purge():
             if message.created_at < discord.utils.utcnow() - datetime.timedelta(hours=24):
                 c+=1
                 await message.delete()
-        print(f"Auto purge terminé. {c} messages supprimés.")
     except discord.HTTPException as e:
         logger.error(f"Erreur lors de la purge : {e}")
 

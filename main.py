@@ -12,6 +12,7 @@ from bots.grok_bot import run_grok_bot
 from bots.perplexity_bot import run_perplexity_bot
 from bots.phi_bot import run_phi_bot
 from bots.qwen_bot import run_qwen_bot
+from api import start_api
 from utils.image_gen import start_image_queue, image_queue
 import logging
 import sys
@@ -25,6 +26,7 @@ async def main():
         start_image_queue(loop)
         
         await asyncio.gather(
+            start_api(),
             run_bot(),
             run_logger_bot(),
             run_mistral_bot(),

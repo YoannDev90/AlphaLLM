@@ -43,26 +43,12 @@ def is_bot_mentioned(bot, message):
         if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
             return True
         return False
-    
-@bot.tree.command(name="purge", description="Purge messages older than 48 hours in the dev DM channel")
-async def purge(interaction: discord.Interaction):
-    logger.info(f"Commande purge exécutée par {interaction.user.display_name}")
-    try:
-        dev_id = os.getenv("DEV_ID")
-        dev_user = await bot.fetch_user(dev_id)
-        dm_channel = await dev_user.create_dm()
-        async for message in dm_channel.history(limit=None):
-            if message.created_at < discord.utils.utcnow() - datetime.timedelta(hours=48):
-                await message.delete()
-    except discord.HTTPException as e:
-        logger.error(f"Erreur lors de la purge : {e}")
-        await interaction.followup.send("Une erreur est survenue lors de la purge.", ephemeral=True)
-
 
 @bot.event
 async def on_ready():
     activity = discord.CustomActivity(name="🚀 Powered by AlphaLLM")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
+    await bot.tree.sync()
 
 @bot.event
 async def on_message(message):

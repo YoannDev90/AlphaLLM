@@ -117,7 +117,7 @@ async def generate_image_tools(prompt: str, bot, user, parameters, tool_paramete
             size = tool_parameters.get("size", "1024x1024")
             width, height = map(int, size.split('x'))
             try:
-                image_data = await generate_image(
+                image_data, nsfw = await generate_image(
                     prompt=prompt,
                     width=width,
                     height=height
@@ -125,7 +125,8 @@ async def generate_image_tools(prompt: str, bot, user, parameters, tool_paramete
             except Exception as e:
                 logger.error(f"Erreur lors de la génération de l'image : {e}")
                 return "❌ Image generation failed."
-        await gallery(bot, image_data, prompt, user)
+        if not nsfw:
+            await gallery(bot, image_data, prompt, user)
         return image_data
     except Exception as e:
         logger.error(f"Erreur lors de l'envoi de l'image : {e}")

@@ -50,6 +50,7 @@ async def on_ready():
 
     activity = discord.CustomActivity(name="🚀 Powered by AlphaLLM")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
+    await bot.tree.sync()
 
 @bot.event
 async def on_message(message):

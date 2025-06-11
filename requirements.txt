@@ -9,3 +9,4 @@ supabase
 fastembed
 mistralai
 google-genai
+jigsawstack
