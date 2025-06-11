@@ -10,3 +10,5 @@ fastembed
 mistralai
 google-genai
 jigsawstack
+perplexity-api 
+perplexity-api-async

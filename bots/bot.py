@@ -11,8 +11,8 @@ import datetime
 
 load_dotenv()
 
-TOKEN = os.getenv("DEV_BOT_TOKEN")
-#TOKEN = os.getenv("BOT_TOKEN")
+#TOKEN = os.getenv("DEV_BOT_TOKEN")
+TOKEN = os.getenv("BOT_TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 
 intents = discord.Intents.default()
