@@ -12,3 +12,4 @@ google-genai
 jigsawstack
 perplexity-api 
 perplexity-api-async
+websocket-client
