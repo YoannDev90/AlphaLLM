@@ -66,6 +66,8 @@ def start_api(host: str = "0.0.0.0", port: int = 25692, reload: bool = False):
         port=port,
         reload=reload,
         log_level="error",
+        ssl_keyfile="api.key",
+        ssl_certfile="api.pem",
         access_log=False,
     )
 
@@ -78,6 +80,8 @@ async def start_api_async(host: str = "0.0.0.0", port: int = 25692):
         host=host,
         port=port,
         log_level="error",
+        ssl_keyfile="api.key",
+        ssl_certfile="api.pem",
         access_log=False,
     )
     server = uvicorn.Server(config)

@@ -7,3 +7,5 @@ logs.log
 temp
 translation_cache.json
 publish.sh
+api.pem
+api.key
