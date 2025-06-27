@@ -98,9 +98,9 @@ async def chat(user_message, perso_preprompt, bot, user, parameters):
             case 1370685321703854110: # Llama bot ID
                 response = await llama_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par Llama")
-            case 1370681547740418079: #Perplexity bot ID
-                response = await perplexity_chat(user_message)
-                logger.info("Réponse générée par Perplexity")
+            # case 1370681547740418079: #Perplexity bot ID
+            #     response = await perplexity_chat(user_message, preprompt)
+            #     logger.info("Réponse générée par Perplexity")
             case _: # AlphaLLM bot ID
                 response = await cerebras_chat(user_message, preprompt, tools, bot, user, parameters)
                 logger.info("Réponse générée par Cerebras")

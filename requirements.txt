@@ -13,3 +13,5 @@ jigsawstack
 perplexity-api 
 perplexity-api-async
 websocket-client
+uvicorn
+fastapi
