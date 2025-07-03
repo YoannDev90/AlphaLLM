@@ -31,15 +31,6 @@ async def read_root():
         logger.error(f"Erreur lors de la lecture de la racine : {str(e)}")
         return {"status": "error", "message": str(e)}
 
-@app.get("/health")
-async def health_check():
-    """Point de contrôle de santé de l'API"""
-    try:
-        return {"status": "healthy", "service": "AlphaLLM API"}
-    except Exception as e:
-        logger.error(f"Erreur lors du point de contrôle de santé : {str(e)}")
-        return {"status": "error", "message": str(e)}
-
 @app.get("/status")
 async def status_check():
     """Point de contrôle de statut de l'API"""
@@ -66,8 +57,6 @@ def start_api(host: str = "0.0.0.0", port: int = 25692, reload: bool = False):
         port=port,
         reload=reload,
         log_level="error",
-        ssl_keyfile="api.key",
-        ssl_certfile="api.pem",
         access_log=False,
     )
 
@@ -80,8 +69,6 @@ async def start_api_async(host: str = "0.0.0.0", port: int = 25692):
         host=host,
         port=port,
         log_level="error",
-        ssl_keyfile="api.key",
-        ssl_certfile="api.pem",
         access_log=False,
     )
     server = uvicorn.Server(config)
