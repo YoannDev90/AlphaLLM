@@ -87,3 +87,19 @@ async def setup(bot: discord.Client):
         except Exception as e:
             logger.error(f"Error updating guild config: {str(e)}")
             await interaction.followup.send("❌ An error occurred while updating the settings.", ephemeral=True)
+
+    # Commande /gc (alias de /guild-config) pour configurer le serveur
+    
+    @bot.tree.command(name="gc", description="Configure server language and announcement channel")
+    @app_commands.describe(
+        langue="Language for the server",
+        announce_channel="Channel for bot announcements"
+    )
+    @app_commands.checks.has_permissions(manage_guild=True)
+    @app_commands.choices(langue=LANG_CHOICES)
+    async def guild_config_alias(
+        interaction: discord.Interaction,
+        langue: Optional[app_commands.Choice[str]] = None,
+        announce_channel: Optional[discord.TextChannel] = None,
+    ):
+        await guild_config(interaction, langue, announce_channel)

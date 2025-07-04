@@ -79,7 +79,9 @@ async def on_message(message):
                 logger.error(f"Erreur vérification liste noire : {str(e)}")
                 await message.channel.send("Erreur système - Veuillez réessayer plus tard", delete_after=10)
                 return
-            await process_ai_response(bot,message)
+            
+            async with message.channel.typing():
+                await process_ai_response(bot,message)
 
 async def run_perplexity_bot():
     try:

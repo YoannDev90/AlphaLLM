@@ -13,6 +13,9 @@ GUILD_ID = int(os.getenv('GUILD_ID'))
 
 
 async def setup(bot: discord.Client):
+    # Commande /blacklist pour ajouter un utilisateur à la blacklist
+    # Cette commande est réservée à l'utilisateur avec l'ID DEV_ID
+
     @bot.tree.command(name="blacklist", description="Ajoute un utilisateur à la blacklist")
     @discord.app_commands.guilds(discord.Object(id=GUILD_ID))
     async def blacklist(interaction: discord.Interaction, user_id: str, reason: str = "Aucune raison fournie"):
@@ -56,3 +59,9 @@ async def setup(bot: discord.Client):
             return
 
         await interaction.followup.send(f"L'utilisateur {user.name} (ID `{user_id}`) a été ajouté à la liste noire pour la raison : `{reason}`.")
+
+    # Commande /bl (alias de /blacklist) pour ajouter un utilisateur à la blacklist
+    @bot.tree.command(name="bl", description="Ajoute un utilisateur à la blacklist")
+    @discord.app_commands.guilds(discord.Object(id=GUILD_ID))
+    async def blacklist_alias(interaction: discord.Interaction, user_id: str, reason: str = "Aucune raison fournie"):
+        await blacklist(interaction, user_id, reason)

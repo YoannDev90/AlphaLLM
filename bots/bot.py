@@ -11,8 +11,8 @@ import datetime
 
 load_dotenv()
 
-#TOKEN = os.getenv("DEV_BOT_TOKEN")
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("DEV_BOT_TOKEN")
+#TOKEN = os.getenv("BOT_TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID"))
 
 intents = discord.Intents.default()
@@ -43,20 +43,6 @@ def is_bot_mentioned(bot, message):
         if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
             return True
         return False
-    
-@bot.tree.command(name="purge", description="Purge messages older than 48 hours in the dev DM channel")
-async def purge(interaction: discord.Interaction):
-    logger.info(f"Commande purge exécutée par {interaction.user.display_name}")
-    try:
-        user = await bot.fetch_user(interaction.user.id)
-        dm_channel = await user.create_dm()
-        async for message in dm_channel.history(limit=None):
-            if message.created_at < discord.utils.utcnow() - datetime.timedelta(hours=48):
-                await message.delete()
-    except discord.HTTPException as e:
-        logger.error(f"Erreur lors de la purge : {e}")
-        await interaction.followup.send("Une erreur est survenue lors de la purge.", ephemeral=True)
-
 
 @bot.event
 async def on_ready():
@@ -86,7 +72,9 @@ async def on_message(message):
                 await message.channel.send(f"⛔️ You are blacklisted from the bot (<@{message.author.id}>) - Reason: **{reason}**")
                 return
 
-            await process_ai_response(bot,message)
+            # typing animation
+            async with message.channel.typing():
+                await process_ai_response(bot,message)
 
 async def run_bot():
     logger.info("Démarrage ...")

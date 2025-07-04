@@ -57,16 +57,21 @@ async def init_db() -> None:
                 CREATE INDEX IF NOT EXISTS created_at_idx
                 ON memories (created_at)
             ''')
+            await conn.execute('''
+                CREATE INDEX IF NOT EXISTS embedding_idx
+                ON memories USING ivfflat (embedding vector_cosine_ops)
+                WITH (lists = 100)
+            ''')
         except Exception as e:
             logger.error(f"Erreur d'initialisation: {str(e)}")
             raise
 
 async def _delete_old_memories() -> None:
-    """Supprime les mémoires de plus de 4h"""
+    """Supprime les mémoires de plus de 8h"""
     async with _PG_POOL.acquire() as conn:
         try:
             await conn.execute('''
-                DELETE FROM memories WHERE created_at < NOW() - INTERVAL '4 hour'
+                DELETE FROM memories WHERE created_at < NOW() - INTERVAL '8 hour'
             ''')
         except Exception as e:
             logger.error(f"Erreur lors du nettoyage: {str(e)}")
@@ -131,3 +136,100 @@ async def initialize() -> None:
     await connect_to_db()
     initialize_embedder()
     await init_db()
+
+async def search_similar_memories(user_id: int, server_id: int, query: str, limit: int = 5) -> List[Dict]:
+    """Recherche des mémoires similaires basée sur la similarité vectorielle"""
+    await _delete_old_memories()
+    try:
+        query_embedding = _generate_embedding(query)
+        query_vec_str = _vec_to_str(query_embedding)
+        
+        async with _PG_POOL.acquire() as conn:
+            records = await conn.fetch('''
+                SELECT id, content, created_at, 
+                       embedding <-> $1::vector as distance
+                FROM memories 
+                WHERE user_id = $2 AND server_id = $3
+                ORDER BY distance ASC
+                LIMIT $4
+            ''', query_vec_str, user_id, server_id, limit)
+            return [dict(r) for r in records]
+    except Exception as e:
+        logger.error(f"Erreur de recherche vectorielle: {str(e)}")
+        return []
+
+async def get_contextual_history(user_id: int, server_id: int, current_query: str, limit: int = 10) -> List[Dict]:
+    """Récupère l'historique le plus pertinent basé sur la requête actuelle"""
+    await _delete_old_memories()
+    try:
+        query_embedding = _generate_embedding(current_query)
+        query_vec_str = _vec_to_str(query_embedding)
+        
+        async with _PG_POOL.acquire() as conn:
+            # Combine recherche par similarité et récence
+            records = await conn.fetch('''
+                SELECT id, content, created_at, 
+                       embedding <-> $1::vector as distance
+                FROM memories 
+                WHERE user_id = $2 AND server_id = $3
+                ORDER BY distance ASC, created_at DESC
+                LIMIT $4
+            ''', query_vec_str, user_id, server_id, limit)
+            return [dict(r) for r in records]
+    except Exception as e:
+        logger.error(f"Erreur de récupération contextuelle: {str(e)}")
+        # Fallback vers l'historique chronologique
+        return await get_history(user_id, server_id, limit)
+
+async def get_hybrid_history(user_id: int, server_id: int, current_query: str, recent_limit: int = 3, similar_limit: int = 5) -> List[Dict]:
+    """Combine historique récent et mémoires similaires pour un contexte optimal"""
+    await _delete_old_memories()
+    try:
+        # Récupère les messages les plus récents
+        recent_memories = await get_history(user_id, server_id, recent_limit)
+        
+        # Si pas assez de mémoires récentes, retourne juste l'historique contextuel
+        if len(recent_memories) < 2:
+            return await get_contextual_history(user_id, server_id, current_query, recent_limit + similar_limit)
+        
+        # Récupère les mémoires similaires (en excluant les récentes)
+        recent_ids = [mem['id'] for mem in recent_memories]
+        
+        query_embedding = _generate_embedding(current_query)
+        query_vec_str = _vec_to_str(query_embedding)
+        
+        async with _PG_POOL.acquire() as conn:
+            if recent_ids:
+                # Crée la requête avec les bons placeholders
+                id_placeholders = ','.join([f'${i+4}' for i in range(len(recent_ids))])
+                limit_param = f'${len(recent_ids) + 4}'
+                query_sql = f'''
+                    SELECT id, content, created_at, 
+                           embedding <-> $1::vector as distance
+                    FROM memories 
+                    WHERE user_id = $2 AND server_id = $3
+                    AND id NOT IN ({id_placeholders})
+                    ORDER BY distance ASC
+                    LIMIT {limit_param}
+                '''
+                similar_records = await conn.fetch(query_sql, query_vec_str, user_id, server_id, *recent_ids, similar_limit)
+            else:
+                # Pas de mémoires récentes à exclure
+                similar_records = await conn.fetch('''
+                    SELECT id, content, created_at, 
+                           embedding <-> $1::vector as distance
+                    FROM memories 
+                    WHERE user_id = $2 AND server_id = $3
+                    ORDER BY distance ASC
+                    LIMIT $4
+                ''', query_vec_str, user_id, server_id, similar_limit)
+            
+            similar_memories = [dict(r) for r in similar_records[:similar_limit]]
+        
+        # Combine et trie par pertinence
+        all_memories = recent_memories + similar_memories
+        return all_memories
+        
+    except Exception as e:
+        logger.error(f"Erreur de récupération hybride: {str(e)}")
+        return await get_history(user_id, server_id, recent_limit + similar_limit)

@@ -7,10 +7,6 @@
 - Mistral AI, un modèle de langage développé par Mistral.
 - Gemini AI, un modèle de langage développé par Google.
 - OpenRouter, une plateforme pour accéder à divers modèles de langage.
-- Markitdown, une librairie pour traiter les fichiers et les liens.
-- Crawl4AI, un outil pour crawler et extraire le contenu des liens.
-- Discord.py, une librairie pour interagir avec l'API de Discord.
-- Supabase, une plateforme de base de données en temps réel pour stocker les logs et les données.
 
 ---
 

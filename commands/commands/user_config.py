@@ -134,3 +134,26 @@ async def setup(bot: discord.Client):
         except Exception as e:
             logger.error(f"Error updating user config: {str(e)}")
             await interaction.followup.send("❌ An error occurred while updating the settings.", ephemeral=True)
+
+    # Commande /uc (alias de /user-config) pour configurer l'utilisateur
+    
+    @bot.tree.command(name="uc", description="Configure user language and preferences, image settings, and audio settings")
+    @app_commands.choices(langue=LANG_CHOICES, image_model=IMAGE_MODEL_CHOICES, image_private=IMAGE_PRIVATE_CHOICES, image_enhance=IMAGE_ENHANCE_CHOICES)
+    @app_commands.describe(
+        langue="Language for the user",
+        image_model="Model for image generation",
+        image_size="Size for image generation (e.g., 1024x2048, min 256x256, max 2048x2048)",
+        image_private="Private image generation",
+        image_enhance="Enhance image generation",
+        perso_preprompt="Personal preprompt for text generation"
+    )
+    async def user_config_alias(
+        interaction: discord.Interaction,
+        langue: Optional[app_commands.Choice[str]] = None,
+        image_model: Optional[app_commands.Choice[str]] = None,
+        image_size: Optional[str] = None,
+        image_private: Optional[app_commands.Choice[int]] = None,
+        image_enhance: Optional[app_commands.Choice[int]] = None,
+        perso_preprompt: Optional[str] = None,
+    ):
+        await user_config(interaction, langue, image_model, image_size, image_private, image_enhance, perso_preprompt)

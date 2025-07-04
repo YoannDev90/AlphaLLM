@@ -3,6 +3,7 @@ import logging
 from utils.user_config import get_audio_gen_active, get_audio_voice
 from utils.user_manager import new_interaction, new_query
 from utils.ai_utils import generate_response
+from utils.table_converter import detect_and_convert_tables
 import discord
 import io
 import re
@@ -57,6 +58,8 @@ async def process_ai_response(bot,message):
             return
 
         try:
+            # Convertir les tableaux Markdown en tableaux ASCII
+            response = detect_and_convert_tables(response)
             await smart_long_messages(message.channel, response)
             logger.debug(f"Réponse envoyée avec succès.")
         except Exception as e:

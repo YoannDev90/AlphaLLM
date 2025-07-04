@@ -3,7 +3,7 @@ import re
 from utils.ai_gen import chat
 from utils.md_converter import md_conversion
 from utils.web_process import get_text_from_url
-from utils.memory_ai import add_memory, get_history, initialize
+from utils.memory_ai import add_memory, get_history, get_hybrid_history, initialize, search_similar_memories
 from utils.user_config import get_perso_preprompt
 
 logger = logging.getLogger('AlphaLLM')
@@ -54,17 +54,26 @@ async def process_attachments(raw_content: str, attachments: list) -> str:
     logger.debug(f"Traitement terminé. Taille finale: {len(processed_content)} caractères")
     return processed_content
 
-async def get_conversation_history(user_id: int, server_id: int) -> str:
+async def get_conversation_history(user_id: int, server_id: int, current_query: str = "") -> str:
     """Récupère l'historique contextuel depuis la mémoire vectorielle"""
     try:
         logger.debug(f"Récupération historique pour {user_id}")
-        history = await get_history(user_id, server_id)      
+        
+        # Utilise la recherche hybride si une requête est fournie
+        if current_query.strip():
+            logger.info(f"🔍 Recherche hybride pour: '{current_query[:50]}...'")
+            history = await get_hybrid_history(user_id, server_id, current_query)
+            logger.info(f"📊 Historique hybride (récent + similaire) chargé: {len(history)} entrées")
+        else:
+            logger.info("📅 Utilisation de l'historique chronologique")
+            history = await get_history(user_id, server_id)
+            logger.info(f"📊 Historique chronologique chargé: {len(history)} entrées")
+            
         if not history:
             logger.debug(f"Aucun historique trouvé pour {user_id} sur {server_id}")
             return ""
         
         context = "\n".join([f"[{entry['created_at']}] {entry['content']}" for entry in history[:10]])
-        logger.debug(f"Historique chargé: {len(history)} entrées")
         return context
         
     except Exception as e:
@@ -87,7 +96,7 @@ async def generate_response(user_id: int, server_id: int, raw_content: str, atta
         
         if parameters.get("history", True):
             logger.debug("Récupération de l'historique de conversation")
-            history_context = await get_conversation_history(user_id, server_id)
+            history_context = await get_conversation_history(user_id, server_id, processed_content)
         else:
             history_context = ""
         
@@ -119,3 +128,24 @@ async def generate_response(user_id: int, server_id: int, raw_content: str, atta
     except Exception as e:
         logger.critical(f"🔴 Erreur critique: {str(e)}", exc_info=True)
         return "❌ Une erreur inattendue s'est produite. Veuillez réessayer."
+
+async def search_memory(user_id: int, server_id: int, query: str, limit: int = 5) -> str:
+    """Recherche dans la mémoire et retourne les résultats formatés"""
+    try:
+        results = await search_similar_memories(user_id, server_id, query, limit)
+        if not results:
+            return "Aucune mémoire similaire trouvée."
+        
+        formatted_results = []
+        for i, result in enumerate(results, 1):
+            distance = result.get('distance', 0)
+            similarity = 1 - distance  # Convertit la distance en similarité
+            formatted_results.append(
+                f"{i}. [Similarité: {similarity:.2%}] [{result['created_at']}]\n{result['content']}"
+            )
+        
+        return "\n\n".join(formatted_results)
+        
+    except Exception as e:
+        logger.error(f"Erreur de recherche mémoire: {str(e)}")
+        return f"Erreur lors de la recherche: {str(e)}"
