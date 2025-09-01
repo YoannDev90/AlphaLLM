@@ -1,56 +1,54 @@
-import aiohttp
-import urllib.parse
-import json
-import asyncio
 import logging
+from utils.config import logger_name
 from dotenv import load_dotenv
 import os
+import litellm
+from datetime import datetime
+from litellm.integrations.opik.opik import OpikLogger
+import os
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 
 load_dotenv()
 
-POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
-
-async def grok_chat(user_message, preprompt, tools, bot, user, parameters):
-    encoded_prompt = urllib.parse.quote(user_message)
-    url = f"https://text.pollinations.ai/{encoded_prompt}"
+async def grok_chat(messages, parameters):
+    start_time = datetime.now()
+    opik_logger = OpikLogger()
+    litellm.callbacks = [opik_logger]
 
     params = {
-        "system": preprompt,
-        "model": "grok",
-        "token": POLLINATIONS_API_KEY,
+        "model": "openai/grok-3",
+        "api_key": os.getenv("NAVY_API_KEY"),
+        "base_url": "https://api.navy/v1",
+        "messages": messages
+    }
+    
+    response = litellm.completion(**params)
+
+    usage = response.usage.total_tokens
+    model = response.model
+
+    response_text = response.choices[0].message.content
+    
+    end_time = datetime.now()
+    elapsed_time = end_time - start_time
+    minutes = elapsed_time.seconds // 60
+    seconds = elapsed_time.seconds % 60
+    milliseconds = elapsed_time.microseconds // 1000
+    
+    if minutes > 0:
+        elapsed_time_str = f"{minutes} minutes, {seconds}.{milliseconds:03d} seconds"
+    else:
+        elapsed_time_str = f"{seconds}.{milliseconds:03d} seconds"
+
+    response_info = {
+        "response": response_text,
+        "usage": usage,
+        "model": model,
+        "elapsed_time": elapsed_time_str
     }
 
-    async with aiohttp.ClientSession() as session:
-        try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                response_message = await response.text()
-
-                # from utils.ai_gen import generate_image_tools
-        
-                # if response_message.tool_calls:
-                #     for tool_call in response_message.tool_calls:
-                #         if tool_call.function.name == "generate_image_tools":
-                #             try:
-                #                 args = json.loads(tool_call.function.arguments)
-                #                 image_data = await generate_image_tools(
-                #                     prompt=args.get("prompt"),
-                #                     bot=bot,
-                #                     user=user,
-                #                     parameters=parameters,
-                #                     tool_parameters={
-                #                         "size": args.get("size", "1024x1024"),
-                #                     }
-                #                 )
-                #                 return image_data
-                #             except json.JSONDecodeError:
-                #                 logger.error("Erreur de parsing JSON")
-                #             except ValueError as e:
-                #                 logger.error(str(e))
-                
-                return response_message
-        except Exception as e:
-            logger.error(f"Erreur lors de la génération de la réponse EvilGPT : {e}")
-            return f"Erreur lors de la génération de la réponse : {e}"
+    if parameters["raw"]:
+        return response_info
+    else:
+        return response_info

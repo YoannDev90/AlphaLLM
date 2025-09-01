@@ -1,12 +1,19 @@
 import logging
+from utils.config import LOGGER_NAME, get_base_preprompt, get_image_enhancer_preprompt
 import re
 from utils.ai_gen import chat
 from utils.md_converter import md_conversion
-from utils.web_process import get_text_from_url
+from utils.web_process import crawl
 from utils.memory_ai import add_memory, get_history, get_hybrid_history, initialize, search_similar_memories
 from utils.user_config import get_perso_preprompt
+import litellm
+from litellm.integrations.opik.opik import OpikLogger
+import asyncio
+import requests
+import json
+from utils.config import EnvVars
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(LOGGER_NAME)
 URL_REGEX = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\/?(?:[^\s]*[^\s.,])?'
 
 async def process_attachments(raw_content: str, attachments: list) -> str:
@@ -38,7 +45,7 @@ async def process_attachments(raw_content: str, attachments: list) -> str:
         try:
             logger.debug(f"Traitement du lien: {link}")
             processed_content += f"\n\nLien : {link}"
-            link_content = await get_text_from_url(link)
+            link_content = await crawl(link)
             
             if link_content:
                 processed_content += f"\nContenu :\n{link_content[:2000]}"
@@ -59,16 +66,15 @@ async def get_conversation_history(user_id: int, server_id: int, current_query: 
     try:
         logger.debug(f"Récupération historique pour {user_id}")
         
-        # Utilise la recherche hybride si une requête est fournie
         if current_query.strip():
-            logger.info(f"🔍 Recherche hybride pour: '{current_query[:50]}...'")
+            logger.debug(f"🔍 Recherche hybride pour: '{current_query[:50]}...'")
             history = await get_hybrid_history(user_id, server_id, current_query)
-            logger.info(f"📊 Historique hybride (récent + similaire) chargé: {len(history)} entrées")
+            logger.debug(f"📊 Historique hybride (récent + similaire) chargé: {len(history)} entrées")
         else:
-            logger.info("📅 Utilisation de l'historique chronologique")
+            logger.debug("📅 Utilisation de l'historique chronologique")
             history = await get_history(user_id, server_id)
-            logger.info(f"📊 Historique chronologique chargé: {len(history)} entrées")
-            
+            logger.debug(f"📊 Historique chronologique chargé: {len(history)} entrées")
+
         if not history:
             logger.debug(f"Aucun historique trouvé pour {user_id} sur {server_id}")
             return ""
@@ -99,27 +105,30 @@ async def generate_response(user_id: int, server_id: int, raw_content: str, atta
             history_context = await get_conversation_history(user_id, server_id, processed_content)
         else:
             history_context = ""
-        
-        full_prompt = f"""
-        [Conversation history]
-        {history_context}
-        
-        [New message]
-        {processed_content}
-        """
-        logger.debug(f"Prompt final:\n{full_prompt[:500]}...")
-        
-        response = await chat(full_prompt, perso_preprompt, bot, user, parameters)
-        logger.debug(f"Réponse générée: {response[:500]}...")
+
+        preprompt = get_base_preprompt()
+        perso_preprompt = False
+        if parameters.get("preprompt", True):
+            perso_preprompt = get_perso_preprompt(user_id)
+        messages = await messages_builder(processed_content, preprompt, perso_preprompt, history_context)
+
+        response = await chat(messages, bot, user, parameters)
 
         if not isinstance(response, bytes):
             if parameters.get("history", True):
                 logger.debug("Mise à jour de la mémoire")
                 try:
-                    combined_text = f"Utilisateur: {processed_content}\nAssistant: {response}"
-                    await add_memory(int(user_id), int(server_id), combined_text)
-
-                    logger.debug("Mémoire mise à jour avec succès")
+                    # Ensure response is a dictionary with the expected structure
+                    if isinstance(response, dict) and 'response' in response:
+                        response_text = response['response']
+                        combined_text = {
+                            "user": processed_content,
+                            "assistant": response_text
+                        }
+                        await add_memory(int(user_id), int(server_id), combined_text, response_text)
+                        logger.debug("Mémoire mise à jour avec succès")
+                    else:
+                        logger.warning(f"Format de réponse inattendu pour la mise à jour de la mémoire: {type(response)}")
                 except Exception as e:
                     logger.error(f"Erreur mise à jour mémoire: {str(e)}")
         
@@ -139,7 +148,7 @@ async def search_memory(user_id: int, server_id: int, query: str, limit: int = 5
         formatted_results = []
         for i, result in enumerate(results, 1):
             distance = result.get('distance', 0)
-            similarity = 1 - distance  # Convertit la distance en similarité
+            similarity = 1 - distance
             formatted_results.append(
                 f"{i}. [Similarité: {similarity:.2%}] [{result['created_at']}]\n{result['content']}"
             )
@@ -149,3 +158,105 @@ async def search_memory(user_id: int, server_id: int, query: str, limit: int = 5
     except Exception as e:
         logger.error(f"Erreur de recherche mémoire: {str(e)}")
         return f"Erreur lors de la recherche: {str(e)}"
+
+async def enhance_image_prompt(original_prompt, number=2):
+    try:
+        # Créer les tâches selon le nombre demandé
+        tasks = []
+        models = ["groq/llama-3.1-8b-instant", "cerebras/llama3.1-8b"]
+        
+        # On génère au maximum 4 prompts améliorés
+        for i in range(min(number, 4)):
+            model = models[i % len(models)]  # Alterner entre les modèles
+            task = litellm.acompletion(
+                model=model,
+                messages=[
+                    {"role": "system", "content": get_image_enhancer_preprompt()},
+                    {"role": "user", "content": original_prompt}
+                ]
+            )
+            tasks.append(task)
+        
+        # Exécuter toutes les tâches en parallèle
+        results = await asyncio.gather(*tasks)
+        
+        # Construire le dictionnaire de résultats
+        result = {}
+        for i, response in enumerate(results, 1):
+            result[i] = response.choices[0].message.content
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Error enhancing image prompt: {e}")
+        return {1: original_prompt}
+    
+async def messages_builder(user_input, system_prompt, perso_preprompt, history):
+    messages = []
+    if perso_preprompt:
+        system_prompt += f"\n\n{perso_preprompt}"
+    if system_prompt:
+        messages.insert(0, {"role": "system", "content": system_prompt})
+    
+    # Gérer l'historique correctement
+    if history:
+        if isinstance(history, str):
+            # Si l'historique est une chaîne, l'ajouter comme contexte système
+            if history.strip():
+                messages.append({"role": "system", "content": f"Contexte de conversation précédente:\n{history}"})
+        elif isinstance(history, list):
+            # Si l'historique est une liste de messages, l'étendre
+            messages.extend(history)
+    
+    messages.append({"role": "user", "content": user_input})
+
+    return messages
+
+def summarize(input_text, max_length):
+    url = f"https://api.cloudflare.com/client/v4/accounts/{EnvVars.CLOUDFLARE_WORKERS_ACCOUNT_ID}/ai/run/@cf/facebook/bart-large-cnn"
+    headers = {
+        "Authorization": f"Bearer {EnvVars.CLOUDFLARE_WORKERS_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "input_text": input_text,
+        "parameters": {
+            "max_length": max_length
+        }
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    response.raise_for_status()
+    result = response.json()
+    result = result['result']['summary']
+    return result
+
+def describe_image(image_url):
+    url = "https://api.aimlapi.com/chat/completions"
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {EnvVars.AIML_API_KEY}'
+    }
+    payload = json.dumps({
+        "model": "meta-llama/Llama-Vision-Free",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Describe this image"},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": image_url
+                        }
+                    }
+                ]
+            }
+        ],
+        "max_tokens": 512
+    })
+
+    response = requests.post(url, headers=headers, data=payload)
+    response.raise_for_status()
+    result = response.json()
+    return result

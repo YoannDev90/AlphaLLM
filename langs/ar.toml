@@ -1,0 +1,7 @@
+[contact]
+success = "Message sent successfully to the developer."
+failure = "Failed to send message to the developer. Please try again later."
+
+[config]
+title = "Configuration"
+description = "Configure your settings"

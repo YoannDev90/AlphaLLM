@@ -1,8 +1,9 @@
 import re
 import logging
+from utils.config import logger_name
 from typing import List, Tuple
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 
 def markdown_to_ascii_table(markdown_table: str) -> str:
     """

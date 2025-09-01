@@ -1,11 +1,13 @@
 import importlib
 import logging
+from utils.config import LOGGER_NAME
 import os
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(LOGGER_NAME)
 
-async def setup_commands(bot):
-    commands_dir = ['commands', 'admin_commands']
+async def setup_commands(bot, is_admin_bot=False):
+    commands_dir = ['admin_commands'] if is_admin_bot else ['commands']
+    bot_type = "Admin Bot" if is_admin_bot else "Main Bot"
     current_dir = os.path.dirname(__file__)
 
     for commands_directory in commands_dir:
@@ -17,7 +19,7 @@ async def setup_commands(bot):
                     module = importlib.import_module(module_name)
                     if hasattr(module, 'setup'):
                         await module.setup(bot)
-                        logger.debug(f"Commande {filename[:-3]} chargée")
+                        logger.debug(f"Commande {filename[:-3]} chargée pour {bot_type}")
                     else:
                         logger.warning(f"Le fichier {filename} n'a pas de fonction 'setup'")
                 except Exception as e:

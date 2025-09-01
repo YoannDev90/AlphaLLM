@@ -3,8 +3,10 @@ import sys
 import os
 import math
 import logging
+from utils.config import logger_name
+from utils.config import logger_name, logging_level
 
-logger = logging.getLogger("AlphaLLM")
+logger = logging.getLogger(logger_name)
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -19,7 +21,6 @@ try:
     from bots.logger_bot import logger_bot
     from bots.mistral_bot import bot as mistral_bot
     from bots.perplexity_bot import bot as perplexity_bot
-    from bots.phi_bot import bot as phi_bot
     from bots.qwen_bot import bot as qwen_bot
 except ImportError as e:
     logger.error(f"Erreur lors de l'import des bots: {e}")
@@ -48,7 +49,6 @@ def get_status() -> dict:
         ("Logger", logger_bot),
         ("Mistral", mistral_bot),
         ("Perplexity", perplexity_bot),
-        ("Phi", phi_bot),
         ("Qwen", qwen_bot),
     ]
     

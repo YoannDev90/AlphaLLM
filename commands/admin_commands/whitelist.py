@@ -5,10 +5,11 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 import logging
+from utils.config import logger_name
 
 load_dotenv()
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 OWNER_ID = int(os.getenv('DEV_ID'))
 GUILD_ID = int(os.getenv('GUILD_ID'))
 
@@ -17,7 +18,6 @@ async def setup(bot: commands.Bot):
     # Cette commande est réservée à l'utilisateur avec l'ID DEV_ID
     
     @bot.tree.command(name="whitelist", description="Retire un utilisateur de la blacklist")
-    @discord.app_commands.guilds(discord.Object(id=GUILD_ID))
     async def whitelist(interaction: discord.Interaction, user_id: str):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /whitelist exécutée par {interaction.user.display_name}")
@@ -50,9 +50,3 @@ async def setup(bot: commands.Bot):
             return
 
         await interaction.followup.send(f"L'utilisateur avec l'ID `{user_id}` a été retiré de la liste noire.", ephemeral=True)
-    
-    # Commande /wl (alias de /whitelist) pour retirer un utilisateur de la blacklist
-    @bot.tree.command(name="wl", description="Retire un utilisateur de la blacklist")
-    @discord.app_commands.guilds(discord.Object(id=GUILD_ID))
-    async def whitelist_alias(interaction: discord.Interaction, user_id: str):
-        await whitelist(interaction, user_id)

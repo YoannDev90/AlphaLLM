@@ -1,51 +1,53 @@
-import aiohttp
 import logging
+from utils.config import logger_name
 from dotenv import load_dotenv
 import os
-import json
+import litellm
+from datetime import datetime
+from litellm.integrations.opik.opik import OpikLogger
+import os
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 
 load_dotenv()
 
-OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
+async def deepseek_chat(messages, parameters):
+    start_time = datetime.now()
+    opik_logger = OpikLogger()
+    litellm.callbacks = [opik_logger]
 
-async def deepseek_chat(user_message, preprompt, tools, bot, user, parameters):
-    try:
-        async with aiohttp.ClientSession() as session:
-            payload = {
-                "model": "deepseek/deepseek-r1:free",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": preprompt
-                    },
-                    {
-                        "role": "user", 
-                        "content": user_message
-                    }
-                ],
-            }
+    params = {
+        "model": "openrouter/deepseek/deepseek-r1:free",
+        "api_key": os.getenv("OPENROUTER_API_KEY"),
+        "messages": messages
+    }
+    
+    response = litellm.completion(**params)
 
-            async with session.post(
-                url="https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json",
-                },
-                json=payload
-            ) as response:
-                
-                if response.status != 200:
-                    error_msg = await response.text()
-                    logger.error(f"API Error {response.status}: {error_msg}")
-                    return f"Erreur API: {error_msg}"
+    usage = response.usage.total_tokens
+    model = response.model
 
-                response_json = await response.json()
-                message_data = response_json['choices'][0]['message']
-                
-                return message_data.get('content')
+    response_text = response.choices[0].message.content
+    
+    end_time = datetime.now()
+    elapsed_time = end_time - start_time
+    minutes = elapsed_time.seconds // 60
+    seconds = elapsed_time.seconds % 60
+    milliseconds = elapsed_time.microseconds // 1000
+    
+    if minutes > 0:
+        elapsed_time_str = f"{minutes} minutes, {seconds}.{milliseconds:03d} seconds"
+    else:
+        elapsed_time_str = f"{seconds}.{milliseconds:03d} seconds"
 
-    except Exception as e:
-        logger.error(f"Erreur lors de la génération de la réponse : {e}")
-        return f"Erreur critique : {str(e)}"
+    response_info = {
+        "response": response_text,
+        "usage": usage,
+        "model": model,
+        "elapsed_time": elapsed_time_str
+    }
+
+    if parameters["raw"]:
+        return response_info
+    else:
+        return response_info

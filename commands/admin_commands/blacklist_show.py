@@ -1,5 +1,6 @@
 import discord
 import logging
+from utils.config import logger_name
 from supabase import create_client, Client, ClientOptions
 import os
 from dotenv import load_dotenv
@@ -7,14 +8,13 @@ from datetime import datetime
 
 load_dotenv()
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 OWNER_ID = int(os.getenv('DEV_ID'))
 GUILD_ID = int(os.getenv('GUILD_ID'))
 
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="blacklist-show", description="Affiche la liste des utilisateurs blacklistés")
-    @discord.app_commands.guilds(discord.Object(id=GUILD_ID))
+    @bot.tree.command(name="blacklist_show", description="Affiche la liste noire")
     async def blacklist_show(interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /blacklist-show exécutée par {interaction.user.display_name}")

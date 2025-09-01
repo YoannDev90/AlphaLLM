@@ -1,6 +1,11 @@
 import asyncio
 import warnings
+import json
+import datetime
+import sys
+import os
 from bots.bot import run_bot
+from bots.admin_bot import run_admin_bot
 from bots.logger_bot import run_logger_bot
 from bots.mistral_bot import run_mistral_bot
 from bots.gemini_bot import run_gemini_bot
@@ -10,15 +15,15 @@ from bots.chatgpt_bot import run_chatgpt_bot
 from bots.deepseek_bot import run_deepseek_bot
 from bots.grok_bot import run_grok_bot
 from bots.perplexity_bot import run_perplexity_bot
-from bots.phi_bot import run_phi_bot
 from bots.qwen_bot import run_qwen_bot
-from api import start_api_async
-from utils.image_gen import start_image_queue
-import logging
-import sys
 
-logger = logging.getLogger("AlphaLLM")
-logger.setLevel(logging.INFO)
+from api import start_api_async, ping_https_server
+from utils.image_gen import start_image_queue
+from utils.config import LOGGER_NAME, get_logging_level
+import logging
+
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(get_logging_level())
 
 async def main():
     try:
@@ -27,7 +32,9 @@ async def main():
         
         await asyncio.gather(
             start_api_async(),
+            ping_https_server("https://alphallm-api.onrender.com"),
             run_bot(),
+            run_admin_bot(),
             run_logger_bot(),
             run_mistral_bot(),
             run_gemini_bot(),
@@ -36,23 +43,40 @@ async def main():
             run_chatgpt_bot(),
             run_deepseek_bot(),
             run_grok_bot(),
-            #run_perplexity_bot(),
-            run_phi_bot(),
+            run_perplexity_bot(),
             run_qwen_bot()
         )
 
-    except SystemExit:
+    except (SystemExit, KeyboardInterrupt):
         logger.info("Arrêt complet du programme.")
-        sys.exit(0)
     except Exception as e:
         logger.error(f"Erreur non gérée : {str(e)}")
     finally:
         tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
+        if tasks:
+            logger.info(f"Nettoyage de {len(tasks)} tâches...")
+            for task in tasks:
+                task.cancel()
+            try:
+                await asyncio.gather(*tasks, return_exceptions=True)
+            except Exception as e:
+                logger.error(f"Erreur lors du nettoyage des tâches: {str(e)}")
+        logger.info("Nettoyage terminé.")
 
 if __name__ == "__main__":
+
+    try:
+        with open("stop.json", "r") as f:
+            data = json.load(f)
+            timestamp = datetime.datetime.fromisoformat(data["timestamp"])
+            if datetime.datetime.now() - timestamp < datetime.timedelta(minutes=1):
+                print("Le bot a été arrêté récemment. Redémarrage annulé.")
+                sys.exit(0)
+            else:
+                os.remove("stop.json")
+    except FileNotFoundError:
+        pass
+
     try:
         asyncio.run(main())
     except KeyboardInterrupt:

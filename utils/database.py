@@ -1,26 +1,63 @@
-import logging
-import os
-from dotenv import load_dotenv
 from supabase import create_client, Client, ClientOptions
+from utils.config import EnvVars
+import logging
 
 logger = logging.getLogger("AlphaLLM")
-load_dotenv()
 
-url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
-key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
-jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
-supabase: Client = create_client(url, key, 
-                                options=ClientOptions(
-                                    schema="public",
-                                    headers={"Authorization": f"Bearer {jwt}"},
-                                    auto_refresh_token=True,
-                                    persist_session=True
-                                ))
+_supabase_client: Client = None
+
+def get_supabase_client() -> Client:
+    """
+    Retourne l'instance du client Supabase (singleton)
+    Crée l'instance si elle n'existe pas encore
+    """
+    global _supabase_client
     
+    if _supabase_client is None:
+        try:
+            _supabase_client = create_client(
+                EnvVars.DB_URL,
+                EnvVars.DB_KEY,
+                options=ClientOptions(
+                    schema="public",
+                    headers={"Authorization": f"Bearer {EnvVars.JWT_KEY}"},
+                    auto_refresh_token=True,
+                    persist_session=True
+                )
+            )
+            logger.debug("Client Supabase initialisé avec succès")
+        except Exception as e:
+            logger.error(f"Erreur lors de l'initialisation du client Supabase: {e}")
+            raise
+    
+    return _supabase_client
+
+supabase = get_supabase_client
+
+# Fonctions utilitaires spécifiques
 def get_blacklist():
     try:
-        response = supabase.table("blacklist").select("*").execute()
+        client = get_supabase_client()
+        response = client.table("blacklist").select("*").execute()
         return response.data
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la liste noire : {str(e)}")
+        return None
+    
+def get_allowed_channels(guild_id):
+    try:
+        client = get_supabase_client()
+        response = client.table("server_settings").select("forbidden_channels").eq("id_discord", guild_id).execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des canaux autorisés : {str(e)}")
+        return None
+    
+def get_allowed_roles(guild_id):
+    try:
+        client = get_supabase_client()
+        response = client.table("server_settings").select("forbidden_roles").eq("id_discord", guild_id).execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des rôles autorisés : {str(e)}")
         return None

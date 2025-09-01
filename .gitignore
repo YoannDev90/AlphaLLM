@@ -2,8 +2,10 @@
 *.pyc
 .env
 __pycache__
-.venv
+venv
 logs.log
 temp
-translation_cache.json
+translations
 publish.sh
+reset_venv.sh
+crowdin.yml

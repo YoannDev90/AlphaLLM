@@ -1,23 +1,21 @@
 import json
-import os
 import logging
-from dotenv import load_dotenv
-from supabase import create_client, Client, ClientOptions
+from utils.config import LOGGER_NAME
+from utils.database import get_supabase_client
 
-load_dotenv()
+logger = logging.getLogger(LOGGER_NAME)
+supabase = get_supabase_client()
 
-logger = logging.getLogger('AlphaLLM')
-
-url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
-key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
-jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
-supabase: Client = create_client(url, key, 
-                                options=ClientOptions(
-                                    schema="public",
-                                    headers={"Authorization": f"Bearer {jwt}"},
-                                    auto_refresh_token=True,
-                                    persist_session=True
-                                ))
+def get_user_language(user_id):
+    try:
+        response = supabase.table("users_settings").select("lang").eq("id_discord", user_id).execute()
+        if response.data:
+            return response.data[0]['lang']
+        else:
+            return None
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération de la langue pour l'utilisateur {user_id} : {str(e)}")
+        return None
 
 def get_image_model(user_id):
     try:

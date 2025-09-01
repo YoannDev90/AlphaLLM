@@ -1,5 +1,4 @@
 markitdown[all]
-cerebras_cloud_sdk
 discord.py
 python-dotenv
 colorama
@@ -7,11 +6,14 @@ asyncpg
 crawl4ai
 supabase
 fastembed
-mistralai
-google-genai
 jigsawstack
-perplexity-api 
-perplexity-api-async
 websocket-client
 uvicorn
 fastapi
+litellm
+cloudinary
+opik
+deep-translator
+aiofiles
+matplotlib
+seaborn

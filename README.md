@@ -7,6 +7,7 @@
 - Mistral AI, un modèle de langage développé par Mistral.
 - Gemini AI, un modèle de langage développé par Google.
 - OpenRouter, une plateforme pour accéder à divers modèles de langage.
+- Navy AI, une autre API fournissant génération d'image et LLMs.
 
 ---
 
