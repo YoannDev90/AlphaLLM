@@ -1,7 +1,7 @@
 # Configuration
 
 debug = false # Set to True to launch BetaLLM
-logging_level = "DEBUG" # Level of logging
+logging_level = "INFO" # Level of logging
 dev_id = 1123534156626939945 # Discord developer ID
 admin_server = 1327996079786168441 # Discord support server ID
 support_server = "https://discord.gg/QGvyrUgwdK" # Discord support server invite link

@@ -48,7 +48,7 @@ async def process_attachments(raw_content: str, attachments: list) -> str:
             link_content = await crawl(link)
             
             if link_content:
-                processed_content += f"\nContenu :\n{link_content[:2000]}"
+                processed_content += f"\nContenu :\n{link_content}"
                 logger.debug(f"Contenu récupéré: {link} ({len(link_content)} caractères)")
             else:
                 processed_content += f"\nLe lien `{link}` est inaccessible"
