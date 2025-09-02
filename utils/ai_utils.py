@@ -55,6 +55,7 @@ async def process_attachments(raw_content: str, attachments: list) -> str:
                 logger.warning(f"Lien inaccessible: {link}")
                 
         except Exception as e:
+            print(e)
             logger.error(f"Erreur traitement lien {link}: {str(e)}")
             processed_content += f"\n[Erreur de traitement du lien {link}]"
     

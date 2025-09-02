@@ -11,21 +11,7 @@ async def fetch_markdown(session, url):
         markdown = markdownify(str(body), heading_style="ATX")
         return url, markdown
 
-async def crawl(urls):
-    results = {}
+async def crawl(url):
     async with aiohttp.ClientSession() as session:
-        tasks = [fetch_markdown(session, url) for url in urls]
-        pages = await asyncio.gather(*tasks)
-        for url, markdown in pages:
-            results[url] = markdown
-    return results
-
-# Exemple d'utilisation :
-if __name__ == "__main__":
-    urls = [
-        "https://www.example.com",
-        "https://www.python.org"
-    ]
-    results = asyncio.run(crawl(urls))
-    for url, md_content in results.items():
-        print(f"URL: {url}\nMarkdown:\n{md_content}\n---\n")
+        page = await fetch_markdown(session, url)
+        return page
