@@ -4,11 +4,9 @@
 __pycache__
 venv
 logs.log
-temp
 translations
+polls
 publish.sh
 reset_venv.sh
 crowdin.yml
-config.toml
-config.toml
 config.toml
