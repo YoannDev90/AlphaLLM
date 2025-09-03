@@ -1,23 +1,31 @@
 # AlphaLLM - Documentation GitHub 🚀
 
-**AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs:  
+**AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs d'IA:  
 
-- Cerebras AI, un modèle de Llama 3.3 70B ultra-rapide et performant.
-- Pollinations AI, une API regroupant génération d'image et LLMs.
-- Mistral AI, un modèle de langage développé par Mistral.
-- Gemini AI, un modèle de langage développé par Google.
-- OpenRouter, une plateforme pour accéder à divers modèles de langage.
-- Navy AI, une autre API fournissant génération d'image et LLMs.
+- Cerebras
+- Pollinations AI
+- Mistral AI
+- Gemini AI
+- OpenRouter
+- AI-ML
+- Groq
+- Navy AI
+- Void AI
+- Cloudinary
+- Cloudflare Workers
 
 ---
 
 ## **Fonctionnalités principales** 🌟
 
-- 🔗 **Traitement des liens** : Remplace automatiquement les liens par leur contenu au format Markdown, avec `Crawl4AI`.
-- 📕 **Traitement des fichiers** : Traite les fichiers (PDF, Docx, etc) grâce à la librairie `Markitdown`.
+- 🔗 **Traitement des liens** : Remplace automatiquement les liens par leur contenu au format Markdown, à l'exception du contenu Javascript.
+- 📕 **Traitement des fichiers** : Traite les fichiers les plus courants grâce à la librairie `Markitdown`.
 - 📄 **Support Markdown** : Formate ses réponses suivant la syntaxe Markdown de Discord.
+- ✂️ **Formatage adaptatif** : Formate les blocs de code, les tableaux, les citations, selon la manière la plus adaptée à Discord.
 - 🖼️ **Génération d'images de qualité** : Génère des images jusqu'à 2048x2048.
+- ✏️ **Edition d'image basique** : Permet l'édition d'une image par l'IA.
 - 🔁 **Bouton de régénération** : Régénère la réponse ou l'image.
+- ⚙️ **Personnalisation maximale** : Permet de personnaliser le bot pour un usage particulier sur votre serveur, avec possibilité d'ajouter des détails au prompt système de base.
 - ⚠️ **Gestion des erreurs** : Gère les erreurs des différentes API et informe l'utilisateur en conséquence.
 
 ---
@@ -26,33 +34,15 @@
 
 ### Prérequis
 
-1. 🖥️ Python 3.11
+1. 🖥️ Python 3.11.13
 2. 🤖 Un bot Discord
-3. 🔑 Une clé API pour Cerebras Cloud SDK (obligatoire)
-4. 🔑 Une clé API pour Mistral AI (facultatif)
-5. 🔑 Une clé API pour Gemini AI (facultatif)
-6. 🔑 Une clé API pour OpenRouter (facultatif)
-7. 🔑 Une clé API pour Pollinations AI (facultatif)
-8. 📦 Une base de données PostgreSQL (optionnel, pour stocker les logs et les données)
+3. 🔑 Une clé pour chaque API
+4. 📦 Une base de données PostgreSQL
 
 ### Dépendances
 
-Le projet utilise les dépendances suivantes, qui seront installées automatiquement via le fichier `requirements.txt` :
+Le projet utilise des dépendances qui sont listées dans le fichier `requirements.txt` :
 
-```txt
-# requirements.txt
-
-markitdown[all]
-cerebras_cloud_sdk
-discord.py
-python-dotenv
-colorama
-asyncpg
-crawl4ai
-supabase
-fastembed
-deep_translator
-```
 
 ### Étapes d'installation
 
@@ -68,34 +58,7 @@ deep_translator
    pip install -r requirements.txt
    ```
 
-3. Configurez vos paramètres dans le fichier `.env` :
-
-   ```venv
-   BOT_TOKEN=""                              # Token du bot Discord
-   LOGGER_BOT_TOKEN=""                       # Token du bot de log (optionnel, pour les logs en MP en temps réel)
-   DEV_BOT_TOKEN=""                          # Token du bot de développement (optionnel, pour les tests)
-
-   DEV_ID=                                   # ID de mon compte Discord
-   GALERIE_ID=                               # ID du salon #galerie sur le Discord de AlphaLLM
-   GUILD_ID=                                 # ID du serveur Discord AlphaLLM
-
-   CEREBRAS_API_KEY=""                       # Clé API pour Cerebras Cloud SDK
-   MISTRAL_API_KEY=""                        # Clé API pour Mistral AI
-   GEMINI_API_KEY=""                         # Clé API pour Gemini AI
-   OPENROUTER_API_KEY=""                     # Clé API pour OpenRouter
-   POLLINATIONS_API_KEY=""                   # Clé API pour Pollinations AI
-
-   DB_URL=""                                 # URL de la base de données (optionnel, pour stocker les logs et les données)
-   DB_KEY=""                                 # Clé de la base de données (optionnel)
-   JWT_KEY=""                                # Clé JWT pour l'authentification (optionnel)
-
-   DB_DIRECT_CONN=""                         # Connexion directe à la base de données (optionnel, pour la mémoire)
-   DB_HOST=                                  # Adresse de la base de données (optionnel)
-   DB_PORT=                                  # Port de la base de données (optionnel)
-   DB_USER=                                  # Nom d'utilisateur de la base de données (optionnel)
-   DB_PASSWORD=                              # Mot de passe de la base de données (optionnel)
-   DB_NAME=postgres                          # Nom de la base de données (optionnel)
-   ```
+3. Configurez vos paramètres dans le fichier `.env`.
 
 4. Lancez le bot :
 
@@ -107,28 +70,32 @@ deep_translator
 
 ## **Utilisation** 📚
 
-Pour discuter avec le bot, il suffit de le mentionner dans un canal Discord. Par exemple :
+Pour discuter avec le bot, il suffit de le mentionner dans un canal Discord autorisé :
 
 ```markdown
 @AlphaLLM Quelle est la capitale de la France ?
+
+>>> La capitale de la France est : **Paris** 🗼️.
 ```
 
-Le bot répondra avec la réponse formatée en Markdown. Vous pouvez également lui envoyer des liens ou des fichiers pour qu'il les traite.
+Le bot répondra avec la réponse formatée. Vous pouvez également lui envoyer des liens ou des fichiers pour qu'il les traite.
 
-Pour générer une image, utilisez la commande suivante :
-
-`/image` ou `@AlphaLLM generate`.
+Pour poser une question ponctuelle, sans contexte, utilisez la commande `/ask` :
 
 ```markdown
-/image "Paysage naturel"
+/ask Quelle est la capitale de la France ?
+
+>>> La capitale de la France est : **Paris** 🗼️.
 ```
+
+À noter que l'utilisation de cette commande n'a pas d'incidence sur votre historique de conversation.
+Cette commande est disponible pour une utilisation sur des serveurs sur lequel le bot n'est pas installé, si toutefois ledit serveur permet l'utilisation de commandes externes.
+
+Pour générer une image, utilisez la commande `/image` :
 
 ```markdown
-@AlphaLLM génère une image de paysage naturel.
+/image "a beautiful natural landscape"
 ```
-
-Note : Dans le second cas, le bot se charge d'éditer le prompt et de définir la taille de l'image, ne pas l'utiliser pour des prompts complexes.
-
 ---
 
 ## **Contributions** 🤝
