@@ -1,84 +1,91 @@
 import discord
 from discord.ext import commands
 import logging
-import os
-from dotenv import load_dotenv
+import datetime
 from commands.cmds import setup_commands
 from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
-from supabase import create_client, Client, ClientOptions
-import datetime
+from utils.database import get_supabase_client
+from utils.config import DEBUG, GUILD_ID, OWNER_ID, get_bot_token, LOGGER_NAME
+from utils.server_config import update_all_guilds_info
+from embeds.welcome_embed import create_welcome_embed, WelcomeLanguageView
+from utils.command_ids import command_id_manager
+from utils.msg_process import message_process
 
-load_dotenv()
-
-TOKEN = os.getenv("DEV_BOT_TOKEN")
-#TOKEN = os.getenv("BOT_TOKEN")
-GUILD_ID = int(os.getenv("GUILD_ID"))
+TOKEN = get_bot_token()
+GUILD_ID = GUILD_ID
 
 intents = discord.Intents.default()
 
-bot = commands.Bot(command_prefix="!", owner_id=int(os.getenv("DEV_ID")), intents=intents)
+bot = commands.Bot(command_prefix="!", owner_id=OWNER_ID, intents=intents)
 
-url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
-key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
-jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
-supabase: Client = create_client(url, key, 
-                                options=ClientOptions(
-                                    schema="public",
-                                    headers={"Authorization": f"Bearer {jwt}"},
-                                    auto_refresh_token=True,
-                                    persist_session=True
-                                ))
-
-logger = logging.getLogger("AlphaLLM")
-
-def is_bot_mentioned(bot, message):
-    if not message.guild:
-        return bot.user.mentioned_in(message)
-    else:
-        if message.mention_everyone:
-            return False
-        if bot.user.mentioned_in(message):
-            return True
-        if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
-            return True
-        return False
+supabase = get_supabase_client()
+logger = logging.getLogger(LOGGER_NAME)
 
 @bot.event
 async def on_ready():
-    activity = discord.CustomActivity(name="🤖 Use @AlphaLLM to chat")
+    activity = discord.CustomActivity(name="🤖 Try @AlphaLLM or /commands")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
-    guild = discord.Object(id=GUILD_ID)
-    await bot.tree.sync(guild=guild)
+    
+    # Initialiser le gestionnaire d'IDs de commandes
+    command_id_manager.set_bot(bot)
+    await command_id_manager.fetch_command_ids()
+    try:
+        await update_all_guilds_info(bot)
+    except Exception as e:
+        logger.error(f"Erreur lors de la mise à jour des serveurs: {e}")
+
+@bot.event
+async def on_guild_join(guild):
+    logger.info(f"Bot ajouté au serveur: {guild.name} (ID: {guild.id})")
+
+    try:
+        # Créer l'embed de bienvenue en anglais par défaut
+        embed = create_welcome_embed(bot, guild, 'en')
+
+        # Créer la vue avec les boutons de langues
+        view = WelcomeLanguageView(bot)
+        
+        target_channel = None
+        
+        if guild.system_channel and guild.system_channel.permissions_for(guild.me).send_messages:
+            target_channel = guild.system_channel
+
+        if not target_channel:
+            for channel in guild.text_channels:
+                if channel.permissions_for(guild.me).send_messages:
+                    target_channel = channel
+                    break
+        
+        if target_channel:
+            await target_channel.send(embed=embed, view=view)
+            logger.info(f"Message de bienvenue envoyé sur {guild.name} dans {target_channel.name}")
+        else:
+            logger.warning(f"Aucun canal accessible trouvé sur {guild.name} pour envoyer le message de bienvenue")
+            
+    except Exception as e:
+        logger.error(f"Erreur lors de l'envoi du message de bienvenue sur {guild.name}: {e}")
+
+
+@bot.event
+async def on_guild_remove(guild):
+    try:
+        logger.info(f"Bot retiré du serveur: {guild.name} (ID: {guild.id})")
+        
+        from utils.server_config import delete_server_settings
+        delete_server_settings(guild.id)
+        
+    except Exception as e:
+        logger.error(f"Erreur lors de la suppression du serveur {guild.name}: {e}")
 
 @bot.event
 async def on_message(message):
-    if message.author.bot:
-        return
-    
-    if not message.author.bot:
-        logger.debug(f"Message reçu de {message.author}: {message.content}")
-        bot_mentioned = is_bot_mentioned(bot, message)
-
-        if bot_mentioned:
-            
-            blacklist_data = get_blacklist()
-                
-            blacklist_entry = next((entry for entry in blacklist_data if entry.get('id_discord') == message.author.id), None)
-            if blacklist_entry:
-                reason = blacklist_entry.get('reason', 'Unspecified')
-                logger.info(f"Message de {message.author.display_name} (ID: {message.author.id}) ignoré - Liste noire - Motif: {reason}")
-                await message.channel.send(f"⛔️ You are blacklisted from the bot (<@{message.author.id}>) - Reason: **{reason}**")
-                return
-
-            # typing animation
-            async with message.channel.typing():
-                await process_ai_response(bot,message)
+    await message_process(bot, message)
 
 async def run_bot():
     logger.info("Démarrage ...")
-    await setup_commands(bot)
+    await setup_commands(bot, is_admin_bot=False)
     try:
         await bot.start(TOKEN)
     except discord.LoginFailure as e:

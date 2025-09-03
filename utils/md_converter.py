@@ -1,9 +1,10 @@
 import requests
 import logging
+from utils.config import logger_name
 import os
 from markitdown import MarkItDown
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 
 class MarkdownConverter:
     def __init__(self):
@@ -39,7 +40,7 @@ async def md_conversion(doc_url):
             
             try:
                 os.remove(file_name)
-                logger.info(f"Fichier {file_name} supprimé avec succès.")
+                logger.debug(f"Fichier {file_name} supprimé avec succès.")
             except Exception as e:
                 logger.error(f"Erreur lors de la suppression du fichier {file_name}: {e}")
             

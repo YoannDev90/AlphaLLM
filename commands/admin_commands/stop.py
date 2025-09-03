@@ -1,18 +1,20 @@
 import discord
 import logging
+from utils.config import logger_name
 import sys
 import os
+import json
+import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 OWNER_ID = int(os.getenv('DEV_ID'))
 GUILD_ID = int(os.getenv('GUILD_ID'))
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="stop", description="Arrête complètement le bot et le programme")
-    @discord.app_commands.guilds(discord.Object(id=GUILD_ID))
+    @bot.tree.command(name="stop", description="Arrête le bot")
     async def stop(interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /stop exécutée par {interaction.user.display_name}")
@@ -23,6 +25,9 @@ async def setup(bot: discord.Client):
 
         await interaction.followup.send("🛑 Arrêt complet du bot...", ephemeral=True)
         logger.info("Demande d'arrêt reçue")
+
+        with open("stop.json", "w") as f:
+            json.dump({"COMMAND": "STOP", "timestamp": datetime.datetime.now().isoformat()}, f)
 
         if bot.is_closed():
             return

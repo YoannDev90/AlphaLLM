@@ -1,51 +1,53 @@
-from mistralai import Mistral
 import logging
+from utils.config import logger_name
 from dotenv import load_dotenv
 import os
-import json
+import litellm
+from datetime import datetime
+from litellm.integrations.opik.opik import OpikLogger
+import os
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 
 load_dotenv()
 
-mistral_client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+async def mistral_chat(messages, parameters):
+    start_time = datetime.now()
+    opik_logger = OpikLogger()
+    litellm.callbacks = [opik_logger]
 
-async def mistral_chat(user_message, preprompt, tools, bot, user, parameters):
-        try:
-            completion = await mistral_client.chat.complete_async(
-                messages=[
-                {"role": "system", "content": preprompt},
-                {"role": "user", "content": user_message}
-                ],
-                tools=tools,
-                tool_choice="auto" if tools else None,
-                model="mistral-small-latest"
-            )
+    params = {
+        "model": "mistral/mistral-medium-latest",
+        "api_key": os.getenv("MISTRAL_API_KEY"),
+        "messages": messages
+    }
+    
+    response = litellm.completion(**params)
 
-            response_message = completion.choices[0].message
+    usage = response.usage.total_tokens
+    model = response.model
 
-            from utils.ai_gen import generate_image_tools
-            
-            if response_message.tool_calls:
-                for tool_call in response_message.tool_calls:
-                    if tool_call.function.name == "generate_image_tools":
-                        try:
-                            args = json.loads(tool_call.function.arguments)
-                            return await generate_image_tools(
-                                prompt=args.get("prompt"),
-                                bot=bot,
-                                user=user,
-                                parameters=parameters,
-                                tool_parameters={
-                                    "size": args.get("size", "1024x1024")
-                                }
-                            )
-                        except json.JSONDecodeError:
-                            logger.error("Erreur de parsing JSON")
-                        except ValueError as e:
-                            logger.error(str(e))
-            
-            return response_message.content
-        except Exception as e:
-            logger.error(f"Erreur lors de la génération de la réponse Mistral : {e}")
-            return f"Erreur lors de la génération de la réponse : {e}"
+    response_text = response.choices[0].message.content
+    
+    end_time = datetime.now()
+    elapsed_time = end_time - start_time
+    minutes = elapsed_time.seconds // 60
+    seconds = elapsed_time.seconds % 60
+    milliseconds = elapsed_time.microseconds // 1000
+    
+    if minutes > 0:
+        elapsed_time_str = f"{minutes} minutes, {seconds}.{milliseconds:03d} seconds"
+    else:
+        elapsed_time_str = f"{seconds}.{milliseconds:03d} seconds"
+
+    response_info = {
+        "response": response_text,
+        "usage": usage,
+        "model": model,
+        "elapsed_time": elapsed_time_str
+    }
+
+    if parameters["raw"]:
+        return response_info
+    else:
+        return response_info

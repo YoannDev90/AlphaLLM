@@ -1,11 +1,8 @@
 import logging
+from utils.config import LOGGER_NAME, EnvVars
 from colorama import Fore, Back, Style
 import asyncio
-import os
-from dotenv import load_dotenv
 import discord
-
-load_dotenv()
 
 class DiscordLogHandler(logging.Handler):
     def __init__(self, bot):
@@ -25,8 +22,7 @@ class DiscordLogHandler(logging.Handler):
 
     async def mp_logs(self, message):
         try:
-            dev_id = os.getenv("DEV_ID")
-            dev_user = await self.bot.fetch_user(dev_id)
+            dev_user = await self.bot.fetch_user(EnvVars.DEV_ID)
             await dev_user.send(message)
         except discord.HTTPException as e:
             print(f"Erreur lors de la récupération de l'utilisateur : {e}")
@@ -59,11 +55,11 @@ class ConsoleFormatter(logging.Formatter):
 
 class DiscordFormatter(logging.Formatter):
     FORMATS = {
-        logging.DEBUG: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m *️⃣ %(asctime)s - %(levelname)s - %(message)s [0m\n```',
-        logging.INFO: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m ✅ %(asctime)s - %(levelname)s - %(message)s [0m\n```',
-        logging.WARNING: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m[0m[2;33m 🚧 %(asctime)s - %(levelname)s - %(message)s [0m\n```',
-        logging.ERROR: '```ansi\n[2;31m[0m[2;47m[0m[2;31m ❌ %(asctime)s - %(levelname)s - %(message)s [0m\n```',
-        logging.CRITICAL: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m[0m[2;33m[0m[2;30m[0m[2;37m[0m[2;30m 🔳 %(asctime)s - %(levelname)s - %(message)s [0m\n```'
+        logging.DEBUG: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m *️⃣ %(asctime)s - %(message)s [0m\n```',
+        logging.INFO: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m ✅ %(asctime)s - %(message)s [0m\n```',
+        logging.WARNING: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m[0m[2;33m 🚧 %(asctime)s - %(message)s [0m\n```',
+        logging.ERROR: '```ansi\n[2;31m[0m[2;47m[0m[2;31m ❌ %(asctime)s - %(message)s [0m\n```',
+        logging.CRITICAL: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m[0m[2;33m[0m[2;30m[0m[2;37m[0m[2;30m 🔳 %(asctime)s - %(message)s [0m\n```'
         }
     
 
@@ -86,8 +82,13 @@ class FileFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
-def setup_logging(logger_name, bot):
-    logger = logging.getLogger(logger_name)
+def setup_logging(bot):
+    """Configuration centralisée du logging"""
+    logger = logging.getLogger(LOGGER_NAME)
+
+    # Éviter la duplication des handlers
+    if logger.handlers:
+        return logger
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(ConsoleFormatter())

@@ -1,25 +1,24 @@
 import logging
+from utils.config import LOGGER_NAME
 #from temp.speech_gen import send_voice_message
 from utils.user_config import get_audio_gen_active, get_audio_voice
-from utils.user_manager import new_interaction, new_query
 from utils.ai_utils import generate_response
 from utils.table_converter import detect_and_convert_tables
 import discord
 import io
 import re
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(LOGGER_NAME)
 
-async def process_ai_response(bot,message):
+async def process_ai_response(bot, query, message):
     try:
-        logger.info(f"Bot mentionné par {message.author.display_name} ({message.author.id})")
-        new_query(message.author.id)
-        new_interaction(message.author.id)
-
-        bot_mention = f"<@{bot.user.id}>"
-
-        query = message.content.replace(bot_mention, "").strip()
-        parameters = {"history": True, "preprompt": True, "tools": True}
+        parameters = {
+            "history": True, 
+            "preprompt": True, 
+            "tools": False, 
+            "internet": False, 
+            "raw": False
+        }
 
         while True:
             if query.endswith(" -h"):
@@ -31,16 +30,22 @@ async def process_ai_response(bot,message):
             elif query.endswith(" -t"):
                 query = query[:-3].rstrip()
                 parameters["tools"] = False
+            elif query.endswith(" +i"):
+                query = query[:-3].rstrip()
+                parameters["internet"] = True
+            elif query.endswith(" +r"):
+                query = query[:-3].rstrip()
+                parameters["raw"] = True
             else:
                 break
 
-
         logger.info(f"Message : {query}")
         if not query or query.isspace():
-            logger.warning(f"Empty query from {message.author.display_name}")
-            await message.channel.send("Veuillez poser une question ou faire une demande.")
-            return
+            logger.info(f"Message vide reçu de {message.author.id}")
+            query = "Hi ! (Tell the user to mention you (<@1286951908786962442>))"
 
+        logger.debug(f"Query processed: {query}")
+        # Generate AI answer
         try:
             response = await generate_response(
                 user_id=int(message.author.id),
@@ -57,11 +62,27 @@ async def process_ai_response(bot,message):
             await message.channel.send("Une erreur s'est produite lors de la génération de la réponse.")
             return
 
+        # Extract response text properly
+        if isinstance(response, dict) and 'response' in response:
+            response_text = response['response']
+        elif isinstance(response, str):
+            response_text = response
+        else:
+            logger.error(f"Type de réponse non géré : {type(response)}")
+            await message.channel.send("Une erreur s'est produite lors de la génération de la réponse.")
+            return
+            
+        # Send using correct format (image/text)
         try:
-            # Convertir les tableaux Markdown en tableaux ASCII
-            response = detect_and_convert_tables(response)
-            await smart_long_messages(message.channel, response)
-            logger.debug(f"Réponse envoyée avec succès.")
+            if isinstance(response_text, bytes):
+                await message.channel.send(file=discord.File(io.BytesIO(response_text), filename="image.png"))
+            elif isinstance(response_text, str):
+                response_text = detect_and_convert_tables(response_text)
+                await smart_long_messages(message.channel, response_text)
+                logger.debug(f"Réponse envoyée avec succès.")
+            else:
+                logger.error(f"Type de réponse texte non géré : {type(response_text)}")
+                await message.channel.send("Une erreur s'est produite lors de la génération de la réponse.")
         except Exception as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")
             await message.channel.send("Une erreur s'est produite lors de l'envoi du message.")
@@ -69,7 +90,7 @@ async def process_ai_response(bot,message):
         # try:
         #     if get_audio_gen_active(message.author.id):
         #         logger.debug(f"Audio generation is active for user {message.author.id}.")
-        #         await send_voice_message(message.channel, response, get_audio_voice(message.author.id))
+        #         await send_voice_message(message.channel, response_text, get_audio_voice(message.author.id))
         #         logger.debug(f"Voice message sent successfully.")
         # except Exception as e:
         #     logger.error(f"Erreur lors de la génération de la voix : {e}")
@@ -82,17 +103,14 @@ async def smart_long_messages(channel, response, max_length: int = 2000):
     """
     Sends a long message to Discord, preserving code blocks and never splitting inside a code block.
     """
-    if isinstance(response, bytes):
-        # Envoi direct des données binaires comme fichier
-        await channel.send(file=discord.File(io.BytesIO(response), filename="image.png"))
-    else:
-        pattern = re.compile(r"(```[\s\S]*?```)")
-        parts = pattern.split(response)
-        for part in parts:
-            if part.startswith("```") and part.endswith("```"):
-                await send_code_block(channel, part, max_length)
-            else:
-                await send_text_in_chunks(channel, part, max_length)
+
+    pattern = re.compile(r"(```[\s\S]*?```)")
+    parts = pattern.split(response)
+    for part in parts:
+        if part.startswith("```") and part.endswith("```"):
+            await send_code_block(channel, part, max_length)
+        else:
+            await send_text_in_chunks(channel, part, max_length)
 
 async def send_text_in_chunks(channel, text: str, max_length: int = 2000):
     """

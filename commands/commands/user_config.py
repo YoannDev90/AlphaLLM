@@ -1,25 +1,13 @@
 import discord
 from discord import app_commands
 from typing import Optional
-from dotenv import load_dotenv
-from supabase import Client, ClientOptions, create_client
-import os
+from utils.database import get_supabase_client
 import logging
+from datetime import datetime
+from utils.config import LOGGER_NAME
 
-load_dotenv()
-
-logger = logging.getLogger('AlphaLLM')
-
-url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
-key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
-jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
-supabase: Client = create_client(url, key, 
-                                options=ClientOptions(
-                                    schema="public",
-                                    headers={"Authorization": f"Bearer {jwt}"},
-                                    auto_refresh_token=True,
-                                    persist_session=True
-                                ))
+logger = logging.getLogger(LOGGER_NAME)
+supabase = get_supabase_client()
 
 LANG_CHOICES = [
     app_commands.Choice(name="Français 🇫🇷", value="FR"),
@@ -56,10 +44,6 @@ async def setup(bot: discord.Client):
     @app_commands.choices(langue=LANG_CHOICES, image_model=IMAGE_MODEL_CHOICES, image_private=IMAGE_PRIVATE_CHOICES, image_enhance=IMAGE_ENHANCE_CHOICES)
     @app_commands.describe(
         langue="Language for the user",
-        image_model="Model for image generation",
-        image_size="Size for image generation (e.g., 1024x2048, min 256x256, max 2048x2048)",
-        image_private="Private image generation",
-        image_enhance="Enhance image generation",
         perso_preprompt="Personal preprompt for text generation"
     )
     async def user_config(
@@ -106,16 +90,22 @@ async def setup(bot: discord.Client):
             return
 
         try:
-            try:
-                supabase.table("users_settings").update(update_data).eq("id_discord", interaction.user.id).execute()
-            except Exception as e:
-                logger.error(f"Error updating user config: {str(e)}")
-
-                try:
-                    supabase.table("users_settings").insert({"id_discord": interaction.user.id, **update_data}).execute()
-                except Exception as e:
-                    logger.error(f"Error inserting user config: {str(e)}")
-                    await interaction.followup.send("❌ An error occurred while inserting the settings.", ephemeral=True)
+            insert_data = {
+                    "name": interaction.user.global_name if interaction.user.global_name else interaction.user.name,
+                    "modified": datetime.now().isoformat(),
+                    **update_data
+                }
+            result = supabase.table("users_settings").update(insert_data).eq("id_discord", interaction.user.id).execute()
+            if not result.data:
+                logger.info(f"No existing record found for user {interaction.user.id}, inserting new record")
+                insert_data = {
+                    "id_discord": interaction.user.id,
+                    "name": interaction.user.global_name if interaction.user.global_name else interaction.user.name,
+                    "modified": datetime.now().isoformat(),
+                    **update_data
+                }
+                result = supabase.table("users_settings").insert(insert_data).execute()
+                print(f"Insert result: {result}")
 
             summary_text = "\n".join(summary)
             if not summary_text:
@@ -130,30 +120,9 @@ async def setup(bot: discord.Client):
             embed.set_footer(text=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
             
             await interaction.followup.send(embed=embed, ephemeral=True)
-            logger.info(f"User config updated for {interaction.user.display_name}: {update_data}")
+            logger.info(f"User config updated for {interaction.user.display_name}")
+            
         except Exception as e:
             logger.error(f"Error updating user config: {str(e)}")
             await interaction.followup.send("❌ An error occurred while updating the settings.", ephemeral=True)
-
-    # Commande /uc (alias de /user-config) pour configurer l'utilisateur
-    
-    @bot.tree.command(name="uc", description="Configure user language and preferences, image settings, and audio settings")
-    @app_commands.choices(langue=LANG_CHOICES, image_model=IMAGE_MODEL_CHOICES, image_private=IMAGE_PRIVATE_CHOICES, image_enhance=IMAGE_ENHANCE_CHOICES)
-    @app_commands.describe(
-        langue="Language for the user",
-        image_model="Model for image generation",
-        image_size="Size for image generation (e.g., 1024x2048, min 256x256, max 2048x2048)",
-        image_private="Private image generation",
-        image_enhance="Enhance image generation",
-        perso_preprompt="Personal preprompt for text generation"
-    )
-    async def user_config_alias(
-        interaction: discord.Interaction,
-        langue: Optional[app_commands.Choice[str]] = None,
-        image_model: Optional[app_commands.Choice[str]] = None,
-        image_size: Optional[str] = None,
-        image_private: Optional[app_commands.Choice[int]] = None,
-        image_enhance: Optional[app_commands.Choice[int]] = None,
-        perso_preprompt: Optional[str] = None,
-    ):
-        await user_config(interaction, langue, image_model, image_size, image_private, image_enhance, perso_preprompt)
+            return

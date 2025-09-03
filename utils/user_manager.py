@@ -1,27 +1,14 @@
-# utils/database.py
+# utils/user_manager.py
 import json
-import os
 import logging
-from dotenv import load_dotenv
+from utils.config import LOGGER_NAME
+from utils.database import get_supabase_client
 from datetime import datetime
-from supabase import create_client, Client, ClientOptions
 from discord import Guild
 from typing import List
 
-load_dotenv()
-
-logger = logging.getLogger('AlphaLLM')
-
-url: str = os.environ.get("DB_URL").encode('utf-8').decode('unicode-escape')
-key: str = os.environ.get("DB_KEY").encode('utf-8').decode('unicode-escape')
-jwt: str = os.environ.get("JWT_KEY").encode('utf-8').decode('unicode-escape')
-supabase: Client = create_client(url, key, 
-                                options=ClientOptions(
-                                    schema="public",
-                                    headers={"Authorization": f"Bearer {jwt}"},
-                                    auto_refresh_token=True,
-                                    persist_session=True
-                                ))
+logger = logging.getLogger(LOGGER_NAME)
+supabase = get_supabase_client()
 def new_interaction(user_id: int):
     try:
         supabase.table("users").upsert({

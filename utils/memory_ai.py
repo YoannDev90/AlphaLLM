@@ -1,12 +1,13 @@
-import os
 import asyncpg
 import logging
+from utils.config import LOGGER_NAME, EnvVars
 import hashlib
 import time
+import json
 from fastembed import TextEmbedding
 from typing import List, Dict, Optional
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(LOGGER_NAME)
 
 _PG_POOL: Optional[asyncpg.pool.Pool] = None
 _EMBEDDER: Optional[TextEmbedding] = None
@@ -15,11 +16,11 @@ async def connect_to_db() -> None:
     global _PG_POOL
     try:
         _PG_POOL = await asyncpg.create_pool(
-            host=os.getenv("DB_HOST"),
-            port=int(os.getenv("DB_PORT")),
-            user=os.getenv("DB_USER"),
-            password=os.getenv("DB_PASSWORD"),
-            database=os.getenv("DB_NAME"),
+            host=EnvVars.DB_HOST,
+            port=int(EnvVars.DB_PORT),
+            user=EnvVars.DB_USER,
+            password=EnvVars.DB_PASSWORD,
+            database=EnvVars.DB_NAME,
             ssl='require'
         )
     except Exception as e:
@@ -81,17 +82,19 @@ def _generate_id(user_id: int, server_id: int) -> str:
     base = f"{user_id}:{server_id}:{time.time_ns()}"
     return hashlib.sha256(base.encode()).hexdigest()
 
-async def add_memory(user_id: int, server_id: int, text: str) -> None:
+async def add_memory(user_id: int, server_id: int, reponse: dict, text_to_embed: str) -> None:
     await _delete_old_memories()
     try:
-        embedding = _generate_embedding(text)
+        embedding = _generate_embedding(text_to_embed)
         vec_str = _vec_to_str(embedding)
         entry_id = _generate_id(user_id, server_id)
+        # Sérialise le dictionnaire en JSON pour la colonne jsonb
+        content_json = json.dumps(reponse, ensure_ascii=False)
         async with _PG_POOL.acquire() as conn:
             await conn.execute('''
                 INSERT INTO memories (id, content, embedding, user_id, server_id)
                 VALUES ($1, $2, $3::vector, $4, $5)
-            ''', entry_id, text, vec_str, user_id, server_id)
+            ''', entry_id, content_json, vec_str, user_id, server_id)
     except Exception as e:
         logger.error(f"Erreur d'ajout: {str(e)}")
         raise
@@ -107,7 +110,17 @@ async def get_history(user_id: int, server_id: int, limit: int = 100) -> List[Di
                 ORDER BY created_at DESC
                 LIMIT $3
             ''', user_id, server_id, limit)
-            return [dict(r) for r in records]
+            result = []
+            for record in records:
+                record_dict = dict(record)
+                # Désérialise le JSON si c'est une chaîne
+                if isinstance(record_dict['content'], str):
+                    try:
+                        record_dict['content'] = json.loads(record_dict['content'])
+                    except json.JSONDecodeError:
+                        logger.warning(f"Impossible de désérialiser le contenu pour l'ID {record_dict['id']}")
+                result.append(record_dict)
+            return result
     except Exception as e:
         logger.error(f"Erreur de récupération: {str(e)}")
         return []
@@ -153,12 +166,22 @@ async def search_similar_memories(user_id: int, server_id: int, query: str, limi
                 ORDER BY distance ASC
                 LIMIT $4
             ''', query_vec_str, user_id, server_id, limit)
-            return [dict(r) for r in records]
+            result = []
+            for record in records:
+                record_dict = dict(record)
+                # Désérialise le JSON si c'est une chaîne
+                if isinstance(record_dict['content'], str):
+                    try:
+                        record_dict['content'] = json.loads(record_dict['content'])
+                    except json.JSONDecodeError:
+                        logger.warning(f"Impossible de désérialiser le contenu pour l'ID {record_dict['id']}")
+                result.append(record_dict)
+            return result
     except Exception as e:
         logger.error(f"Erreur de recherche vectorielle: {str(e)}")
         return []
 
-async def get_contextual_history(user_id: int, server_id: int, current_query: str, limit: int = 10) -> List[Dict]:
+async def get_contextual_history(user_id: int, server_id: int, current_query: str, limit: int) -> List[Dict]:
     """Récupère l'historique le plus pertinent basé sur la requête actuelle"""
     await _delete_old_memories()
     try:
@@ -175,7 +198,17 @@ async def get_contextual_history(user_id: int, server_id: int, current_query: st
                 ORDER BY distance ASC, created_at DESC
                 LIMIT $4
             ''', query_vec_str, user_id, server_id, limit)
-            return [dict(r) for r in records]
+            result = []
+            for record in records:
+                record_dict = dict(record)
+                # Désérialise le JSON si c'est une chaîne
+                if isinstance(record_dict['content'], str):
+                    try:
+                        record_dict['content'] = json.loads(record_dict['content'])
+                    except json.JSONDecodeError:
+                        logger.warning(f"Impossible de désérialiser le contenu pour l'ID {record_dict['id']}")
+                result.append(record_dict)
+            return result
     except Exception as e:
         logger.error(f"Erreur de récupération contextuelle: {str(e)}")
         # Fallback vers l'historique chronologique
@@ -224,7 +257,16 @@ async def get_hybrid_history(user_id: int, server_id: int, current_query: str, r
                     LIMIT $4
                 ''', query_vec_str, user_id, server_id, similar_limit)
             
-            similar_memories = [dict(r) for r in similar_records[:similar_limit]]
+            similar_memories = []
+            for record in similar_records[:similar_limit]:
+                record_dict = dict(record)
+                # Désérialise le JSON si c'est une chaîne
+                if isinstance(record_dict['content'], str):
+                    try:
+                        record_dict['content'] = json.loads(record_dict['content'])
+                    except json.JSONDecodeError:
+                        logger.warning(f"Impossible de désérialiser le contenu pour l'ID {record_dict['id']}")
+                similar_memories.append(record_dict)
         
         # Combine et trie par pertinence
         all_memories = recent_memories + similar_memories

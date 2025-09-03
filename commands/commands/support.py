@@ -1,8 +1,9 @@
 import discord
 from discord import app_commands
 import logging
+from utils.config import logger_name
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="support", description="Show the support server link")

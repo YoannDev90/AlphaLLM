@@ -1,26 +1,54 @@
-from google import genai
 import logging
+from utils.config import logger_name
 from dotenv import load_dotenv
 import os
-import json
-import asyncio
+import litellm
+from datetime import datetime
+from litellm.integrations.opik.opik import OpikLogger
+import os
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(logger_name)
 
 load_dotenv()
 
-GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+async def gemini_chat(messages, parameters):
+    start_time = datetime.now()
+    opik_logger = OpikLogger()
+    litellm.callbacks = [opik_logger]
 
-async def gemini_chat(user_message, preprompt, tools, bot, user, parameters):
-        try:
-            response = await gemini_client.aio.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=[user_message]
-            )
+    params = {
+        "model": "openai/gemini-2.0-flash",
+        "api_key": os.getenv("GEMINI_API_KEY"),
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "messages": messages
+    }
+    
+    response = litellm.completion(**params)
 
-            return response.text
+    usage = response.usage.total_tokens
+    model = response.model
 
-        except Exception as e:
-            logger.error(f"Erreur lors de la génération de la réponse Gemini : {e}")
-            return f"Erreur lors de la génération de la réponse : {e}"
+    response_text = response.choices[0].message.content
+    
+    end_time = datetime.now()
+    elapsed_time = end_time - start_time
+    minutes = elapsed_time.seconds // 60
+    seconds = elapsed_time.seconds % 60
+    milliseconds = elapsed_time.microseconds // 1000
+    
+    if minutes > 0:
+        elapsed_time_str = f"{minutes} minutes, {seconds}.{milliseconds:03d} seconds"
+    else:
+        elapsed_time_str = f"{seconds}.{milliseconds:03d} seconds"
+
+    response_info = {
+        "response": response_text,
+        "usage": usage,
+        "model": model,
+        "elapsed_time": elapsed_time_str
+    }
+
+    if parameters["raw"]:
+        return response_info
+    else:
+        return response_info

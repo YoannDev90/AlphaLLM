@@ -1,88 +1,111 @@
 import aiohttp
 import asyncio
 import logging
+from utils.config import logger_name
 import urllib.parse
 import random
 from dotenv import load_dotenv
-from utils.ai_mod import is_nsfw
+from utils.ai_gen import get_image_model_info
+import litellm
+from io import BytesIO
 import os
 
 load_dotenv()
 
-POLLINATIONS_TOKEN = os.getenv("POLLINATIONS_API_KEY")
-
-logger = logging.getLogger('AlphaLLM')
-
-
+logger = logging.getLogger(logger_name)
 
 class ImageGenerationQueue:
-    def __init__(self, max_per_minute=5):
+    def __init__(self, max_per_minute=3):
         self.queue = asyncio.Queue()
         self.max_per_minute = max_per_minute
         self.semaphore = asyncio.Semaphore(max_per_minute)
         self.tasks = []
         self.start_time = asyncio.get_event_loop().time()
-        logger.debug(f"ImageGenerationQueue initialized with max_per_minute={max_per_minute}")
 
-    async def enqueue(self, prompt, model="flux", seed=None, width=1024, height=1024, nologo=True, private=False, enhance=False, safe=True):
-        logger.debug(f"Enqueuing image generation task: prompt={prompt}, model={model}, seed={seed}, width={width}, height={height}, nologo={nologo}, private={private}, enhance={enhance}, safe={safe}")
+    async def enqueue(self, prompt, model="pollinations/flux", size = "1024x1024"):
         future = asyncio.Future()
-        await self.queue.put((prompt, model, seed, width, height, nologo, private, enhance, safe, future))
-        logger.debug("Task enqueued successfully")
+        await self.queue.put((prompt, model, size, future))
         return future
 
     async def process_queue(self):
-        logger.debug("Starting queue processing")
         while True:
-            prompt, model, seed, width, height, nologo, private, enhance, safe, future = await self.queue.get()
-            logger.debug(f"Processing task: prompt={prompt}, model={model}, seed={seed}, width={width}, height={height}, nologo={nologo}, private={private}, enhance={enhance}, safe={safe}")
+            prompt, model, size, future = await self.queue.get()
             try:
                 async with self.semaphore:
-                    logger.debug("Semaphore acquired for task")
-                    image_data = await self._generate_image(prompt, model, seed, width, height, nologo, private, enhance, safe)
+                    image_data = await self._generate_image(prompt, model, size)
                     future.set_result(image_data)
-                    logger.debug("Image generation task completed successfully")
             except Exception as e:
-                logger.exception("Error processing image generation task:")
+                logger.error(f"Error processing image generation task: {str(e)}")
                 future.set_exception(e)
             finally:
                 self.queue.task_done()
-                logger.debug("Task marked as done")
 
-    async def _generate_image(self, prompt, model="flux", seed=None, width=1024, height=1024, nologo=True, private=False, enhance=False, safe=True):
-        logger.debug(f"Generating image with parameters: prompt={prompt}, model={model}, seed={seed}, width={width}, height={height}, nologo={nologo}, private={private}, enhance={enhance}, safe={safe}")
-        try:
-            params = {
-                "prompt": prompt,
-                "model": model,
-                "width": width,
-                "height": height,
-                "seed": random.randint(0, 1000000),
-                "nologo": str(nologo).lower(),
-                "private": str(private).lower(),
-                "enhance": str(enhance).lower(),
-                "safe": str(safe).lower(),
-                "token": str(POLLINATIONS_TOKEN)
-            }
+    async def _generate_image(self, prompt, model, size):
+        if model.startswith("pollinations/"):
+            model = model.replace("pollinations/", "")
+            width, height = map(int, size.split("x"))
+            logger.info(f"Generating image with prompt: {prompt}, model: {model}, size: {size}")
 
-            url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
-            url += "?" + urllib.parse.urlencode(params)
-            logger.debug(f"Generated URL for image generation: {url}")
+            try:
+                params = {
+                    "prompt": prompt,
+                    "model": model,
+                    "width": width,
+                    "height": height,
+                    "seed": random.randint(0, 1000000),
+                    "nologo": "true",
+                    "private": "true",
+                    "enhance": "false",
+                    "safe": "false",
+                    "token": os.getenv("POLLINATIONS_API_KEY")
+                }
 
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    if response.status == 200:
-                        logger.debug("Image generation request successful")
-                        image_data = await response.read()
-                        nsfw = is_nsfw(url)
-                        return image_data, nsfw
-                    else:
-                        error_message = await response.text()
-                        logger.error(f"Error generating image. Status: {response.status} - {error_message}")
-                        return None
-        except Exception as e:
-            logger.error(f"Error during image generation: {e}")
-            return None
+                url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
+                url += "?" + urllib.parse.urlencode(params)
+
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(url) as response:
+                        if response.status == 200:
+                            image_data = await response.read()
+                            return image_data, False
+                        else:
+                            error_message = await response.text()
+                            logger.error(f"Error generating image. Status: {response.status} - {error_message}")
+                            return None, False
+            except Exception as e:
+                logger.error(f"Error during image generation: {e}")
+                return None, False
+        
+        elif model.startswith("navy/"):
+            model = model.replace("navy/", "openai/")
+            try:
+                model_info = get_image_model_info(model)
+                image = litellm.image_generation(
+                    model=model,
+                    api_key=model_info["api_key"],
+                    api_base=model_info["base_url"],
+                    size=size,
+                    prompt=prompt                
+                    )
+                if model == "navy/imagen-3":
+                    return image, False
+                else:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(image.data[0].url) as response:
+                            if response.status == 200:
+                                image_data = await response.read()
+                                return image_data, False
+                            else:
+                                error_message = await response.text()
+                                logger.error(f"Error generating image. Status: {response.status} - {error_message}")
+                                return None, False
+            except Exception as e:
+                logger.error(f"Error during navy image generation: {e}")
+                return None, False
+        
+        else:
+            logger.error(f"Unsupported model: {model}")
+            return None, False
 
 image_queue = ImageGenerationQueue()
 logger.debug("Global image queue initialized")
@@ -90,22 +113,60 @@ logger.debug("Global image queue initialized")
 queue_task = None
 
 def start_image_queue(loop):
-    """Fonction d'initialisation à appeler dans le main"""
     global queue_task
     queue_task = loop.create_task(image_queue.process_queue())
-    logger.debug("Queue processing task started")
 
-async def generate_image(prompt: str, model="flux", seed=None, width=1024, height=1024, nologo=True, private=False, enhance=False, safe=False):
-    logger.debug(f"generate_image called with: prompt={prompt}, model={model}, seed={seed}, width={width}, height={height}, nologo={nologo}, private={private}, enhance={enhance}, safe={safe}")
+async def generate_image(prompt: str, model="pollinations/flux", size="1024x1024"):
     future = await image_queue.enqueue(prompt=prompt,
                                         model=model,
-                                        seed=seed,
-                                        width=width,
-                                        height=height,
-                                        nologo=True,
-                                        private=private,
-                                        enhance=enhance,
-                                        safe=safe)
+                                        size=size,
+                                        )
     result = await future
-    logger.debug("generate_image completed")
     return result
+
+async def image_edit(prompt, url, size):
+    width, height = size.split("x")
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.head(url) as response:
+                if response.status != 200:
+                    logger.error("❌ L'image n'existe pas.")
+    except Exception as e:
+        logger.error(f"💥 Erreur lors de la vérification de l'image: {e}")
+
+    params = {
+        "prompt": prompt,
+        "model": "kontext",
+        "image": url,
+        "width": width,
+        "height": height,
+        "seed": random.randint(0, 1000000),
+        "nologo": "true",
+        "private": "true",
+        "enhance": "false",
+        "safe": "false",
+        "token": os.getenv("POLLINATIONS_API_KEY")
+    }
+    base_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
+    request_url = base_url + "?" + urllib.parse.urlencode(params)
+
+    try:
+        timeout = aiohttp.ClientTimeout(total=120)
+        
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(request_url) as response:
+                if response.status == 200:
+                    image_data = await response.read()
+                    logger.info(f"Image édition réussie. Taille: {len(image_data)} bytes")
+                    return image_data, False
+                else:
+                    error_message = await response.text()
+                    logger.error(f"Error editing image. Status: {response.status} - {error_message}")
+                    return None, False
+    except asyncio.TimeoutError:
+        logger.error("Timeout lors de l'édition d'image (120s)")
+        return None, False
+    except Exception as e:
+        logger.error(f"Erreur lors de l'édition d'image: {str(e)}")
+        return None, False
+            

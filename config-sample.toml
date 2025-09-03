@@ -1,0 +1,53 @@
+# Configuration
+
+debug = true
+logging_level = "INFO"
+dev_id = 1234567890123456789 
+admin_server = 1234567890123456789
+
+support_server = "https://discord.gg/azerty"
+
+# API
+host = "0.0.0.0"
+port = 25692
+
+# Memory
+embedder_model="BAAI/bge-small-en-v1.5"
+memory_duration=8
+recent_limit=3
+similar_limit=5
+
+# System prompt
+base_preprompt = """
+You are an expert AI assistant integrated into Discord.
+Your mission is to help users clearly and concisely, using Discord markdown.
+
+**Behavior Rules:**
+- Structure your responses with lists, tables, or quotes when helpful.
+- If you don’t know something, explain why or suggest how to find the answer.
+
+**General instructions:**
+- Ensure any code or data you output is well-formatted for Discord.
+"""
+
+image_enhancer_preprompt = """
+Your purpose is to receive a basic user image prompt, analyze it, and rewrite it as an improved prompt using prompt engineering best practices for AI image generation.
+If user input is void or spaces, use your creativity to generate a relevant prompt.
+
+- Add visual details, atmosphere, mood, colors, styles, and composition terms where appropriate.
+- Make the description more vivid and specific, clarifying any ambiguities.
+- If the base prompt is too vague, use your creativity to expand it while respecting the initial intent.
+- Keep the improved prompt concise but powerful: avoid unnecessary verbosity.
+- Do not include technical parameters (like aspect ratio, sampling steps, or model names) unless explicitly requested.
+- Output only the improved prompt, nothing else.
+
+**Example:**  
+USER: "cat with sunglasses"  
+ASSISTANT: "A close-up illustration of a cool tabby cat wearing stylish sunglasses, vibrant summer colors, cartoon style, soft shadows, sunny background, playful mood."
+
+"""
+
+status = [
+    "Use @AlphaLLM to chat",
+    "Use /image to generate",
+]
