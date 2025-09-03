@@ -1,58 +1,91 @@
 import discord
 import logging
 from utils.config import logger_name
-from supabase import create_client, Client, ClientOptions
+from utils.database import get_supabase_client, get_blacklist, blacklist_add, blacklist_remove
 import os
 from dotenv import load_dotenv
 from datetime import datetime
 
 load_dotenv()
+supabase = get_supabase_client()
 
 logger = logging.getLogger(logger_name)
 OWNER_ID = int(os.getenv('DEV_ID'))
 GUILD_ID = int(os.getenv('GUILD_ID'))
 
+CHOICES = [
+    discord.app_commands.Choice(name="show", value=0),
+    discord.app_commands.Choice(name="add", value=1),
+    discord.app_commands.Choice(name="remove", value=2),
+]
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="blacklist", description="Ajoute un utilisateur à la blacklist")
-    async def blacklist(interaction: discord.Interaction, user_id: str, reason: str = "Aucune raison fournie"):
+    @discord.app_commands.choices(mode=CHOICES)
+    async def blacklist(
+        interaction: discord.Interaction, 
+        mode: discord.app_commands.Choice = CHOICES[0],
+        user_id: str = None, 
+        reason: str = "Aucune raison fournie"):
         await interaction.response.defer(thinking=True, ephemeral=True)
-        logger.info(f"Commande /blacklist exécutée par {interaction.user.display_name}")
+        logger.info(f"Commande /blacklist [{mode.name}] exécutée par {interaction.user.display_name}")
 
         if interaction.user.id != OWNER_ID:
             await interaction.followup.send("Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
 
-        if not user_id.isdigit() or int(user_id) <= 0:
-            await interaction.followup.send("L'ID utilisateur fourni est invalide.", ephemeral=True)
-            return
+        match mode.value:
+            case 0:
+                blacklisted_users = await get_blacklist(interaction)
+                if not blacklisted_users:
+                    await interaction.followup.send("Aucun utilisateur n'est actuellement blacklisté.", ephemeral=True)
+                    return
 
-        try:
-            data = {
-                "id_discord": int(user_id),
-                "reason": reason,
-                "datetime": datetime.now().isoformat()
-            }
+                embed = discord.Embed(
+                    title="📋 Liste des utilisateurs blacklistés",
+                    color=discord.Color.red(),
+                    timestamp=datetime.now()
+                )
+                embed.set_footer(text=f"Total: {len(blacklisted_users)} utilisateur(s)")
 
-            url = os.environ.get("DB_URL")
-            key = os.environ.get("DB_KEY")
-            jwt = os.environ.get("JWT_KEY")
-            supabase_client: Client = create_client(url, key, 
-                                options=ClientOptions(
-                                    schema="public",
-                                    headers={"Authorization": f"Bearer {jwt}"},
-                                    auto_refresh_token=True,
-                                    persist_session=True
-                                ))
-            supabase_client.table("blacklist").insert(data).execute()
-        except Exception as e:
-            logger.error(f"Erreur lors de l'interaction avec Supabase : {str(e)}")
-            await interaction.followup.send("Erreur interne : Impossible d'ajouter l'utilisateur à la liste noire.", ephemeral=True)
-            return
-        
-        user = await bot.fetch_user(int(user_id))
-        if user is None:
-            await interaction.followup.send("Utilisateur introuvable.", ephemeral=True)
-            return
+                for user_data in blacklisted_users:
+                    user_id = user_data["id_discord"]
+                    reason = user_data["reason"]
+                    ban_date = user_data["datetime"]
+                    
+                    try:
+                        date_obj = datetime.fromisoformat(ban_date.replace('Z', '+00:00'))
+                        formatted_date = date_obj.strftime("%d/%m/%Y à %H:%M")
+                    except:
+                        formatted_date = ban_date
 
-        await interaction.followup.send(f"L'utilisateur {user.name} (ID `{user_id}`) a été ajouté à la liste noire pour la raison : `{reason}`.")
+                    try:
+                        user = await bot.fetch_user(user_id)
+                        username = user.global_name if user.global_name else user.name
+                    except:
+                        username = f"Utilisateur (ID: {user_id})"
+
+                    field_value = f"**Raison:** {reason}\n**Date:** {formatted_date}\n```\n{user_id}\n```"
+                    embed.add_field(
+                        name=f"👤 {username}",
+                        value=field_value,
+                        inline=False
+                    )
+
+                await interaction.followup.send(embed=embed)
+            case 1:
+                if not user_id.isdigit() or int(user_id) <= 0:
+                    await interaction.followup.send("L'ID utilisateur fourni est invalide.", ephemeral=True)
+                    return
+                await blacklist_add(int(user_id), reason)
+                user = await bot.fetch_user(int(user_id))
+                if user is None:
+                    await interaction.followup.send("Utilisateur introuvable.", ephemeral=True)
+                    return
+                await interaction.followup.send(f"L'utilisateur {user.name} (ID `{user_id}`) a été ajouté à la liste noire pour la raison : `{reason}`.")
+            case 2:
+                if not user_id.isdigit() or int(user_id) <= 0:
+                    await interaction.followup.send("L'ID utilisateur fourni est invalide.", ephemeral=True)
+                    return
+                await blacklist_remove(int(user_id))
+                await interaction.followup.send(f"L'utilisateur avec l'ID `{user_id}` a été retiré de la liste noire.", ephemeral=True)

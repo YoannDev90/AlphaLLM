@@ -10,10 +10,7 @@ import os
 load_dotenv()
 logger = logging.getLogger(logger_name)
 
-async def setup(bot: discord.Client):
-    @bot.tree.command(name="ask", description="Ask something")
-    @app_commands.describe(input="Ask something")
-    @app_commands.choices(model=[
+MODELS = [
         app_commands.Choice(name="Llama", value="cerebras/llama3.3-70b"),
         app_commands.Choice(name="GPT-5", value="openai/gpt-5"),
         app_commands.Choice(name="Mistral", value="mistral/mistral-medium-latest"),
@@ -23,7 +20,12 @@ async def setup(bot: discord.Client):
         app_commands.Choice(name="Perplexity", value="openai/sonar"),
         app_commands.Choice(name="EvilGPT", value="openai/evil"),
         app_commands.Choice(name="Grok", value="openai/grok-4")
-    ])
+    ]
+
+async def setup(bot: discord.Client):
+    @bot.tree.command(name="ask", description="Ask something")
+    @app_commands.describe(input="Ask something")
+    @app_commands.choices(model=MODELS)
     async def ask(interaction: discord.Interaction, input: str, model: str = "cerebras/llama3.3-70b", search_internet: bool = None):
         logger.info(f"Commande /ask exécutée par {interaction.user.display_name}")
         try:

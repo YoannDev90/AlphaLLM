@@ -45,8 +45,9 @@ async def setup(bot: discord.Client):
                 name="🆘 Help & Support Commands",
                 value=(
                     f"{command_id_manager.get_command_mention('help-bot')} - Show detailed help information\n"
+                    f"{command_id_manager.get_command_mention('status')} - Show details ping informations\n"
                     f"{command_id_manager.get_command_mention('support')} - Get support server link\n"
-                    f"{command_id_manager.get_command_mention('contact')} - Contact the developer directly"
+                    f"{command_id_manager.get_command_mention('contact-dev')} - Contact the developer directly"
                 ),
                 inline=False
             )
@@ -73,7 +74,7 @@ async def setup(bot: discord.Client):
             
             # Footer avec informations utiles
             embed.set_footer(
-                text=f"Requested by {interaction.user.display_name} • Total: 8+ commands available",
+                text=f"Requested by {interaction.user.display_name} • Total: 11 commands available",
                 icon_url=interaction.user.display_avatar.url
             )
             

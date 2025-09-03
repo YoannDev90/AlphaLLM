@@ -1,5 +1,6 @@
 from supabase import create_client, Client, ClientOptions
 from utils.config import EnvVars
+from datetime import datetime
 import logging
 
 logger = logging.getLogger("AlphaLLM")
@@ -34,7 +35,6 @@ def get_supabase_client() -> Client:
 
 supabase = get_supabase_client
 
-# Fonctions utilitaires spécifiques
 def get_blacklist():
     try:
         client = get_supabase_client()
@@ -42,6 +42,29 @@ def get_blacklist():
         return response.data
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la liste noire : {str(e)}")
+        return None
+
+def blacklist_add(user_id: int, reason: str):
+    try:
+        client = get_supabase_client()
+        data = {
+            "id_discord": user_id,
+            "reason": reason,
+            "datetime": datetime.now().isoformat()
+        }
+        response = client.table("blacklist").insert(data).execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Erreur lors de l'ajout à la liste noire : {str(e)}")
+        return None
+
+def blacklist_remove(user_id: int):
+    try:
+        client = get_supabase_client()
+        response = client.table("blacklist").delete().eq("id_discord", user_id).execute()
+        return response.data
+    except Exception as e:
+        logger.error(f"Erreur lors de la suppression de la liste noire : {str(e)}")
         return None
     
 def get_allowed_channels(guild_id):
