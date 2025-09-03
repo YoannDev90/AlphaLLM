@@ -3,13 +3,13 @@ from discord.ext import commands
 import logging
 from commands.cmds import setup_commands
 from utils.database import get_supabase_client
-from utils.config import DEBUG, GUILD_ID, OWNER_ID, LOGGER_NAME
+from utils.config import get_admin_bot_token, GUILD_ID, OWNER_ID, LOGGER_NAME
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("ADMIN_BOT_TOKEN")
+TOKEN = get_admin_bot_token()
 GUILD_ID = GUILD_ID
 
 intents = discord.Intents.default()
@@ -21,7 +21,7 @@ logger = logging.getLogger(LOGGER_NAME)
 
 @bot.event
 async def on_ready():
-    activity = discord.CustomActivity(name="Administrate AlphaLLM", emoji="⚙️")
+    activity = discord.CustomActivity(name="⚙️ Administrate AlphaLLM")
     await bot.change_presence(activity=activity, status=discord.Status.online)
     await bot.tree.sync()
 

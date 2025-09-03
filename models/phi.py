@@ -11,15 +11,15 @@ logger = logging.getLogger(logger_name)
 
 load_dotenv()
 
-async def deepseek_chat(messages, parameters):
+async def phi_chat(messages, parameters):
     start_time = datetime.now()
     opik_logger = OpikLogger()
     litellm.callbacks = [opik_logger]
 
     params = {
-        "model": "openai/deepseek-v3.1",
-        "api_key": os.getenv("VOID_API_KEY"),
-        "base_url": "https://api.voidai.app/v1/",
+        "model": "openai/phi-4",
+        "api_key": os.getenv("NAVY_API_KEY"),
+        "base_url": "https://api.navy/v1",
         "messages": messages
     }
     

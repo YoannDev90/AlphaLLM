@@ -37,7 +37,7 @@ async def setup(bot: discord.Client):
     ):
         await interaction.response.defer()
 
-        blacklist_data = get_blacklist()
+        blacklist_data = await get_blacklist()
                 
         blacklist_entry = next((entry for entry in blacklist_data if entry.get('id_discord') == interaction.user.id), None)
         if blacklist_entry:

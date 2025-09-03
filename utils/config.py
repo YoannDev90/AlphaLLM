@@ -6,14 +6,9 @@ import os
 import logging
 from dotenv import load_dotenv
 from typing import Dict, Any
+import tomllib
 
-# Support pour Python < 3.11
-try:
-    import tomllib
-except ModuleNotFoundError:
-    import tomli as tomllib
 
-# Chargement unique des variables d'environnement
 load_dotenv()
 
 def load_toml_config(file_path: str = "config.toml") -> Dict[str, Any]:
@@ -78,6 +73,8 @@ class EnvVars:
     DEV_BOT_TOKEN = os.getenv("DEV_BOT_TOKEN")
     LOGGER_BOT_TOKEN = os.getenv("LOGGER_BOT_TOKEN")
     ADMIN_BOT_TOKEN = os.getenv("ADMIN_BOT_TOKEN")
+    DEV_ADMIN_BOT_TOKEN = os.getenv("DEV_ADMIN_BOT_TOKEN")
+
     
     # Base de données
     DB_URL = os.getenv("DB_URL", "").encode('utf-8').decode('unicode-escape')
@@ -114,6 +111,10 @@ class EnvVars:
 def get_bot_token() -> str:
     """Retourne le token du bot approprié selon le mode debug"""
     return EnvVars.DEV_BOT_TOKEN if DEBUG else EnvVars.BOT_TOKEN
+
+def get_admin_bot_token() -> str:
+    """Retourne le token du bot approprié selon le mode debug"""
+    return EnvVars.DEV_ADMIN_BOT_TOKEN if DEBUG else EnvVars.ADMIN_BOT_TOKEN
 
 # Aliases pour compatibilité avec l'ancienne version
 logger_name = LOGGER_NAME

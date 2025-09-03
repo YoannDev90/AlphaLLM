@@ -21,7 +21,7 @@ def is_bot_mentioned(bot, message):
         return False
 
 async def is_blacklist(message):
-    blacklist_data = get_blacklist()
+    blacklist_data = await get_blacklist()
 
     blacklist_entry = next((entry for entry in blacklist_data if entry.get('id_discord') == message.author.id), None)
     if blacklist_entry:
@@ -31,7 +31,7 @@ async def is_blacklist(message):
         return
     
 async def is_channel_allowed(message):
-    forbidden_channels = get_allowed_channels(message.guild.id)
+    forbidden_channels = await get_allowed_channels(message.guild.id)
     if message.channel.id in forbidden_channels:
         logger.info(f"Message de {message.author.display_name} (ID: {message.author.id}) ignoré - Canal non autorisé")
         await message.channel.send(f"⛔️ You are not allowed to use this bot in this channel (<#{message.channel.id}>)")
@@ -39,7 +39,7 @@ async def is_channel_allowed(message):
     return
 
 async def is_role_allowed(message):
-    forbidden_roles = get_allowed_roles(message.guild.id)
+    forbidden_roles = await get_allowed_roles(message.guild.id)
     user = message.author
     user_role_ids = [role.id for role in user.roles]
     
@@ -95,7 +95,7 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
             case "mistral/mistral-medium-latest":
                 from models.mistral import mistral_chat
                 resp = await mistral_chat(messages, parameters)
-            case "openrouter/deepseek/deepseek-r1:free":
+            case "openai/deepseek-v3.1":
                 from models.deepseek import deepseek_chat
                 resp = await deepseek_chat(messages, parameters)
             case "cerebras/qwen-3-32b":
@@ -113,6 +113,18 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
             case "openai/grok-4":
                 from models.grok import grok_chat
                 resp = await grok_chat(messages, parameters)
+            case "openai/phi-4":
+                from models.phi import phi_chat
+                resp = await phi_chat(messages, parameters)
+            case "openai/claude-3-5-haiku-20241022":
+                from models.claude import claude_chat
+                resp = await claude_chat(messages, parameters)
+            case "openai/kimi-k2-instruct":
+                from models.kimi import kimi_chat
+                resp = await kimi_chat(messages, parameters)
+            case "openai/glm-4.5":
+                from models.glm import glm_chat
+                resp = await glm_chat(messages, parameters)
             case _:
                 from models.llama import llama_chat
                 resp = await llama_chat(messages, parameters)

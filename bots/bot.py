@@ -24,7 +24,7 @@ logger = logging.getLogger(LOGGER_NAME)
 
 @bot.event
 async def on_ready():
-    activity = discord.CustomActivity(name="🤖 Use @AlphaLLM to chat")
+    activity = discord.CustomActivity(name="🤖 Try @AlphaLLM or /commands")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
     

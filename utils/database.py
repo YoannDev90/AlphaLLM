@@ -33,9 +33,9 @@ def get_supabase_client() -> Client:
     
     return _supabase_client
 
-supabase = get_supabase_client
+supabase = get_supabase_client()
 
-def get_blacklist():
+async def get_blacklist():
     try:
         client = get_supabase_client()
         response = client.table("blacklist").select("*").execute()
@@ -44,7 +44,7 @@ def get_blacklist():
         logger.error(f"Erreur lors de la récupération de la liste noire : {str(e)}")
         return None
 
-def blacklist_add(user_id: int, reason: str):
+async def blacklist_add(user_id: int, reason: str):
     try:
         client = get_supabase_client()
         data = {
@@ -58,7 +58,7 @@ def blacklist_add(user_id: int, reason: str):
         logger.error(f"Erreur lors de l'ajout à la liste noire : {str(e)}")
         return None
 
-def blacklist_remove(user_id: int):
+async def blacklist_remove(user_id: int):
     try:
         client = get_supabase_client()
         response = client.table("blacklist").delete().eq("id_discord", user_id).execute()
@@ -67,7 +67,7 @@ def blacklist_remove(user_id: int):
         logger.error(f"Erreur lors de la suppression de la liste noire : {str(e)}")
         return None
     
-def get_allowed_channels(guild_id):
+async def get_allowed_channels(guild_id):
     try:
         client = get_supabase_client()
         response = client.table("server_settings").select("forbidden_channels").eq("id_discord", guild_id).execute()
@@ -76,7 +76,7 @@ def get_allowed_channels(guild_id):
         logger.error(f"Erreur lors de la récupération des canaux autorisés : {str(e)}")
         return None
     
-def get_allowed_roles(guild_id):
+async def get_allowed_roles(guild_id):
     try:
         client = get_supabase_client()
         response = client.table("server_settings").select("forbidden_roles").eq("id_discord", guild_id).execute()

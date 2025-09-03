@@ -24,7 +24,7 @@ async def setup(bot: discord.Client):
     @discord.app_commands.choices(mode=CHOICES)
     async def blacklist(
         interaction: discord.Interaction, 
-        mode: discord.app_commands.Choice = CHOICES[0],
+        mode: discord.app_commands.Choice[int],
         user_id: str = None, 
         reason: str = "Aucune raison fournie"):
         await interaction.response.defer(thinking=True, ephemeral=True)
@@ -36,7 +36,7 @@ async def setup(bot: discord.Client):
 
         match mode.value:
             case 0:
-                blacklisted_users = await get_blacklist(interaction)
+                blacklisted_users = await get_blacklist()
                 if not blacklisted_users:
                     await interaction.followup.send("Aucun utilisateur n'est actuellement blacklisté.", ephemeral=True)
                     return

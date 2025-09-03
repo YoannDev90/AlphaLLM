@@ -11,15 +11,19 @@ load_dotenv()
 logger = logging.getLogger(logger_name)
 
 MODELS = [
-        app_commands.Choice(name="Llama", value="cerebras/llama3.3-70b"),
+        app_commands.Choice(name="Llama 3.3 70b", value="cerebras/llama3.3-70b"),
         app_commands.Choice(name="GPT-5", value="openai/gpt-5"),
-        app_commands.Choice(name="Mistral", value="mistral/mistral-medium-latest"),
-        app_commands.Choice(name="Deepseek", value="openrouter/deepseek/deepseek-r1:free"),
-        app_commands.Choice(name="Qwen", value="cerebras/qwen-3-32b"),
-        app_commands.Choice(name="Gemini", value="openai/gemini-2.5-flash"),
+        app_commands.Choice(name="Mistral Medium", value="mistral/mistral-medium-latest"),
+        app_commands.Choice(name="Qwen 3 32b", value="cerebras/qwen-3-32b"),
+        app_commands.Choice(name="Gemini 2.5 Flash", value="openai/gemini-2.5-flash"),
         app_commands.Choice(name="Perplexity", value="openai/sonar"),
         app_commands.Choice(name="EvilGPT", value="openai/evil"),
-        app_commands.Choice(name="Grok", value="openai/grok-4")
+        app_commands.Choice(name="Grok 4", value="openai/grok-4"),
+        app_commands.Choice(name="Claude 3 5 Haiku", value="openai/claude-3-5-haiku-20241022"),
+        app_commands.Choice(name="Kimi K2 Instruct", value="openai/kimi-k2-instruct"),
+        app_commands.Choice(name="Deepseek", value="openai/deepseek-v3.1"),
+        app_commands.Choice(name="GLM 4.5", value="openai/glm-4.5"),
+        app_commands.Choice(name="Phi 4", value="openai/phi-4"),
     ]
 
 async def setup(bot: discord.Client):
