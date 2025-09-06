@@ -72,7 +72,7 @@ async def is_https_api_running():
     """Vérifie si l'API HTTPS est en cours d'exécution"""
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get("https://alphallm-api.onrender.com", timeout=30) as response:
+            async with session.get("https://alphallm-api.onrender.com/status", timeout=30) as response:
                 return response.status == 200
     except Exception:
         return False
@@ -94,7 +94,7 @@ async def ping_https_server(url: str, interval_range: tuple = (30, 300)):
         try:
             async with aiohttp.ClientSession() as session:
                 start_time = asyncio.get_event_loop().time()
-                async with session.get(url, timeout=10) as response:
+                async with session.get(url, timeout=30) as response:
                     end_time = asyncio.get_event_loop().time()
                     ping_time = (end_time - start_time) * 1000
                     

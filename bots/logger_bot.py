@@ -43,9 +43,6 @@ async def auto_purge():
             except discord.HTTPException:
                 continue
                 
-        if deleted_count > 0:
-            logger.info(f"Auto-purge : {deleted_count} messages supprimés")
-            
     except discord.HTTPException as e:
         logger.error(f"Erreur lors de la purge : {e}")
     except Exception as e:
