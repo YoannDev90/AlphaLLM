@@ -32,7 +32,7 @@ async def main():
         
         await asyncio.gather(
             start_api_async(),
-            ping_https_server("https://alphallm-api.onrender.com"),
+            ping_https_server("https://alphallm-api.onrender.com/status"),
             run_bot(),
             run_admin_bot(),
             run_logger_bot(),
