@@ -27,6 +27,12 @@ LOGGER_NAME = CONFIG.get("logger_name", "AlphaLLM")
 API_HOST = CONFIG.get("host", "0.0.0.0")
 API_PORT = CONFIG.get("port", 25692)
 
+# Configuration de sécurité API
+API_KEY_REQUIRED = CONFIG.get("api_key_required", True)
+MAX_REQUESTS_PER_MINUTE = CONFIG.get("max_requests_per_minute", 60)
+REQUEST_TIMEOUT = CONFIG.get("request_timeout", 30)
+API_KEYS = set(CONFIG.get("api_keys", []))
+
 # Configuration Discord
 GUILD_ID = int(CONFIG.get("admin_server", 0))
 OWNER_ID = int(CONFIG.get("dev_id", 0))

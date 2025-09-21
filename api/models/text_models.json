@@ -1,0 +1,128 @@
+{
+  "mistral": {
+    "name": "Mistral AI",
+    "description": "Modèle français de pointe pour la génération de texte",
+    "capabilities": ["chat", "completion", "multilingual"],
+    "languages": ["français", "anglais", "espagnol", "allemand", "italien"],
+    "max_tokens": 32768,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "openai": {
+    "name": "OpenAI GPT",
+    "description": "Modèle GPT d'OpenAI pour conversations et completion",
+    "capabilities": ["chat", "completion", "code", "reasoning"],
+    "languages": ["multilingue"],
+    "max_tokens": 128000,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "claude": {
+    "name": "Anthropic Claude",
+    "description": "Assistant IA constitutionnel d'Anthropic",
+    "capabilities": ["chat", "analysis", "reasoning", "code"],
+    "languages": ["multilingue"],
+    "max_tokens": 200000,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "llama": {
+    "name": "Meta LLaMA",
+    "description": "Modèle open-source de Meta pour diverses tâches",
+    "capabilities": ["chat", "completion", "code"],
+    "languages": ["multilingue"],
+    "max_tokens": 8192,
+    "supports_tools": false,
+    "supports_streaming": true
+  },
+  "deepseek": {
+    "name": "DeepSeek",
+    "description": "Modèle spécialisé en code et raisonnement",
+    "capabilities": ["chat", "code", "reasoning", "math"],
+    "languages": ["anglais", "chinois"],
+    "max_tokens": 32768,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "qwen": {
+    "name": "Alibaba Qwen",
+    "description": "Modèle multilingue d'Alibaba",
+    "capabilities": ["chat", "completion", "multilingual"],
+    "languages": ["chinois", "anglais", "japonais", "coréen"],
+    "max_tokens": 32768,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "gemini": {
+    "name": "Google Gemini",
+    "description": "Modèle multimodal de Google",
+    "capabilities": ["chat", "vision", "code", "reasoning"],
+    "languages": ["multilingue"],
+    "max_tokens": 2000000,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "grok": {
+    "name": "xAI Grok",
+    "description": "Modèle d'IA de xAI avec accès temps réel",
+    "capabilities": ["chat", "real-time", "humor"],
+    "languages": ["anglais"],
+    "max_tokens": 131072,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "perplexity": {
+    "name": "Perplexity AI",
+    "description": "Moteur de recherche IA avec sources",
+    "capabilities": ["search", "research", "citations"],
+    "languages": ["multilingue"],
+    "max_tokens": 4096,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "cohere": {
+    "name": "Cohere",
+    "description": "Modèle enterprise de Cohere",
+    "capabilities": ["chat", "classification", "embedding"],
+    "languages": ["multilingue"],
+    "max_tokens": 4096,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "evilgpt": {
+    "name": "EvilGPT",
+    "description": "Modèle personnalisé sans restrictions",
+    "capabilities": ["chat", "unrestricted"],
+    "languages": ["multilingue"],
+    "max_tokens": 4096,
+    "supports_tools": false,
+    "supports_streaming": true
+  },
+  "glm": {
+    "name": "ChatGLM",
+    "description": "Modèle bilingue chinois-anglais",
+    "capabilities": ["chat", "completion"],
+    "languages": ["chinois", "anglais"],
+    "max_tokens": 32768,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "kimi": {
+    "name": "Moonshot Kimi",
+    "description": "Modèle avec très long contexte",
+    "capabilities": ["chat", "long-context"],
+    "languages": ["chinois", "anglais"],
+    "max_tokens": 200000,
+    "supports_tools": true,
+    "supports_streaming": true
+  },
+  "phi": {
+    "name": "Microsoft Phi",
+    "description": "Petit modèle efficace de Microsoft",
+    "capabilities": ["chat", "code", "reasoning"],
+    "languages": ["anglais"],
+    "max_tokens": 131072,
+    "supports_tools": false,
+    "supports_streaming": true
+  }
+}

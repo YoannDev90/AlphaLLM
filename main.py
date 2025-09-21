@@ -17,7 +17,7 @@ from bots.grok_bot import run_grok_bot
 from bots.perplexity_bot import run_perplexity_bot
 from bots.qwen_bot import run_qwen_bot
 
-from api import start_api_async, ping_https_server
+from api.api import start_api_async, ping_https_server
 from utils.image_gen import start_image_queue
 from utils.config import LOGGER_NAME, get_logging_level
 import logging

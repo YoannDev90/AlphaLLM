@@ -1,13 +1,13 @@
 # from utils.image_gen import generate_image
-from models.mistral import mistral_chat
-from models.deepseek import deepseek_chat
-from models.qwen import qwen_chat
-from models.openai import openai_chat
-from models.evilgpt import evilgpt_chat
-from models.llama import llama_chat
-from models.gemini import gemini_chat
-from models.perplexity import perplexity_chat
-from models.grok import grok_chat
+from models.text.mistral import mistral_chat
+from models.text.deepseek import deepseek_chat
+from models.text.qwen import qwen_chat
+from models.text.openai import openai_chat
+from models.text.evilgpt import evilgpt_chat
+from models.text.llama import llama_chat
+from models.text.gemini import gemini_chat
+from models.text.perplexity import perplexity_chat
+from models.text.grok import grok_chat
 import logging
 from utils.config import LOGGER_NAME
 from dotenv import load_dotenv
