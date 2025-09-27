@@ -22,6 +22,11 @@ try:
     from bots.mistral_bot import bot as mistral_bot
     from bots.perplexity_bot import bot as perplexity_bot
     from bots.qwen_bot import bot as qwen_bot
+    from bots.claude_bot import bot as claude_bot
+    from bots.phi_bot import bot as phi_bot
+    from bots.kimi_bot import bot as kimi_bot
+    from bots.glm_bot import bot as glm_bot
+    from bots.command_bot import bot as command_bot
 except ImportError as e:
     logger.error(f"Erreur lors de l'import des bots: {e}")
 
@@ -50,6 +55,11 @@ def get_status() -> dict:
         ("Mistral", mistral_bot),
         ("Perplexity", perplexity_bot),
         ("Qwen", qwen_bot),
+        ("Claude", claude_bot),
+        ("Phi", phi_bot),
+        ("Kimi", kimi_bot),
+        ("GLM", glm_bot),
+        ("Commando", command_bot),
     ]
     
     status = {}

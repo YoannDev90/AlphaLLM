@@ -26,6 +26,17 @@ async def setup(bot: discord.Client):
         app_commands.Choice(name="Flux", value="pollinations/flux"),
         app_commands.Choice(name="Kontext", value="pollinations/kontext"),
         app_commands.Choice(name="Turbo", value="pollinations/turbo"),
+        app_commands.Choice(name="Seedream", value="pollinations/seedream"),
+        app_commands.Choice(name="NanoBanana", value="pollinations/nanobanana"),
+    ])
+    @app_commands.choices(size=[
+        app_commands.Choice(name="Square (1024x1024)", value="1024x1024"),
+        app_commands.Choice(name="Landscape (2048x1024)", value="2048x1024"),
+        app_commands.Choice(name="Portrait (1024x2048)", value="1024x2048"),
+        app_commands.Choice(name="Small square (768x768)", value="768x768"),
+        app_commands.Choice(name="Small landscape (1536x768)", value="1536x768"),
+        app_commands.Choice(name="Small portrait (768x1536)", value="768x1536"),
+        app_commands.Choice(name="Large square (2048x2048)", value="2048x2048")
     ])
     async def image(
         interaction: discord.Interaction,

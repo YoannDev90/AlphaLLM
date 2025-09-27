@@ -26,6 +26,7 @@ LOGGER_NAME = CONFIG.get("logger_name", "AlphaLLM")
 # Configuration API
 API_HOST = CONFIG.get("host", "0.0.0.0")
 API_PORT = CONFIG.get("port", 25692)
+API_URL = CONFIG.get("api_url", "https://alphallm-api.onrender.com")
 
 # Configuration de sécurité API
 API_KEY_REQUIRED = CONFIG.get("api_key_required", True)

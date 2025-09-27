@@ -16,10 +16,15 @@ from bots.deepseek_bot import run_deepseek_bot
 from bots.grok_bot import run_grok_bot
 from bots.perplexity_bot import run_perplexity_bot
 from bots.qwen_bot import run_qwen_bot
+from bots.claude_bot import run_claude_bot
+from bots.phi_bot import run_phi_bot
+from bots.kimi_bot import run_kimi_bot
+from bots.glm_bot import run_glm_bot
+from bots.command_bot import run_command_bot
 
 from api.api import start_api_async, ping_https_server
 from utils.image_gen import start_image_queue
-from utils.config import LOGGER_NAME, get_logging_level
+from utils.config import LOGGER_NAME, get_logging_level, API_URL
 import logging
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -32,7 +37,7 @@ async def main():
         
         await asyncio.gather(
             start_api_async(),
-            ping_https_server("https://alphallm-api.onrender.com/status"),
+            ping_https_server(API_URL),
             run_bot(),
             run_admin_bot(),
             run_logger_bot(),
@@ -44,7 +49,12 @@ async def main():
             run_deepseek_bot(),
             run_grok_bot(),
             run_perplexity_bot(),
-            run_qwen_bot()
+            run_qwen_bot(),
+            run_claude_bot(),
+            run_phi_bot(),
+            run_kimi_bot(),
+            run_glm_bot(),
+            run_command_bot()
         )
 
     except (SystemExit, KeyboardInterrupt):
@@ -54,7 +64,6 @@ async def main():
     finally:
         tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         if tasks:
-            logger.info(f"Nettoyage de {len(tasks)} tâches...")
             for task in tasks:
                 task.cancel()
             try:
@@ -64,7 +73,6 @@ async def main():
         logger.info("Nettoyage terminé.")
 
 if __name__ == "__main__":
-
     try:
         with open("stop.json", "r") as f:
             data = json.load(f)
