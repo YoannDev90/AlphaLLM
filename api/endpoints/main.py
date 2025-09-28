@@ -49,4 +49,4 @@ async def status_check():
         return status_result
     except Exception as e:
         logger.error(f"Erreur lors du point de contrôle de statut : {str(e)}")
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": "An internal server error occurred."}
