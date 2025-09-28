@@ -11,15 +11,15 @@ logger = logging.getLogger(logger_name)
 
 load_dotenv()
 
-async def llama_chat(messages, parameters):
-    try:        
+async def command_chat(messages, parameters):
+    try:     
         start_time = datetime.now()
         opik_logger = OpikLogger()
         litellm.callbacks = [opik_logger]
 
         params = {
-            "model": "cerebras/llama3.3-70b",
-            "api_key": os.getenv("CEREBRAS_API_KEY"),
+            "model": "command-r",
+            "api_key": os.getenv("COHERE_API_KEY"),
             "messages": messages
         }
         
@@ -53,10 +53,10 @@ async def llama_chat(messages, parameters):
         else:
             return response_info
     except Exception as e:
-        logger.error(f"Erreur lors de l'appel à Llama : {e}")
+        logger.error(f"Erreur lors de l'appel à Cohere : {e}")
         logger.error(f"Type d'erreur: {type(e).__name__}")
         return {
-            "response": f"Erreur lors de l'appel à Llama : {e}",
+            "response": f"Erreur lors de l'appel à Cohere : {e}",
             "usage": 0,
             "model": "error",
             "elapsed_time": "0 seconds"

@@ -1,5 +1,6 @@
 import discord
 import logging
+import re
 from utils.config import logger_name
 from utils.database import get_blacklist, get_allowed_channels, get_allowed_roles
 from utils.ai_process import process_ai_response
@@ -15,8 +16,6 @@ def is_bot_mentioned(bot, message):
         if message.mention_everyone:
             return False
         if bot.user.mentioned_in(message):
-            return True
-        if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
             return True
         return False
 
@@ -49,12 +48,18 @@ async def is_role_allowed(message):
         return
     return
 
-async def message_process(bot, message):
-    if message.author.bot:
-        return
-    
-    if not message.author.bot:
-        logger.debug(f"Message reçu de {message.author}: {message.content}")
+async def dm_message_process(bot, message):
+        await is_blacklist(message)
+
+        new_query(message.author.id)
+        new_interaction(message.author.id)
+
+        query = message.content.strip()
+
+        async with message.channel.typing():
+            await process_ai_response(bot, query, message)
+
+async def guild_message_process(bot, message):    
         bot_mentioned = is_bot_mentioned(bot, message)
 
         if bot_mentioned:
@@ -71,6 +76,18 @@ async def message_process(bot, message):
 
             async with message.channel.typing():
                 await process_ai_response(bot, query, message)
+
+async def message_process(bot, message):
+    if message.author.bot:
+        return
+    
+    if not message.author.bot:
+        logger.debug(f"Message reçu de {message.author}: {message.content}")
+
+        if message.guild:
+            await guild_message_process(bot, message)
+        else:
+            await dm_message_process(bot, message)
 
 async def ask_cmd_process(bot, query, model, internet, interaction):
     new_query(interaction.user.id)
@@ -125,6 +142,9 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
             case "openai/glm-4.5":
                 from models.text.glm import glm_chat
                 resp = await glm_chat(messages, parameters)
+            case "cohere/command-r":
+                from models.text.command import command_chat
+                resp = await command_chat(messages, parameters)
             case _:
                 from models.text.llama import llama_chat
                 resp = await llama_chat(messages, parameters)
@@ -134,7 +154,7 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
         await smart_long_messages_interaction(interaction, response_text)
         
     except Exception as e:
-        logger.error(f"Error in ask_cmd_process: {e}")
+        logger.error(f"Error in processing ask command: {e}")
         error_msg = "An error occurred while processing your request."
         if interaction.response.is_done():
             await interaction.followup.send(error_msg)

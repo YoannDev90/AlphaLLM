@@ -1,12 +1,9 @@
-"""
-Endpoint de génération de texte de l'API AlphaLLM
-"""
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Optional
 import asyncio
 
-from . import get_api_key, logger, REQUEST_TIMEOUT
+from . import logger, REQUEST_TIMEOUT
+from api.utils.security_utils import get_api_key
 
 router = APIRouter()
 
@@ -16,12 +13,6 @@ async def generate_text(
     prompt: str,
     api_key: Optional[str] = Depends(get_api_key)
 ):
-    """
-    Génère un texte avec timeout et authentification
-    
-    - **model**: Modèle d'IA à utiliser (mistral, openai, llama, deepseek, qwen, etc.)
-    - **prompt**: Texte d'entrée pour la génération
-    """
     try:
         from models.text.mistral import mistral_chat
         from models.text.deepseek import deepseek_chat
@@ -50,7 +41,6 @@ async def generate_text(
             "raw": False
         }
         
-        # Fonction de génération selon le modèle
         async def generate_response():
             match model.lower():
                 case "mistral":
@@ -100,7 +90,6 @@ async def generate_text(
                     logger.info("Réponse générée par Llama (modèle par défaut)")
             return response
         
-        # Applique un timeout sur la génération de texte
         response = await asyncio.wait_for(
             generate_response(),
             timeout=REQUEST_TIMEOUT

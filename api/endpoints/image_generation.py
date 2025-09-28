@@ -1,14 +1,11 @@
-"""
-Endpoints de génération d'images de l'API AlphaLLM
-"""
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import Response
 from typing import Optional
 import asyncio
 import base64
 
-from . import get_api_key, logger, REQUEST_TIMEOUT
+from . import logger, REQUEST_TIMEOUT
+from api.utils.security_utils import get_api_key
 
 router = APIRouter()
 
@@ -19,13 +16,6 @@ async def generate_image(
     size: str,
     api_key: Optional[str] = Depends(get_api_key)
 ):
-    """
-    Génère une image avec timeout et authentification
-    
-    - **model**: Modèle d'IA à utiliser pour la génération
-    - **prompt**: Description de l'image à générer
-    - **size**: Taille de l'image souhaitée
-    """
     try:
         from utils.image_gen import generate_image
         
@@ -34,19 +24,15 @@ async def generate_image(
             timeout=REQUEST_TIMEOUT * 2
         )
         
-        # Vérifiez le type de réponse
         if response is None:
             return {"status": "error", "message": "Échec de la génération d'image"}
         
-        # Si response est un tuple (image_data, bool)
         if isinstance(response, tuple):
             image_data, is_url = response
             
             if is_url or isinstance(image_data, str):
-                # Si c'est une URL ou une chaîne, retournez-la directement
                 return {"status": "success", "image_url": image_data}
             elif isinstance(image_data, bytes):
-                # Si ce sont des bytes, encodez en base64
                 image_b64 = base64.b64encode(image_data).decode('utf-8')
                 return {
                     "status": "success", 
@@ -57,7 +43,6 @@ async def generate_image(
             else:
                 return {"status": "error", "message": "Format d'image non supporté"}
         else:
-            # Gestion d'autres types de réponse
             if isinstance(response, str):
                 return {"status": "success", "image_url": response}
             elif isinstance(response, bytes):

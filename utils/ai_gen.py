@@ -75,6 +75,26 @@ async def chat(messages, bot, user, parameters):
                 logger.debug("Using Perplexity model for chat")
                 response = await perplexity_chat(messages, parameters)
                 logger.info("Réponse générée par Perplexity")
+            case 1413827193670467634: # Claude bot ID
+                from models.text.claude import claude_chat
+                response = await claude_chat(messages, parameters)
+                logger.info("Réponse générée par Claude")
+            case 1413831535940993044: #Command bot ID
+                from models.text.command import command_chat
+                response = await command_chat(messages, parameters)
+                logger.info("Réponse générée par Command")
+            case 1413827975325159454: #GLM bot ID
+                from models.text.glm import glm_chat
+                response = await glm_chat(messages, parameters)
+                logger.info("Réponse générée par GLM")
+            case 1413827727408238642: #Kimi bot ID
+                from models.text.kimi import kimi_chat
+                response = await kimi_chat(messages, parameters)
+                logger.info("Réponse générée par Kimi")
+            case 1413825696043630594: #Phi bot ID
+                from models.text.phi import phi_chat
+                response = await phi_chat(messages, parameters)
+                logger.info("Réponse générée par Phi")
             case _: # AlphaLLM bot ID
                 response = await llama_chat(messages, parameters)
                 logger.info("Réponse générée par Llama")

@@ -5,7 +5,7 @@ Gère les variables d'environnement et la configuration TOML
 import os
 import logging
 from dotenv import load_dotenv
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import tomllib
 
 
@@ -139,3 +139,43 @@ def load_preprompt():
 
 def load_image_enhancer_preprompt():
     return get_image_enhancer_preprompt()
+
+
+def update_log_level(new_level: str) -> bool:
+    config_path = "config.toml"
+    
+    valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+    if new_level.upper() not in valid_levels:
+        return False
+    
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+        
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if stripped.startswith('logging_level'):
+                indent = line[:len(line) - len(line.lstrip())]
+                comment_pos = line.find('#')
+                comment = line[comment_pos:] if comment_pos != -1 else ''
+                
+                lines[i] = f'{indent}logging_level = "{new_level.upper()}" {comment}'.rstrip() + '\n'
+                break
+        
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+        
+        return True
+    
+    except Exception as e:
+        print(f"Erreur lors de la modification du fichier config.toml: {e}")
+        return False
+
+
+def get_current_log_level() -> Optional[str]:
+    try:
+        config = load_toml_config("config.toml")
+        return config.get("logging_level")
+    except Exception as e:
+        print(f"Erreur lors de la lecture du niveau de log: {e}")
+        return None

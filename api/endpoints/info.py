@@ -1,22 +1,11 @@
-"""
-Endpoints d'informations de l'API AlphaLLM
-"""
-
 from fastapi import APIRouter, Depends
 from typing import Optional
-
-from . import get_api_key, verify_api_access, load_models_data
+from api.utils.models_utils import load_models_data
 
 router = APIRouter()
 
 @router.get("/text-models", tags=["info"])
 async def get_text_models():
-    """
-    Retourne la liste des modèles de texte disponibles
-    
-    Fournit une liste complète des modèles d'IA texte supportés,
-    avec leurs capacités et caractéristiques principales.
-    """
     text_models = load_models_data("text")
     
     return {
@@ -28,12 +17,6 @@ async def get_text_models():
 
 @router.get("/image-models", tags=["info"])
 async def get_image_models():
-    """
-    Retourne la liste des modèles d'image disponibles
-    
-    Fournit une liste complète des modèles d'IA image supportés,
-    avec leurs capacités, tailles supportées et caractéristiques.
-    """
     image_models = load_models_data("image")
     
     return {
@@ -47,12 +30,6 @@ async def get_image_models():
 
 @router.get("/api/info", tags=["info"])
 async def api_info():
-    """
-    Informations sur l'API et l'authentification
-    
-    Retourne des informations détaillées sur la configuration de l'API,
-    les limites de taux, les méthodes d'authentification et les endpoints disponibles.
-    """
     from utils.config import API_KEY_REQUIRED, MAX_REQUESTS_PER_MINUTE, REQUEST_TIMEOUT
     
     return {
@@ -63,7 +40,7 @@ async def api_info():
             "window_seconds": 60
         },
         "timeout_seconds": REQUEST_TIMEOUT,
-        "authenticated": False,  # Pas d'authentification requise pour cet endpoint
+        "authenticated": False,
         "endpoints": {
             "/": "Point d'entrée principal",
             "/status": "Statut de l'API",
