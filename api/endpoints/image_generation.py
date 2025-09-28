@@ -64,4 +64,4 @@ async def generate_image(
         )
     except Exception as e:
         logger.error(f"Erreur lors de la génération de l'image : {str(e)}")
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": "Erreur interne lors de la génération d'image"}
