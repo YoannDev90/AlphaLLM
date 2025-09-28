@@ -10,6 +10,8 @@ jigsawstack
 websocket-client
 uvicorn
 fastapi
+slowapi
+python-multipart
 litellm
 cloudinary
 opik

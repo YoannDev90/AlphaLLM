@@ -24,6 +24,7 @@ MODELS = [
         app_commands.Choice(name="Deepseek", value="openai/deepseek-v3.1"),
         app_commands.Choice(name="GLM 4.5", value="openai/glm-4.5"),
         app_commands.Choice(name="Phi 4", value="openai/phi-4"),
+        app_commands.Choice(name="Command R", value="cohere/command-r")
     ]
 
 async def setup(bot: discord.Client):

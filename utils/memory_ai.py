@@ -125,10 +125,10 @@ async def get_history(user_id: int, server_id: int, limit: int = 100) -> List[Di
         logger.error(f"Erreur de récupération: {str(e)}")
         return []
 
-async def clear_history(user_id: int, server_id: int) -> None:
+async def clear_remote_history(user_id: int) -> None:
     try:
         async with _PG_POOL.acquire() as conn:
-            await conn.execute('DELETE FROM memories WHERE user_id = $1 AND server_id = $2', user_id, server_id)
+            await conn.execute('DELETE FROM memories WHERE user_id = $1', user_id)
     except Exception as e:
         logger.error(f"Erreur de suppression: {str(e)}")
         raise

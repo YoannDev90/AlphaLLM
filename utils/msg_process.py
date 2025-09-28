@@ -1,5 +1,6 @@
 import discord
 import logging
+import re
 from utils.config import logger_name
 from utils.database import get_blacklist, get_allowed_channels, get_allowed_roles
 from utils.ai_process import process_ai_response
@@ -15,8 +16,6 @@ def is_bot_mentioned(bot, message):
         if message.mention_everyone:
             return False
         if bot.user.mentioned_in(message):
-            return True
-        if message.guild.me and any(role in message.role_mentions for role in message.guild.me.roles):
             return True
         return False
 
@@ -49,12 +48,18 @@ async def is_role_allowed(message):
         return
     return
 
-async def message_process(bot, message):
-    if message.author.bot:
-        return
-    
-    if not message.author.bot:
-        logger.debug(f"Message reçu de {message.author}: {message.content}")
+async def dm_message_process(bot, message):
+        await is_blacklist(message)
+
+        new_query(message.author.id)
+        new_interaction(message.author.id)
+
+        query = message.content.strip()
+
+        async with message.channel.typing():
+            await process_ai_response(bot, query, message)
+
+async def guild_message_process(bot, message):    
         bot_mentioned = is_bot_mentioned(bot, message)
 
         if bot_mentioned:
@@ -72,6 +77,18 @@ async def message_process(bot, message):
             async with message.channel.typing():
                 await process_ai_response(bot, query, message)
 
+async def message_process(bot, message):
+    if message.author.bot:
+        return
+    
+    if not message.author.bot:
+        logger.debug(f"Message reçu de {message.author}: {message.content}")
+
+        if message.guild:
+            await guild_message_process(bot, message)
+        else:
+            await dm_message_process(bot, message)
+
 async def ask_cmd_process(bot, query, model, internet, interaction):
     new_query(interaction.user.id)
     new_interaction(interaction.user.id)
@@ -87,46 +104,49 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
         
         match model:
             case "cerebras/llama3.3-70b":
-                from models.llama import llama_chat
+                from models.text.llama import llama_chat
                 resp = await llama_chat(messages, parameters)
             case "openai/gpt-5":
-                from models.openai import openai_chat
+                from models.text.openai import openai_chat
                 resp = await openai_chat(messages, parameters)
             case "mistral/mistral-medium-latest":
-                from models.mistral import mistral_chat
+                from models.text.mistral import mistral_chat
                 resp = await mistral_chat(messages, parameters)
             case "openai/deepseek-v3.1":
-                from models.deepseek import deepseek_chat
+                from models.text.deepseek import deepseek_chat
                 resp = await deepseek_chat(messages, parameters)
             case "cerebras/qwen-3-32b":
-                from models.qwen import qwen_chat
+                from models.text.qwen import qwen_chat
                 resp = await qwen_chat(messages, parameters)
             case "openai/gemini-2.5-flash":
-                from models.gemini import gemini_chat
+                from models.text.gemini import gemini_chat
                 resp = await gemini_chat(messages, parameters)
             case "openai/sonar":
-                from models.perplexity import perplexity_chat
+                from models.text.perplexity import perplexity_chat
                 resp = await perplexity_chat(messages, parameters)
             case "openai/evil":
-                from models.evilgpt import evilgpt_chat
+                from models.text.evilgpt import evilgpt_chat
                 resp = await evilgpt_chat(messages, parameters)
             case "openai/grok-4":
-                from models.grok import grok_chat
+                from models.text.grok import grok_chat
                 resp = await grok_chat(messages, parameters)
             case "openai/phi-4":
-                from models.phi import phi_chat
+                from models.text.phi import phi_chat
                 resp = await phi_chat(messages, parameters)
             case "openai/claude-3-5-haiku-20241022":
-                from models.claude import claude_chat
+                from models.text.claude import claude_chat
                 resp = await claude_chat(messages, parameters)
             case "openai/kimi-k2-instruct":
-                from models.kimi import kimi_chat
+                from models.text.kimi import kimi_chat
                 resp = await kimi_chat(messages, parameters)
             case "openai/glm-4.5":
-                from models.glm import glm_chat
+                from models.text.glm import glm_chat
                 resp = await glm_chat(messages, parameters)
+            case "cohere/command-r":
+                from models.text.command import command_chat
+                resp = await command_chat(messages, parameters)
             case _:
-                from models.llama import llama_chat
+                from models.text.llama import llama_chat
                 resp = await llama_chat(messages, parameters)
 
         response_text = resp.get("response", "No response generated")
@@ -134,7 +154,7 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
         await smart_long_messages_interaction(interaction, response_text)
         
     except Exception as e:
-        logger.error(f"Error in ask_cmd_process: {e}")
+        logger.error(f"Error in processing ask command: {e}")
         error_msg = "An error occurred while processing your request."
         if interaction.response.is_done():
             await interaction.followup.send(error_msg)

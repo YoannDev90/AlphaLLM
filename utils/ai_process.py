@@ -78,6 +78,7 @@ async def process_ai_response(bot, query, message):
                 await message.channel.send(file=discord.File(io.BytesIO(response_text), filename="image.png"))
             elif isinstance(response_text, str):
                 response_text = detect_and_convert_tables(response_text)
+                
                 await smart_long_messages(message.channel, response_text)
                 logger.debug(f"Réponse envoyée avec succès.")
             else:
