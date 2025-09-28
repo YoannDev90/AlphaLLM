@@ -39,7 +39,7 @@ async def read_root(request: Request):
         }
     except Exception as e:
         logger.error(f"Erreur lors de la lecture de la racine : {str(e)}")
-        return {"status": "error", "message": str(e)}
+        return {"status": "error", "message": "An internal server error occurred."}
 
 @router.get("/status", tags=["general"])
 async def status_check():
