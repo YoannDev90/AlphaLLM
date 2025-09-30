@@ -143,8 +143,8 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
                 from models.text.glm import glm_chat
                 resp = await glm_chat(messages, parameters)
             case "cohere/command-r":
-                from models.text.command import command_chat
-                resp = await command_chat(messages, parameters)
+                from models.text.cohere import cohere_chat
+                resp = await cohere_chat(messages, parameters)
             case _:
                 from models.text.llama import llama_chat
                 resp = await llama_chat(messages, parameters)

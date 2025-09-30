@@ -80,8 +80,8 @@ async def chat(messages, bot, user, parameters):
                 response = await claude_chat(messages, parameters)
                 logger.info("Réponse générée par Claude")
             case 1413831535940993044: #Command bot ID
-                from models.text.command import command_chat
-                response = await command_chat(messages, parameters)
+                from models.text.cohere import cohered_chat
+                response = await cohere_chat(messages, parameters)
                 logger.info("Réponse générée par Command")
             case 1413827975325159454: #GLM bot ID
                 from models.text.glm import glm_chat
