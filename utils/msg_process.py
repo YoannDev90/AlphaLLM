@@ -106,48 +106,120 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
             case "cerebras/llama3.3-70b":
                 from models.text.llama import llama_chat
                 resp = await llama_chat(messages, parameters)
+                logger.info("Réponse générée par Llama")
             case "openai/gpt-5":
                 from models.text.openai import openai_chat
                 resp = await openai_chat(messages, parameters)
+                logger.info("Réponse générée par OpenAI")
             case "mistral/mistral-medium-latest":
                 from models.text.mistral import mistral_chat
                 resp = await mistral_chat(messages, parameters)
+                logger.info("Réponse générée par Mistral")
             case "openai/deepseek-v3.1":
                 from models.text.deepseek import deepseek_chat
                 resp = await deepseek_chat(messages, parameters)
+                logger.info("Réponse générée par DeepSeek")
             case "cerebras/qwen-3-32b":
                 from models.text.qwen import qwen_chat
                 resp = await qwen_chat(messages, parameters)
+                logger.info("Réponse générée par Qwen")
             case "openai/gemini-2.5-flash":
                 from models.text.gemini import gemini_chat
                 resp = await gemini_chat(messages, parameters)
+                logger.info("Réponse générée par Gemini")
             case "openai/sonar":
                 from models.text.perplexity import perplexity_chat
                 resp = await perplexity_chat(messages, parameters)
+                logger.info("Réponse générée par Perplexity")
             case "openai/evil":
                 from models.text.evilgpt import evilgpt_chat
                 resp = await evilgpt_chat(messages, parameters)
+                logger.info("Réponse générée par EvilGPT")
             case "openai/grok-4":
                 from models.text.grok import grok_chat
                 resp = await grok_chat(messages, parameters)
+                logger.info("Réponse générée par Grok")
             case "openai/phi-4":
                 from models.text.phi import phi_chat
                 resp = await phi_chat(messages, parameters)
+                logger.info("Réponse générée par Phi")
             case "openai/claude-3-5-haiku-20241022":
                 from models.text.claude import claude_chat
                 resp = await claude_chat(messages, parameters)
+                logger.info("Réponse générée par Claude")
             case "openai/kimi-k2-instruct":
                 from models.text.kimi import kimi_chat
                 resp = await kimi_chat(messages, parameters)
+                logger.info("Réponse générée par Kimi")
             case "openai/glm-4.5":
                 from models.text.glm import glm_chat
                 resp = await glm_chat(messages, parameters)
+                logger.info("Réponse générée par GLM")
             case "cohere/command-r":
                 from models.text.cohere import cohere_chat
                 resp = await cohere_chat(messages, parameters)
+                logger.info("Réponse générée par Cohere")
             case _:
-                from models.text.llama import llama_chat
-                resp = await llama_chat(messages, parameters)
+                from utils.llm_selector import llm_selector
+                selected_model = await llm_selector(query)
+                logger.info(f"Modèle sélectionné par LLM Selector: {selected_model}")
+                match selected_model:
+                    case "cerebras/llama3.3-70b":
+                        from models.text.llama import llama_chat
+                        resp = await llama_chat(messages, parameters)
+                        logger.info("Réponse générée par Llama")
+                    case "openai/gpt-5":
+                        from models.text.openai import openai_chat
+                        resp = await openai_chat(messages, parameters)
+                        logger.info("Réponse générée par OpenAI")
+                    case "mistral/mistral-medium-latest":
+                        from models.text.mistral import mistral_chat
+                        resp = await mistral_chat(messages, parameters)
+                        logger.info("Réponse générée par Mistral")
+                    case "cerebras/qwen-3-32b":
+                        from models.text.qwen import qwen_chat
+                        resp = await qwen_chat(messages, parameters)
+                        logger.info("Réponse générée par Qwen")
+                    case "openai/gemini-2.5-flash":
+                        from models.text.gemini import gemini_chat
+                        resp = await gemini_chat(messages, parameters)
+                        logger.info("Réponse générée par Gemini")
+                    case "openai/sonar":
+                        from models.text.perplexity import perplexity_chat
+                        resp = await perplexity_chat(messages, parameters)
+                        logger.info("Réponse générée par Perplexity")
+                    case "openai/evil":
+                        from models.text.evilgpt import evilgpt_chat
+                        resp = await evilgpt_chat(messages, parameters)
+                        logger.info("Réponse générée par EvilGPT")
+                    case "openai/grok-4":
+                        from models.text.grok import grok_chat
+                        resp = await grok_chat(messages, parameters)
+                        logger.info("Réponse générée par Grok")
+                    case "openai/claude-3-5-haiku-20241022":
+                        from models.text.claude import claude_chat
+                        resp = await claude_chat(messages, parameters)
+                        logger.info("Réponse générée par Claude")
+                    case "openai/kimi-k2-instruct":
+                        from models.text.kimi import kimi_chat
+                        resp = await kimi_chat(messages, parameters)
+                        logger.info("Réponse générée par Kimi")
+                    case "openai/deepseek-v3.1":
+                        from models.text.deepseek import deepseek_chat
+                        resp = await deepseek_chat(messages, parameters)
+                        logger.info("Réponse générée par DeepSeek")
+                    case "openai/glm-4.5":
+                        from models.text.glm import glm_chat
+                        resp = await glm_chat(messages, parameters)
+                        logger.info("Réponse générée par GLM")
+                    case "openai/phi-4":
+                        from models.text.phi import phi_chat
+                        resp = await phi_chat(messages, parameters)
+                        logger.info("Réponse générée par Phi")
+                    case "cohere/command-r":
+                        from models.text.cohere import cohere_chat
+                        resp = await cohere_chat(messages, parameters)
+                        logger.info("Réponse générée par Cohere")
 
         response_text = resp.get("response", "No response generated")
         response_text = detect_and_convert_tables(response_text)

@@ -67,6 +67,10 @@ def get_image_enhancer_preprompt() -> str:
     """Retourne le preprompt pour l'amélioration d'images"""
     return CONFIG.get("image_enhancer_preprompt", "")
 
+def get_llm_selector_preprompt() -> str:
+    """Retourne le preprompt pour le sélecteur de modèle LLM"""
+    return CONFIG.get("llm_selector_preprompt", "")
+
 def get_status_messages() -> list:
     """Retourne les messages de statut"""
     return CONFIG.get("status", [])
@@ -139,7 +143,6 @@ def load_preprompt():
 
 def load_image_enhancer_preprompt():
     return get_image_enhancer_preprompt()
-
 
 def update_log_level(new_level: str) -> bool:
     config_path = "config.toml"
