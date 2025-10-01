@@ -13,6 +13,7 @@
 - Void AI
 - Cloudinary
 - Cloudflare Workers
+- Hackclub AI
 
 ---
 
