@@ -1,12 +1,12 @@
 
 *.pyc
 .env
+.vscode
 __pycache__
-venv
+.venv
 logs.log
 translations
 polls
 publish.sh
-reset_venv.sh
 crowdin.yml
 config.toml

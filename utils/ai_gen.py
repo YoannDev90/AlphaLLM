@@ -1,13 +1,5 @@
 # from utils.image_gen import generate_image
-from models.text.mistral import mistral_chat
-from models.text.deepseek import deepseek_chat
-from models.text.qwen import qwen_chat
-from models.text.openai import openai_chat
-from models.text.evilgpt import evilgpt_chat
-from models.text.llama import llama_chat
-from models.text.gemini import gemini_chat
-from models.text.perplexity import perplexity_chat
-from models.text.grok import grok_chat
+from utils.llm_selector import llm_selector
 import logging
 from utils.config import LOGGER_NAME
 from dotenv import load_dotenv
@@ -17,6 +9,21 @@ import json
 import aiohttp
 import discord
 import tomllib
+
+from models.text.mistral import mistral_chat
+from models.text.deepseek import deepseek_chat
+from models.text.gemini import gemini_chat
+from models.text.qwen import qwen_chat
+from models.text.openai import openai_chat
+from models.text.evilgpt import evilgpt_chat
+from models.text.grok import grok_chat
+from models.text.llama import llama_chat
+from models.text.perplexity import perplexity_chat
+from models.text.claude import claude_chat
+from models.text.cohere import cohere_chat
+from models.text.glm import glm_chat
+from models.text.kimi import kimi_chat
+from models.text.phi import phi_chat
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -76,28 +83,67 @@ async def chat(messages, bot, user, parameters):
                 response = await perplexity_chat(messages, parameters)
                 logger.info("Réponse générée par Perplexity")
             case 1413827193670467634: # Claude bot ID
-                from models.text.claude import claude_chat
                 response = await claude_chat(messages, parameters)
                 logger.info("Réponse générée par Claude")
             case 1413831535940993044: #Command bot ID
-                from models.text.command import command_chat
-                response = await command_chat(messages, parameters)
+                response = await cohere_chat(messages, parameters)
                 logger.info("Réponse générée par Command")
             case 1413827975325159454: #GLM bot ID
-                from models.text.glm import glm_chat
                 response = await glm_chat(messages, parameters)
                 logger.info("Réponse générée par GLM")
             case 1413827727408238642: #Kimi bot ID
-                from models.text.kimi import kimi_chat
                 response = await kimi_chat(messages, parameters)
                 logger.info("Réponse générée par Kimi")
             case 1413825696043630594: #Phi bot ID
-                from models.text.phi import phi_chat
                 response = await phi_chat(messages, parameters)
                 logger.info("Réponse générée par Phi")
             case _: # AlphaLLM bot ID
-                response = await llama_chat(messages, parameters)
-                logger.info("Réponse générée par Llama")
+                logger.debug("Using LLM Selector to choose the best model")
+                selected_model = await llm_selector(messages[-1]['content'])
+                logger.info(f"Model selected by LLM Selector: {selected_model}")
+                match selected_model:
+                    case "cerebras/llama3.3-70b":
+                        response = await llama_chat(messages, parameters)
+                        logger.info("Réponse générée par Llama")
+                    case "openai/gpt-5":
+                        response = await openai_chat(messages, parameters)
+                        logger.info("Réponse générée par OpenAI")
+                    case "mistral/mistral-medium-latest":
+                        response = await mistral_chat(messages, parameters)
+                        logger.info("Réponse générée par Mistral")
+                    case "cerebras/qwen-3-32b":
+                        response = await qwen_chat(messages, parameters)
+                        logger.info("Réponse générée par Qwen")
+                    case "openai/gemini-2.5-flash":
+                        response = await gemini_chat(messages, parameters)
+                        logger.info("Réponse générée par Gemini")
+                    case "openai/sonar":
+                        response = await perplexity_chat(messages, parameters)
+                        logger.info("Réponse générée par Perplexity")
+                    case "openai/evil":
+                        response = await evilgpt_chat(messages, parameters)
+                        logger.info("Réponse générée par EvilGPT")
+                    case "openai/grok-4":
+                        response = await grok_chat(messages, parameters)
+                        logger.info("Réponse générée par Grok")
+                    case "openai/claude-3-5-haiku-20241022":
+                        response = await claude_chat(messages, parameters)
+                        logger.info("Réponse générée par Claude")
+                    case "openai/kimi-k2-instruct":
+                        response = await kimi_chat(messages, parameters)
+                        logger.info("Réponse générée par Kimi")
+                    case "openai/deepseek-v3.1":
+                        response = await deepseek_chat(messages, parameters)
+                        logger.info("Réponse générée par DeepSeek")
+                    case "openai/glm-4.5":
+                        response = await glm_chat(messages, parameters)
+                        logger.info("Réponse générée par GLM")
+                    case "openai/phi-4":
+                        response = await phi_chat(messages, parameters)
+                        logger.info("Réponse générée par Phi")
+                    case "cohere/command-r":
+                        response = await cohere_chat(messages, parameters)
+                        logger.info("Réponse générée par Cohere")
 
         return response
 
