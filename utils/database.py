@@ -8,10 +8,7 @@ logger = logging.getLogger("AlphaLLM")
 _supabase_client: Client = None
 
 def get_supabase_client() -> Client:
-    """
-    Retourne l'instance du client Supabase (singleton)
-    Crée l'instance si elle n'existe pas encore
-    """
+
     global _supabase_client
     
     if _supabase_client is None:
