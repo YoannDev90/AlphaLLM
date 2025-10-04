@@ -4,11 +4,30 @@ from utils.config import LOGGER_NAME
 from utils.user_config import get_audio_gen_active, get_audio_voice
 from utils.ai_utils import generate_response
 from utils.table_converter import detect_and_convert_tables
+from utils.audio_gen import send_voice_message
 import discord
 import io
+import json
 import re
 
 logger = logging.getLogger(LOGGER_NAME)
+
+MODELS_LIST = [
+    "mistral",
+    "openai", 
+    "claude",
+    "llama",
+    "deepseek",
+    "qwen",
+    "gemini", 
+    "grok",
+    "perplexity",
+    "cohere",
+    "evilgpt",
+    "glm",
+    "kimi", 
+    "phi"
+]
 
 async def process_ai_response(bot, query, message):
     try:
@@ -17,26 +36,56 @@ async def process_ai_response(bot, query, message):
             "preprompt": True, 
             "tools": False, 
             "internet": False, 
-            "raw": False
+            "audio" : False,
+            "raw": False,
+            "model": None
         }
 
         while True:
-            if query.endswith(" -h"):
+            command_found = False
+            
+            model_match = re.search(r' -m \{([^}]+)\}$', query)
+            if model_match:
+                model_name = model_match.group(1)
+                if model_name.lower() in MODELS_LIST:
+                    parameters["model"] = model_name
+                    query = query[:model_match.start()].rstrip()
+                    logger.info(f"Modèle spécifié via commande: {model_name}")
+                    command_found = True
+                else:
+                    logger.warning(f"Modèle spécifié inconnu: {model_name}")
+            elif query.endswith(" -h"):
                 query = query[:-3].rstrip()
                 parameters["history"] = False
+                logger.info("Historique désactivé via commande")
+                command_found = True
             elif query.endswith(" -p"):
                 query = query[:-3].rstrip()
                 parameters["preprompt"] = False
+                logger.info("Preprompt désactivé via commande")
+                command_found = True
             elif query.endswith(" -t"):
                 query = query[:-3].rstrip()
                 parameters["tools"] = False
+                logger.info("Outils désactivés via commande")
+                command_found = True
             elif query.endswith(" +i"):
                 query = query[:-3].rstrip()
                 parameters["internet"] = True
+                logger.info("Internet activé via commande")
+                command_found = True
+            elif query.endswith(" +a"):
+                query = query[:-3].rstrip()
+                parameters["audio"] = True
+                logger.info("Audio activé via commande")
+                command_found = True
             elif query.endswith(" +r"):
                 query = query[:-3].rstrip()
                 parameters["raw"] = True
-            else:
+                logger.info("Mode raw activé via commande")
+                command_found = True
+            
+            if not command_found:
                 break
 
         logger.info(f"Message : {query}")
@@ -45,7 +94,6 @@ async def process_ai_response(bot, query, message):
             query = "Hi ! (Tell the user to mention you (<@1286951908786962442>))"
 
         logger.debug(f"Query processed: {query}")
-        # Generate AI answer
         try:
             response = await generate_response(
                 user_id=int(message.author.id),
@@ -88,14 +136,15 @@ async def process_ai_response(bot, query, message):
             logger.error(f"Erreur lors de l'envoi du message : {e}")
             await message.channel.send("Une erreur s'est produite lors de l'envoi du message.")
 
-        # try:
-        #     if get_audio_gen_active(message.author.id):
-        #         logger.debug(f"Audio generation is active for user {message.author.id}.")
-        #         await send_voice_message(message.channel, response_text, get_audio_voice(message.author.id))
-        #         logger.debug(f"Voice message sent successfully.")
-        # except Exception as e:
-        #     logger.error(f"Erreur lors de la génération de la voix : {e}")
-        #     await message.channel.send("Une erreur s'est produite lors de la génération de la voix.")
+        # Audio generation if enabled by command `+a`
+        try:
+            if parameters.get("audio", False):
+                await send_voice_message(message.channel, response_text)
+                logger.debug(f"Voice message sent successfully.")
+        except Exception as e:
+            logger.error(f"Erreur lors de la génération de la voix : {e}")
+            await message.channel.send("Une erreur s'est produite lors de la génération de la voix.")
+
     except Exception as e:
         logger.error(f"Erreur lors de la génération : {e}")
         await message.channel.send("Une erreur s'est produite lors de la génération.")

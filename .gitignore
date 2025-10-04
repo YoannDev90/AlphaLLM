@@ -10,3 +10,4 @@ polls
 publish.sh
 crowdin.yml
 config.toml
+API_KEY.txt

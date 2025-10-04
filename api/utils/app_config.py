@@ -12,6 +12,8 @@ from utils.config import API_HOST, API_PORT, LOGGER_NAME
 logger = logging.getLogger(LOGGER_NAME)
 
 def create_app() -> FastAPI:
+    logger.info("Initialisation de l'application FastAPI")
+    
     app = FastAPI(
         title="AlphaLLM API",
         description="API pour le projet AlphaLLM avec sécurité renforcée",
@@ -25,19 +27,24 @@ def create_app() -> FastAPI:
             },
             {
                 "name": "generation",
-                "description": "Endpoints de génération IA",
+                "description": "Endpoints de génération IA (texte, image, audio)",
             },
             {
                 "name": "info",
-                "description": "Informations sur l'API",
+                "description": "Informations sur les modèles et capacités de l'API",
             },
         ]
     )
+    
+    logger.debug("Application FastAPI initialisée avec succès")
 
+    logger.info("Configuration des middlewares")
+    
     app.add_middleware(
         TrustedHostMiddleware, 
         allowed_hosts=["*"]
     )
+    logger.debug("Middleware TrustedHost configuré")
 
     app.add_middleware(
         CORSMiddleware,
@@ -46,9 +53,12 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST"],
         allow_headers=["*"],
     )
+    logger.debug("Middleware CORS configuré")
 
     app.openapi = lambda: custom_openapi(app)
+    logger.debug("Schema OpenAPI personnalisé configuré")
     
+    logger.info("Application FastAPI complètement configurée")
     return app
 
 def custom_openapi(app: FastAPI):
@@ -70,14 +80,15 @@ def custom_openapi(app: FastAPI):
         - `/status` : Statut de l'API  
         - `/text-models` : Liste des modèles de texte avec leurs capacités
         - `/image-models` : Liste des modèles d'image avec leurs spécifications
-        - `/api/info` : Informations sur l'API
+        - `/voices` : Liste des voix audio disponibles pour la génération vocale
+        - `/api/info` : Informations complètes sur l'API
         - `/docs` : Documentation Swagger
         - `/redoc` : Documentation ReDoc
         
         ### Endpoints protégés (authentification requise)
         - `/generate/text` : Génération de texte avec un modèle spécifique
         - `/generate/image` : Génération d'image en format JSON/Base64
-        - `/generate/image/binary` : Génération d'image en format binaire direct
+        - `/generate/audio` : Génération audio à partir de texte (format MP3)
         
         ### Authentification (pour les endpoints protégés)
         Vous pouvez vous authentifier de plusieurs façons :
@@ -89,6 +100,12 @@ def custom_openapi(app: FastAPI):
         ### Rate Limiting
         - Limite : 10 requêtes par minute par clé API (endpoints protégés)
         - En cas de dépassement : Erreur 429
+        
+        ### Format Audio Supporté
+        - **MP3** : Format universel, compatible avec tous les navigateurs et applications
+        
+        ### Voix Disponibles
+        Consultez l'endpoint `/voices` pour la liste complète des voix disponibles avec leurs caractéristiques (langue, genre, etc.)
         """,
         routes=app.routes,
     )

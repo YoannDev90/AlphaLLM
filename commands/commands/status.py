@@ -31,14 +31,14 @@ async def setup(bot: discord.Client):
                 color_indicator = "❌"
             
             if ping > 0:
-                value = f"{color_indicator} {state.capitalize()} | Ping: {ping}ms"
+                value = f"{color_indicator} {state.capitalize()}\nPing: {ping}ms"
             else:
                 value = f"{color_indicator} {state.capitalize()}"
             
             embed.add_field(
                 name=f"**{bot_name}**",
                 value=value,
-                inline=False
+                inline=True
             )
 
         embed.set_footer(
