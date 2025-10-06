@@ -19,3 +19,6 @@ deep-translator
 aiofiles
 matplotlib
 seaborn
+speechify-api
+librosa
+pydub

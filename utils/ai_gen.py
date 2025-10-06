@@ -43,58 +43,58 @@ def load_preprompt() -> str:
 
 async def chat(messages, bot, user, parameters):
     try:
-        bot_id = bot.user.id if isinstance(bot, discord.Client) else bot.id
+        model = parameters.get("model", bot.user.id if isinstance(bot, discord.Client) else bot.id)
 
-        match bot_id:
-            case 1370685184269352962: # Mistral bot ID
+        match model:
+            case 1370685184269352962 | "mistral": # Mistral bot ID
                 logger.debug("Using Mistral model for chat")
                 response = await mistral_chat(messages, parameters)
                 logger.info("Réponse générée par Mistral")
-            case 1370682029460684850: # DeepSeek bot ID
+            case 1370682029460684850 | "deepseek": # DeepSeek bot ID
                 logger.debug("Using DeepSeek model for chat")
                 response = await deepseek_chat(messages, parameters)
                 logger.info("Réponse générée par DeepSeek")
-            case 1370683258274185349: # Gemini bot ID
+            case 1370683258274185349 | "gemini": # Gemini bot ID
                 logger.debug("Using Gemini model for chat")
                 response = await gemini_chat(messages, parameters)
                 logger.info("Réponse générée par Gemini")
-            case 1370686144542539846: # Qwen bot ID
+            case 1370686144542539846 | "qwen": # Qwen bot ID
                 logger.debug("Using Qwen model for chat")
                 response = await qwen_chat(messages, parameters)
                 logger.info("Réponse générée par Qwen")
-            case 1370683080892747796: # OpenAI bot ID
+            case 1370683080892747796 | "openai": # OpenAI bot ID
                 logger.debug("Using OpenAI model for chat")
                 response = await openai_chat(messages, parameters)
                 logger.info("Réponse générée par OpenAI")
-            case 1370685660326920252: # EvilGPT bot ID
+            case 1370685660326920252 | "evilgpt": # EvilGPT bot ID
                 logger.debug("Using EvilGPT model for chat")
                 response = await evilgpt_chat(messages, parameters)
                 logger.info("Réponse générée par EvilGPT")
-            case 1370683169522847827: # Grok bot ID
+            case 1370683169522847827 | "grok": # Grok bot ID
                 logger.debug("Using Grok model for chat")
                 response = await grok_chat(messages, parameters)
                 logger.info("Réponse générée par Grok")
-            case 1370685321703854110: # Llama bot ID
+            case 1370685321703854110 | "llama": # Llama bot ID
                 logger.debug("Using Llama model for chat")
                 response = await llama_chat(messages, parameters)
                 logger.info("Réponse générée par Llama")
-            case 1370681547740418079: #Perplexity bot ID
+            case 1370681547740418079 | "perplexity": #Perplexity bot ID
                 logger.debug("Using Perplexity model for chat")
                 response = await perplexity_chat(messages, parameters)
                 logger.info("Réponse générée par Perplexity")
-            case 1413827193670467634: # Claude bot ID
+            case 1413827193670467634 | "claude": # Claude bot ID
                 response = await claude_chat(messages, parameters)
                 logger.info("Réponse générée par Claude")
-            case 1413831535940993044: #Command bot ID
+            case 1413831535940993044 | "command": #Command bot ID
                 response = await cohere_chat(messages, parameters)
                 logger.info("Réponse générée par Command")
-            case 1413827975325159454: #GLM bot ID
+            case 1413827975325159454 | "glm": #GLM bot ID
                 response = await glm_chat(messages, parameters)
                 logger.info("Réponse générée par GLM")
-            case 1413827727408238642: #Kimi bot ID
+            case 1413827727408238642 | "kimi": #Kimi bot ID
                 response = await kimi_chat(messages, parameters)
                 logger.info("Réponse générée par Kimi")
-            case 1413825696043630594: #Phi bot ID
+            case 1413825696043630594 | "phi": #Phi bot ID
                 response = await phi_chat(messages, parameters)
                 logger.info("Réponse générée par Phi")
             case _: # AlphaLLM bot ID

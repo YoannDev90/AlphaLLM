@@ -59,7 +59,7 @@ def get_status() -> dict:
         ("Phi", phi_bot),
         ("Kimi", kimi_bot),
         ("GLM", glm_bot),
-        ("Commando", command_bot),
+        ("Command", command_bot),
     ]
     
     status = {}
