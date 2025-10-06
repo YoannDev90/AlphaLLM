@@ -2,7 +2,7 @@ from discord.ui import View, Select
 from discord import Interaction, ChannelType
 import discord
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, TIMEOUT_CONFIG_VIEW
 
 logger = logging.getLogger(logger_name)
 
@@ -30,7 +30,7 @@ class ChannelSelect(Select):
 
 class ChannelSelectView(View):
     def __init__(self, guild):
-        super().__init__(timeout=300)
+        super().__init__(timeout=TIMEOUT_CONFIG_VIEW)
         self.selected_channels = []
         self.add_item(ChannelSelect(guild))
         logger.info("ChannelSelectView initialized")
@@ -65,7 +65,7 @@ class RoleSelect(Select):
 
 class RoleSelectView(View):
     def __init__(self, guild):
-        super().__init__(timeout=300)
+        super().__init__(timeout=TIMEOUT_CONFIG_VIEW)
         self.selected_roles = []
         self.add_item(RoleSelect(guild))
         logger.info("RoleSelectView initialized")

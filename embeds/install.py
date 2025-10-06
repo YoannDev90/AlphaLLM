@@ -1,15 +1,22 @@
 import discord
+from utils.config import BOTS_LINKS, TIMEOUT_INSTALL_VIEW
 
-# Liens d'invitation des bots
-chatgpt_link = "https://discord.com/oauth2/authorize?client_id=1370683080892747796"
-deepseek_link = "https://discord.com/oauth2/authorize?client_id=1370682029460684850"
-evilgpt_link = "https://discord.com/oauth2/authorize?client_id=1370685660326920252"
-gemini_link = "https://discord.com/oauth2/authorize?client_id=1370683258274185349"
-grok_link = "https://discord.com/oauth2/authorize?client_id=1370683169522847827"
-llama_link = "https://discord.com/oauth2/authorize?client_id=1370685321703854110"
-mistral_link = "https://discord.com/oauth2/authorize?client_id=1370685184269352962"
-perplexity_link = "https://discord.com/oauth2/authorize?client_id=1370681547740418079"
-qwen_link = "https://discord.com/oauth2/authorize?client_id=1370686144542539846"
+# Liens d'invitation des bots (depuis config.toml)
+chatgpt_link = BOTS_LINKS.get("chatgpt", "")
+deepseek_link = BOTS_LINKS.get("deepseek", "")
+evilgpt_link = BOTS_LINKS.get("evilgpt", "")
+gemini_link = BOTS_LINKS.get("gemini", "")
+grok_link = BOTS_LINKS.get("grok", "")
+llama_link = BOTS_LINKS.get("llama", "")
+mistral_link = BOTS_LINKS.get("mistral", "")
+perplexity_link = BOTS_LINKS.get("perplexity", "")
+qwen_link = BOTS_LINKS.get("qwen", "")
+claude_link = BOTS_LINKS.get("claude", "")
+command_link = BOTS_LINKS.get("command", "")
+glm_link = BOTS_LINKS.get("glm", "")
+kimi_link = BOTS_LINKS.get("kimi", "")
+phi_link = BOTS_LINKS.get("phi", "")
+
 
 # Descriptions des bots
 bot_descriptions = {
@@ -21,12 +28,17 @@ bot_descriptions = {
     "Llama": "🦙 Meta's open-source model, performant and transparent.",
     "Mistral": "🌪️ Fast and efficient French AI for various tasks.",
     "Perplexity": "🔍 Specialist in search and real-time information.",
-    "Qwen": "🈳 Alibaba's model with excellent multilingual capabilities."
+    "Qwen": "🈳 Alibaba's model with excellent multilingual capabilities.",
+    "Claude": "🎨 Poetic and creative, excellent for literary and reflective writing.",
+    "Command": "💡 Powerful in logic and analytical reasoning, suited for comparisons.",
+    "GLM": "🌏 Excellent multilingual support, great for translation and cross-language understanding.",
+    "Kimi": "📚 Clear and pedagogical, ideal for education, explanation, and learning tasks.",
+    "Phi": "⚙️ Lightweight and efficient, best for simple and quick requests."
 }
 
 class InstallView(discord.ui.View):
     def __init__(self):
-        super().__init__(timeout=300)
+        super().__init__(timeout=TIMEOUT_INSTALL_VIEW)
         
         # Ajouter les boutons pour chaque bot
         buttons_data = [
@@ -38,7 +50,12 @@ class InstallView(discord.ui.View):
             ("Llama", llama_link, "🦙"),
             ("Mistral", mistral_link, "🌪️"),
             ("Perplexity", perplexity_link, "🔍"),
-            ("Qwen", qwen_link, "🈳")
+            ("Qwen", qwen_link, "🈳"),
+            ("Claude", claude_link, "🎨"),
+            ("Command", command_link, "💡"),
+            ("GLM", glm_link, "🌏"),
+            ("Kimi", kimi_link, "📚"),
+            ("Phi", phi_link, "⚙️")
         ]
         
         for name, url, emoji in buttons_data:

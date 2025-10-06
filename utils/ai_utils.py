@@ -1,5 +1,9 @@
 import logging
-from utils.config import LOGGER_NAME, get_base_preprompt, get_image_enhancer_preprompt
+from utils.config import (
+    LOGGER_NAME, get_base_preprompt, IMAGE_ENHANCER_PREPROMPT,
+    CLOUDFLARE_WORKERS_ACCOUNT_ID, CLOUDFLARE_WORKERS_API_KEY, AIML_API_KEY,
+    API_ENDPOINTS_OTHER, MAX_TOKENS_IMAGE_DESCRIPTION
+)
 import re
 from utils.ai_gen import chat
 from utils.md_converter import md_conversion
@@ -11,7 +15,6 @@ from litellm.integrations.opik.opik import OpikLogger
 import asyncio
 import requests
 import json
-from utils.config import EnvVars
 
 logger = logging.getLogger(LOGGER_NAME)
 URL_REGEX = r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+\/?(?:[^\s]*[^\s.,])?'
@@ -169,12 +172,13 @@ async def enhance_image_prompt(original_prompt, number=2):
         # On génère au maximum 4 prompts améliorés
         for i in range(min(number, 4)):
             model = models[i % len(models)]  # Alterner entre les modèles
-            task = litellm.acompletion(
-                model=model,
-                messages=[
-                    {"role": "system", "content": get_image_enhancer_preprompt()},
+            messages=[
+                    {"role": "system", "content": IMAGE_ENHANCER_PREPROMPT},
                     {"role": "user", "content": original_prompt}
                 ]
+            task = litellm.acompletion(
+                model=model,
+                messages=messages
             )
             tasks.append(task)
         
@@ -214,9 +218,10 @@ async def messages_builder(user_input, system_prompt, perso_preprompt, history):
     return messages
 
 def summarize(input_text, max_length):
-    url = f"https://api.cloudflare.com/client/v4/accounts/{EnvVars.CLOUDFLARE_WORKERS_ACCOUNT_ID}/ai/run/@cf/facebook/bart-large-cnn"
+    cloudflare_base = API_ENDPOINTS_OTHER.get("cloudflare_ai", "https://api.cloudflare.com/client/v4/accounts")
+    url = f"{cloudflare_base}/{CLOUDFLARE_WORKERS_ACCOUNT_ID}/ai/run/@cf/facebook/bart-large-cnn"
     headers = {
-        "Authorization": f"Bearer {EnvVars.CLOUDFLARE_WORKERS_API_KEY}",
+        "Authorization": f"Bearer {CLOUDFLARE_WORKERS_API_KEY}",
         "Content-Type": "application/json"
     }
     payload = {
@@ -233,10 +238,10 @@ def summarize(input_text, max_length):
     return result
 
 def describe_image(image_url):
-    url = "https://api.aimlapi.com/chat/completions"
+    url = API_ENDPOINTS_OTHER.get("aiml", "https://api.aimlapi.com/chat/completions")
     headers = {
         'Content-Type': 'application/json',
-        'Authorization': f'Bearer {EnvVars.AIML_API_KEY}'
+        'Authorization': f'Bearer {AIML_API_KEY}'
     }
     payload = json.dumps({
         "model": "meta-llama/Llama-Vision-Free",
@@ -254,7 +259,7 @@ def describe_image(image_url):
                 ]
             }
         ],
-        "max_tokens": 512
+        "max_tokens": MAX_TOKENS_IMAGE_DESCRIPTION
     })
 
     response = requests.post(url, headers=headers, data=payload)

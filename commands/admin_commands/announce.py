@@ -4,8 +4,8 @@ from utils.config import logger_name
 from dotenv import load_dotenv
 from utils.server_config import get_announce_channel
 from utils.translator import TranslationManager, SUPPORTED_LANGUAGES, load_translations
-from embeds.announcement_embed import create_announcement_embed, AnnouncementTranslationView
-from embeds.announcement_confirmation_embed import ConfirmationView, create_announcement_confirmation_embed
+from embeds.announce import create_announcement_embed, AnnouncementTranslationView
+from embeds.announce_confirm import AnnounceConfirmView, create_announcement_confirmation_embed
 from utils.command_ids import command_id_manager
 from utils.config import logger_name
 import os
@@ -53,9 +53,9 @@ class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
         translation_manager = TranslationManager(message, file_path)
 
         await translation_manager.generate_all_translations(interaction)
-        
-        confirmation_view = ConfirmationView(message, file_path, translation_manager, len(self.bot.guilds))
-        
+
+        confirmation_view = AnnounceConfirmView(message, file_path, translation_manager, len(self.bot.guilds))
+
         # Créer l'embed de confirmation avec aperçu
         embed = discord.Embed(
             title="🔍 Traductions générées - Confirmation requise",

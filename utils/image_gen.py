@@ -1,172 +1,109 @@
-import aiohttp
-import asyncio
 import logging
-from utils.config import logger_name
-import urllib.parse
-import random
-from dotenv import load_dotenv
-from utils.ai_gen import get_image_model_info
-import litellm
-from io import BytesIO
-import os
+from utils.config import LOGGER_NAME
 
-load_dotenv()
+# Imports des modèles d'image
+from models.image.flux import generate_flux
+from models.image.flux_schnell import generate_flux_schnell
+from models.image.sdxl import generate_sdxl
+from models.image.sdlarge import generate_sdlarge
+from models.image.dalle import generate_dalle
+from models.image.gpt_image import generate_gpt_image
+from models.image.imagen import generate_imagen
+from models.image.recraft import generate_recraft
+from models.image.sana import generate_sana
+from models.image.playground import generate_playground
+from models.image.phoenix import generate_phoenix
+from models.image.kontext import generate_kontext
+from models.image.nanobanana import generate_nanobanana
+from models.image.seedream import generate_seedream
+from models.image.turbo import generate_turbo
 
-logger = logging.getLogger(logger_name)
+logger = logging.getLogger(LOGGER_NAME)
 
-class ImageGenerationQueue:
-    def __init__(self, max_per_minute=3):
-        self.queue = asyncio.Queue()
-        self.max_per_minute = max_per_minute
-        self.semaphore = asyncio.Semaphore(max_per_minute)
-        self.tasks = []
-        self.start_time = asyncio.get_event_loop().time()
-
-    async def enqueue(self, prompt, model="pollinations/flux", size = "1024x1024"):
-        future = asyncio.Future()
-        await self.queue.put((prompt, model, size, future))
-        return future
-
-    async def process_queue(self):
-        while True:
-            prompt, model, size, future = await self.queue.get()
-            try:
-                async with self.semaphore:
-                    image_data = await self._generate_image(prompt, model, size)
-                    future.set_result(image_data)
-            except Exception as e:
-                logger.error(f"Error processing image generation task: {str(e)}")
-                future.set_exception(e)
-            finally:
-                self.queue.task_done()
-
-    async def _generate_image(self, prompt, model, size):
-        if model.startswith("pollinations/"):
-            model = model.replace("pollinations/", "")
-            width, height = map(int, size.split("x"))
-            logger.info(f"Generating image with prompt: {prompt}, model: {model}, size: {size}")
-
-            try:
-                params = {
-                    "prompt": prompt,
-                    "model": model,
-                    "width": width,
-                    "height": height,
-                    "seed": random.randint(0, 1000000),
-                    "nologo": "true",
-                    "private": "true",
-                    "enhance": "false",
-                    "safe": "false",
-                    "token": os.getenv("POLLINATIONS_API_KEY")
-                }
-
-                url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
-                url += "?" + urllib.parse.urlencode(params)
-
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url) as response:
-                        if response.status == 200:
-                            image_data = await response.read()
-                            return image_data, False
-                        else:
-                            error_message = await response.text()
-                            logger.error(f"Error generating image. Status: {response.status} - {error_message}")
-                            return None, False
-            except Exception as e:
-                logger.error(f"Error during image generation: {e}")
-                return None, False
+async def generate_image(prompt: str, model: str = None, size: str = "1024x1024") -> str:
+    """
+    Génère une image avec le modèle spécifié
+    
+    Args:
+        prompt: Le prompt pour générer l'image
+        model: Le modèle à utiliser (par défaut: flux)
+        size: La taille de l'image (par défaut "1024x1024")
         
-        elif model.startswith("navy/"):
-            model = model.replace("navy/", "openai/")
-            try:
-                model_info = get_image_model_info(model)
-                image = litellm.image_generation(
-                    model=model,
-                    api_key=model_info["api_key"],
-                    api_base=model_info["base_url"],
-                    size=size,
-                    prompt=prompt                
-                    )
-                if model == "navy/imagen-3":
-                    return image, False
-                else:
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(image.data[0].url) as response:
-                            if response.status == 200:
-                                image_data = await response.read()
-                                return image_data, False
-                            else:
-                                error_message = await response.text()
-                                logger.error(f"Error generating image. Status: {response.status} - {error_message}")
-                                return None, False
-            except Exception as e:
-                logger.error(f"Error during navy image generation: {e}")
-                return None, False
-        
-        else:
-            logger.error(f"Unsupported model: {model}")
-            return None, False
-
-image_queue = ImageGenerationQueue()
-logger.debug("Global image queue initialized")
-
-queue_task = None
-
-def start_image_queue(loop):
-    global queue_task
-    queue_task = loop.create_task(image_queue.process_queue())
-
-async def generate_image(prompt: str, model="pollinations/flux", size="1024x1024"):
-    future = await image_queue.enqueue(prompt=prompt,
-                                        model=model,
-                                        size=size,
-                                        )
-    result = await future
-    return result
-
-async def image_edit(prompt, url, size):
-    width, height = size.split("x")
+    Returns:
+        L'image encodée en base64
+    """
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.head(url) as response:
-                if response.status != 200:
-                    logger.error("❌ L'image n'existe pas.")
-    except Exception as e:
-        logger.error(f"💥 Erreur lors de la vérification de l'image: {e}")
-
-    params = {
-        "prompt": prompt,
-        "model": "kontext",
-        "image": url,
-        "width": width,
-        "height": height,
-        "seed": random.randint(0, 1000000),
-        "nologo": "true",
-        "private": "true",
-        "enhance": "false",
-        "safe": "false",
-        "token": os.getenv("POLLINATIONS_API_KEY")
-    }
-    base_url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"
-    request_url = base_url + "?" + urllib.parse.urlencode(params)
-
-    try:
-        timeout = aiohttp.ClientTimeout(total=120)
+        # Modèle par défaut
+        if model is None:
+            model = "flux"
         
-        async with aiohttp.ClientSession(timeout=timeout) as session:
-            async with session.get(request_url) as response:
-                if response.status == 200:
-                    image_data = await response.read()
-                    logger.info(f"Image édition réussie. Taille: {len(image_data)} bytes")
-                    return image_data, False
-                else:
-                    error_message = await response.text()
-                    logger.error(f"Error editing image. Status: {response.status} - {error_message}")
-                    return None, False
-    except asyncio.TimeoutError:
-        logger.error("Timeout lors de l'édition d'image (120s)")
-        return None, False
-    except Exception as e:
-        logger.error(f"Erreur lors de l'édition d'image: {str(e)}")
-        return None, False
+        logger.info(f"Génération d'image avec le modèle: {model}")
+        
+        match model.lower():
+            case "flux":
+                logger.debug("Utilisation du modèle Flux")
+                return await generate_flux(prompt, size)
             
+            case "flux-schnell":
+                logger.debug("Utilisation du modèle Flux Schnell")
+                return await generate_flux_schnell(prompt, size)
+            
+            case "sdxl":
+                logger.debug("Utilisation du modèle Stable Diffusion XL")
+                return await generate_sdxl(prompt, size)
+            
+            case "sd3.5-large" | "sdlarge":
+                logger.debug("Utilisation du modèle Stable Diffusion 3.5 Large")
+                return await generate_sdlarge(prompt, size)
+            
+            case "dalle" | "dall-e-3":
+                logger.debug("Utilisation du modèle DALL-E 3")
+                return await generate_dalle(prompt, size)
+            
+            case "gpt-image" | "gpt-image-1":
+                logger.debug("Utilisation du modèle GPT-Image-1")
+                return await generate_gpt_image(prompt, size)
+            
+            case "imagen" | "imagen-3-fast":
+                logger.debug("Utilisation du modèle Imagen 3 Fast")
+                return await generate_imagen(prompt, size)
+            
+            case "recraft" | "recraft-20b":
+                logger.debug("Utilisation du modèle Recraft 20B")
+                return await generate_recraft(prompt, size)
+            
+            case "sana":
+                logger.debug("Utilisation du modèle Sana")
+                return await generate_sana(prompt, size)
+            
+            case "playground" | "playground-v2.5":
+                logger.debug("Utilisation du modèle Playground v2.5")
+                return await generate_playground(prompt, size)
+            
+            case "phoenix" | "phoenix-1.0":
+                logger.debug("Utilisation du modèle Phoenix 1.0")
+                return await generate_phoenix(prompt, size)
+            
+            case "kontext":
+                logger.debug("Utilisation du modèle Kontext")
+                return await generate_kontext(prompt, size)
+            
+            case "nanobanana":
+                logger.debug("Utilisation du modèle Nanobanana")
+                return await generate_nanobanana(prompt, size)
+            
+            case "seedream":
+                logger.debug("Utilisation du modèle Seedream")
+                return await generate_seedream(prompt, size)
+            
+            case "turbo":
+                logger.debug("Utilisation du modèle Turbo")
+                return await generate_turbo(prompt, size)
+            
+            case _:
+                logger.warning(f"Modèle inconnu: {model}, utilisation du modèle par défaut (Flux)")
+                return await generate_flux(prompt, size)
+    
+    except Exception as e:
+        logger.error(f"Erreur lors de la génération de l'image: {str(e)}")
+        raise

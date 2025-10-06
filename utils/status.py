@@ -51,7 +51,6 @@ def get_status() -> dict:
         ("Gemini", gemini_bot),
         ("Grok", grok_bot),
         ("Llama", llama_bot),
-        ("Logger", logger_bot),
         ("Mistral", mistral_bot),
         ("Perplexity", perplexity_bot),
         ("Qwen", qwen_bot),

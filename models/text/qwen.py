@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, MODELS_CONFIG_TEXT, CEREBRAS_API_KEY
 from dotenv import load_dotenv
 import os
 import litellm
@@ -17,8 +17,8 @@ async def qwen_chat(messages, parameters):
     litellm.callbacks = [opik_logger]
 
     params = {
-        "model": "cerebras/qwen-3-32b",
-        "api_key": os.getenv("CEREBRAS_API_KEY"),
+        "model": MODELS_CONFIG_TEXT.get("qwen", "cerebras/qwen-3-32b"),
+        "api_key": CEREBRAS_API_KEY,
         "messages": messages
     }
     

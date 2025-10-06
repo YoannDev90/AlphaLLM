@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, MODELS_CONFIG_TEXT
 from dotenv import load_dotenv
 import os
 import litellm
@@ -18,7 +18,7 @@ async def cohere_chat(messages, parameters):
         litellm.callbacks = [opik_logger]
 
         params = {
-            "model": "command-r",
+            "model": MODELS_CONFIG_TEXT.get("cohere", "command-r"),
             "api_key": os.getenv("COHERE_API_KEY"),
             "messages": messages
         }

@@ -1,5 +1,5 @@
 from supabase import create_client, Client, ClientOptions
-from utils.config import EnvVars
+from utils.config import DB_URL, DB_KEY, JWT_KEY
 from datetime import datetime
 import logging
 
@@ -14,11 +14,11 @@ def get_supabase_client() -> Client:
     if _supabase_client is None:
         try:
             _supabase_client = create_client(
-                EnvVars.DB_URL,
-                EnvVars.DB_KEY,
+                DB_URL,
+                DB_KEY,
                 options=ClientOptions(
                     schema="public",
-                    headers={"Authorization": f"Bearer {EnvVars.JWT_KEY}"},
+                    headers={"Authorization": f"Bearer {JWT_KEY}"},
                     auto_refresh_token=True,
                     persist_session=True
                 )

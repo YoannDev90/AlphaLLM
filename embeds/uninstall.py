@@ -1,6 +1,6 @@
 import discord
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, TIMEOUT_UNINSTALL_VIEW
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(logger_name)
@@ -14,28 +14,36 @@ bot_ids = {
     "Grok": 1370683169522847827,
     "Llama": 1370685321703854110,
     "Mistral": 1370685184269352962,
-    "Phi": 1370685419557224538,
     "Perplexity": 1370681547740418079,
-    "Qwen": 1370686144542539846
+    "Qwen": 1370686144542539846,
+    "Claude": 1413827193670467634,
+    "Command": 1413831535940993044,
+    "GLM": 1413827975325159454,
+    "Kimi": 1413827727408238642,
+    "Phi": 1413825696043630594
 }
 
 # Descriptions des bots avec emojis
 bot_descriptions = {
-    "ChatGPT": "🤖 Based on GPT-4, excellent for conversation and general tasks.",
+    "ChatGPT": "🤖 Based on GPT-5, excellent for conversation and general tasks.",
     "DeepSeek": "🧠 Advanced reasoning model specialized in solving complex problems.",
     "EvilGPT": "😈 Alternative version with a more provocative and free personality.",
     "Gemini": "💎 Google's multimodal AI, capable of processing text, images and more.",
     "Grok": "🚀 xAI's AI assistant with a unique and innovative approach.",
     "Llama": "🦙 Meta's open-source model, performant and transparent.",
     "Mistral": "🌪️ Fast and efficient French AI for various tasks.",
-    "Phi": "🌍️ Compact but powerful Microsoft model, optimized for performance.",
     "Perplexity": "🔍 Specialist in search and real-time information.",
-    "Qwen": "🈳 Alibaba's model with excellent multilingual capabilities."
+    "Qwen": "🈳 Alibaba's model with excellent multilingual capabilities.",
+    "Claude": "🎨 Poetic and creative, excellent for literary and reflective writing.",
+    "Command": "💡 Powerful in logic and analytical reasoning, suited for comparisons.",
+    "GLM": "🌏 Excellent multilingual support, great for translation and cross-language understanding.",
+    "Kimi": "📚 Clear and pedagogical, ideal for education, explanation, and learning tasks.",
+    "Phi": "⚙️ Lightweight and efficient, best for simple and quick requests."
 }
 
 class UninstallConfirmView(discord.ui.View):
     def __init__(self, bot_name: str, bot_id: int, delete_messages: bool):
-        super().__init__(timeout=60)
+        super().__init__(timeout=TIMEOUT_UNINSTALL_VIEW)
         self.bot_name = bot_name
         self.bot_id = bot_id
         self.delete_messages = delete_messages

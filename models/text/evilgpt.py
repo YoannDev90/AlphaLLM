@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT
 from dotenv import load_dotenv
 import os
 import litellm
@@ -17,9 +17,9 @@ async def evilgpt_chat(messages, parameters):
     litellm.callbacks = [opik_logger]
 
     params = {
-        "model": "openai/evil",
+        "model": MODELS_CONFIG_TEXT.get("evilgpt", "openai/evil"),
         "api_key": os.getenv("POLLINATIONS_API_KEY"),
-        "base_url": "https://text.pollinations.ai/openai/",
+        "base_url": API_ENDPOINTS_TEXT.get("pollinations", "https://text.pollinations.ai/openai/"),
         "messages": messages
     }
     

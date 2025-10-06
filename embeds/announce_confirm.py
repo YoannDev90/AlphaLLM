@@ -1,13 +1,14 @@
 import discord
+from utils.config import TIMEOUT_ANNOUNCE_CONFIRM
 import logging
 from datetime import datetime
 from utils.config import logger_name
 
 logger = logging.getLogger(logger_name)
 
-class ConfirmationView(discord.ui.View):
-    def __init__(self, original_message: str, file_path: str, translation_manager, total_guilds: int):
-        super().__init__(timeout=300)
+class AnnounceConfirmView(discord.ui.View):
+    def __init__(self, original_message, file_path, translation_manager, total_guilds):
+        super().__init__(timeout=TIMEOUT_ANNOUNCE_CONFIRM)
         self.original_message = original_message
         self.file_path = file_path
         self.translation_manager = translation_manager
@@ -31,7 +32,7 @@ class ConfirmationView(discord.ui.View):
             
             # Import des fonctions nécessaires
             try:
-                from embeds.announcement_embed import AnnouncementTranslationView
+                from embeds.announce import AnnouncementTranslationView
                 from commands.admin_commands.announce import send_announcement_to_guilds
                 
                 translation_view = AnnouncementTranslationView(self.original_message, self.file_path)

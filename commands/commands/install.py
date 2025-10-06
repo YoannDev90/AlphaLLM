@@ -3,7 +3,7 @@ import discord
 from discord import app_commands
 import logging
 from utils.config import logger_name
-from embeds.install_embed import InstallView, create_install_embed
+from embeds.install import InstallView, create_install_embed
 
 logger = logging.getLogger(logger_name)
 

@@ -3,6 +3,8 @@ from fastapi.responses import Response
 from typing import Optional
 import asyncio
 import base64
+import json
+import os
 
 from . import logger, REQUEST_TIMEOUT
 from api.utils.security_utils import get_api_key
@@ -54,12 +56,9 @@ async def generate_image(
                 logger.error(f"Format d'image non supporté dans tuple: {type(image_data)}")
                 return {"status": "error", "message": "Format d'image non supporté"}
         else:
-            if isinstance(response, str):
-                logger.info(f"Image générée avec succès - URL directe: {response[:50]}{'...' if len(response) > 50 else ''}")
-                return {"status": "success", "image_url": response}
-            elif isinstance(response, bytes):
+            if isinstance(response, bytes):
                 image_b64 = base64.b64encode(response).decode('utf-8')
-                logger.info(f"Image générée avec succès - Données binaires directes encodées en base64 ({len(response)} bytes)")
+                logger.info(f"Image générée avec succès")
                 return {
                     "status": "success", 
                     "image_data": image_b64,

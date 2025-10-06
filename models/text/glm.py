@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT, NAVY_API_KEY
 from dotenv import load_dotenv
 import os
 import litellm
@@ -17,9 +17,9 @@ async def glm_chat(messages, parameters):
     litellm.callbacks = [opik_logger]
 
     params = {
-        "model": "openai/glm-4.5",
-        "api_key": os.getenv("NAVY_API_KEY"),
-        "base_url": "https://api.navy/v1",
+        "model": MODELS_CONFIG_TEXT.get("glm", "openai/glm-4.5"),
+        "api_key": NAVY_API_KEY,
+        "base_url": API_ENDPOINTS_TEXT.get("navy", "https://api.navy/v1"),
         "messages": messages
     }
     
