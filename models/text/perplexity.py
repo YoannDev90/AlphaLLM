@@ -3,6 +3,7 @@ from litellm.integrations.opik.opik import OpikLogger
 from datetime import datetime
 import os
 import re
+from utils.config import API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT, NAVY_API_KEY
 
 async def perplexity_chat(messages, parameters):
     start_time = datetime.now()
@@ -10,9 +11,9 @@ async def perplexity_chat(messages, parameters):
     litellm.callbacks = [opik_logger]
     
     params = {
-        "model": "openai/sonar",
-        "api_key": os.getenv("NAVY_API_KEY"),
-        "base_url": "https://api.navy/v1",
+        "model": MODELS_CONFIG_TEXT.get("perplexity", "openai/sonar"),
+        "api_key": NAVY_API_KEY,
+        "base_url": API_ENDPOINTS_TEXT.get("navy", "https://api.navy/v1"),
         "messages": messages
     }
     

@@ -1,6 +1,6 @@
 import asyncpg
 import logging
-from utils.config import LOGGER_NAME, EnvVars
+from utils.config import LOGGER_NAME, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 import hashlib
 import time
 import json
@@ -16,11 +16,11 @@ async def connect_to_db() -> None:
     global _PG_POOL
     try:
         _PG_POOL = await asyncpg.create_pool(
-            host=EnvVars.DB_HOST,
-            port=int(EnvVars.DB_PORT),
-            user=EnvVars.DB_USER,
-            password=EnvVars.DB_PASSWORD,
-            database=EnvVars.DB_NAME,
+            host=DB_HOST,
+            port=int(DB_PORT),
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME,
             ssl='require'
         )
     except Exception as e:

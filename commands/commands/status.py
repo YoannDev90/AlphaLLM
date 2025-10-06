@@ -31,12 +31,12 @@ async def setup(bot: discord.Client):
                 color_indicator = "❌"
             
             if ping > 0:
-                value = f"{color_indicator} {state.capitalize()}\nPing: {ping}ms"
+                value = f"{color_indicator} {state.capitalize()}\n⚡️ {ping}ms"
             else:
                 value = f"{color_indicator} {state.capitalize()}"
             
             embed.add_field(
-                name=f"**{bot_name}**",
+                name=f"**{bot_name}**\t",
                 value=value,
                 inline=True
             )

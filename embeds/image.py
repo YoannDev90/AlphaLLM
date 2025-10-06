@@ -1,13 +1,13 @@
 import discord
 import logging
 from io import BytesIO
-from utils.config import logger_name
+from utils.config import logger_name, TIMEOUT_IMAGE_VIEW
 
 logger = logging.getLogger(logger_name)
 
 class ImageView(discord.ui.View):
     def __init__(self, prompt, model, size, enhance, safe):
-        super().__init__(timeout=30.0)
+        super().__init__(timeout=TIMEOUT_IMAGE_VIEW)
         self.prompt = prompt
         self.model = model
         self.size = size

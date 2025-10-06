@@ -3,7 +3,7 @@ from discord import app_commands
 import logging
 from utils.config import logger_name
 from typing import Literal
-from embeds.uninstall_embed import UninstallConfirmView, create_uninstall_embed, bot_ids
+from embeds.uninstall import UninstallConfirmView, create_uninstall_embed, bot_ids
 
 logger = logging.getLogger(logger_name)
 

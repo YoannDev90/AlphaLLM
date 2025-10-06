@@ -44,7 +44,9 @@ if __name__ == "__main__":
             host=API_HOST,
             port=API_PORT,
             log_level="info",
-            reload=True
+            reload=True,
+            ssl_keyfile="key.pem",
+            ssl_certfile="cert.pem"
         )
     except Exception as e:
         logger.error(f"Erreur lors du démarrage du serveur API: {str(e)}")

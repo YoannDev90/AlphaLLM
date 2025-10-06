@@ -8,7 +8,7 @@ import random
 import socket
 import logging
 
-from utils.config import REQUEST_TIMEOUT, LOGGER_NAME
+from utils.config import REQUEST_TIMEOUT, LOGGER_NAME, API_URL
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -24,7 +24,7 @@ def get_server_ip():
         return "127.0.0.1"
 
 async def is_https_api_running():
-    url = "https://alphallm-api.onrender.com/status"
+    url = f"{API_URL}/status"
     try:
         logger.debug(f"Vérification de l'état de l'API HTTPS: {url}")
         timeout = aiohttp.ClientTimeout(total=10)

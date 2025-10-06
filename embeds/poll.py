@@ -4,7 +4,7 @@ import aiofiles
 import logging
 from typing import List, Dict
 from datetime import datetime, timedelta
-from utils.config import logger_name
+from utils.config import logger_name, TIMEOUT_POLL_VIEW
 
 logger = logging.getLogger(logger_name)
 
@@ -189,7 +189,7 @@ class PollView(discord.ui.View):
 
 class ResultsCollectorView(discord.ui.View):    
     def __init__(self, poll_id: str, question: str, options: List[str], total_guilds: int):
-        super().__init__(timeout=300)
+        super().__init__(timeout=TIMEOUT_POLL_VIEW)
         self.poll_id = poll_id
         self.question = question
         self.options = options
@@ -345,7 +345,7 @@ class ResultsCollectorView(discord.ui.View):
 
 class PollConfirmationView(discord.ui.View):
     def __init__(self, question: str, options: List[str], poll_id: str, total_guilds: int):
-        super().__init__(timeout=300)
+        super().__init__(timeout=TIMEOUT_POLL_VIEW)
         self.question = question
         self.options = options
         self.poll_id = poll_id

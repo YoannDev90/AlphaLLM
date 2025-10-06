@@ -1,4 +1,9 @@
 {
+  "auto": {
+    "name": "Auto",
+    "author": "AlphaLLM",
+    "icon": "https://alphallm.tech/assets/images/bots/alphallm.webp"
+  },
   "mistral": {
     "name": "Mistral",
     "author": "Mistral AI",

@@ -23,7 +23,6 @@ from bots.glm_bot import run_glm_bot
 from bots.command_bot import run_command_bot
 from api.api import start_api_async
 from api.utils.server_utils import ping_https_server
-from utils.image_gen import start_image_queue
 from utils.config import LOGGER_NAME, get_logging_level, API_URL
 import logging
 
@@ -31,10 +30,7 @@ logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(get_logging_level())
 
 async def main():
-    try:
-        loop = asyncio.get_running_loop()
-        start_image_queue(loop)
-        
+    try:        
         await asyncio.gather(
             start_api_async(),
             ping_https_server(API_URL),

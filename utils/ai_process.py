@@ -38,7 +38,7 @@ async def process_ai_response(bot, query, message):
             "internet": False, 
             "audio" : False,
             "raw": False,
-            "model": None
+            "model": bot.user.id if isinstance(bot, discord.Client) else bot.id
         }
 
         while True:

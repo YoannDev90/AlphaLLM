@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, MODELS_CONFIG_TEXT, MISTRAL_API_KEY
 from dotenv import load_dotenv
 import os
 import litellm
@@ -17,8 +17,8 @@ async def mistral_chat(messages, parameters):
     litellm.callbacks = [opik_logger]
 
     params = {
-        "model": "mistral/mistral-medium-latest",
-        "api_key": os.getenv("MISTRAL_API_KEY"),
+        "model": MODELS_CONFIG_TEXT.get("mistral", "mistral/mistral-medium-latest"),
+        "api_key": MISTRAL_API_KEY,
         "messages": messages
     }
     

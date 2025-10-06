@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, MODELS_CONFIG_TEXT, CEREBRAS_API_KEY
 from dotenv import load_dotenv
 import os
 import litellm
@@ -18,8 +18,8 @@ async def llama_chat(messages, parameters):
         litellm.callbacks = [opik_logger]
 
         params = {
-            "model": "cerebras/llama3.3-70b",
-            "api_key": os.getenv("CEREBRAS_API_KEY"),
+            "model": MODELS_CONFIG_TEXT.get("llama", "cerebras/llama3.3-70b"),
+            "api_key": CEREBRAS_API_KEY,
             "messages": messages
         }
         

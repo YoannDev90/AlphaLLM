@@ -7,7 +7,7 @@ from fastapi.security import HTTPBearer
 from typing import Optional
 import logging
 
-from utils.config import API_KEYS, API_KEY_REQUIRED, LOGGER_NAME
+from utils.config import API_KEYS, API_KEYS_MAPPING, API_KEY_REQUIRED, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -70,7 +70,9 @@ def verify_api_access(api_key: str) -> bool:
     
     is_valid = api_key in API_KEYS
     if is_valid:
-        logger.info(f"Authentification réussie pour la clé API: {api_key[:8]}***")
+        # Retrouver le nom associé à la clé API pour les logs
+        user_name = next((name for name, key in API_KEYS_MAPPING.items() if key == api_key), "utilisateur inconnu")
+        logger.info(f"Authentification réussie pour l'utilisateur: {user_name}")
     else:
         logger.warning(f"Tentative d'authentification échouée avec la clé API: {api_key[:8]}***")
     

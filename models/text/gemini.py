@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT, GEMINI_API_KEY
 from dotenv import load_dotenv
 import os
 import litellm
@@ -17,9 +17,9 @@ async def gemini_chat(messages, parameters):
     litellm.callbacks = [opik_logger]
 
     params = {
-        "model": "openai/gemini-2.0-flash",
-        "api_key": os.getenv("GEMINI_API_KEY"),
-        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "model": MODELS_CONFIG_TEXT.get("gemini", "openai/gemini-2.0-flash"),
+        "api_key": GEMINI_API_KEY,
+        "base_url": API_ENDPOINTS_TEXT.get("gemini_google", "https://generativelanguage.googleapis.com/v1beta/openai/"),
         "messages": messages
     }
     

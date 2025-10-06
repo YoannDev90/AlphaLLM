@@ -22,3 +22,4 @@ seaborn
 speechify-api
 librosa
 pydub
+tavily-python

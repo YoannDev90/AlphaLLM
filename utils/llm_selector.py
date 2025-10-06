@@ -1,5 +1,5 @@
 import logging
-from utils.config import logger_name, get_llm_selector_preprompt, CONFIG
+from utils.config import logger_name, get_llm_selector_preprompt, CONFIG, API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT
 from dotenv import load_dotenv
 import os
 import requests
@@ -27,12 +27,12 @@ async def llm_selector(input):
     ]
        
     response = requests.post(
-        "https://ai.hackclub.com/chat/completions",
+        API_ENDPOINTS_TEXT.get("hackclub", "https://ai.hackclub.com/chat/completions"),
         headers={
             "Content-Type": "application/json",
         },
         json={
-            "model": "openai/gpt-oss-20b",
+            "model": MODELS_CONFIG_TEXT.get("llm_selector", "openai/gpt-oss-20b"),
             "messages": messages
         }
     )

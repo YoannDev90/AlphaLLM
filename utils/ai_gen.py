@@ -1,7 +1,7 @@
 # from utils.image_gen import generate_image
 from utils.llm_selector import llm_selector
 import logging
-from utils.config import LOGGER_NAME
+from utils.config import LOGGER_NAME, BOTS_IDS
 from dotenv import load_dotenv
 import os
 from datetime import datetime
@@ -46,55 +46,55 @@ async def chat(messages, bot, user, parameters):
         model = parameters.get("model", bot.user.id if isinstance(bot, discord.Client) else bot.id)
 
         match model:
-            case 1370685184269352962 | "mistral": # Mistral bot ID
+            case id if id == BOTS_IDS.get("mistral") or id == "mistral":
                 logger.debug("Using Mistral model for chat")
                 response = await mistral_chat(messages, parameters)
                 logger.info("Réponse générée par Mistral")
-            case 1370682029460684850 | "deepseek": # DeepSeek bot ID
+            case id if id == BOTS_IDS.get("deepseek") or id == "deepseek":
                 logger.debug("Using DeepSeek model for chat")
                 response = await deepseek_chat(messages, parameters)
                 logger.info("Réponse générée par DeepSeek")
-            case 1370683258274185349 | "gemini": # Gemini bot ID
+            case id if id == BOTS_IDS.get("gemini") or id == "gemini":
                 logger.debug("Using Gemini model for chat")
                 response = await gemini_chat(messages, parameters)
                 logger.info("Réponse générée par Gemini")
-            case 1370686144542539846 | "qwen": # Qwen bot ID
+            case id if id == BOTS_IDS.get("qwen") or id == "qwen":
                 logger.debug("Using Qwen model for chat")
                 response = await qwen_chat(messages, parameters)
                 logger.info("Réponse générée par Qwen")
-            case 1370683080892747796 | "openai": # OpenAI bot ID
+            case id if id == BOTS_IDS.get("chatgpt") or id == "openai":
                 logger.debug("Using OpenAI model for chat")
                 response = await openai_chat(messages, parameters)
                 logger.info("Réponse générée par OpenAI")
-            case 1370685660326920252 | "evilgpt": # EvilGPT bot ID
+            case id if id == BOTS_IDS.get("evilgpt") or id == "evilgpt":
                 logger.debug("Using EvilGPT model for chat")
                 response = await evilgpt_chat(messages, parameters)
                 logger.info("Réponse générée par EvilGPT")
-            case 1370683169522847827 | "grok": # Grok bot ID
+            case id if id == BOTS_IDS.get("grok") or id == "grok":
                 logger.debug("Using Grok model for chat")
                 response = await grok_chat(messages, parameters)
                 logger.info("Réponse générée par Grok")
-            case 1370685321703854110 | "llama": # Llama bot ID
+            case id if id == BOTS_IDS.get("llama") or id == "llama":
                 logger.debug("Using Llama model for chat")
                 response = await llama_chat(messages, parameters)
                 logger.info("Réponse générée par Llama")
-            case 1370681547740418079 | "perplexity": #Perplexity bot ID
+            case id if id == BOTS_IDS.get("perplexity") or id == "perplexity":
                 logger.debug("Using Perplexity model for chat")
                 response = await perplexity_chat(messages, parameters)
                 logger.info("Réponse générée par Perplexity")
-            case 1413827193670467634 | "claude": # Claude bot ID
+            case id if id == BOTS_IDS.get("claude") or id == "claude":
                 response = await claude_chat(messages, parameters)
                 logger.info("Réponse générée par Claude")
-            case 1413831535940993044 | "command": #Command bot ID
+            case id if id == BOTS_IDS.get("cohere") or id == "command":
                 response = await cohere_chat(messages, parameters)
                 logger.info("Réponse générée par Command")
-            case 1413827975325159454 | "glm": #GLM bot ID
+            case id if id == BOTS_IDS.get("glm") or id == "glm":
                 response = await glm_chat(messages, parameters)
                 logger.info("Réponse générée par GLM")
-            case 1413827727408238642 | "kimi": #Kimi bot ID
+            case id if id == BOTS_IDS.get("kimi") or id == "kimi":
                 response = await kimi_chat(messages, parameters)
                 logger.info("Réponse générée par Kimi")
-            case 1413825696043630594 | "phi": #Phi bot ID
+            case id if id == BOTS_IDS.get("phi") or id == "phi":
                 response = await phi_chat(messages, parameters)
                 logger.info("Réponse générée par Phi")
             case _: # AlphaLLM bot ID
@@ -155,69 +155,3 @@ async def chat(messages, bot, user, parameters):
             "model": "error",
             "elapsed_time": "0 seconds"
         }
-    
-def get_text_model_info(model_name):
-    """
-    Récupère les informations d'un modèle depuis text_models.toml
-    """
-    try:
-        with open("text_models.toml", "rb") as f:
-            models_config = tomllib.load(f)
-        
-        for key, model in models_config.items():
-            if isinstance(model, dict) and model.get("model") == model_name:
-                api_key_env = model["api_key"]
-                api_key = os.getenv(api_key_env)
-                
-                if not api_key:
-                    raise ValueError(f"Clé d'API {api_key_env} non trouvée dans les variables d'environnement")
-                
-                result = {
-                    "model": model["model"],
-                    "api_key": api_key
-                }
-                
-                if "base_url" in model:
-                    result["base_url"] = model["base_url"]
-                
-                return result
-
-        raise ValueError(f"Modèle '{model_name}' non trouvé dans text_models.toml")
-
-    except FileNotFoundError:
-        raise ValueError("Fichier text_models.toml non trouvé")
-    except Exception as e:
-        raise ValueError(f"Erreur lors de la lecture de text_models.toml: {str(e)}")
-
-def get_image_model_info(model_name):
-    """
-    Récupère les informations d'un modèle depuis image_models.toml
-    """
-    try:
-        with open("image_models.toml", "rb") as f:
-            models_config = tomllib.load(f)
-
-        for key, model in models_config.items():
-            if isinstance(model, dict) and model.get("model") == model_name:
-                api_key_env = model["api_key"]
-                api_key = os.getenv(api_key_env)
-
-                if not api_key:
-                    raise ValueError(f"Clé d'API {api_key_env} non trouvée dans les variables d'environnement")
-
-                result = {
-                    "model": model["model"],
-                    "api_key": api_key
-                }
-
-                if "base_url" in model:
-                    result["base_url"] = model["base_url"]
-
-                return result
-
-        raise ValueError(f"Modèle '{model_name}' non trouvé dans image_models.toml")
-
-    except FileNotFoundError:
-        raise ValueError("Fichier image_models.toml non trouvé")
-    except Exception as e:
-        raise ValueError(f"Erreur lors de la lecture de image_models.toml: {str(e)}")

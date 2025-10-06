@@ -8,7 +8,7 @@ from utils.database import get_blacklist
 from utils.database import get_supabase_client
 from utils.config import DEBUG, GUILD_ID, OWNER_ID, get_bot_token, LOGGER_NAME
 from utils.server_config import update_all_guilds_info
-from embeds.welcome_embed import create_welcome_embed, WelcomeLanguageView
+from embeds.welcome import create_welcome_embed, WelcomeLanguageView
 from utils.command_ids import command_id_manager
 from utils.msg_process import message_process
 

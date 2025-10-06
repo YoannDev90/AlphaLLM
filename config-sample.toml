@@ -6,10 +6,54 @@ dev_id = 1234567890123456789
 admin_server = 1234567890123456789
 
 support_server = "https://discord.gg/azerty"
+website = "https://www.alphallm.com"
+status_page = "https://alphallm.com/status"
+api_url = "https://alphallm-api.onrender.com"
 
 # API
 host = "0.0.0.0"
 port = 25692
+api_key_required = true
+max_requests_per_minute = 10
+request_timeout = 30
+
+# Bots links for installation
+[bots_links]
+chatgpt = "https://discord.com/oauth2/authorize?client_id=YOUR_CHATGPT_BOT_ID"
+deepseek = "https://discord.com/oauth2/authorize?client_id=YOUR_DEEPSEEK_BOT_ID"
+evilgpt = "https://discord.com/oauth2/authorize?client_id=YOUR_EVILGPT_BOT_ID"
+gemini = "https://discord.com/oauth2/authorize?client_id=YOUR_GEMINI_BOT_ID"
+grok = "https://discord.com/oauth2/authorize?client_id=YOUR_GROK_BOT_ID"
+llama = "https://discord.com/oauth2/authorize?client_id=YOUR_LLAMA_BOT_ID"
+mistral = "https://discord.com/oauth2/authorize?client_id=YOUR_MISTRAL_BOT_ID"
+perplexity = "https://discord.com/oauth2/authorize?client_id=YOUR_PERPLEXITY_BOT_ID"
+qwen = "https://discord.com/oauth2/authorize?client_id=YOUR_QWEN_BOT_ID"
+claude = "https://discord.com/oauth2/authorize?client_id=YOUR_CLAUDE_BOT_ID"
+command = "https://discord.com/oauth2/authorize?client_id=YOUR_COMMAND_BOT_ID"
+glm = "https://discord.com/oauth2/authorize?client_id=YOUR_GLM_BOT_ID"
+kimi = "https://discord.com/oauth2/authorize?client_id=YOUR_KIMI_BOT_ID"
+phi = "https://discord.com/oauth2/authorize?client_id=YOUR_PHI_BOT_ID"
+
+# Bots IDs for model matching
+[bots_ids]
+mistral = 1234567890123456789
+chatgpt = 1234567890123456789
+llama = 1234567890123456789
+deepseek = 1234567890123456789
+qwen = 1234567890123456789
+gemini = 1234567890123456789
+grok = 1234567890123456789
+perplexity = 1234567890123456789
+cohere = 1234567890123456789
+evilgpt = 1234567890123456789
+glm = 1234567890123456789
+kimi = 1234567890123456789
+phi = 1234567890123456789
+claude = 1234567890123456789
+
+[api_keys]
+"USER1" = "your_api_key_here"
+"USER2" = "another_api_key_here"
 
 # Memory
 embedder_model="BAAI/bge-small-en-v1.5"
@@ -44,10 +88,26 @@ If user input is void or spaces, use your creativity to generate a relevant prom
 **Example:**  
 USER: "cat with sunglasses"  
 ASSISTANT: "A close-up illustration of a cool tabby cat wearing stylish sunglasses, vibrant summer colors, cartoon style, soft shadows, sunny background, playful mood."
-
 """
 
-status = [
-    "Use @AlphaLLM to chat",
-    "Use /image to generate",
-]
+basic_infos_preprompt = """
+Use the following pieces of information to help answer the question at the end.
+Website = https://example.com
+Support server = https://discord.gg/example
+Status = https://example.com/status
+
+**Commands available:**
+- All standard Discord bot commands
+"""
+
+llm_selector_preprompt = """
+You are a model selection system. Your mission is to return only the **exact name of the model** that best matches the user's request from the available models.
+
+Rules:
+- Analyze the user's input and determine its main intent.
+- Always choose **one single model**, the most appropriate fit.
+- Answer with the **model name only**, no explanations or additional text.
+"""
+
+[models]
+# Define your models here following the structure in config.toml

@@ -1,6 +1,5 @@
 import discord
 from discord import app_commands
-from utils.image_gen import generate_image, image_edit
 from utils.ai_utils import enhance_image_prompt
 from io import BytesIO
 import logging
@@ -8,8 +7,26 @@ from utils.config import logger_name
 from utils.user_config import get_image_model, get_image_size, get_image_private, get_image_enhance
 from utils.user_manager import new_interaction, new_image
 from utils.database import get_blacklist
-from embeds.image_embed import ImageView, EditImageModal
+from embeds.image import ImageView, EditImageModal
 import random
+import base64
+
+# Import des fonctions de génération d'images
+from models.image.flux import generate_flux
+from models.image.kontext import generate_kontext
+from models.image.turbo import generate_turbo
+from models.image.seedream import generate_seedream
+from models.image.nanobanana import generate_nanobanana
+from models.image.dalle import generate_dalle
+from models.image.flux_schnell import generate_flux_schnell
+from models.image.gpt_image import generate_gpt_image
+from models.image.imagen import generate_imagen
+from models.image.phoenix import generate_phoenix
+from models.image.playground import generate_playground
+from models.image.recraft import generate_recraft
+from models.image.sana import generate_sana
+from models.image.sdlarge import generate_sdlarge
+from models.image.sdxl import generate_sdxl
 
 logger = logging.getLogger(logger_name)
 
@@ -23,11 +40,21 @@ async def setup(bot: discord.Client):
         enhance="Whether to enhance the image (default: Yes)"
     )
     @app_commands.choices(model=[
-        app_commands.Choice(name="Flux", value="pollinations/flux"),
-        app_commands.Choice(name="Kontext", value="pollinations/kontext"),
-        app_commands.Choice(name="Turbo", value="pollinations/turbo"),
-        app_commands.Choice(name="Seedream", value="pollinations/seedream"),
-        app_commands.Choice(name="NanoBanana", value="pollinations/nanobanana"),
+        app_commands.Choice(name="Flux", value="flux"),
+        app_commands.Choice(name="Kontext", value="kontext"),
+        app_commands.Choice(name="Turbo", value="turbo"),
+        app_commands.Choice(name="Seedream", value="seedream"),
+        app_commands.Choice(name="NanoBanana", value="nanobanana"),
+        app_commands.Choice(name="DALL-E 3", value="dalle"),
+        app_commands.Choice(name="Flux Schnell", value="flux_schnell"),
+        app_commands.Choice(name="GPT Image 1", value="gpt_image"),
+        app_commands.Choice(name="Imagen 3 Fast", value="imagen"),
+        app_commands.Choice(name="Phoenix 1.0", value="phoenix"),
+        app_commands.Choice(name="Playground v2.5", value="playground"),
+        app_commands.Choice(name="Recraft 20B", value="recraft"),
+        app_commands.Choice(name="Sana", value="sana"),
+        app_commands.Choice(name="SD 3.5 Large", value="sdlarge"),
+        app_commands.Choice(name="SDXL", value="sdxl"),
     ])
     @app_commands.choices(size=[
         app_commands.Choice(name="Square (1024x1024)", value="1024x1024"),
@@ -41,7 +68,7 @@ async def setup(bot: discord.Client):
     async def image(
         interaction: discord.Interaction,
         prompt: str,
-        model: str = "pollinations/flux",
+        model: str = "flux",
         size: str = "1024x1024",
         number: int = 2,
         enhance: bool = True,
@@ -58,6 +85,7 @@ async def setup(bot: discord.Client):
             return
         
         logger.info(f"Commande /image exécutée par {interaction.user.display_name} ({interaction.user.id})")
+        logger.info(f"Prompt: {prompt}, model: {model}, size: {size}, number: {number}")
 
         original_number = number
         warning_message = ""
@@ -71,8 +99,29 @@ async def setup(bot: discord.Client):
 
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
-        model = "pollinations/flux" if not model else model
+        model = "flux" if not model else model
         size = "1024x1024" if not size else size
+        
+        # Mapping des modèles vers leurs fonctions
+        model_functions = {
+            "flux": generate_flux,
+            "kontext": generate_kontext,
+            "turbo": generate_turbo,
+            "seedream": generate_seedream,
+            "nanobanana": generate_nanobanana,
+            "dalle": generate_dalle,
+            "flux_schnell": generate_flux_schnell,
+            "gpt_image": generate_gpt_image,
+            "imagen": generate_imagen,
+            "phoenix": generate_phoenix,
+            "playground": generate_playground,
+            "recraft": generate_recraft,
+            "sana": generate_sana,
+            "sdlarge": generate_sdlarge,
+            "sdxl": generate_sdxl,
+        }
+        
+        generate_func = model_functions.get(model, generate_flux)
         
         if enhance:
             enhanced_prompts = await enhance_image_prompt(prompt, number)
@@ -90,16 +139,16 @@ async def setup(bot: discord.Client):
         
         for i, current_prompt in enumerate(prompts_to_generate, 1):
             try:
-                result = await generate_image(current_prompt, model, size)
-                if result and len(result) == 2:
-                    image_data, nsfw = result
-                    if nsfw:
-                        nsfw_detected = True
-                    images_data.append((image_data, nsfw, current_prompt, i))
-                    logger.info(f"Image {i}/{number} générée pour {interaction.user.display_name}")
-                else:
-                    logger.error(f"Résultat invalide pour l'image {i}: {result}")
-                    images_data.append((None, False, current_prompt, i))
+                logger.info(f"Generating image {i}/{number} with prompt: {current_prompt}")
+                # Appel direct de la fonction de génération qui retourne base64
+                image_base64 = await generate_func(current_prompt, size)
+                
+                # Convertir base64 en bytes
+                image_data = base64.b64decode(image_base64)
+                
+                nsfw = False
+                images_data.append((image_data, nsfw, current_prompt, i))
+                logger.info(f"Image {i}/{number} générée pour {interaction.user.display_name}")
             except Exception as e:
                 logger.error(f"Erreur génération image {i}: {str(e)}")
                 images_data.append((None, False, current_prompt, i))
@@ -128,13 +177,13 @@ async def setup(bot: discord.Client):
                     
                     if success_count == 0 and not warning_message:
                         message = await interaction.followup.send(
-                            f"🎨 Image {image_num}/{number}:", 
+                            f"🎨 Image {image_num}/{number}:\n```{current_prompt}```", 
                             file=file, 
                             view=view
                         )
                     else:
                         message = await interaction.followup.send(
-                            f"🎨 Image {image_num}/{number}:", 
+                            f"🎨 Image {image_num}/{number}:\n```{current_prompt}```", 
                             file=file, 
                             view=view
                         )
