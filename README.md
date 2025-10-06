@@ -1,4 +1,4 @@
-# AlphaLLM - Documentation GitHub 🚀
+# AlphaLLM - GitHub Documentation 🚀
 
 ## [🇬🇧](https://github.com/YoannDev90/AlphaLLM/main/README.md) / [🇫🇷](https://github.com/YoannDev90/AlphaLLM/main/README-FR.md)
 
