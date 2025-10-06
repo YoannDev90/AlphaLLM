@@ -1,6 +1,6 @@
 # AlphaLLM - GitHub Documentation 🚀
 
-## [🇬🇧](https://github.com/YoannDev90/AlphaLLM/main/README.md) / [🇫🇷](https://github.com/YoannDev90/AlphaLLM/main/README-FR.md)
+## [🇬🇧](https://github.com/YoannDev90/AlphaLLM/blob/main/README.md) / [🇫🇷](https://github.com/YoannDev90/AlphaLLM/blob/main/README-FR.md)
 
 AlphaLLM is a Python-written Discord bot that integrates multiple AI APIs:
 
