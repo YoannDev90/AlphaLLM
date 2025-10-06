@@ -1,6 +1,8 @@
 # AlphaLLM - Documentation GitHub 🚀
 
-**AlphaLLM** est un bot Discord écrit en Python, qui regroupe plusieurs APIs d'IA:  
+## [🇬🇧](https://github.com/YoannDev90/AlphaLLM/main/README.md) / [🇫🇷](https://github.com/YoannDev90/AlphaLLM/main/README-FR.md)
+
+AlphaLLM is a Python-written Discord bot that integrates multiple AI APIs:
 
 - Cerebras
 - Pollinations AI
@@ -17,51 +19,50 @@
 
 ---
 
-## **Fonctionnalités principales** 🌟
+## **Main Features** 🌟
 
-- 🔗 **Traitement des liens** : Remplace automatiquement les liens par leur contenu au format Markdown, à l'exception du contenu Javascript.
-- 📕 **Traitement des fichiers** : Traite les fichiers les plus courants grâce à la librairie `Markitdown`.
-- 📄 **Support Markdown** : Formate ses réponses suivant la syntaxe Markdown de Discord.
-- ✂️ **Formatage adaptatif** : Formate les blocs de code, les tableaux, les citations, selon la manière la plus adaptée à Discord.
-- 🖼️ **Génération d'images de qualité** : Génère des images jusqu'à 2048x2048.
-- ✏️ **Edition d'image basique** : Permet l'édition d'une image par l'IA.
-- 🔁 **Bouton de régénération** : Régénère la réponse ou l'image.
-- ⚙️ **Personnalisation maximale** : Permet de personnaliser le bot pour un usage particulier sur votre serveur, avec possibilité d'ajouter des détails au prompt système de base.
-- ⚠️ **Gestion des erreurs** : Gère les erreurs des différentes API et informe l'utilisateur en conséquence.
+- 🔗 **Link Processing**: Automatically replaces links with their content in Markdown format, except for JavaScript content.
+- 📕 **File Processing**: Handles common file types using the `Markitdown` library.
+- 📄 **Markdown Support**: Formats responses using Discord's Markdown syntax.
+- ✂️ **Adaptive Formatting**: Formats code blocks, tables, and quotes in the most suitable way for Discord.
+- 🖼️ **High-Quality Image Generation**: Generates images up to 2048x2048 resolution.
+- ✏️ **Basic Image Editing**: Enables AI-based image editing.
+- 🔁 **Regeneration Button**: Regenerates the response or image.
+- ⚙️ **Maximum Customization**: Allows customization for specific server use, including the ability to add details to the base system prompt.
+- ⚠️ **Error Handling**: Manages errors from different APIs and informs the user accordingly.
 
 ---
 
 ## **Installation** 🛠️
 
-### Prérequis
+### Prerequisites
 
 1. 🖥️ Python 3.11.13
-2. 🤖 Un bot Discord
-3. 🔑 Une clé pour chaque API
-4. 📦 Une base de données PostgreSQL
+2. 🤖 A Discord bot
+3. 🔑 An API key for each service
+4. 📦 A PostgreSQL database
 
-### Dépendances
+### Dependencies
 
-Le projet utilise des dépendances qui sont listées dans le fichier `requirements.txt` :
+Project dependencies are listed in the `requirements.txt` file:
 
+### Installation Steps
 
-### Étapes d'installation
-
-1. Clonez ce dépôt :
+1. Clone the repository:
 
    ```bash
    git clone https://github.com/YoannDev90/AlphaLLM.git
    ```
 
-2. Installez les dépendances :
+3. Install dependencies:
 
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Configurez vos paramètres dans le fichier `.env`.
+5. Configure your settings in the `config.toml` file and your keys in the `.env` file.
 
-4. Lancez le bot :
+6. Launch the bot:
 
    ```bash
    python main.py
@@ -69,50 +70,49 @@ Le projet utilise des dépendances qui sont listées dans le fichier `requiremen
 
 ---
 
-## **Utilisation** 📚
+## **Usage** 📚
 
-Pour discuter avec le bot, il suffit de le mentionner dans un canal Discord autorisé :
+To chat with the bot, simply mention it in an authorized Discord channel:
 
-```markdown
-@AlphaLLM Quelle est la capitale de la France ?
+@AlphaLLM What is the capital of France?
 
->>> La capitale de la France est : **Paris** 🗼️.
+```md
+>>> The capital of France is: **Paris** 🗼️.
 ```
 
-Le bot répondra avec la réponse formatée. Vous pouvez également lui envoyer des liens ou des fichiers pour qu'il les traite.
+The bot will respond with a formatted answer. You can also send it links or files for processing.
 
-Pour poser une question ponctuelle, sans contexte, utilisez la commande `/ask` :
+To ask a one-time question without context, use the `/ask` command:
 
-```markdown
-/ask Quelle est la capitale de la France ?
+`/ask` What is the capital of France?
 
->>> La capitale de la France est : **Paris** 🗼️.
+```md
+>>> The capital of France is: **Paris** 🗼️.
 ```
 
-À noter que l'utilisation de cette commande n'a pas d'incidence sur votre historique de conversation.
-Cette commande est disponible pour une utilisation sur des serveurs sur lequel le bot n'est pas installé, si toutefois ledit serveur permet l'utilisation de commandes externes.
+Note that using this command does not affect your conversation history.  
+This command is available for use on servers where the bot is not installed, provided the server allows external commands.
 
-Pour générer une image, utilisez la commande `/image` :
+To generate an image, use the `/image` command:
 
-```markdown
-/image "a beautiful natural landscape"
-```
+`/image` "a beautiful natural landscape"
+
 ---
 
 ## **Contributions** 🤝
 
-Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
+Contributions are welcome! Please follow these steps:
 
-1. Forkez le dépôt.
-2. Créez une branche.
-3. Soumettez une Pull Request avec une description claire.
+1. Fork the repository.
+2. Create a branch.
+3. Submit a Pull Request with a clear description.
 
 ---
 
 ## **Support** 📧
 
-Pour toute question ou problème, contactez-nous via [le serveur Discord de support](https://discord.gg/QGvyrUgwdK).
+For any questions or issues, contact us via the [support Discord server](https://discord.gg/QGvyrUgwdK).
 
 ---
 
-Merci d'utiliser AlphaLLM ! 🎮✨
+Thank you for using AlphaLLM! 🎮✨
