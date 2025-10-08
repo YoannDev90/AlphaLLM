@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = os.getenv("PHI_BOT_TOKEN")
-GUILD_ID = GUILD_ID
 
 intents = discord.Intents.default()
 

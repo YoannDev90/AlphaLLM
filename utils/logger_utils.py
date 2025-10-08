@@ -1,5 +1,5 @@
 import logging
-from utils.config import LOGGER_NAME, DEV_ID
+from utils.config import LOGGER_NAME, OWNER_ID
 from colorama import Fore, Back, Style
 import asyncio
 import discord
@@ -10,6 +10,7 @@ class DiscordLogHandler(logging.Handler):
         self.bot = bot
         self.log_queue = asyncio.Queue()
         self.running = False
+        self.log_task = None
 
     async def _send_logs(self):
         self.running = True
@@ -22,7 +23,7 @@ class DiscordLogHandler(logging.Handler):
 
     async def mp_logs(self, message):
         try:
-            dev_user = await self.bot.fetch_user(DEV_ID)
+            dev_user = await self.bot.fetch_user(OWNER_ID)
             await dev_user.send(message)
         except discord.HTTPException as e:
             print(f"Erreur lors de la récupération de l'utilisateur : {e}")
@@ -31,13 +32,25 @@ class DiscordLogHandler(logging.Handler):
 
     def emit(self, record):
         message = self.format(record)
-        asyncio.create_task(self.log_queue.put(message))
-        if not hasattr(self, 'log_task') or self.log_task is None or self.log_task.done():
-            self.log_task = asyncio.create_task(self._send_logs())
+        try:
+            # Essayer d'obtenir la boucle d'événements en cours
+            loop = asyncio.get_running_loop()
+            # Si on est dans une boucle, créer la tâche
+            asyncio.create_task(self.log_queue.put(message))
+            if self.log_task is None or self.log_task.done():
+                self.log_task = asyncio.create_task(self._send_logs())
+        except RuntimeError:
+            # Pas de boucle en cours, ignorer silencieusement
+            # Cela se produit quand le logging est appelé depuis un thread non-async
+            pass
 
     def stop(self):
         self.running = False
-        asyncio.create_task(self.log_queue.put(None))
+        try:
+            loop = asyncio.get_running_loop()
+            asyncio.create_task(self.log_queue.put(None))
+        except RuntimeError:
+            pass
 
 class ConsoleFormatter(logging.Formatter):
     FORMATS = {

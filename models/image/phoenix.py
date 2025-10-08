@@ -8,14 +8,14 @@ from utils.config import API_ENDPOINTS_IMAGE, MODELS_CONFIG_IMAGE
 load_dotenv()
 ELECTRONHUB_API_KEY = os.getenv("ELECTRONHUB_API_KEY")
 
-async def generate_phoenix(prompt: str, width=1024, height=1024):
+async def generate_phoenix(prompt: str, size: str = "1024x1024") -> str:
     """Génère une image avec le modèle Phoenix via ElectronHub"""
     
     image = litellm.image_generation(
-        model=MODELS_CONFIG_IMAGE.get("phoenix", "openai/phoenix"),
+        model="openai/phoenix-1.0",
         api_key=ELECTRONHUB_API_KEY,
-        api_base=API_ENDPOINTS_IMAGE.get("electronhub", "https://api.electronhub.ai/v1/"),
-        size=f"{width}x{height}",
+        api_base="https://api.electronhub.ai/v1/",
+        size=size,
         prompt=prompt                
     )
     

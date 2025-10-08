@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
 from dotenv import load_dotenv
 from utils.server_config import get_announce_channel
 from utils.translator import TranslationManager, SUPPORTED_LANGUAGES, load_translations
@@ -22,8 +22,6 @@ import matplotlib.font_manager as fm
 load_dotenv()
 
 logger = logging.getLogger(logger_name)
-OWNER_ID = int(os.getenv('DEV_ID'))
-GUILD_ID = int(os.getenv('GUILD_ID'))
 
 active_poll_messages: Dict[str, List[Dict]] = {}
 

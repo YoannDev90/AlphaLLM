@@ -6,7 +6,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import logging
-
 from utils.config import API_HOST, API_PORT, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)

@@ -13,7 +13,6 @@ from utils.command_ids import command_id_manager
 from utils.msg_process import message_process
 
 TOKEN = get_bot_token()
-GUILD_ID = GUILD_ID
 
 intents = discord.Intents.default()
 

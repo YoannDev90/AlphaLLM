@@ -19,42 +19,37 @@ bearer_scheme = HTTPBearer(
 
 def get_api_key(request: Request) -> Optional[str]:
     """
-    Extrait la clé API depuis les headers ou les paramètres de requête
+    Extrait la clé API depuis les headers ou les paramètres de requête et la valide
     """
     client_ip = request.client.host if request.client else 'unknown'
-    logger.debug(f"Tentative d'authentification depuis {client_ip}")
     
     if not API_KEY_REQUIRED:
-        logger.debug("Authentification API désactivée, accès autorisé")
         return None
     
-    # Essayer d'abord le header X-API-Key
     api_key = request.headers.get("X-API-Key")
-    if api_key:
-        logger.debug(f"Clé API trouvée dans le header X-API-Key depuis {client_ip}")
-        return api_key
     
-    # Puis le header Authorization: Bearer <key>
-    auth_header = request.headers.get("Authorization")
-    if auth_header and auth_header.startswith("Bearer "):
-        logger.debug(f"Clé API trouvée dans le header Authorization depuis {client_ip}")
-        return auth_header[7:]
+    if not api_key:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            api_key = auth_header[7:]
     
-    # Enfin le paramètre de requête api_key
-    api_key = request.query_params.get("api_key")
-    if api_key:
-        logger.debug(f"Clé API trouvée dans les paramètres de requête depuis {client_ip}")
-        return api_key
+    if not api_key:
+        api_key = request.query_params.get("api_key")
     
-    # Si aucune clé trouvée et qu'elle est requise
-    if API_KEY_REQUIRED:
-        logger.warning(f"Tentative d'accès sans clé API depuis {client_ip}")
+    if not api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Clé API requise. Utilisez X-API-Key header, Authorization: Bearer <key>, ou paramètre ?api_key=<key>"
         )
     
-    return None
+    # Vérifier que la clé API est valide
+    if not verify_api_access(api_key):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Clé API invalide"
+        )
+    
+    return api_key
 
 def verify_api_access(api_key: str) -> bool:
     """
@@ -70,7 +65,6 @@ def verify_api_access(api_key: str) -> bool:
     
     is_valid = api_key in API_KEYS
     if is_valid:
-        # Retrouver le nom associé à la clé API pour les logs
         user_name = next((name for name, key in API_KEYS_MAPPING.items() if key == api_key), "utilisateur inconnu")
         logger.info(f"Authentification réussie pour l'utilisateur: {user_name}")
     else:

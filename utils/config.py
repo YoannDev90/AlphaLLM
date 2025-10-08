@@ -22,6 +22,7 @@ CONFIG = load_toml_config()
 _config = CONFIG.get("config", {})
 DEBUG = _config.get("debug", False)
 LOGGER_NAME = _config.get("logger_name", "AlphaLLM")
+LOGGER_PREFIX = _config.get("logger_prefix", "[=]")
 GUILD_ID = int(_config.get("admin_server", 0))
 OWNER_ID = int(_config.get("dev_id", 0))
 
@@ -45,8 +46,9 @@ API_KEYS = set(API_KEYS_MAPPING.values())
 
 # Memory Configuration
 _memory = CONFIG.get("memory", {})
+CHROMA_DB_NAME = _memory.get("chroma_db_name", "AlphaLLM")
 EMBEDDER_MODEL = _memory.get("embedder_model", "BAAI/bge-small-en-v1.5")
-MEMORY_DURATION = _memory.get("memory_duration", 8)
+MEMORY_DURATION = _memory.get("memory_duration", 14400)
 RECENT_LIMIT = _memory.get("recent_limit", 3)
 SIMILAR_LIMIT = _memory.get("similar_limit", 5)
 
@@ -65,6 +67,7 @@ LOGGING_LEVEL = _level_mapping.get(_level_str, logging.INFO)
 # Preprompts
 _preprompts = CONFIG.get("preprompts", {})
 BASE_PREPROMPT = _preprompts.get("base_preprompt", "")
+API_MODELS_PREPROMPT = _preprompts.get("api_models_preprompt", "")
 IMAGE_ENHANCER_PREPROMPT = _preprompts.get("image_enhancer_preprompt", "")
 BASIC_INFOS_PREPROMPT = _preprompts.get("basic_infos_preprompt", "")
 LLM_SELECTOR_PREPROMPT = _preprompts.get("llm_selector_preprompt", "")
@@ -110,16 +113,15 @@ DB_URL = os.getenv("DB_URL", "").encode('utf-8').decode('unicode-escape')
 DB_KEY = os.getenv("DB_KEY", "").encode('utf-8').decode('unicode-escape')
 JWT_KEY = os.getenv("JWT_KEY", "").encode('utf-8').decode('unicode-escape')
 
+CHROMA_TENANT_ID = os.getenv("CHROMA_TENANT_ID", "").encode('utf-8').decode('unicode-escape')
+CHROMA_API_KEY = os.getenv("CHROMA_API_KEY", "").encode('utf-8').decode('unicode-escape')
+
 # PostgreSQL (pour memory_ai)
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
-
-# IDs Discord depuis les variables d'environnement
-DEV_ID = os.getenv("DEV_ID")
-GUILD_ID_ENV = os.getenv("GUILD_ID")
 
 # APIs externes
 NAVY_API_KEY = os.getenv("NAVY_API_KEY")
@@ -146,7 +148,6 @@ logger_name = LOGGER_NAME
 debug = DEBUG
 api_host = API_HOST
 api_port = API_PORT
-guild_id = GUILD_ID
 owner_id = OWNER_ID
 
 # Fonctions de compatibilité (retournent les constantes)

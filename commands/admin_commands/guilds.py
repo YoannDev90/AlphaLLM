@@ -1,14 +1,12 @@
 import discord
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
 from dotenv import load_dotenv
 import os
 from bots.bot import bot as main_bot
 
 load_dotenv()
 
-OWNER_ID = int(os.getenv('DEV_ID'))
-GUILD_ID = int(os.getenv('GUILD_ID'))
 logger = logging.getLogger(logger_name)
 
 CHOICES = [

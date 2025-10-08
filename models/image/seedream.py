@@ -6,7 +6,7 @@ import urllib.parse
 import random
 
 load_dotenv()
-POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
+SEEDREAM_API_KEY = os.getenv("SEEDREAM_API_KEY")
 
 async def generate_seedream(prompt: str, size: str = "1024x1024") -> str:
     """
@@ -31,7 +31,7 @@ async def generate_seedream(prompt: str, size: str = "1024x1024") -> str:
         "private": "true",
         "enhance": "false",
         "safe": "false",
-        "token": POLLINATIONS_API_KEY
+        "token": SEEDREAM_API_KEY
     }
 
     url = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}"

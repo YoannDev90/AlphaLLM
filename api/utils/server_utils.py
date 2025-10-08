@@ -43,9 +43,7 @@ async def ping_https_server(url: str, interval_range: tuple = (30, 300)):
     if min_interval < 30 or max_interval > 300 or min_interval >= max_interval:
         logger.error(f"Paramètres d'intervalle invalides: {interval_range}. Min=30s, Max=300s")
         return
-    
-    logger.info(f"Démarrage du ping automatique vers {url} (intervalle: {min_interval}-{max_interval}s)")
-        
+            
     while True:
         try:
             timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)

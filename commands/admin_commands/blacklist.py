@@ -1,6 +1,6 @@
 import discord
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
 from utils.database import get_supabase_client, get_blacklist, blacklist_add, blacklist_remove
 import os
 from dotenv import load_dotenv
@@ -10,8 +10,6 @@ load_dotenv()
 supabase = get_supabase_client()
 
 logger = logging.getLogger(logger_name)
-OWNER_ID = int(os.getenv('DEV_ID'))
-GUILD_ID = int(os.getenv('GUILD_ID'))
 
 CHOICES = [
     discord.app_commands.Choice(name="show", value=0),
