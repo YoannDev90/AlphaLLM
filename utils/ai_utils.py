@@ -8,7 +8,7 @@ import re
 from utils.ai_gen import chat
 from utils.md_converter import md_conversion
 from utils.web_process import crawl
-from utils.memory_ai import add_memory, get_history, get_hybrid_history, initialize, search_similar_memories
+from utils.memory import add_memory, get_history, get_hybrid_history, initialize, search_similar_memories
 from utils.user_config import get_perso_preprompt
 import litellm
 from litellm.integrations.opik.opik import OpikLogger
@@ -165,13 +165,11 @@ async def search_memory(user_id: int, server_id: int, query: str, limit: int = 5
 
 async def enhance_image_prompt(original_prompt, number=2):
     try:
-        # Créer les tâches selon le nombre demandé
         tasks = []
         models = ["groq/llama-3.1-8b-instant", "cerebras/llama3.1-8b"]
         
-        # On génère au maximum 4 prompts améliorés
         for i in range(min(number, 4)):
-            model = models[i % len(models)]  # Alterner entre les modèles
+            model = models[i % len(models)]
             messages=[
                     {"role": "system", "content": IMAGE_ENHANCER_PREPROMPT},
                     {"role": "user", "content": original_prompt}
@@ -182,10 +180,7 @@ async def enhance_image_prompt(original_prompt, number=2):
             )
             tasks.append(task)
         
-        # Exécuter toutes les tâches en parallèle
         results = await asyncio.gather(*tasks)
-        
-        # Construire le dictionnaire de résultats
         result = {}
         for i, response in enumerate(results, 1):
             result[i] = response.choices[0].message.content
@@ -203,10 +198,8 @@ async def messages_builder(user_input, system_prompt, perso_preprompt, history):
     if system_prompt:
         messages.insert(0, {"role": "system", "content": system_prompt})
     
-    # Gérer l'historique correctement
     if history:
         if isinstance(history, str):
-            # Si l'historique est une chaîne, l'ajouter comme contexte système
             if history.strip():
                 messages.append({"role": "system", "content": f"Contexte de conversation précédente:\n{history}"})
         elif isinstance(history, list):

@@ -20,9 +20,9 @@ async def generate_sdxl(prompt: str, size: str = "1024x1024") -> str:
         L'image encodée en base64
     """
     image = litellm.image_generation(
-        model=MODELS_CONFIG_IMAGE.get("sdxl", "openai/stabilityai/stable-diffusion-xl-base-1.0"),
+        model="stable-diffusion-xl-base-1.0",
         api_key=ELECTRONHUB_API_KEY,
-        api_base=API_ENDPOINTS_IMAGE.get("electronhub", "https://api.electronhub.ai/v1/"),
+        api_base="https://api.electronhub.ai/v1/",
         size=size,
         prompt=prompt                
     )

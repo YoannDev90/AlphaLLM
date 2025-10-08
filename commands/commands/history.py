@@ -1,7 +1,7 @@
 import discord
 import logging
 from utils.config import logger_name
-from utils.memory_ai import clear_remote_history
+from utils.memory import clear_remote_history
 
 logger = logging.getLogger(logger_name)
 

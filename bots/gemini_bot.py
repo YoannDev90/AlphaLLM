@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TOKEN = os.getenv("GEMINI_BOT_TOKEN")
-GUILD_ID = GUILD_ID
 
 intents = discord.Intents.default()
 

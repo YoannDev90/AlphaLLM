@@ -7,7 +7,7 @@ from utils.translator import TranslationManager, SUPPORTED_LANGUAGES, load_trans
 from embeds.announce import create_announcement_embed, AnnouncementTranslationView
 from embeds.announce_confirm import AnnounceConfirmView, create_announcement_confirmation_embed
 from utils.command_ids import command_id_manager
-from utils.config import logger_name
+from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
 import os
 import json
 import aiofiles
@@ -16,8 +16,6 @@ from datetime import datetime
 load_dotenv()
 
 logger = logging.getLogger(logger_name)
-OWNER_ID = int(os.getenv('DEV_ID'))
-GUILD_ID = int(os.getenv('GUILD_ID'))
 
 class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
     """Modal Discord pour saisir l'annonce - Classe nécessaire pour Discord.py"""

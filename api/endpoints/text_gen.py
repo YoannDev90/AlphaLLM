@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from utils.ai_utils import messages_builder, get_conversation_history
+from utils.memory import initialize, add_memory
+from utils.config import API_MODELS_PREPROMPT
 from typing import Optional
 import asyncio
-import logging
-
 from . import logger, REQUEST_TIMEOUT
 from api.utils.security_utils import get_api_key
 
@@ -10,8 +11,11 @@ router = APIRouter()
 
 @router.get("/generate/text", tags=["generation"])
 async def generate_text(
-    model: Optional[str], 
     prompt: str,
+    model: Optional[str] = "auto", 
+    user_id: Optional[int] = None,
+    conversation_id: Optional[int] = None,
+    incognito: Optional[bool] = False,
     api_key: Optional[str] = Depends(get_api_key)
 ):
     try:
@@ -30,25 +34,32 @@ async def generate_text(
         from models.text.kimi import kimi_chat
         from models.text.phi import phi_chat
         from utils.llm_selector import llm_selector
-                
-        messages = [
-            {"role": "user", "content": prompt}
-        ]
+
+        history = []
+        await initialize()
+        if not incognito and user_id and conversation_id:
+            history = await get_conversation_history(user_id, conversation_id, prompt)
+            if history is None:
+                history = []
+
+        messages = await messages_builder(
+            user_input=prompt, 
+            system_prompt=API_MODELS_PREPROMPT,
+            perso_preprompt="",
+            history=history
+            )
         
-        logger.info(f"Requête API reçue - Modèle: {model}, Prompt: {prompt}")
+        logger.info(f"Requête API reçue - Modèle: {model}")
 
         parameters = {
-            "history": False, 
+            "history": True, 
             "preprompt": False, 
             "tools": False, 
             "internet": False, 
             "raw": False
         }
         
-        async def generate_response():
-            logger.info(f"Début de génération de texte - Modèle: {model}")
-            logger.debug(f"Prompt reçu: {prompt[:100]}{'...' if len(prompt) > 100 else ''}")
-            
+        async def generate_response():            
             response = None
             
             match model.lower():
@@ -154,7 +165,16 @@ async def generate_text(
                 logger.error("Aucune réponse n'a été générée")
                 raise ValueError("Aucune réponse générée par le modèle")
             
-            logger.debug(f"Réponse brute: {str(response)[:100]}{'...' if len(str(response)) > 100 else ''}")
+            logger.debug(f"Réponse brute: {str(response)}")
+
+            if not incognito and user_id and conversation_id:
+                response_text = response.get('response', '')
+                combined_text = {
+                    "user": prompt,
+                    "assistant": response_text
+                }
+                await add_memory(user_id, conversation_id, combined_text, response_text)
+                logger.debug("Mémoires utilisateur et assistant ajoutées à la base de données")
             return response
         
         response = await asyncio.wait_for(

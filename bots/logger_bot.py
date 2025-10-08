@@ -3,7 +3,7 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv
 from utils.logger_utils import setup_logging
-from utils.config import update_log_level, get_current_log_level
+from utils.config import update_log_level, get_current_log_level, OWNER_ID, LOGGER_PREFIX
 import asyncio
 import datetime
 import sys
@@ -11,7 +11,6 @@ import sys
 load_dotenv()
 
 LOGGER_TOKEN = os.getenv("LOGGER_BOT_TOKEN")
-LOGGER_PREFIX = os.getenv("LOGGER_BOT_PREFIX")
 
 intents = discord.Intents.default()
 
@@ -29,8 +28,7 @@ async def on_ready():
 
 async def auto_purge():
     try:
-        dev_id = os.getenv("DEV_ID")
-        dev_user = await logger_bot.fetch_user(dev_id)
+        dev_user = await logger_bot.fetch_user(OWNER_ID)
         dm_channel = await dev_user.create_dm()
         
         cutoff_time = discord.utils.utcnow() - datetime.timedelta(days=2.0)
@@ -53,14 +51,13 @@ async def auto_purge():
 @logger_bot.tree.command(name="clear", description="Purge tous les messages DM sans limite de temps")
 async def clear_command(interaction: discord.Interaction):
     try:
-        dev_id = os.getenv("DEV_ID")
-        if str(interaction.user.id) != dev_id:
+        if str(interaction.user.id) != str(OWNER_ID):
             await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
         
         await interaction.response.defer(ephemeral=True)
         
-        dev_user = await logger_bot.fetch_user(dev_id)
+        dev_user = await logger_bot.fetch_user(OWNER_ID)
         dm_channel = await dev_user.create_dm()
         
         deleted_count = 0
@@ -88,8 +85,7 @@ async def clear_command(interaction: discord.Interaction):
 async def loglevel_command(interaction: discord.Interaction, level: str):
     """Commande pour modifier le niveau de logging dans config.toml et redémarrer le bot"""
     try:
-        dev_id = os.getenv("DEV_ID")
-        if str(interaction.user.id) != dev_id:
+        if str(interaction.user.id) != str(OWNER_ID):
             await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
         

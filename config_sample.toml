@@ -6,13 +6,13 @@ dev_id = 1234567890123456789
 admin_server = 1234567890123456789
 
 support_server = "https://discord.gg/azerty"
-website = "https://www.alphallm.com"
-status_page = "https://alphallm.com/status"
-api_url = "https://alphallm-api.onrender.com"
+website = "https://www.example.com"
+status_page = "https://example.com/status"
+api_url = "https://example-api.com"
 
 # API
 host = "0.0.0.0"
-port = 25692
+port = 50000
 api_key_required = true
 max_requests_per_minute = 10
 request_timeout = 30
@@ -110,4 +110,3 @@ Rules:
 """
 
 [models]
-# Define your models here following the structure in config.toml

@@ -1,6 +1,6 @@
 import discord
 import logging
-from utils.config import logger_name
+from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
 from dotenv import load_dotenv
 from discord.ext import commands
 import os
@@ -8,8 +8,6 @@ import os
 load_dotenv()
 
 logger = logging.getLogger(logger_name)
-OWNER_ID = int(os.getenv('DEV_ID'))
-GUILD_ID = int(os.getenv('GUILD_ID'))
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="reply", description="Répond à un utilisateur via DM")
@@ -24,11 +22,10 @@ async def setup(bot: discord.Client):
         try:
             user_id = int(user_id)
             asker = await bot.fetch_user(user_id)
-            dev_id = os.getenv("DEV_ID")
-            if not dev_id:
-                raise ValueError("L'ID du développeur (DEV_ID) n'est pas défini dans les variables d'environnement.")
+            if not OWNER_ID:
+                raise ValueError("L'ID du développeur (OWNER_ID) n'est pas défini dans les variables d'environnement.")
             await asker.send(
-                f"Développeur (<@{dev_id}>): {message}\nUse `/contact-dev` to reply"
+                f"Développeur (<@{OWNER_ID}>): {message}\nUse `/contact-dev` to reply"
             )
         except discord.HTTPException as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")
