@@ -31,7 +31,7 @@ async def generate_image(
         
         logger.debug(f"Démarrage de la génération avec timeout de {REQUEST_TIMEOUT * 2}s")
         response = await asyncio.wait_for(
-            generate_image(prompt=final_prompt, model=model, size=size),
+            generate_image(prompt=final_prompt, model=model, size=size, output_format="base64"),
             timeout=REQUEST_TIMEOUT * 2
         )
         

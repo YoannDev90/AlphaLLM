@@ -6,13 +6,12 @@ from utils.config import logger_name, TIMEOUT_IMAGE_VIEW
 logger = logging.getLogger(logger_name)
 
 class ImageView(discord.ui.View):
-    def __init__(self, prompt, model, size, enhance, safe):
+    def __init__(self, prompt, model, size, enhance):
         super().__init__(timeout=TIMEOUT_IMAGE_VIEW)
         self.prompt = prompt
         self.model = model
         self.size = size
         self.enhance = enhance
-        self.safe = safe
         self.message = None
 
     async def on_timeout(self):
@@ -35,23 +34,30 @@ class ImageView(discord.ui.View):
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
         
-        image_data, nsfw = await generate_image(self.prompt, self.model, self.size)
+        image_data = await generate_image(self.prompt, self.model, self.size, output_format="bytes")
         
-        if image_data:
-            file = discord.File(BytesIO(image_data), filename="regenerated_image.png")
-            view = ImageView(self.prompt, self.model, self.size, self.enhance, not nsfw)
-            message = await interaction.followup.send("🔄 Regenerated image:", file=file, view=view)
-            view.message = message
-            logger.info(f"Image régénérée et envoyée à {interaction.user.display_name}")
-        else:
-            await interaction.followup.send("❌ Image regeneration failed.", delete_after=10)
-            logger.error(f"Échec de la régénération d'image pour {interaction.user.display_name}")
+        try:
+            if image_data:
+                try:
+                    file = discord.File(BytesIO(image_data), filename="regenerated_image.png")
+                    view = ImageView(self.prompt, self.model, self.size, self.enhance)
+                    message = await interaction.followup.send("🔄 Regenerated image:", file=file, view=view)
+                    view.message = message
+                    logger.info(f"Image régénérée et envoyée à {interaction.user.display_name}")
+                except Exception as e:
+                    await interaction.followup.send("❌ Error sending regenerated image.")
+                    logger.error(f"Erreur lors de l'envoi de l'image régénérée pour {interaction.user.display_name}: {str(e)}")
+            else:
+                await interaction.followup.send("❌ Image regeneration failed.")
+                logger.error(f"Échec de la régénération d'image pour {interaction.user.display_name}")
+        except Exception as e:
+            logger.error(f"Erreur inattendue lors de la régénération d'image pour {interaction.user.display_name}: {str(e)}")
+            await interaction.followup.send("❌ Unexpected error during image regeneration.")
 
     @discord.ui.button(emoji="✏️", label="Edit", style=discord.ButtonStyle.gray)
     async def edit(self, interaction: discord.Interaction, button: discord.ui.Button):
         logger.info(f"Édition d'image demandée par {interaction.user.display_name}")
         
-        # Import des fonctions nécessaires à l'exécution
         from utils.user_manager import new_interaction, new_image
         
         new_interaction(interaction.user.id)
