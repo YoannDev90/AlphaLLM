@@ -197,11 +197,10 @@ async def image_edit(edit_prompt: str, image_url: str, size: str = "1024x1024", 
     try:
         logger.info(f"Édition d'image avec prompt: {edit_prompt}")
 
-        result = await generate_image(edit_prompt, "nanobanana", size, output_format, use_fallback=True)
+        result = await generate_image(edit_prompt, "nanobanana", size, output_format, use_fallback=True, is_edit=True)
         
         if result is not None:
             logger.info(f"Édition d'image réussie")
-            # NSFW detection placeholder - à implémenter selon vos besoins
             nsfw_detected = False
             return result, nsfw_detected
         else:

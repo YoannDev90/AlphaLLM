@@ -115,7 +115,6 @@ class EditImageModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer()
         
-        # Import des fonctions nécessaires à l'exécution
         from utils.image_gen import image_edit
         
         edit_prompt = self.prompt_input.value
@@ -128,7 +127,7 @@ class EditImageModal(discord.ui.Modal):
         
         if image_data:
             file = discord.File(BytesIO(image_data), filename="edited_image.png")
-            view = ImageView(edit_prompt, "kontext", self.size, self.enhance, not nsfw)
+            view = ImageView(edit_prompt, "nanobanana", self.size, self.enhance, not nsfw)
             message = await interaction.followup.send("✏️ Edited image:", file=file, view=view)
             view.message = message
             logger.info(f"Image éditée et envoyée à {interaction.user.display_name}")
