@@ -38,18 +38,9 @@ def get_image_size(user_id):
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la taille d'image pour l'utilisateur {user_id} : {str(e)}")
         return None
-    
-def get_image_private(user_id):
-    try:
-        response = supabase.table("users_settings").select("image_private").eq("id_discord", user_id).execute()
-        if response.data:
-            return response.data[0]['image_private']
-        else:
-            return None
-    except Exception as e:
-        logger.error(f"Erreur lors de la récupération du statut d'image privée pour l'utilisateur {user_id} : {str(e)}")
-        return None
-    
+
+def get_image_private(user_id): return False
+
 def get_image_enhance(user_id):
     try:
         response = supabase.table("users_settings").select("image_enhance").eq("id_discord", user_id).execute()
@@ -81,17 +72,6 @@ def get_audio_voice(user_id):
             return None
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de la voix pour l'utilisateur {user_id} : {str(e)}")
-        return None
-    
-def get_announce_mp_active(user_id):
-    try:
-        response = supabase.table("users_settings").select("announce_mp").eq("id_discord", user_id).execute()
-        if response.data:
-            return response.data[0]['announce_mp']
-        else:
-            return None
-    except Exception as e:
-        logger.error(f"Erreur lors de la récupération du statut d'annonce MP pour l'utilisateur {user_id} : {str(e)}")
         return None
     
 def get_perso_preprompt(user_id):

@@ -7,7 +7,7 @@ from utils.translator import TranslationManager, SUPPORTED_LANGUAGES, load_trans
 from embeds.announce import create_announcement_embed, AnnouncementTranslationView
 from embeds.announce_confirm import AnnounceConfirmView, create_announcement_confirmation_embed
 from utils.command_ids import command_id_manager
-from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
+from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
 import os
 import json
 import aiofiles
@@ -83,7 +83,7 @@ class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
         )
 
 async def check_announce_permission(interaction: discord.Interaction) -> bool:
-    if interaction.user.id != OWNER_ID:
+    if not is_dev_id(interaction.user.id):
         logger.warning(f"Refus d'accès pour {interaction.user} (ID: {interaction.user.id})")
         await interaction.response.send_message(
             "Vous n'avez pas la permission d'utiliser cette commande.", 

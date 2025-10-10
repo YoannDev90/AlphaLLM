@@ -1,5 +1,5 @@
 import logging
-from utils.config import LOGGER_NAME, OWNER_ID
+from utils.config import LOGGER_NAME, DEV_IDS
 from colorama import Fore, Back, Style
 import asyncio
 import discord
@@ -23,8 +23,11 @@ class DiscordLogHandler(logging.Handler):
 
     async def mp_logs(self, message):
         try:
-            dev_user = await self.bot.fetch_user(OWNER_ID)
-            await dev_user.send(message)
+            for dev_id in DEV_IDS:
+                dev_user = await self.bot.fetch_user(dev_id)
+                if not dev_user:
+                    continue
+                await dev_user.send(message)
         except discord.HTTPException as e:
             print(f"Erreur lors de la récupération de l'utilisateur : {e}")
         except Exception as e: 

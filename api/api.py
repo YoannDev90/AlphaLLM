@@ -4,7 +4,7 @@ import logging
 
 from api.utils.app_config import create_app
 from api.utils.server_utils import get_server_ip
-from api.endpoints import image_gen, main, text_gen, info, audio_gen
+from api.endpoints import image_gen, main, text_gen, info, audio_gen, misc
 from utils.config import API_HOST, API_PORT, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -22,6 +22,8 @@ logger.debug("Router 'image_generation' ajouté")
 # logger.debug("Router 'audio_generation' ajouté")
 app.include_router(info.router)
 logger.debug("Router 'info' ajouté")
+app.include_router(misc.router)
+logger.debug("Router 'misc' ajouté")
 logger.info("Tous les routers ont été configurés avec succès")
 
 async def start_api_async(host: str = API_HOST, port: int = API_PORT):

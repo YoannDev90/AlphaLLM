@@ -1,6 +1,6 @@
 import discord
 import logging
-from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
+from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
 from dotenv import load_dotenv
 import os
 from bots.bot import bot as main_bot
@@ -22,7 +22,7 @@ async def setup(bot: discord.Client):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /guilds [{data.name}] exécutée par {interaction.user.display_name}")
 
-        if interaction.user.id != OWNER_ID:
+        if not is_dev_id(interaction.user.id):
             await interaction.followup.send("Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
         

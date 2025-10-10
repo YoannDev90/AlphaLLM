@@ -8,25 +8,8 @@ from utils.user_config import get_image_model, get_image_size, get_image_private
 from utils.user_manager import new_interaction, new_image
 from utils.database import get_blacklist
 from embeds.image import ImageView, EditImageModal
+from utils.image_gen import generate_image
 import random
-import base64
-
-# Import des fonctions de génération d'images
-from models.image.flux import generate_flux
-from models.image.kontext import generate_kontext
-from models.image.turbo import generate_turbo
-from models.image.seedream import generate_seedream
-from models.image.nanobanana import generate_nanobanana
-from models.image.dalle import generate_dalle
-from models.image.flux_schnell import generate_flux_schnell
-from models.image.gpt_image import generate_gpt_image
-from models.image.imagen import generate_imagen
-from models.image.phoenix import generate_phoenix
-from models.image.playground import generate_playground
-from models.image.recraft import generate_recraft
-from models.image.sana import generate_sana
-from models.image.sdlarge import generate_sdlarge
-from models.image.sdxl import generate_sdxl
 
 logger = logging.getLogger(logger_name)
 
@@ -70,7 +53,7 @@ async def setup(bot: discord.Client):
         prompt: str,
         model: str = "flux",
         size: str = "1024x1024",
-        number: int = 2,
+        number: int = 1,
         enhance: bool = True,
     ):
         await interaction.response.defer()
@@ -93,35 +76,15 @@ async def setup(bot: discord.Client):
         if number < 1:
             number = 1
             warning_message = "⚠️ Number adjusted from less than 1 to 1.\n"
-        elif number > 4:
-            number = 4
-            warning_message = f"⚠️ Number adjusted from {original_number} to 4 (maximum allowed).\n"
+        elif number > 3:
+            number = 3
+            warning_message = f"⚠️ Number adjusted from {original_number} to 3 (maximum allowed).\n"
 
+        for _ in range(number):
+            new_image(interaction.user.id)
         new_interaction(interaction.user.id)
-        new_image(interaction.user.id)
         model = "flux" if not model else model
         size = "1024x1024" if not size else size
-        
-        # Mapping des modèles vers leurs fonctions
-        model_functions = {
-            "flux": generate_flux,
-            "kontext": generate_kontext,
-            "turbo": generate_turbo,
-            "seedream": generate_seedream,
-            "nanobanana": generate_nanobanana,
-            "dalle": generate_dalle,
-            "flux_schnell": generate_flux_schnell,
-            "gpt_image": generate_gpt_image,
-            "imagen": generate_imagen,
-            "phoenix": generate_phoenix,
-            "playground": generate_playground,
-            "recraft": generate_recraft,
-            "sana": generate_sana,
-            "sdlarge": generate_sdlarge,
-            "sdxl": generate_sdxl,
-        }
-        
-        generate_func = model_functions.get(model, generate_flux)
         
         if enhance:
             enhanced_prompts = await enhance_image_prompt(prompt, number)
@@ -140,11 +103,7 @@ async def setup(bot: discord.Client):
         for i, current_prompt in enumerate(prompts_to_generate, 1):
             try:
                 logger.info(f"Generating image {i}/{number} with prompt: {current_prompt}")
-                # Appel direct de la fonction de génération qui retourne base64
-                image_base64 = await generate_func(current_prompt, size)
-                
-                # Convertir base64 en bytes
-                image_data = base64.b64decode(image_base64)
+                image_data = await generate_image(current_prompt, model, size, output_format="bytes")
                 
                 nsfw = False
                 images_data.append((image_data, nsfw, current_prompt, i))
@@ -171,7 +130,7 @@ async def setup(bot: discord.Client):
             if image_data:
                 try:
                     file = discord.File(BytesIO(image_data), filename=f"generated_image_{image_num}.png")
-                    view = ImageView(current_prompt, model, size, enhance, nsfw)
+                    view = ImageView(current_prompt, model, size, enhance)
                     
                     logger.debug(f"Tentative d'envoi de l'image {image_num}/{number}")
                     

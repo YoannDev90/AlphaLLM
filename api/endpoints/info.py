@@ -150,6 +150,8 @@ async def api_info():
                 "/generate/text": "Génération de texte (authentification requise)",
                 "/generate/image": "Génération d'image (authentification requise)",
                 "/generate/audio": "Génération audio MP3 (authentification requise)",
+                "/summarize": "Résumé automatique de texte (authentification requise)",
+                "/conv_name": "Génération de titre de conversation (authentification requise)",
                 "/text-models": "Liste des modèles de texte disponibles (public)",
                 "/image-models": "Liste des modèles d'image disponibles (public)",
                 "/voices": "Liste des voix audio disponibles (public)",

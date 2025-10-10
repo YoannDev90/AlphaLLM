@@ -88,6 +88,8 @@ def custom_openapi(app: FastAPI):
         - `/generate/text` : Génération de texte avec un modèle spécifique
         - `/generate/image` : Génération d'image en format JSON/Base64
         - `/generate/audio` : Génération audio à partir de texte (format MP3)
+        - `/summarize` : Résumé automatique de texte long
+        - `/conv_name` : Génération de titre de conversation
         
         ### Authentification (pour les endpoints protégés)
         Vous pouvez vous authentifier de plusieurs façons :
@@ -120,7 +122,8 @@ def custom_openapi(app: FastAPI):
     
     if "paths" in openapi_schema:
         for path, path_obj in openapi_schema["paths"].items():
-            if "/generate/" in path:
+            # Appliquer la sécurité aux endpoints de génération et aux nouveaux endpoints misc
+            if "/generate/" in path or path in ["/summarize", "/conv_name"]:
                 for method, method_obj in path_obj.items():
                     if method.lower() in ["get", "post", "put", "delete"]:
                         method_obj["security"] = [{"APIKeyAuth": []}]
