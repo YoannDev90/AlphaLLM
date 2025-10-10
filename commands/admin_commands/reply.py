@@ -1,6 +1,6 @@
 import discord
 import logging
-from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
+from utils.config import logger_name, GUILD_ID, is_dev_id, DEV_IDS, LOGGER_NAME
 from dotenv import load_dotenv
 from discord.ext import commands
 import os
@@ -15,17 +15,17 @@ async def setup(bot: discord.Client):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /reply exécutée par {interaction.user.display_name}")
 
-        if interaction.user.id != OWNER_ID:
+        if not is_dev_id(interaction.user.id):
             await interaction.followup.send("Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
 
         try:
             user_id = int(user_id)
             asker = await bot.fetch_user(user_id)
-            if not OWNER_ID:
-                raise ValueError("L'ID du développeur (OWNER_ID) n'est pas défini dans les variables d'environnement.")
+            if not DEV_IDS:
+                raise ValueError("Les IDs des développeurs ne sont pas définis dans la configuration.")
             await asker.send(
-                f"Développeur (<@{OWNER_ID}>): {message}\nUse `/contact-dev` to reply"
+                f"Développeur (<@{interaction.user.id}>): {message}\nUse `/contact-dev` to reply"
             )
         except discord.HTTPException as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")

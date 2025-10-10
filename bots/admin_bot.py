@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 from commands.cmds import setup_commands
 from utils.database import get_supabase_client
-from utils.config import get_admin_bot_token, GUILD_ID, OWNER_ID, LOGGER_NAME
+from utils.config import get_admin_bot_token, GUILD_ID, DEV_IDS, is_dev_id, LOGGER_NAME
 import os
 import asyncio
 import datetime
@@ -15,7 +15,7 @@ TOKEN = get_admin_bot_token()
 
 intents = discord.Intents.default()
 
-bot = commands.Bot(command_prefix="!", owner_id=OWNER_ID, intents=intents)
+bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 
 supabase = get_supabase_client()
 logger = logging.getLogger(LOGGER_NAME)
@@ -31,7 +31,10 @@ async def on_ready():
 
 async def auto_purge():
     try:
-        dev_user = await bot.fetch_user(OWNER_ID)
+        # Utilise le premier développeur de la liste pour les DMs
+        dev_user = await bot.fetch_user(DEV_IDS[0]) if DEV_IDS else None
+        if not dev_user:
+            return
         dm_channel = await dev_user.create_dm()
         
         cutoff_time = discord.utils.utcnow() - datetime.timedelta(days=2.0)
@@ -54,13 +57,17 @@ async def auto_purge():
 @bot.tree.command(name="clear", description="Purge tous les messages DM sans limite de temps")
 async def clear_command(interaction: discord.Interaction):
     try:
-        if str(interaction.user.id) != str(OWNER_ID):
+        if not is_dev_id(interaction.user.id):
             await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
         
         await interaction.response.defer(ephemeral=True)
         
-        dev_user = await bot.fetch_user(OWNER_ID)
+        # Utilise le premier développeur de la liste pour les DMs
+        dev_user = await bot.fetch_user(DEV_IDS[0]) if DEV_IDS else None
+        if not dev_user:
+            await interaction.followup.send("❌ Aucun développeur configuré.", ephemeral=True)
+            return
         dm_channel = await dev_user.create_dm()
         
         deleted_count = 0

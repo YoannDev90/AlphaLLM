@@ -24,7 +24,9 @@ DEBUG = _config.get("debug", False)
 LOGGER_NAME = _config.get("logger_name", "AlphaLLM")
 LOGGER_PREFIX = _config.get("logger_prefix", "[=]")
 GUILD_ID = int(_config.get("admin_server", 0))
-OWNER_ID = int(_config.get("dev_id", 0))
+DEV_IDS = _config.get("dev_id", [])
+# Pour compatibilité, on garde OWNER_ID qui prend le premier ID de la liste
+OWNER_ID = DEV_IDS[0] if DEV_IDS else 0
 
 # Links
 _links = CONFIG.get("links", {})
@@ -225,3 +227,7 @@ def get_current_log_level() -> Optional[str]:
     except Exception as e:
         print(f"Erreur lors de la lecture du niveau de log: {e}")
         return None
+
+def is_dev_id(user_id: int) -> bool:
+    """Vérifie si l'ID utilisateur est dans la liste des développeurs"""
+    return user_id in DEV_IDS

@@ -3,7 +3,7 @@ from discord.ext import commands
 import logging
 from commands.cmds import setup_commands
 from utils.database import get_supabase_client
-from utils.config import DEBUG, GUILD_ID, OWNER_ID, LOGGER_NAME
+from utils.config import DEBUG, GUILD_ID, DEV_IDS, LOGGER_NAME
 from utils.msg_process import message_process
 import os
 from dotenv import load_dotenv
@@ -14,7 +14,7 @@ TOKEN = os.getenv("PERPLEXITY_BOT_TOKEN")
 
 intents = discord.Intents.default()
 
-bot = commands.Bot(command_prefix="!", owner_id=OWNER_ID, intents=intents)
+bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 
 supabase = get_supabase_client()
 logger = logging.getLogger(LOGGER_NAME)

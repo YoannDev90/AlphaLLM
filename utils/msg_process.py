@@ -223,7 +223,7 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
 
         response_text = resp.get("response", "No response generated")
         response_text = detect_and_convert_tables(response_text)
-        await smart_long_messages_interaction(interaction, response_text)
+        await smart_long_messages_interaction_with_view(interaction, response_text, query, model, resp, bot, internet)
         
     except Exception as e:
         logger.error(f"Error in processing ask command: {e}")
@@ -232,6 +232,34 @@ async def ask_cmd_process(bot, query, model, internet, interaction):
             await interaction.followup.send(error_msg)
         else:
             await interaction.response.send_message(error_msg)
+
+async def smart_long_messages_interaction_with_view(interaction, response, original_question, model, response_data, bot, search_internet, max_length: int = 2000):
+    """
+    Sends a long message to Discord via interaction with MessageView buttons, preserving code blocks and never splitting inside a code block.
+    """
+    import re
+    from embeds.message import MessageView
+    
+    pattern = re.compile(r"(```[\s\S]*?```)")
+    parts = pattern.split(response)
+    first_message = True
+    view = None
+    last_message = None
+    
+    for part in parts:
+        if part.startswith("```") and part.endswith("```"):
+            last_message = await send_code_block_interaction(interaction, part, max_length, first_message)
+            first_message = False
+        else:
+            last_message = await send_text_in_chunks_interaction(interaction, part, max_length, first_message)
+            if part.strip():
+                first_message = False
+    
+    # Ajouter la vue au dernier message envoyé
+    if last_message:
+        view = MessageView(original_question, model, response_data, bot, search_internet)
+        await last_message.edit(view=view)
+        view.message = last_message
 
 async def smart_long_messages_interaction(interaction, response, max_length: int = 2000):
     """
@@ -255,33 +283,38 @@ async def smart_long_messages_interaction(interaction, response, max_length: int
 async def send_text_in_chunks_interaction(interaction, text: str, max_length: int = 2000, first_message: bool = True):
     """
     Sends plain text in chunks via interaction, never breaking lines in the middle if possible.
+    Returns the last message sent.
     """
     if not text.strip():
-        return
+        return None
         
     lines = text.splitlines(keepends=True)
     current_message = ""
+    last_message = None
     
     for line in lines:
         if len(current_message) + len(line) > max_length:
             if current_message:
                 if first_message:
-                    await interaction.followup.send(current_message.rstrip())
+                    last_message = await interaction.followup.send(current_message.rstrip())
                     first_message = False
                 else:
-                    await interaction.followup.send(current_message.rstrip())
+                    last_message = await interaction.followup.send(current_message.rstrip())
             current_message = ""
         current_message += line
     
     if current_message.strip():
         if first_message:
-            await interaction.followup.send(current_message.rstrip())
+            last_message = await interaction.followup.send(current_message.rstrip())
         else:
-            await interaction.followup.send(current_message.rstrip())
+            last_message = await interaction.followup.send(current_message.rstrip())
+    
+    return last_message
 
 async def send_code_block_interaction(interaction, code_block: str, max_length: int = 2000, first_message: bool = True):
     """
     Sends a code block via interaction, splitting into multiple code blocks if needed but never breaking a line of code.
+    Returns the last message sent.
     """
     first_line_end = code_block.find('\n')
     if first_line_end == -1:
@@ -295,21 +328,24 @@ async def send_code_block_interaction(interaction, code_block: str, max_length: 
     code_prefix = f"```{language}\n" if language else "```"
     code_suffix = "```"
     current_code = code_prefix
+    last_message = None
     
     for line in code_lines:
         if len(current_code) + len(line) + len(code_suffix) > max_length:
             current_code += code_suffix
             if first_message:
-                await interaction.followup.send(current_code)
+                last_message = await interaction.followup.send(current_code)
                 first_message = False
             else:
-                await interaction.followup.send(current_code)
+                last_message = await interaction.followup.send(current_code)
             current_code = code_prefix
         current_code += line
     
     if current_code.strip() != code_prefix.strip():
         current_code += code_suffix
         if first_message:
-            await interaction.followup.send(current_code)
+            last_message = await interaction.followup.send(current_code)
         else:
-            await interaction.followup.send(current_code)
+            last_message = await interaction.followup.send(current_code)
+    
+    return last_message

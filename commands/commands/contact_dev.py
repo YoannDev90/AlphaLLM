@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 import logging
-from utils.config import logger_name, OWNER_ID
+from utils.config import logger_name, DEV_IDS
 from bots.admin_bot import bot as admin_bot
 from dotenv import load_dotenv
 import os
@@ -17,7 +17,11 @@ async def setup(bot: discord.Client):
         
         try:
             bot = admin_bot
-            dev_user = await bot.fetch_user(OWNER_ID)
+            # Envoie le message au premier développeur de la liste
+            if not DEV_IDS:
+                await interaction.response.send_message("No developer configured.", ephemeral=True)
+                return
+            dev_user = await bot.fetch_user(DEV_IDS[0])
             await dev_user.send(f"<@{interaction.user.id}> ({interaction.user.global_name}): {message}", mention_author=True)
             await interaction.response.send_message("Message sent successfully to the developer.", ephemeral=True)
         except discord.HTTPException as e:

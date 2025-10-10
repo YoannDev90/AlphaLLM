@@ -6,7 +6,7 @@ from commands.cmds import setup_commands
 from utils.ai_process import process_ai_response
 from utils.database import get_blacklist
 from utils.database import get_supabase_client
-from utils.config import DEBUG, GUILD_ID, OWNER_ID, get_bot_token, LOGGER_NAME
+from utils.config import DEBUG, GUILD_ID, DEV_IDS, get_bot_token, LOGGER_NAME
 from utils.server_config import update_all_guilds_info
 from embeds.welcome import create_welcome_embed, WelcomeLanguageView
 from utils.command_ids import command_id_manager
@@ -16,7 +16,7 @@ TOKEN = get_bot_token()
 
 intents = discord.Intents.default()
 
-bot = commands.Bot(command_prefix="!", owner_id=OWNER_ID, intents=intents)
+bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 
 supabase = get_supabase_client()
 logger = logging.getLogger(LOGGER_NAME)

@@ -127,7 +127,7 @@ async def process_ai_response(bot, query, message):
             elif isinstance(response_text, str):
                 response_text = detect_and_convert_tables(response_text)
                 
-                await smart_long_messages(message.channel, response_text)
+                await smart_long_messages_with_view(message.channel, response_text, query, parameters.get("model", "unknown"), response, bot)
                 logger.debug(f"Réponse envoyée avec succès.")
             else:
                 logger.error(f"Type de réponse texte non géré : {type(response_text)}")
@@ -148,6 +148,32 @@ async def process_ai_response(bot, query, message):
     except Exception as e:
         logger.error(f"Erreur lors de la génération : {e}")
         await message.channel.send("Une erreur s'est produite lors de la génération.")
+
+async def smart_long_messages_with_view(channel, response, original_question, model, response_data, bot, max_length: int = 2000):
+    """
+    Sends a long message to Discord with MessageView buttons, preserving code blocks and never splitting inside a code block.
+    """
+    from embeds.message import MessageView
+    
+    pattern = re.compile(r"(```[\s\S]*?```)")
+    parts = pattern.split(response)
+    last_message = None
+    
+    for part in parts:
+        if part.startswith("```") and part.endswith("```"):
+            result = await send_code_block_with_return(channel, part, max_length)
+            if result:
+                last_message = result
+        else:
+            result = await send_text_in_chunks_with_return(channel, part, max_length)
+            if result:
+                last_message = result
+    
+    # Ajouter la vue au dernier message envoyé
+    if last_message:
+        view = MessageView(original_question, model, response_data, bot)
+        await last_message.edit(view=view)
+        view.message = last_message
 
 async def smart_long_messages(channel, response, max_length: int = 2000):
     """
@@ -176,6 +202,62 @@ async def send_text_in_chunks(channel, text: str, max_length: int = 2000):
         current_message += line
     if current_message.strip():
         await channel.send(current_message.rstrip())
+
+async def send_text_in_chunks_with_return(channel, text: str, max_length: int = 2000):
+    """
+    Sends plain text in chunks, never breaking lines in the middle if possible.
+    Returns the last message sent.
+    """
+    if not text.strip():
+        return None
+        
+    lines = text.splitlines(keepends=True)
+    current_message = ""
+    last_message = None
+    
+    for line in lines:
+        if len(current_message) + len(line) > max_length:
+            if current_message:
+                last_message = await channel.send(current_message.rstrip())
+            current_message = ""
+        current_message += line
+    
+    if current_message.strip():
+        last_message = await channel.send(current_message.rstrip())
+    
+    return last_message
+
+async def send_code_block_with_return(channel, code_block: str, max_length: int = 2000):
+    """
+    Sends a code block, splitting into multiple code blocks if needed but never breaking a line of code.
+    Returns the last message sent.
+    """
+    first_line_end = code_block.find('\n')
+    if first_line_end == -1:
+        language = ""
+        code = code_block[3:-3]
+    else:
+        language = code_block[3:first_line_end].strip()
+        code = code_block[first_line_end+1:-3]
+
+    code_lines = code.splitlines(keepends=True)
+    code_prefix = f"```{language}\n" if language else "```"
+    code_suffix = "```"
+    current_code = code_prefix
+    last_message = None
+    
+    for line in code_lines:
+        if len(current_code) + len(line) + len(code_suffix) > max_length:
+            current_code += code_suffix
+            last_message = await channel.send(current_code)
+            current_code = code_prefix
+        current_code += line
+    
+    if current_code.strip() != code_prefix.strip():
+        current_code += code_suffix
+        last_message = await channel.send(current_code)
+    
+    return last_message
 
 async def send_code_block(channel, code_block: str, max_length: int = 2000):
     """

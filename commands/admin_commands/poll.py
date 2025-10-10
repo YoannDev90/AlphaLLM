@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 import logging
-from utils.config import logger_name, GUILD_ID, OWNER_ID, LOGGER_NAME
+from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
 from dotenv import load_dotenv
 from utils.server_config import get_announce_channel
 from utils.translator import TranslationManager, SUPPORTED_LANGUAGES, load_translations
@@ -334,7 +334,7 @@ async def setup(bot: discord.Client):
     
     @bot.tree.command(name="poll", description="Crée et envoie un sondage sur tous les serveurs")
     async def poll_command(interaction: discord.Interaction):
-        if interaction.user.id != OWNER_ID:
+        if not is_dev_id(interaction.user.id):
             logger.warning(f"Refus d'accès pour {interaction.user} (ID: {interaction.user.id})")
             await interaction.response.send_message(
                 "Vous n'avez pas la permission d'utiliser cette commande.", 

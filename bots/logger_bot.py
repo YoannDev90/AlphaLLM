@@ -3,7 +3,7 @@ from discord.ext import commands
 import os
 from dotenv import load_dotenv
 from utils.logger_utils import setup_logging
-from utils.config import update_log_level, get_current_log_level, OWNER_ID, LOGGER_PREFIX
+from utils.config import update_log_level, get_current_log_level, DEV_IDS, is_dev_id, LOGGER_PREFIX
 import asyncio
 import datetime
 import sys
@@ -28,20 +28,23 @@ async def on_ready():
 
 async def auto_purge():
     try:
-        dev_user = await logger_bot.fetch_user(OWNER_ID)
-        dm_channel = await dev_user.create_dm()
-        
-        cutoff_time = discord.utils.utcnow() - datetime.timedelta(days=2.0)
-        deleted_count = 0
-        
-        async for message in dm_channel.history(limit=None, before=cutoff_time):
-            try:
-                await message.delete()
-                deleted_count += 1
-            except discord.NotFound:
+        for dev_id in DEV_IDS:
+            dev_user = await logger_bot.fetch_user(dev_id)
+            if not dev_user:
                 continue
-            except discord.HTTPException:
-                continue
+            dm_channel = await dev_user.create_dm()
+
+            cutoff_time = discord.utils.utcnow() - datetime.timedelta(days=2.0)
+            deleted_count = 0
+        
+            async for message in dm_channel.history(limit=None, before=cutoff_time):
+                try:
+                    await message.delete()
+                    deleted_count += 1
+                except discord.NotFound:
+                    continue
+                except discord.HTTPException:
+                    continue
                 
     except discord.HTTPException as e:
         logger.error(f"Erreur lors de la purge : {e}")
@@ -51,13 +54,13 @@ async def auto_purge():
 @logger_bot.tree.command(name="clear", description="Purge tous les messages DM sans limite de temps")
 async def clear_command(interaction: discord.Interaction):
     try:
-        if str(interaction.user.id) != str(OWNER_ID):
+        if not is_dev_id(interaction.user.id):
             await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
         
         await interaction.response.defer(ephemeral=True)
         
-        dev_user = await logger_bot.fetch_user(OWNER_ID)
+        dev_user = await logger_bot.fetch_user(DEV_IDS[0]) if DEV_IDS else None
         dm_channel = await dev_user.create_dm()
         
         deleted_count = 0
@@ -85,7 +88,7 @@ async def clear_command(interaction: discord.Interaction):
 async def loglevel_command(interaction: discord.Interaction, level: str):
     """Commande pour modifier le niveau de logging dans config.toml et redémarrer le bot"""
     try:
-        if str(interaction.user.id) != str(OWNER_ID):
+        if not is_dev_id(interaction.user.id):
             await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
         
