@@ -1,4 +1,5 @@
 import logging
+import asyncio
 from utils.config import logger_name, get_llm_selector_preprompt, CONFIG, API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT
 from dotenv import load_dotenv
 import os
@@ -16,6 +17,69 @@ async def models(format):
         return "\n".join(f"- {k} : {v}" for k, v in models_dict.items())
     else:
         return models_dict
+    
+
+async def hackclub_llm_selector(messages):
+    def _sync_request():
+        response = requests.post(
+            "https://ai.hackclub.com/chat/completions",
+            headers={
+                "Content-Type": "application/json",
+            },
+            json={
+                "model": "openai/gpt-oss-20b",
+                "messages": messages
+            }
+        )
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+        else:
+            raise Exception(f"HackClub API error: {response.status_code} {response.text}")
+    
+    return await asyncio.to_thread(_sync_request)
+    
+async def io_intelligence_llm(messages):
+    def _sync_request():
+        response = requests.post(
+            "https://api.intelligence.io.solutions/api/v1/chat/completions",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {os.getenv('IO_INTELLIGENCE_API_KEY')}"
+            },
+            json={
+                "model": "openai/gpt-oss-20b",
+                "messages": messages
+                }
+        )
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+        else:
+            raise Exception(f"IO Intelligence API error: {response.status_code} {response.text}")
+    
+    return await asyncio.to_thread(_sync_request)
+
+
+async def openrouter_llm_selector(messages):
+    def _sync_request():
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}"
+            },
+            json={
+                "model": "openai/gpt-oss-20b",
+                "messages": messages
+            }
+        )
+        if response.status_code == 200:
+            return response.json()["choices"][0]["message"]["content"]
+        else:
+            raise Exception(f"OpenRouter API error: {response.status_code} {response.text}")
+    
+    return await asyncio.to_thread(_sync_request)
+
+
 
 async def llm_selector(input):
     
@@ -25,23 +89,20 @@ async def llm_selector(input):
         {"role": "system", "content": get_llm_selector_preprompt() + models_text},
         {"role": "user", "content": input}
     ]
-       
-    response = requests.post(
-        API_ENDPOINTS_TEXT.get("hackclub", "https://ai.hackclub.com/chat/completions"),
-        headers={
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": MODELS_CONFIG_TEXT.get("llm_selector", "openai/gpt-oss-20b"),
-            "messages": messages
-        }
-    )
-    
-    if response.status_code == 200:
-        data = response.json()
-        text = data["choices"][0]["message"]["content"]
-    else:
-        raise Exception(f"API error: {response.status_code} {response.text}")
+
+    try :
+        text = await hackclub_llm_selector(messages)
+    except Exception as e:
+        logger.error(f"HackClub LLM Selector failed: {e}. Falling back to OpenRouter LLM Selector.")
+        try:
+            text = await openrouter_llm_selector(messages)
+        except Exception as e2:
+            logger.error(f"OpenRouter LLM Selector failed: {e2}. Falling back to IO Intelligence LLM Selector.")
+            try:
+                text = await io_intelligence_llm(messages)
+            except Exception as e3:
+                logger.error(f"IO Intelligence LLM Selector also failed: {e3}. Using default model.")
+                return "cerebras/llama3.3-70b"
     
     model = await parse_llm_selection(text)
     return model
