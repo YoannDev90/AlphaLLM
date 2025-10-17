@@ -91,7 +91,7 @@ async def run_bot():
         logger.error(f"Erreur de connexion : {e}")
     except Exception as e:
         logger.error(f"Erreur inattendue : {e}")
-        await bot.close()
     finally:
+        if not bot.is_closed():
+            await bot.close()
         logger.info("Arrêt du bot.")
-        raise SystemExit(0)

@@ -41,6 +41,7 @@ async def generate_image(
             logger.info(f"Prompt amélioré: {final_prompt[:100]}{'...' if len(final_prompt) > 100 else ''}")
         
         from utils.image_gen import generate_image
+        size = "1024x1024"
         
         logger.debug(f"Démarrage de la génération avec timeout de {REQUEST_TIMEOUT * 2}s")
         response = await asyncio.wait_for(

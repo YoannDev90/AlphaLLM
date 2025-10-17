@@ -17,14 +17,37 @@ intents = discord.Intents.default()
 logger_bot = commands.Bot(command_prefix=LOGGER_PREFIX, intents=intents)
 logger = setup_logging(logger_bot)
 
+# Variable globale pour la tâche de purge
+purge_task = None
+
 @logger_bot.event
 async def on_ready():
+    global purge_task
     activity = discord.CustomActivity(name="🎛️ Monitoring AlphaLLM")
     await logger_bot.change_presence(activity=activity)
     await logger_bot.tree.sync()
-    while True:
-        await auto_purge()
-        await asyncio.sleep(60)
+    
+    # Lance la tâche de purge automatique
+    if purge_task is None or purge_task.done():
+        purge_task = asyncio.create_task(purge_loop())
+
+async def purge_loop():
+    try:
+        while True:
+            await auto_purge()
+            await asyncio.sleep(60)
+    except asyncio.CancelledError:
+        pass
+
+async def close_bot():
+    global purge_task
+    if purge_task and not purge_task.done():
+        purge_task.cancel()
+        try:
+            await purge_task
+        except asyncio.CancelledError:
+            pass
+    await logger_bot.close()
 
 async def auto_purge():
     try:
@@ -161,7 +184,6 @@ async def run_logger_bot():
         logger.error(f"Erreur de connexion : {e}")
     except Exception as e:
         logger.error(f"Erreur inattendue : {e}")
-        await logger_bot.close()
     finally:
+        await close_bot()
         logger.info("Arrêt du bot Logger.")
-        raise SystemExit(0)

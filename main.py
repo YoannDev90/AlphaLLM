@@ -4,6 +4,7 @@ import json
 import datetime
 import sys
 import os
+import signal
 from bots.bot import run_bot
 from bots.admin_bot import run_admin_bot
 from bots.logger_bot import run_logger_bot
@@ -29,28 +30,118 @@ import logging
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(get_logging_level())
 
+# Variable globale pour gérer l'arrêt propre
+shutdown_event = asyncio.Event()
+restart_requested = False
+
+def handle_shutdown_signal(signum, frame):
+    """Gestionnaire de signal pour arrêt propre"""
+    global restart_requested
+    logger.debug(f"Signal {signum} reçu, arrêt en cours...")
+    
+    # Vérifie si c'est un redémarrage ou un arrêt
+    command = check_restart_command()
+    logger.debug(f"Commande lue depuis stop.json: {command}")
+    restart_requested = (command == "RESTART")
+    logger.debug(f"Redémarrage demandé: {restart_requested}")
+    
+    # Déclenche l'événement d'arrêt
+    try:
+        loop = asyncio.get_running_loop()
+        logger.debug("Event loop trouvée, déclenchement de shutdown_event")
+        loop.call_soon_threadsafe(shutdown_event.set)
+        logger.debug("shutdown_event.set() appelé")
+    except RuntimeError as e:
+        logger.error(f"Impossible de récupérer l'event loop: {e}")
+
+def check_restart_command():
+    """Vérifie si un redémarrage ou arrêt a été demandé"""
+    try:
+        with open("stop.json", "r") as f:
+            data = json.load(f)
+            command = data.get("COMMAND")
+            timestamp = datetime.datetime.fromisoformat(data["timestamp"])
+            
+            # Vérifie que la commande n'est pas trop ancienne (évite les boucles)
+            if datetime.datetime.now() - timestamp > datetime.timedelta(minutes=1):
+                os.remove("stop.json")
+                return None
+            
+            return command
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        return None
+
 async def main():
+    # Configure les gestionnaires de signaux
+    signal.signal(signal.SIGTERM, handle_shutdown_signal)
+    signal.signal(signal.SIGINT, handle_shutdown_signal)
+    
+    # Crée une tâche pour surveiller le fichier stop.json
+    async def monitor_stop_file():
+        """Surveille le fichier stop.json pour détecter les demandes d'arrêt"""
+        while not shutdown_event.is_set():
+            try:
+                if os.path.exists("stop.json"):
+                    command = check_restart_command()
+                    if command in ["STOP", "RESTART"]:
+                        logger.debug(f"Commande {command} détectée dans stop.json")
+                        # Déclenche l'arrêt
+                        os.kill(os.getpid(), signal.SIGTERM)
+                        break
+            except Exception as e:
+                logger.error(f"Erreur lors de la surveillance du fichier stop.json: {e}")
+            await asyncio.sleep(1)
+    
+    # Wrapper pour arrêter les bots quand shutdown_event est déclenché
+    async def run_with_shutdown(coro, name="task"):
+        """Execute une coroutine et l'annule quand shutdown_event est set"""
+        task = asyncio.create_task(coro)
+        
+        # Attend soit la fin de la tâche, soit le shutdown
+        done, pending = await asyncio.wait(
+            [task, asyncio.create_task(shutdown_event.wait())],
+            return_when=asyncio.FIRST_COMPLETED
+        )
+        
+        # Si shutdown_event est déclenché, annule la tâche
+        if shutdown_event.is_set():
+            logger.debug(f"Arrêt de la tâche: {name}")
+            task.cancel()
+            try:
+                # Laisse 2 secondes pour terminer proprement
+                await asyncio.wait_for(task, timeout=2.0)
+            except asyncio.CancelledError:
+                logger.debug(f"Tâche {name} annulée proprement")
+            except asyncio.TimeoutError:
+                logger.warning(f"Tâche {name} n'a pas pu se terminer dans le délai")
+            except Exception as e:
+                logger.error(f"Erreur lors de l'arrêt de {name}: {e}")
+        
+        return task.result() if task.done() and not task.cancelled() else None
+    
     try:        
         await asyncio.gather(
-            start_api_async(),
-            ping_https_server(API_URL),
-            run_bot(),
-            run_admin_bot(),
-            run_logger_bot(),
-            run_mistral_bot(),
-            run_gemini_bot(),
-            run_evilgpt_bot(),
-            run_llama_bot(),
-            run_chatgpt_bot(),
-            run_deepseek_bot(),
-            run_grok_bot(),
-            run_perplexity_bot(),
-            run_qwen_bot(),
-            run_claude_bot(),
-            run_phi_bot(),
-            run_kimi_bot(),
-            run_glm_bot(),
-            run_command_bot()
+            monitor_stop_file(),
+            run_with_shutdown(start_api_async(), "API"),
+            run_with_shutdown(ping_https_server(API_URL), "Ping HTTPS"),
+            run_with_shutdown(run_bot(), "Bot principal"),
+            run_with_shutdown(run_admin_bot(), "Admin Bot"),
+            run_with_shutdown(run_logger_bot(), "Logger Bot"),
+            run_with_shutdown(run_mistral_bot(), "Mistral Bot"),
+            run_with_shutdown(run_gemini_bot(), "Gemini Bot"),
+            run_with_shutdown(run_evilgpt_bot(), "EvilGPT Bot"),
+            run_with_shutdown(run_llama_bot(), "Llama Bot"),
+            run_with_shutdown(run_chatgpt_bot(), "ChatGPT Bot"),
+            run_with_shutdown(run_deepseek_bot(), "DeepSeek Bot"),
+            run_with_shutdown(run_grok_bot(), "Grok Bot"),
+            run_with_shutdown(run_perplexity_bot(), "Perplexity Bot"),
+            run_with_shutdown(run_qwen_bot(), "Qwen Bot"),
+            run_with_shutdown(run_claude_bot(), "Claude Bot"),
+            run_with_shutdown(run_phi_bot(), "Phi Bot"),
+            run_with_shutdown(run_kimi_bot(), "Kimi Bot"),
+            run_with_shutdown(run_glm_bot(), "GLM Bot"),
+            run_with_shutdown(run_command_bot(), "Command Bot"),
+            return_exceptions=True
         )
 
     except (SystemExit, KeyboardInterrupt):
@@ -58,30 +149,60 @@ async def main():
     except Exception as e:
         logger.error(f"Erreur non gérée : {str(e)}")
     finally:
-        tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
-        if tasks:
-            for task in tasks:
+        logger.debug("Entrée dans le bloc finally de main()")
+        # Annule et attend toutes les tâches restantes pour éviter les warnings
+        pending = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+        logger.debug(f"Nombre de tâches en attente: {len(pending)}")
+        if pending:
+            for task in pending:
                 task.cancel()
             try:
-                await asyncio.gather(*tasks, return_exceptions=True)
+                logger.debug("Attente de la fin des tâches annulées...")
+                await asyncio.gather(*pending, return_exceptions=True)
+                logger.debug("Toutes les tâches ont été annulées et attendues.")
             except Exception as e:
                 logger.error(f"Erreur lors du nettoyage des tâches: {str(e)}")
         logger.info("Nettoyage terminé.")
 
 if __name__ == "__main__":
+    # Vérifie si un arrêt a été demandé au démarrage
+    command = check_restart_command()
+    if command == "STOP":
+        logger.info("Arrêt demandé via stop.json. Le bot ne démarrera pas.")
+        try:
+            os.remove("stop.json")
+        except Exception:
+            pass
+        sys.exit(0)
+    
+    # Supprime le fichier stop.json s'il existe pour éviter les conflits
     try:
-        with open("stop.json", "r") as f:
-            data = json.load(f)
-            timestamp = datetime.datetime.fromisoformat(data["timestamp"])
-            if datetime.datetime.now() - timestamp < datetime.timedelta(minutes=1):
-                print("Le bot a été arrêté récemment. Redémarrage annulé.")
-                sys.exit(0)
-            else:
-                os.remove("stop.json")
-    except FileNotFoundError:
-        pass
-
+        if os.path.exists("stop.json"):
+            os.remove("stop.json")
+    except Exception as e:
+        logger.warning(f"Impossible de supprimer stop.json: {e}")
+    
+    # Lance le bot
     try:
+        logger.debug("Lancement de asyncio.run(main())...")
         asyncio.run(main())
+        logger.debug("asyncio.run(main()) terminé.")
     except KeyboardInterrupt:
-        logger.info("Interruption manuelle - Arrêt du programme.")
+        logger.debug("Interruption manuelle - Arrêt du programme.")
+    except Exception as e:
+        logger.error(f"Erreur fatale: {e}")
+        sys.exit(1)
+    
+    # Vérifie après la sortie complète si un redémarrage est demandé
+    logger.debug(f"Vérification du redémarrage: restart_requested = {restart_requested}")
+    if restart_requested:
+        logger.info("Redémarrage demandé. Relance du processus...")
+        try:
+            os.remove("stop.json")
+        except Exception:
+            pass
+        # Relance le processus
+        logger.debug(f"Exécution de os.execv({sys.executable}, {[sys.executable] + sys.argv})")
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+    
+    logger.info("Arrêt complet du bot.")

@@ -26,9 +26,5 @@ async def setup(bot: discord.Client):
 
         with open("stop.json", "w") as f:
             json.dump({"COMMAND": "STOP", "timestamp": datetime.datetime.now().isoformat()}, f)
-
-        if bot.is_closed():
-            return
-
-        await bot.close()
-        sys.exit(0)
+        
+        logger.info("Fichier stop.json créé, le processus principal va arrêter le bot.")

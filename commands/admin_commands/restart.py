@@ -24,8 +24,7 @@ async def setup(bot: discord.Client):
         await interaction.followup.send("🛑 Redémarrage complet du bot...", ephemeral=True)
         logger.info("Demande de redémarrage reçue")
 
-        if bot.is_closed():
-            return
-
-        await bot.close()
-        sys.exit(0)
+        with open("stop.json", "w") as f:
+            json.dump({"COMMAND": "RESTART", "timestamp": datetime.datetime.now().isoformat()}, f)
+        
+        logger.info("Fichier stop.json créé, le processus principal va redémarrer le bot.")
