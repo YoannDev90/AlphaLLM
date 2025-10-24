@@ -1,11 +1,10 @@
 import chromadb
-from utils.config import CHROMA_DB_NAME, CHROMA_TENANT_ID, CHROMA_API_KEY, EMBEDDER_MODEL, MEMORY_DURATION, RECENT_LIMIT
+from utils.config import CHROMA_DB_NAME, CHROMA_TENANT_ID, CHROMA_API_KEY, EMBEDDER_MODEL, MEMORY_DURATION
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict
 from fastembed import TextEmbedding
 import time
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 import hashlib
 
 logger = logging.getLogger("memory_ai")
@@ -52,14 +51,12 @@ async def add_memory(user_id: int, server_id: int, reponse: dict, text_to_embed:
             metadatas=[{
                 "user_id": user_id,
                 "server_id": server_id,
-                "content": json.dumps(reponse, ensure_ascii=False),
                 "created_at": datetime.utcnow().isoformat()
             }]
         )
     except Exception as e:
         logger.error(f"Erreur lors de l'ajout de mémoire : {str(e)}")
         raise
-
 
 async def get_history(user_id: int, server_id: int, limit: int = 100) -> List[Dict]:
     await delete_old_memories()
@@ -74,11 +71,21 @@ async def get_history(user_id: int, server_id: int, limit: int = 100) -> List[Di
             limit=limit,
             include=["metadatas", "documents"]
         )
-        return format_results(results)
+        
+        formatted = []
+        for i, entry_id in enumerate(results.get("ids", [])):
+            formatted.append({
+                "id": entry_id,
+                "text": results["documents"][i],
+                "created_at": results["metadatas"][i].get("created_at"),
+                "user_id": results["metadatas"][i].get("user_id"),
+                "server_id": results["metadatas"][i].get("server_id")
+            })
+        
+        return formatted
     except Exception as e:
         logger.error(f"Erreur lors de la récupération de l'historique : {str(e)}")
         return []
-
 
 async def search_similar_memories(user_id: int, server_id: int, query: str, limit: int = 5) -> List[Dict]:
     await delete_old_memories()
@@ -95,11 +102,26 @@ async def search_similar_memories(user_id: int, server_id: int, query: str, limi
             n_results=limit,
             include=["metadatas", "documents"]
         )
-        return format_results(results)
+        
+        formatted = []
+        metadatas = results.get("metadatas", [[]])[0]
+        documents = results.get("documents", [[]])[0]
+        ids = results.get("ids", [[]])[0]
+        
+        for i, entry_id in enumerate(ids):
+            formatted.append({
+                "id": entry_id,
+                "text": documents[i],
+                "created_at": metadatas[i].get("created_at"),
+                "user_id": metadatas[i].get("user_id"),
+                "server_id": metadatas[i].get("server_id")
+            })
+        
+        return formatted
     except Exception as e:
         logger.error(f"Erreur lors de la recherche vectorielle : {str(e)}")
         return []
-    
+
 async def get_hybrid_history(user_id: int, server_id: int, current_query: str, recent_limit: int = 3, similar_limit: int = 5) -> List[Dict]:
     await delete_old_memories()
     
@@ -116,9 +138,7 @@ async def get_hybrid_history(user_id: int, server_id: int, current_query: str, r
 
 async def delete_old_memories() -> None:
     try:
-        all_memories = collection.get(
-            include=["metadatas"]
-        )
+        all_memories = collection.get(include=["metadatas"])
         if not all_memories["metadatas"]:
             return
         
@@ -128,7 +148,6 @@ async def delete_old_memories() -> None:
         for i, meta in enumerate(all_memories["metadatas"]):
             created_at = datetime.fromisoformat(meta["created_at"]).timestamp()
             if now - created_at > MEMORY_DURATION:
-                # Utiliser l'ID de la liste des IDs au même index
                 expired_ids.append(all_memories["ids"][i])
         
         if expired_ids:
@@ -137,47 +156,13 @@ async def delete_old_memories() -> None:
     except Exception as e:
         logger.error(f"Erreur lors du nettoyage des mémoires : {str(e)}")
 
-
-def format_results(results: Dict) -> List[Dict]:
-    formatted = []
-    
-    # ChromaDB retourne les résultats différemment selon la méthode (get vs query)
-    # Pour collection.get(): {"metadatas": [...], "documents": [...], "ids": [...]}
-    # Pour collection.query(): {"metadatas": [[...]], "documents": [[...]], "ids": [[...]]}
-    
-    metadatas = results.get("metadatas", [])
-    documents = results.get("documents", [])
-    ids = results.get("ids", [])
-    
-    # Si c'est un résultat de query (liste de listes), on prend le premier élément
-    if metadatas and isinstance(metadatas[0], list):
-        metadatas = metadatas[0] if metadatas else []
-        documents = documents[0] if documents else []
-        ids = ids[0] if ids else []
-    
-    for meta, doc, entry_id in zip(metadatas, documents, ids):
-        try:
-            content = json.loads(meta["content"]) if isinstance(meta["content"], str) else meta["content"]
-        except (json.JSONDecodeError, KeyError):
-            content = meta.get("content", doc)
-        formatted.append({
-            "id": entry_id,
-            "content": content,
-            "created_at": meta.get("created_at"),
-            "text": doc
-        })
-    return formatted
-
 async def clear_remote_history(user_id: int) -> None:
     try:
-        results = collection.get(
-            where={"user_id": {"$eq": user_id}}
-        )
+        results = collection.get(where={"user_id": {"$eq": user_id}})
         ids_to_delete = results.get("ids", [])
         if ids_to_delete:
             collection.delete(ids=ids_to_delete)
-        logger.info(f"Historique utilisateur {user_id} supprimé")
+            logger.info(f"Historique utilisateur {user_id} supprimé")
     except Exception as e:
         logger.error(f"Erreur lors de la suppression de l'historique : {str(e)}")
-
 

@@ -30,7 +30,6 @@ import logging
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(get_logging_level())
 
-# Variable globale pour gérer l'arrêt propre
 shutdown_event = asyncio.Event()
 restart_requested = False
 
@@ -39,13 +38,11 @@ def handle_shutdown_signal(signum, frame):
     global restart_requested
     logger.debug(f"Signal {signum} reçu, arrêt en cours...")
     
-    # Vérifie si c'est un redémarrage ou un arrêt
     command = check_restart_command()
     logger.debug(f"Commande lue depuis stop.json: {command}")
     restart_requested = (command == "RESTART")
     logger.debug(f"Redémarrage demandé: {restart_requested}")
     
-    # Déclenche l'événement d'arrêt
     try:
         loop = asyncio.get_running_loop()
         logger.debug("Event loop trouvée, déclenchement de shutdown_event")
@@ -62,7 +59,6 @@ def check_restart_command():
             command = data.get("COMMAND")
             timestamp = datetime.datetime.fromisoformat(data["timestamp"])
             
-            # Vérifie que la commande n'est pas trop ancienne (évite les boucles)
             if datetime.datetime.now() - timestamp > datetime.timedelta(minutes=1):
                 os.remove("stop.json")
                 return None
@@ -72,11 +68,9 @@ def check_restart_command():
         return None
 
 async def main():
-    # Configure les gestionnaires de signaux
     signal.signal(signal.SIGTERM, handle_shutdown_signal)
     signal.signal(signal.SIGINT, handle_shutdown_signal)
     
-    # Crée une tâche pour surveiller le fichier stop.json
     async def monitor_stop_file():
         """Surveille le fichier stop.json pour détecter les demandes d'arrêt"""
         while not shutdown_event.is_set():
@@ -92,23 +86,19 @@ async def main():
                 logger.error(f"Erreur lors de la surveillance du fichier stop.json: {e}")
             await asyncio.sleep(1)
     
-    # Wrapper pour arrêter les bots quand shutdown_event est déclenché
     async def run_with_shutdown(coro, name="task"):
         """Execute une coroutine et l'annule quand shutdown_event est set"""
         task = asyncio.create_task(coro)
         
-        # Attend soit la fin de la tâche, soit le shutdown
         done, pending = await asyncio.wait(
             [task, asyncio.create_task(shutdown_event.wait())],
             return_when=asyncio.FIRST_COMPLETED
         )
         
-        # Si shutdown_event est déclenché, annule la tâche
         if shutdown_event.is_set():
             logger.debug(f"Arrêt de la tâche: {name}")
             task.cancel()
             try:
-                # Laisse 2 secondes pour terminer proprement
                 await asyncio.wait_for(task, timeout=2.0)
             except asyncio.CancelledError:
                 logger.debug(f"Tâche {name} annulée proprement")
@@ -150,7 +140,6 @@ async def main():
         logger.error(f"Erreur non gérée : {str(e)}")
     finally:
         logger.debug("Entrée dans le bloc finally de main()")
-        # Annule et attend toutes les tâches restantes pour éviter les warnings
         pending = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
         logger.debug(f"Nombre de tâches en attente: {len(pending)}")
         if pending:
@@ -165,7 +154,6 @@ async def main():
         logger.info("Nettoyage terminé.")
 
 if __name__ == "__main__":
-    # Vérifie si un arrêt a été demandé au démarrage
     command = check_restart_command()
     if command == "STOP":
         logger.info("Arrêt demandé via stop.json. Le bot ne démarrera pas.")
@@ -175,14 +163,12 @@ if __name__ == "__main__":
             pass
         sys.exit(0)
     
-    # Supprime le fichier stop.json s'il existe pour éviter les conflits
     try:
         if os.path.exists("stop.json"):
             os.remove("stop.json")
     except Exception as e:
         logger.warning(f"Impossible de supprimer stop.json: {e}")
     
-    # Lance le bot
     try:
         logger.debug("Lancement de asyncio.run(main())...")
         asyncio.run(main())
@@ -193,7 +179,6 @@ if __name__ == "__main__":
         logger.error(f"Erreur fatale: {e}")
         sys.exit(1)
     
-    # Vérifie après la sortie complète si un redémarrage est demandé
     logger.debug(f"Vérification du redémarrage: restart_requested = {restart_requested}")
     if restart_requested:
         logger.info("Redémarrage demandé. Relance du processus...")
@@ -201,7 +186,6 @@ if __name__ == "__main__":
             os.remove("stop.json")
         except Exception:
             pass
-        # Relance le processus
         logger.debug(f"Exécution de os.execv({sys.executable}, {[sys.executable] + sys.argv})")
         os.execv(sys.executable, [sys.executable] + sys.argv)
     
