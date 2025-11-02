@@ -82,13 +82,13 @@ async def llm_selector(input: str) -> str:
     ]
 
     try :
-        text = await hackclub_llm_selector(messages)
+        text = await openrouter_llm_selector(messages)
     except Exception as e:
-        logger.error(f"HackClub LLM Selector failed: {e}. Falling back to OpenRouter LLM Selector.")
+        logger.error(f"OpenRouter LLM Selector failed: {e}. Falling back to HackClub LLM Selector.")
         try:
-            text = await openrouter_llm_selector(messages)
+            text = await hackclub_llm_selector(messages)
         except Exception as e2:
-            logger.error(f"OpenRouter LLM Selector failed: {e2}. Falling back to IO Intelligence LLM Selector.")
+            logger.error(f"HackClub LLM Selector failed: {e2}. Falling back to IO Intelligence LLM Selector.")
             try:
                 text = await io_intelligence_llm(messages)
             except Exception as e3:
