@@ -23,6 +23,7 @@ async def llama_chat(messages, parameters):
             llama_configs = json.load(f)
         
         primary_config = llama_configs[0]["litellm_params"]
+        fallback_configs = [config["litellm_params"] for config in llama_configs[1:]]
         
         params = {
             "model": primary_config["model"],
@@ -32,6 +33,19 @@ async def llama_chat(messages, parameters):
         
         if "api_base" in primary_config:
             params["api_base"] = primary_config["api_base"]
+        
+        fallbacks = []
+        for fb_config in fallback_configs:
+            fb_params = {
+                "model": fb_config["model"],
+                "api_key": os.getenv(fb_config["api_key"])
+            }
+            if "api_base" in fb_config:
+                fb_params["api_base"] = fb_config["api_base"]
+            fallbacks.append(fb_params)
+        
+        if fallbacks:
+            params["fallbacks"] = fallbacks
         
         response = litellm.completion(**params)
 
