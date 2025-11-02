@@ -41,7 +41,7 @@ def load_preprompt() -> str:
         logger.error(f"Error loading preprompt from config.toml: {str(e)}")
         raise
 
-async def chat(messages, bot, user, parameters):
+async def chat(messages: list, bot: discord.Client, user: discord.User, parameters: dict)-> dict:
     try:
         model = parameters.get("model", bot.user.id if isinstance(bot, discord.Client) else bot.id)
 

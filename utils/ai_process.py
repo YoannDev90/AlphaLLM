@@ -9,6 +9,8 @@ import discord
 import io
 import json
 import re
+from embeds.code import CodeView
+from embeds.table import TableView
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -149,6 +151,69 @@ async def process_ai_response(bot, query, message):
         logger.error(f"Erreur lors de la génération : {e}")
         await message.channel.send("Une erreur s'est produite lors de la génération.")
 
+def is_ascii_table(code_block: str) -> bool:
+    """
+    Détecte si un code block contient un tableau ASCII (généré par table_converter)
+    """
+    # Extraire le contenu du code block
+    if code_block.startswith("```") and code_block.endswith("```"):
+        content = code_block[3:-3].strip()
+    else:
+        content = code_block.strip()
+    
+    lines = content.split('\n')
+    if len(lines) < 3:
+        return False
+    
+    # Vérifier les caractéristiques d'un tableau ASCII
+    # Ligne du haut avec + et -
+    first_line = lines[0].strip()
+    if not (first_line.startswith('+') and first_line.endswith('+') and '-' in first_line):
+        return False
+    
+    # Ligne du bas similaire
+    last_line = lines[-1].strip()
+    if not (last_line.startswith('+') and last_line.endswith('+') and '-' in last_line):
+        return False
+    
+    # Vérifier qu'il y a des lignes avec | (séparateurs de colonnes)
+    has_pipe_lines = any('|' in line for line in lines[1:-1])
+    
+    return has_pipe_lines
+
+async def send_table_block_with_view(channel, table_block: str, max_length: int = 2000):
+    """
+    Sends a table block with TableView, splitting into multiple table blocks if needed.
+    Returns the last message sent.
+    """
+    # Extraire le contenu du tableau du code block
+    if table_block.startswith("```") and table_block.endswith("```"):
+        table_content = table_block[3:-3].strip()
+    else:
+        table_content = table_block.strip()
+    
+    # Pour les tableaux, on garde le format ``` car c'est du texte formaté
+    # Mais on utilise TableView avec les données du tableau
+    table_lines = table_block.splitlines(keepends=True)
+    current_table = ""
+    last_message = None
+    
+    for line in table_lines:
+        if len(current_table) + len(line) > max_length:
+            if current_table.strip():
+                view = TableView(table_content)  # Passer le contenu du tableau, pas le code block
+                last_message = await channel.send(current_table, view=view)
+                view.message = last_message
+            current_table = ""
+        current_table += line
+    
+    if current_table.strip():
+        view = TableView(table_content)  # Passer le contenu du tableau, pas le code block
+        last_message = await channel.send(current_table, view=view)
+        view.message = last_message
+    
+    return last_message
+
 async def smart_long_messages_with_view(channel, response, original_question, model, response_data, bot, max_length: int = 2000):
     """
     Sends a long message to Discord with MessageView buttons, preserving code blocks and never splitting inside a code block.
@@ -161,9 +226,15 @@ async def smart_long_messages_with_view(channel, response, original_question, mo
     
     for part in parts:
         if part.startswith("```") and part.endswith("```"):
-            result = await send_code_block_with_return(channel, part, max_length)
-            if result:
-                last_message = result
+            # Vérifier si c'est un tableau ASCII
+            if is_ascii_table(part):
+                result = await send_table_block_with_view(channel, part, max_length)
+                if result:
+                    last_message = result
+            else:
+                result = await send_code_block_with_view(channel, part, max_length)
+                if result:
+                    last_message = result
         else:
             result = await send_text_in_chunks_with_return(channel, part, max_length)
             if result:
@@ -227,9 +298,9 @@ async def send_text_in_chunks_with_return(channel, text: str, max_length: int = 
     
     return last_message
 
-async def send_code_block_with_return(channel, code_block: str, max_length: int = 2000):
+async def send_code_block_with_view(channel, code_block: str, max_length: int = 2000):
     """
-    Sends a code block, splitting into multiple code blocks if needed but never breaking a line of code.
+    Sends a code block with CodeView, splitting into multiple code blocks if needed but never breaking a line of code.
     Returns the last message sent.
     """
     first_line_end = code_block.find('\n')
@@ -249,13 +320,17 @@ async def send_code_block_with_return(channel, code_block: str, max_length: int 
     for line in code_lines:
         if len(current_code) + len(line) + len(code_suffix) > max_length:
             current_code += code_suffix
-            last_message = await channel.send(current_code)
+            view = CodeView(current_code)
+            last_message = await channel.send(current_code, view=view)
+            view.message = last_message
             current_code = code_prefix
         current_code += line
     
     if current_code.strip() != code_prefix.strip():
         current_code += code_suffix
-        last_message = await channel.send(current_code)
+        view = CodeView(current_code)
+        last_message = await channel.send(current_code, view=view)
+        view.message = last_message
     
     return last_message
 

@@ -4,18 +4,27 @@ from datetime import datetime
 import os
 import re
 from utils.config import API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT, NAVY_API_KEY
+import json
 
 async def perplexity_chat(messages, parameters):
     start_time = datetime.now()
     opik_logger = OpikLogger()
     litellm.callbacks = [opik_logger]
+
+    # Load Perplexity configurations
+    with open("models/text/perplexity_config.json", "r") as f:
+        perplexity_configs = json.load(f)
+    
+    primary_config = perplexity_configs[0]["litellm_params"]
     
     params = {
-        "model": MODELS_CONFIG_TEXT.get("perplexity", "openai/sonar"),
-        "api_key": NAVY_API_KEY,
-        "base_url": API_ENDPOINTS_TEXT.get("navy", "https://api.navy/v1"),
+        "model": primary_config["model"],
+        "api_key": os.getenv(primary_config["api_key"]),
         "messages": messages
     }
+    
+    if "api_base" in primary_config:
+        params["api_base"] = primary_config["api_base"]
     
     response = litellm.completion(**params)
 

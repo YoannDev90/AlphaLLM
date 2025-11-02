@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from utils.server_config import get_announce_channel
 from utils.translator import TranslationManager, SUPPORTED_LANGUAGES, load_translations
 from embeds.announce import create_announcement_embed, AnnouncementTranslationView
-from embeds.announce_confirm import AnnounceConfirmView, create_announcement_confirmation_embed
+from embeds.admin import AnnounceConfirmView, create_announcement_confirmation_embed
 from utils.command_ids import command_id_manager
 from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
 import os

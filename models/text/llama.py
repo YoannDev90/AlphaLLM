@@ -6,6 +6,7 @@ import litellm
 from datetime import datetime
 from litellm.integrations.opik.opik import OpikLogger
 import os
+import json
 
 logger = logging.getLogger(logger_name)
 
@@ -17,11 +18,20 @@ async def llama_chat(messages, parameters):
         opik_logger = OpikLogger()
         litellm.callbacks = [opik_logger]
 
+        # Load Llama configurations
+        with open("models/text/llama_config.json", "r") as f:
+            llama_configs = json.load(f)
+        
+        primary_config = llama_configs[0]["litellm_params"]
+        
         params = {
-            "model": MODELS_CONFIG_TEXT.get("llama", "cerebras/llama3.3-70b"),
-            "api_key": CEREBRAS_API_KEY,
+            "model": primary_config["model"],
+            "api_key": os.getenv(primary_config["api_key"]),
             "messages": messages
         }
+        
+        if "api_base" in primary_config:
+            params["api_base"] = primary_config["api_base"]
         
         response = litellm.completion(**params)
 

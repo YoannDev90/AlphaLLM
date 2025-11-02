@@ -83,17 +83,6 @@ class MessageView(discord.ui.View):
             logger.error(f"Erreur lors de la régénération de réponse pour {interaction.user.display_name}: {str(e)}")
             await interaction.followup.send("❌ Unexpected error during response regeneration.")
 
-    @discord.ui.button(emoji="✏️", label="Edit", style=discord.ButtonStyle.gray)
-    async def edit(self, interaction: discord.Interaction, button: discord.ui.Button):
-        logger.info(f"Édition de question demandée par {interaction.user.display_name}")
-        
-        from utils.user_manager import new_interaction
-        
-        new_interaction(interaction.user.id)
-
-        modal = EditQuestionModal(self.original_question, self.model, self.bot, self.search_internet)
-        await interaction.response.send_modal(modal)
-
     @discord.ui.button(emoji="📊", label="Details", style=discord.ButtonStyle.gray)
     async def show_details(self, interaction: discord.Interaction, button: discord.ui.Button):
         logger.info(f"Affichage des détails demandé par {interaction.user.display_name}")
@@ -165,75 +154,3 @@ class MessageView(discord.ui.View):
         # Supprimer le message de réponse
         await interaction.message.edit(view=None)
         await interaction.message.delete()
-
-
-class EditQuestionModal(discord.ui.Modal):
-    def __init__(self, original_question, model, bot, search_internet):
-        super().__init__(title="Edit Question")
-        self.original_question = original_question
-        self.model = model
-        self.bot = bot
-        self.search_internet = search_internet
-        
-        self.question_input = discord.ui.TextInput(
-            label="New question",
-            placeholder="Enter your new question...",
-            style=discord.TextStyle.paragraph,
-            max_length=2000,
-            default=original_question,
-            required=True
-        )
-        self.add_item(self.question_input)
-    
-    async def on_submit(self, interaction: discord.Interaction):
-        await interaction.response.defer()
-        
-        new_question = self.question_input.value
-        
-        if not new_question.strip():
-            await interaction.followup.send("❌ The question cannot be empty.", ephemeral=True)
-            return
-        
-        try:
-            from utils.ai_utils import generate_response
-            from utils.table_converter import detect_and_convert_tables
-            from utils.ai_process import smart_long_messages_with_view
-            
-            # Générer la réponse en utilisant generate_response directement
-            parameters = {
-                "history": True, 
-                "preprompt": True, 
-                "tools": False, 
-                "internet": self.search_internet if self.search_internet is not None else False, 
-                "audio": False,
-                "raw": False,
-                "model": self.model if hasattr(self, 'model') and self.model else self.bot.user.id if isinstance(self.bot, discord.Client) else self.bot.id
-            }
-            
-            response = await generate_response(
-                user_id=int(interaction.user.id),
-                server_id=int(interaction.channel.id if not interaction.guild else interaction.guild.id),
-                raw_content=new_question,
-                attachments=[],
-                bot=self.bot,
-                user=interaction.user.display_name,
-                parameters=parameters
-            )
-            
-            # Extract response text properly
-            if isinstance(response, dict) and 'response' in response:
-                response_text = response['response']
-            elif isinstance(response, str):
-                response_text = response
-            else:
-                await interaction.followup.send("❌ Unexpected response format.")
-                return
-            
-            response_text = detect_and_convert_tables(response_text)
-            await smart_long_messages_with_view(interaction.channel, response_text, new_question, self.model, response, self.bot)
-            
-            logger.info(f"Question éditée et nouvelle réponse envoyée à {interaction.user.display_name}")
-            
-        except Exception as e:
-            await interaction.followup.send("❌ Error processing the edited question.")
-            logger.error(f"Échec de l'édition de question pour {interaction.user.display_name}: {str(e)}")

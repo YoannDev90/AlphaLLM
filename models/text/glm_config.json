@@ -1,0 +1,34 @@
+[
+    {
+        "model_name": "glm-4.6:free",
+        "litellm_params": {
+            "model": "openai/glm-4.6:free",
+            "api_base": "https://api.voidai.app/v1/",
+            "api_key": "VOID_API_KEY"
+        }
+    },
+    {
+        "model_name": "glm-4.5",
+        "litellm_params": {
+            "model": "openai/glm-4.5",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "glm-4.5-air",
+        "litellm_params": {
+            "model": "openai/glm-4.5-air",
+            "api_base": "https://mnnai.ru/v1/",
+            "api_key": "MNN_API_KEY"
+        }
+    },
+    {
+        "model_name": "glm-4.5-air",
+        "litellm_params": {
+            "model": "openai/glm-4.5-air",
+            "api_base": "https://api.airforce/v1/",
+            "api_key": "AIRFORCE_API_KEY"
+        }
+    }
+]

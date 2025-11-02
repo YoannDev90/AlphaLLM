@@ -6,15 +6,23 @@ from utils.database import get_supabase_client
 from datetime import datetime
 from discord import Guild
 from typing import List
+import uuid
 
 logger = logging.getLogger(LOGGER_NAME)
 supabase = get_supabase_client()
 def new_interaction(user_id: int):
     try:
-        supabase.table("users").upsert({
-            "id_discord": str(user_id),
-            "activity": datetime.now().isoformat()
-        }).execute()
+        user_data = supabase.table("users").select("id").eq("id_discord", str(user_id)).execute()
+        if user_data.data:
+            # update activity
+            supabase.table("users").update({"activity": datetime.now().isoformat()}).eq("id_discord", str(user_id)).execute()
+        else:
+            # insert
+            supabase.table("users").insert({
+                "id": str(uuid.uuid4()),
+                "id_discord": str(user_id),
+                "activity": datetime.now().isoformat()
+            }).execute()
     except Exception as e:
         logger.error(f"Erreur mise à jour interaction : {str(e)}")
         return False
@@ -29,6 +37,7 @@ def new_image(user_id: int, count: int = 1):
             supabase.table("users").update({"images": updated_images}).eq("id_discord", str(user_id)).execute()
         else:
             supabase.table("users").insert({
+                "id": str(uuid.uuid4()),
                 "id_discord": str(user_id),
                 "images": count
             }).execute()
@@ -46,6 +55,7 @@ def new_query(user_id: int):
             supabase.table("users").update({"queries": updated_queries}).eq("id_discord", str(user_id)).execute()
         else:
             supabase.table("users").insert({
+                "id": str(uuid.uuid4()),
                 "id_discord": str(user_id),
                 "queries": 1
             }).execute()

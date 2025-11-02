@@ -1,0 +1,33 @@
+[
+    {
+        "model_name": "qwen-3-32b",
+        "litellm_params": {
+            "model": "cerebras/qwen-3-32b",
+            "api_key": "CEREBRAS_API_KEY"
+        }
+    },
+    {
+        "model_name": "qwq-32b:free",
+        "litellm_params": {
+            "model": "openai/qwq-32b:free",
+            "api_base": "https://electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "qwen3-next-80b-a3b-instruct:free",
+        "litellm_params": {
+            "model": "openai/qwen3-next-80b-a3b-instruct:free",
+            "api_base": "https://electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "qwq-32b",
+        "litellm_params": {
+            "model": "openai/qwq-32b",
+            "api_base": "https://voidai.app/v1/",
+            "api_key": "VOID_API_KEY"
+        }
+    }
+]

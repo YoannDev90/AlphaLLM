@@ -83,7 +83,7 @@ async def get_conversation_history(user_id: int, server_id: int, current_query: 
             logger.debug(f"Aucun historique trouvé pour {user_id} sur {server_id}")
             return ""
         
-        context = "\n".join([f"[{entry['created_at']}] {entry['content']}" for entry in history[:10]])
+        context = "\n".join([f"[{entry['created_at']}] {entry['text']}" for entry in history[:10]])
         return context
         
     except Exception as e:

@@ -13,3 +13,4 @@ config.toml
 cert.pem
 key.pem
 API_KEY.txt
+models/embedder/

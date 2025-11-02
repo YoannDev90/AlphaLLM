@@ -1,0 +1,34 @@
+[
+    {
+        "model_name": "sonar",
+        "litellm_params": {
+            "model": "openai/sonar",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "sonar",
+        "litellm_params": {
+            "model": "openai/sonar",
+            "api_base": "https://api.voidai.app/v1/",
+            "api_key": "VOID_API_KEY"
+        }
+    },
+    {
+        "model_name": "sonar",
+        "litellm_params": {
+            "model": "openai/sonar",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "sonar",
+        "litellm_params": {
+            "model": "openai/sonar",
+            "api_base": "https://api.mnn.com/v1/",
+            "api_key": "MNN_API_KEY"
+        }
+    }
+]

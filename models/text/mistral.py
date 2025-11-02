@@ -1,11 +1,12 @@
 import logging
-from utils.config import logger_name, MODELS_CONFIG_TEXT, MISTRAL_API_KEY
+from utils.config import logger_name
 from dotenv import load_dotenv
 import os
 import litellm
 from datetime import datetime
 from litellm.integrations.opik.opik import OpikLogger
 import os
+import json
 
 logger = logging.getLogger(logger_name)
 
@@ -16,11 +17,33 @@ async def mistral_chat(messages, parameters):
     opik_logger = OpikLogger()
     litellm.callbacks = [opik_logger]
 
+    with open("models/text/mistral_config.json", "r") as f:
+        mistral_configs = json.load(f)
+    
+    primary_config = mistral_configs[0]["litellm_params"]
+    fallback_configs = [config["litellm_params"] for config in mistral_configs[1:]]
+    
     params = {
-        "model": MODELS_CONFIG_TEXT.get("mistral", "mistral/mistral-medium-latest"),
-        "api_key": MISTRAL_API_KEY,
+        "model": primary_config["model"],
+        "api_key": os.getenv(primary_config["api_key"]),
         "messages": messages
     }
+    
+    if "api_base" in primary_config:
+        params["api_base"] = primary_config["api_base"]
+    
+    fallbacks = []
+    for fb_config in fallback_configs:
+        fb_params = {
+            "model": fb_config["model"],
+            "api_key": os.getenv(fb_config["api_key"])
+        }
+        if "api_base" in fb_config:
+            fb_params["api_base"] = fb_config["api_base"]
+        fallbacks.append(fb_params)
+    
+    if fallbacks:
+        params["fallbacks"] = fallbacks
     
     response = litellm.completion(**params)
 

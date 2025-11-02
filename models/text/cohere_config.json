@@ -1,0 +1,17 @@
+[
+    {
+        "model_name": "command-r",
+        "litellm_params": {
+            "model": "command-r",
+            "api_key": "COHERE_API_KEY"
+        }
+    },
+    {
+        "model_name": "command-r-08-2024",
+        "litellm_params": {
+            "model": "openai/command-r-08-2024",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    }
+]

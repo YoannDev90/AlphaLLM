@@ -7,19 +7,9 @@ import requests
 
 logger = logging.getLogger(logger_name)
 
-load_dotenv()
+load_dotenv()  
 
-async def models(format):   
-    models_raw = CONFIG.get("models", {})
-    models_dict = {k: v.get("description", "") for k, v in models_raw.items()}
-    
-    if format == "text":
-        return "\n".join(f"- {k} : {v}" for k, v in models_dict.items())
-    else:
-        return models_dict
-    
-
-async def hackclub_llm_selector(messages):
+async def hackclub_llm_selector(messages: list) -> str:
     def _sync_request():
         response = requests.post(
             "https://ai.hackclub.com/chat/completions",
@@ -38,7 +28,7 @@ async def hackclub_llm_selector(messages):
     
     return await asyncio.to_thread(_sync_request)
     
-async def io_intelligence_llm(messages):
+async def io_intelligence_llm(messages: list) -> str:
     def _sync_request():
         response = requests.post(
             "https://api.intelligence.io.solutions/api/v1/chat/completions",
@@ -59,7 +49,7 @@ async def io_intelligence_llm(messages):
     return await asyncio.to_thread(_sync_request)
 
 
-async def openrouter_llm_selector(messages):
+async def openrouter_llm_selector(messages: list) -> str:
     def _sync_request():
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -81,9 +71,10 @@ async def openrouter_llm_selector(messages):
 
 
 
-async def llm_selector(input):
+async def llm_selector(input: str) -> str:
     
-    models_text = await models("text")
+    models_dict = {k: v.get("description", "") for k, v in CONFIG.get("models", {}).items()}
+    models_text = "\n".join(f"- {k} : {v}" for k, v in models_dict.items())
     
     messages = [
         {"role": "system", "content": get_llm_selector_preprompt() + models_text},
@@ -107,9 +98,9 @@ async def llm_selector(input):
     model = await parse_llm_selection(text)
     return model
 
-async def parse_llm_selection(text):
+async def parse_llm_selection(text: str) -> str:
     t = text.lower()
-    available_models = await models("json")
+    available_models = {k: v.get("description", "") for k, v in CONFIG.get("models", {}).items()}
     for model_name in available_models.keys():
         if model_name.lower() in t:
             return model_name

@@ -6,8 +6,11 @@ from fastembed import TextEmbedding
 import time
 from datetime import datetime
 import hashlib
+import os
 
 logger = logging.getLogger("memory_ai")
+
+embedder = None
 
 def initialize_chroma_client():
     return chromadb.CloudClient(
@@ -27,7 +30,11 @@ async def initialize() -> None:
         raise
 
 def generate_embedding(text: str) -> List[float]:
-    embedder = TextEmbedding(model_name=EMBEDDER_MODEL)
+    global embedder
+    if embedder is None:
+        cache_dir = os.path.join(os.path.dirname(__file__), "..", "models", "embedder")
+        os.makedirs(cache_dir, exist_ok=True)
+        embedder = TextEmbedding(model_name=EMBEDDER_MODEL, cache_dir=cache_dir)
     try:
         return list(embedder.embed([text]))[0].tolist()
     except Exception as e:

@@ -6,6 +6,7 @@ import litellm
 from datetime import datetime
 from litellm.integrations.opik.opik import OpikLogger
 import os
+import json
 
 logger = logging.getLogger(logger_name)
 
@@ -16,12 +17,20 @@ async def glm_chat(messages, parameters):
     opik_logger = OpikLogger()
     litellm.callbacks = [opik_logger]
 
+    # Load GLM configurations
+    with open("models/text/glm_config.json", "r") as f:
+        glm_configs = json.load(f)
+    
+    primary_config = glm_configs[0]["litellm_params"]
+    
     params = {
-        "model": MODELS_CONFIG_TEXT.get("glm", "openai/glm-4.5"),
-        "api_key": NAVY_API_KEY,
-        "base_url": API_ENDPOINTS_TEXT.get("navy", "https://api.navy/v1"),
+        "model": primary_config["model"],
+        "api_key": os.getenv(primary_config["api_key"]),
         "messages": messages
     }
+    
+    if "api_base" in primary_config:
+        params["api_base"] = primary_config["api_base"]
     
     response = litellm.completion(**params)
 
