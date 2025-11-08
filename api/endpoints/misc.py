@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Optional, List, Dict, Any
 from api.utils.security_utils import get_api_key
-from utils.ai_utils import summarize
+from utils.processing.ai_handler.enhancement import summarize
 import requests
 import logging
 import asyncio

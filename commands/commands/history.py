@@ -1,7 +1,7 @@
 import discord
 import logging
 from utils.config import logger_name
-from utils.memory import clear_remote_history
+from utils.memory import get_memory_manager
 
 logger = logging.getLogger(logger_name)
 
@@ -12,7 +12,8 @@ async def setup(bot: discord.Client):
         await interaction.response.defer(ephemeral=True)
 
         try:
-            await clear_remote_history(interaction.user.id)
+            memory_manager = get_memory_manager()
+            await memory_manager.clear_history(interaction.user.id)
 
             embed = discord.Embed(
                 title="🗑️ History cleaned",

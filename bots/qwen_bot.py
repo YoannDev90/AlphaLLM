@@ -4,7 +4,7 @@ import logging
 from commands.cmds import setup_commands
 from utils.database import get_supabase_client
 from utils.config import DEBUG, GUILD_ID, DEV_IDS, LOGGER_NAME
-from utils.msg_process import message_process
+from utils import message_process
 import os
 from dotenv import load_dotenv
 

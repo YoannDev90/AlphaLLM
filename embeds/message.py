@@ -28,10 +28,10 @@ class MessageView(discord.ui.View):
         await interaction.response.defer()
         
         # Import des fonctions nécessaires à l'exécution
-        from utils.user_manager import new_interaction
-        from utils.ai_utils import generate_response
-        from utils.table_converter import detect_and_convert_tables
-        from utils.ai_process import smart_long_messages_with_view
+        from utils.database.user_manager import new_interaction
+        from utils.processing.ai_handler.core import generate_response
+        from utils.processing.table import detect_and_convert_tables
+        from utils.processing.message import smart_long_messages_with_view
         
         new_interaction(interaction.user.id)
         

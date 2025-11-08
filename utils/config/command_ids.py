@@ -1,0 +1,91 @@
+"""
+Utilitaire pour gérer les IDs des commandes slash Discord.
+Permet de récupérer automatiquement les IDs des commandes et de créer des mentions.
+"""
+import discord
+import logging
+from utils.config.app_config import logger_name
+from typing import Dict, Optional
+
+logger = logging.getLogger(logger_name)
+
+class CommandIDManager:
+    def __init__(self):
+        self.command_ids: Dict[str, int] = {}
+        self.bot: Optional[discord.Client] = None
+    
+    def set_bot(self, bot: discord.Client):
+        """Définit le bot pour récupérer les IDs des commandes"""
+        self.bot = bot
+    
+    async def fetch_command_ids(self) -> Dict[str, int]:
+        """
+        Récupère tous les IDs des commandes slash du bot.
+        Retourne un dictionnaire {nom_commande: id_commande}
+        """
+        if not self.bot:
+            logger.error("Bot non défini dans CommandIDManager")
+            return {}
+        
+        try:
+            commands = await self.bot.tree.fetch_commands()
+            
+            command_ids = {}
+            for Command in commands:
+                command_ids[Command.name] = Command.id
+                logger.debug(f"Command trouvée: {Command.name} (ID: {Command.id})")
+            
+            self.command_ids = command_ids
+            return command_ids
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la récupération des IDs des commandes: {e}")
+            return {}
+    
+    def get_command_mention(self, command_name: str, subcommand: str = None, subcommand_group: str = None) -> str:
+        """
+        Crée une mention de Command slash Discord.
+        
+        Args:
+            command_name: Nom de la Command principale
+            subcommand: Nom de la sous-Command (optionnel)
+            subcommand_group: Nom du groupe de sous-commandes (optionnel)
+        
+        Returns:
+            Mention formatée pour Discord (ex: </ask:123456789>)
+        """
+        command_id = self.command_ids.get(command_name)
+        
+        if command_id is None:
+            # Si l'ID n'est pas trouvé, retourner une mention générique
+            logger.warning(f"ID de Command non trouvé pour: {command_name}")
+            if subcommand_group and subcommand:
+                return f"</{command_name} {subcommand_group} {subcommand}:0>"
+            elif subcommand:
+                return f"</{command_name} {subcommand}:0>"
+            else:
+                return f"</{command_name}:0>"
+        
+        # build la mention avec l'ID réel
+        if subcommand_group and subcommand:
+            return f"</{command_name} {subcommand_group} {subcommand}:{command_id}>"
+        elif subcommand:
+            return f"</{command_name} {subcommand}:{command_id}>"
+        else:
+            return f"</{command_name}:{command_id}>"
+    
+    def update_command_id(self, command_name: str, command_id: int):
+        """Met à jour l'ID d'une Command spécifique"""
+        self.command_ids[command_name] = command_id
+        logger.debug(f"ID de Command mis à jour: {command_name} -> {command_id}")
+    
+    def get_all_command_ids(self) -> Dict[str, int]:
+        """Retourne tous les IDs de commandes stockés"""
+        return self.command_ids.copy()
+    
+    def has_command_id(self, command_name: str) -> bool:
+        """Vérifie si l'ID d'une Command est disponible"""
+        return command_name in self.command_ids
+
+# Instance globale du gestionnaire
+command_id_manager = CommandIDManager()

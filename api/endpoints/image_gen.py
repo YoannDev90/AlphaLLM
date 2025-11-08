@@ -35,12 +35,12 @@ async def generate_image(
         final_prompt = prompt
         if enhance:
             logger.debug("Amélioration du prompt demandée")
-            from utils.ai_utils import enhance_image_prompt
+            from utils.processing.ai_handler.enhancement import enhance_image_prompt
             enhanced_prompts = await enhance_image_prompt(prompt, number=1)
             final_prompt = enhanced_prompts.get(1, prompt)
             logger.info(f"Prompt amélioré: {final_prompt[:100]}{'...' if len(final_prompt) > 100 else ''}")
         
-        from utils.image_gen import generate_image
+        from utils.media.image import generate_image
         size = "1024x1024"
         
         logger.debug(f"Démarrage de la génération avec timeout de {REQUEST_TIMEOUT * 2}s")

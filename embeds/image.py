@@ -28,8 +28,8 @@ class ImageView(discord.ui.View):
         await interaction.response.defer()
         
         # Import des fonctions nécessaires à l'exécution
-        from utils.user_manager import new_interaction, new_image
-        from utils.image_gen import generate_image
+        from utils.database.user_manager import new_interaction, new_image
+        from utils.media.image import generate_image
         
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
@@ -58,7 +58,7 @@ class ImageView(discord.ui.View):
     async def edit(self, interaction: discord.Interaction, button: discord.ui.Button):
         logger.info(f"Édition d'image demandée par {interaction.user.display_name}")
         
-        from utils.user_manager import new_interaction, new_image
+        from utils.database.user_manager import new_interaction, new_image
         
         new_interaction(interaction.user.id)
         new_image(interaction.user.id)
@@ -115,7 +115,7 @@ class EditImageModal(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer()
         
-        from utils.image_gen import image_edit
+        from utils.media.image import image_edit
         
         edit_prompt = self.prompt_input.value
         

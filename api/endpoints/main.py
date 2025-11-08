@@ -6,7 +6,7 @@ import socket
 
 from . import logger, REQUEST_TIMEOUT
 from api.utils.server_utils import get_server_ip, is_https_api_running
-from utils.status import get_status
+from utils.monitoring.status import get_status
 
 router = APIRouter()
 

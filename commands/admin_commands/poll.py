@@ -3,9 +3,9 @@ from discord.ext import commands, tasks
 import logging
 from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
 from dotenv import load_dotenv
-from utils.server_config import get_announce_channel
-from utils.translator import TranslationManager, SUPPORTED_LANGUAGES, load_translations
-from utils.command_ids import command_id_manager
+from utils import get_announce_channel
+from utils import TranslationManager, SUPPORTED_LANGUAGES, load_translations
+from utils import command_id_manager
 from bots.bot import bot as main_bot
 from embeds.poll import PollView, ResultsCollectorView, PollConfirmationView, poll_results
 import os

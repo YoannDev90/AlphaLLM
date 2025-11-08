@@ -3,7 +3,7 @@ import datetime
 import logging
 from utils.config import logger_name
 from langs.language_manager import language_manager, SUPPORTED_LANGUAGES
-from utils.command_ids import command_id_manager
+from utils import command_id_manager
 
 logger = logging.getLogger(logger_name)
 

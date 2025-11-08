@@ -3,8 +3,8 @@ from discord import app_commands
 import logging
 from utils.config import logger_name
 from dotenv import load_dotenv
-from utils.ai_process import process_ai_response
-from utils.msg_process import ask_cmd_process
+from utils.processing.ai_handler.discord_handler import process_ai_response
+from utils.processing.message import ask_cmd_process
 import os
 
 load_dotenv()

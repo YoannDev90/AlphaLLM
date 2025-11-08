@@ -1,7 +1,7 @@
 import discord
 from discord import app_commands
 import logging
-from utils.command_ids import command_id_manager
+from utils import command_id_manager
 
 logger = logging.getLogger('AlphaLLM')
 

@@ -3,7 +3,7 @@ from discord import app_commands
 from typing import Optional
 from embeds.config import ChannelSelectView, RoleSelectView
 from langs.language_manager import language_manager
-from utils.server_config import get_guild_language
+from utils import get_guild_language
 from utils.database import get_supabase_client
 import logging
 from utils.config import LOGGER_NAME

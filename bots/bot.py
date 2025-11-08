@@ -3,14 +3,14 @@ from discord.ext import commands
 import logging
 import datetime
 from commands.cmds import setup_commands
-from utils.ai_process import process_ai_response
+from utils import process_ai_response
 from utils.database import get_blacklist
 from utils.database import get_supabase_client
 from utils.config import DEBUG, GUILD_ID, DEV_IDS, get_bot_token, LOGGER_NAME
-from utils.server_config import update_all_guilds_info
+from utils import update_all_guilds_info
 from embeds.welcome import create_welcome_embed, WelcomeLanguageView
-from utils.command_ids import command_id_manager
-from utils.msg_process import message_process
+from utils import command_id_manager
+from utils import message_process
 
 TOKEN = get_bot_token()
 
@@ -72,7 +72,7 @@ async def on_guild_remove(guild):
     try:
         logger.info(f"Bot retiré du serveur: {guild.name} (ID: {guild.id})")
         
-        from utils.server_config import delete_server_settings
+        from utils import delete_server_settings
         delete_server_settings(guild.id)
         
     except Exception as e:

@@ -12,5 +12,5 @@ crowdin.yml
 config.toml
 cert.pem
 key.pem
-API_KEY.txt
+resources.csv
 models/embedder/

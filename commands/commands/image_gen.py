@@ -1,14 +1,14 @@
 import discord
 from discord import app_commands
-from utils.ai_utils import enhance_image_prompt
+from utils.processing.ai_handler.enhancement import enhance_image_prompt
 from io import BytesIO
 import logging
 from utils.config import logger_name
-from utils.user_config import get_image_model, get_image_size, get_image_private, get_image_enhance
-from utils.user_manager import new_interaction, new_image
+from utils.database.user_config import get_image_model, get_image_size, get_image_private, get_image_enhance
+from utils.database.user_manager import new_interaction, new_image
 from utils.database import get_blacklist
 from embeds.image import ImageView, EditImageModal
-from utils.image_gen import generate_image
+from utils.media.image import generate_image
 import random
 
 logger = logging.getLogger(logger_name)

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from utils.ai_utils import messages_builder, get_conversation_history
-from utils.memory import initialize, add_memory
-from utils.config import API_MODELS_PREPROMPT
+from utils.processing.ai_handler import messages_builder, get_conversation_history
+from utils.memory import initialize, get_memory_manager
+from utils.config.app_config import API_MODELS_PREPROMPT
 from typing import Optional
 import asyncio
+import json
 from . import logger, REQUEST_TIMEOUT
 from api.utils.security_utils import get_api_key
 
@@ -33,14 +34,14 @@ async def generate_text(
         from models.text.glm import glm_chat
         from models.text.kimi import kimi_chat
         from models.text.phi import phi_chat
-        from utils.llm_selector import llm_selector
+        from utils.ai.selector import llm_selector
 
-        history = []
+        history = {"stm": [], "ltm": ""}
         await initialize()
         if not incognito and user_id and conversation_id:
             history = await get_conversation_history(user_id, conversation_id, prompt)
             if history is None:
-                history = []
+                history = {"stm": [], "ltm": ""}
 
         messages = await messages_builder(
             user_input=prompt, 
@@ -58,6 +59,10 @@ async def generate_text(
             "internet": False, 
             "raw": False
         }
+
+        print(history)
+        print("-------------------------------------")
+        print(messages)
         
         async def generate_response():            
             response = None
@@ -173,7 +178,13 @@ async def generate_text(
                     "user": prompt,
                     "assistant": response_text
                 }
-                await add_memory(user_id, conversation_id, combined_text, response_text)
+                manager = get_memory_manager()
+                await manager.add_conversation_message(
+                    user_id, 
+                    conversation_id, 
+                    json.dumps(combined_text, ensure_ascii=False),
+                    role="conversation"
+                )
                 logger.debug("Mémoires utilisateur et assistant ajoutées à la base de données")
             return response
         

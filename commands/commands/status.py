@@ -1,7 +1,7 @@
 import discord
 import logging
 from utils.config import logger_name
-from utils.status import get_status
+from utils.monitoring.status import get_status
 
 logger = logging.getLogger(logger_name)
 

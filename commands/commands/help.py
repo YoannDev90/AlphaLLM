@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from utils.command_ids import command_id_manager
+from utils import command_id_manager
 import logging
 from utils.config import logger_name
 
