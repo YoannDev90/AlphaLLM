@@ -2,18 +2,18 @@ import os
 from dotenv import load_dotenv
 import base64
 import aiohttp
-import urllib.parse
 import random
+import urllib.parse
 import asyncio
 from pathlib import Path
 
 load_dotenv()
 POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
 
-async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
+async def generate_gpt_image(prompt: str, size: str = "1024x1024") -> str:
     """
-    Génère une image avec le modèle Flux via Pollinations
-
+    Génère une image avec le modèle GPT-Image-1
+    
     Args:
         prompt: Le prompt pour générer l'image
         size: La taille de l'image (par défaut "1024x1024")
@@ -25,7 +25,7 @@ async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
     
     params = {
         "prompt": prompt,
-        "model": "flux",
+        "model": "gptimage",
         "width": width,
         "height": height,
         "seed": random.randint(0, 2**31 - 1),
@@ -51,14 +51,14 @@ async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
 
 
 if __name__ == "__main__":
-    prompt = input("Enter prompt (default: 'A serene lake with mountains'): ").strip() or "A serene lake with mountains"
+    prompt = input("Enter prompt (default: 'A robot in a futuristic city'): ").strip() or "A robot in a futuristic city"
     size = input("Enter size (default: '1024x1024'): ").strip() or "1024x1024"
     
     print(f"Generating image with prompt: '{prompt}'")
     print(f"Size: {size}")
     
     try:
-        result = asyncio.run(generate_flux(prompt, size))
+        result = asyncio.run(generate_gpt_image(prompt, size))
         print(f"✓ Image generated successfully!")
         print(f"Base64 length: {len(result)} characters")
         
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         output_dir.mkdir(exist_ok=True)
         
         image_bytes = base64.b64decode(result)
-        image_filename = output_dir / "flux_output.png"
+        image_filename = output_dir / "gptimage_output.png"
         with open(image_filename, "wb") as f:
             f.write(image_bytes)
         

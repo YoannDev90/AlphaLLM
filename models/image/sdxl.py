@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv
 import base64
 import aiohttp
-from utils.config import API_ENDPOINTS_IMAGE, MODELS_CONFIG_IMAGE
+import asyncio
+from pathlib import Path
 
 load_dotenv()
 ELECTRONHUB_API_KEY = os.getenv("ELECTRONHUB_API_KEY")
@@ -20,7 +21,7 @@ async def generate_sdxl(prompt: str, size: str = "1024x1024") -> str:
         L'image encodée en base64
     """
     image = litellm.image_generation(
-        model="stable-diffusion-xl-base-1.0",
+        model="openai/sdxl",
         api_key=ELECTRONHUB_API_KEY,
         api_base="https://api.electronhub.ai/v1/",
         size=size,
@@ -35,3 +36,29 @@ async def generate_sdxl(prompt: str, size: str = "1024x1024") -> str:
                 return base64.b64encode(image_data).decode('utf-8')
             else:
                 raise Exception(f"Erreur lors du téléchargement de l'image: {response.status}")
+
+
+if __name__ == "__main__":
+    prompt = input("Enter prompt (default: 'A cyberpunk city at night'): ").strip() or "A cyberpunk city at night"
+    size = input("Enter size (default: '1024x1024'): ").strip() or "1024x1024"
+    
+    print(f"Generating image with prompt: '{prompt}'")
+    print(f"Size: {size}")
+    
+    try:
+        result = asyncio.run(generate_sdxl(prompt, size))
+        print(f"✓ Image generated successfully!")
+        print(f"Base64 length: {len(result)} characters")
+        
+        # Save the image
+        output_dir = Path(__file__).parent.parent.parent / "generated_images"
+        output_dir.mkdir(exist_ok=True)
+        
+        image_bytes = base64.b64decode(result)
+        image_filename = output_dir / "sdxl_output.png"
+        with open(image_filename, "wb") as f:
+            f.write(image_bytes)
+        
+        print(f"✓ Image saved to: {image_filename}")
+    except Exception as e:
+        print(f"✗ Error: {e}")

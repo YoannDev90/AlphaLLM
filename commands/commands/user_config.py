@@ -26,7 +26,14 @@ LANG_CHOICES = [
 
 IMAGE_MODEL_CHOICES = [
     app_commands.Choice(name="Flux", value="flux"),
-    app_commands.Choice(name="Turbo", value="turbo")
+    app_commands.Choice(name="Kontext", value="kontext"),
+    app_commands.Choice(name="Seedream", value="seedream"),
+    app_commands.Choice(name="NanoBanana", value="nanobanana"),
+    app_commands.Choice(name="DALL-E 3", value="dalle"),
+    app_commands.Choice(name="GPT Image 1", value="gptimage"),
+    app_commands.Choice(name="Imagen 3 Fast", value="imagen"),
+    app_commands.Choice(name="Qwen Image", value="qwenimage"),
+    app_commands.Choice(name="SDXL", value="sdxl"),
 ]
 
 IMAGE_PRIVATE_CHOICES = [

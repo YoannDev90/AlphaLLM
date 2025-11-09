@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("COMMAND_BOT_TOKEN")
+TOKEN = os.getenv("COHERE_BOT_TOKEN")
 
 intents = discord.Intents.default()
 

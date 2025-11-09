@@ -18,7 +18,7 @@ from utils.config.constants import (
 logger = logging.getLogger(LOGGER_NAME)
 load_dotenv()
 
-JIGSAWSTACK_API_KEY = os.getenv("NSFW_CLASSIFIER_API_KEY")
+JIGSAWSTACK_API_KEY = os.getenv("JIGSAWSTACK_API_KEY")
 jigsaw = JigsawStack(api_key=JIGSAWSTACK_API_KEY)
 
 

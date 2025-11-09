@@ -14,7 +14,7 @@ router = APIRouter()
            response_description="Image générée avec métadonnées")
 async def generate_image(
     prompt: str = Query(..., description="Prompt pour générer l'image", min_length=1, max_length=2000),
-    model: Optional[str] = Query("flux", description="Modèle d'IA à utiliser (flux, dalle, kontext, turbo, seedream, nanobanana, etc.)"),
+    model: Optional[str] = Query("flux", description="Modèle d'IA à utiliser (flux, dalle, kontext, seedream, nanobanana, imagen, gptimage, sdxl, qwenimage)"),
     size: Optional[str] = Query("1024x1024", description="Taille de l'image (format: largeurxhauteur, ex: 1024x1024, 512x512)"),
     format: Optional[str] = Query("base64", description="Format de sortie de l'image", regex="^(base64|bytes|raw)$"),
     enhance: bool = Query(True, description="Améliorer automatiquement le prompt avec l'IA"),

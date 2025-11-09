@@ -2,76 +2,92 @@
   "flux": {
     "name": "Flux",
     "author": "Black Forest Labs",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]  
-  },
-  "flux-schnell": {
-    "name": "Flux Schnell",
-    "author": "Black Forest Labs",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152"
+    ]
   },
   "sdxl": {
     "name": "Stable Diffusion XL",
     "author": "Stability AI",
-    "supported_sizes": ["512x512", "768x768", "1024x1024", "1152x896", "896x1152"]
-  },
-  "sdlarge": {
-    "name": "Stable Diffusion 3.5 Large",
-    "author": "Stability AI",
-    "supported_sizes": ["512x512", "768x768", "1024x1024", "1152x896", "896x1152"]
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152"
+    ]
   },
   "dalle": {
     "name": "DALL-E 3",
     "author": "OpenAI",
-    "supported_sizes": ["1024x1024", "1792x1024", "1024x1792"]
+    "supported_sizes": [
+      "1024x1024"
+    ]
   },
-  "gpt-image": {
+  "gptimage": {
     "name": "GPT-Image-1",
     "author": "OpenAI",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024"
+    ]
   },
   "imagen": {
     "name": "Imagen 3 Fast",
     "author": "Google",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]
-  },
-  "recraft": {
-    "name": "Recraft 20B",
-    "author": "Recraft AI",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]
-  },
-  "sana": {
-    "name": "Sana",
-    "author": "NVIDIA",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]
-  },
-  "playground": {
-    "name": "Playground v2.5",
-    "author": "Playground AI",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]
-  },
-  "phoenix": {
-    "name": "Phoenix 1.0",
-    "author": "Phoenix AI",
-    "supported_sizes": ["512x512", "768x768", "1024x1024"]
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024"
+    ]
   },
   "kontext": {
     "name": "Kontext",
     "author": "Black Forest Labs",
-    "supported_sizes": ["512x512", "768x768", "1024x1024", "1152x896", "896x1152"]
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152"
+    ]
   },
   "nanobanana": {
     "name": "Nanobanana",
     "author": "Google",
-    "supported_sizes": ["512x512", "768x768", "1024x1024", "1152x896", "896x1152"]
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152"
+    ]
   },
   "seedream": {
     "name": "Seedream",
     "author": "ByteDance",
-    "supported_sizes": ["512x512", "768x768", "1024x1024", "1152x896", "896x1152"]
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152"
+    ]
   },
-  "turbo": {
-    "name": "Turbo",
-    "author": "Stability AI",
-    "supported_sizes": ["512x512", "768x768", "1024x1024", "1152x896", "896x1152"]
+  "qwenimage": {
+    "name": "Qwen Image",
+    "author": "Alibaba",
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152"
+    ]
   }
 }

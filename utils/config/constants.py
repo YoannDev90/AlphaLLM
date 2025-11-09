@@ -114,16 +114,16 @@ LLM_SELECTOR_TIMEOUT = 10  # seconds
 # Default image generation model fallback chain
 # Tried in order when main model fails
 DEFAULT_FALLBACK_CHAIN = [
-    "pollinations",
-    "replicate",
-    "huggingface"
+    "flux",
+    "sdxl",
+    "dalle"
 ]
 
 # Image edit/modification model fallback chain
 EDIT_FALLBACK_CHAIN = [
-    "replicate-edit",
-    "huggingface-edit",
-    "pollinations-edit"
+    "gptimage",
+    "dalle",
+    "flux"
 ]
 
 # Image generation API timeouts

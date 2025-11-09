@@ -1,19 +1,18 @@
+import litellm
 import os
 from dotenv import load_dotenv
 import base64
 import aiohttp
-import urllib.parse
-import random
 import asyncio
 from pathlib import Path
 
 load_dotenv()
-POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
+NAVY_API_KEY = os.getenv("NAVY_API_KEY")
 
-async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
+async def generate_qwen(prompt: str, size: str = "1024x1024") -> str:
     """
-    Génère une image avec le modèle Flux via Pollinations
-
+    Génère une image avec le modèle Qwen Image
+    
     Args:
         prompt: Le prompt pour générer l'image
         size: La taille de l'image (par défaut "1024x1024")
@@ -21,44 +20,33 @@ async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
     Returns:
         L'image encodée en base64
     """
-    width, height = map(int, size.split("x"))
+    image = litellm.image_generation(
+        model="openai/qwen-image",
+        api_key=NAVY_API_KEY,
+        api_base="https://api.navy/v1/",
+        size=size,
+        prompt=prompt                
+    )
     
-    params = {
-        "prompt": prompt,
-        "model": "flux",
-        "width": width,
-        "height": height,
-        "seed": random.randint(0, 2**31 - 1),
-        "nologo": "true",
-        "private": "true",
-        "nofeed": "true",
-        "enhance": "false",
-        "safe": "false",
-        "token": POLLINATIONS_API_KEY
-    }
-
-    url = f"https://enter.pollinations.ai/api/generate/image/{urllib.parse.quote(prompt)}"
-    url += "?" + urllib.parse.urlencode(params)
-
+    # Télécharger l'image depuis l'URL et la convertir en base64
     async with aiohttp.ClientSession() as session:
-        async with session.post(url) as response:
+        async with session.get(image.data[0].url) as response:
             if response.status == 200:
                 image_data = await response.read()
                 return base64.b64encode(image_data).decode('utf-8')
             else:
-                error_message = await response.text()
-                raise Exception(f"Erreur lors de la génération de l'image. Status: {response.status} - {error_message}")
+                raise Exception(f"Erreur lors du téléchargement de l'image: {response.status}")
 
 
 if __name__ == "__main__":
-    prompt = input("Enter prompt (default: 'A serene lake with mountains'): ").strip() or "A serene lake with mountains"
+    prompt = input("Enter prompt (default: 'An ancient temple in the jungle'): ").strip() or "An ancient temple in the jungle"
     size = input("Enter size (default: '1024x1024'): ").strip() or "1024x1024"
     
     print(f"Generating image with prompt: '{prompt}'")
     print(f"Size: {size}")
     
     try:
-        result = asyncio.run(generate_flux(prompt, size))
+        result = asyncio.run(generate_qwen(prompt, size))
         print(f"✓ Image generated successfully!")
         print(f"Base64 length: {len(result)} characters")
         
@@ -67,7 +55,7 @@ if __name__ == "__main__":
         output_dir.mkdir(exist_ok=True)
         
         image_bytes = base64.b64decode(result)
-        image_filename = output_dir / "flux_output.png"
+        image_filename = output_dir / "qwenimage_output.png"
         with open(image_filename, "wb") as f:
             f.write(image_bytes)
         

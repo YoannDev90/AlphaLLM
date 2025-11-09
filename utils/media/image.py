@@ -13,47 +13,34 @@ from utils.config.constants import (
     MAX_IMAGE_RETRIES
 )
 from models.image.flux import generate_flux
-from models.image.flux_schnell import generate_flux_schnell
 from models.image.sdxl import generate_sdxl
-from models.image.sdlarge import generate_sdlarge
 from models.image.dalle import generate_dalle
-from models.image.gpt_image import generate_gpt_image
+from models.image.gptimage import generate_gpt_image
 from models.image.imagen import generate_imagen
-from models.image.recraft import generate_recraft
-from models.image.sana import generate_sana
-from models.image.playground import generate_playground
-from models.image.phoenix import generate_phoenix
 from models.image.kontext import generate_kontext
 from models.image.nanobanana import generate_nanobanana
+from models.image.qwenimage import generate_qwen
 from models.image.seedream import generate_seedream
-from models.image.turbo import generate_turbo
 
 logger = logging.getLogger(LOGGER_NAME)
 
 # Model routing table
 MODEL_HANDLERS = {
     "flux": generate_flux,
-    "flux-schnell": generate_flux_schnell,
-    "flux_schnell": generate_flux_schnell,
     "sdxl": generate_sdxl,
-    "sd3.5-large": generate_sdlarge,
-    "sdlarge": generate_sdlarge,
     "dalle": generate_dalle,
     "dall-e-3": generate_dalle,
     "gpt-image": generate_gpt_image,
     "gpt-image-1": generate_gpt_image,
     "gpt_image": generate_gpt_image,
+    "gptimage": generate_gpt_image,
     "imagen": generate_imagen,
     "imagen-3-fast": generate_imagen,
-    "recraft": generate_recraft,
-    "recraft-20b": generate_recraft,
-    "sana": generate_sana,
-    "playground": generate_playground,
-    "phoenix": generate_phoenix,
     "kontext": generate_kontext,
     "nanobanana": generate_nanobanana,
+    "qwenimage": generate_qwen,
+    "qwen": generate_qwen,
     "seedream": generate_seedream,
-    "turbo": generate_turbo,
 }
 
 
@@ -119,7 +106,7 @@ async def generate_image(
     raise Exception("Image generation failed with all available models")
 
 
-async def _generate_with_model(prompt: str, model: str, size: str) -> bytes | None:
+async def _generate_with_model(prompt: str, model: str, size: str) -> str | None:
     """Call appropriate image generation model handler.
     
     Args:
@@ -128,7 +115,7 @@ async def _generate_with_model(prompt: str, model: str, size: str) -> bytes | No
         size: Image size specification.
         
     Returns:
-        Image bytes or None if generation fails.
+        Image as base64 string or None if generation fails.
     """
     model_lower = model.lower()
     
@@ -146,20 +133,20 @@ async def _generate_with_model(prompt: str, model: str, size: str) -> bytes | No
         raise
 
 
-def _convert_output_format(image_data: bytes, format: str) -> str | bytes:
-    """Convert image bytes to requested output format.
+def _convert_output_format(image_data: str, format: str) -> str | bytes:
+    """Convert image base64 string to requested output format.
     
     Args:
-        image_data: Raw image bytes.
+        image_data: Image as base64 string.
         format: Target format ('base64', 'bytes', or 'raw').
         
     Returns:
         Image in requested format.
     """
     if format == "base64":
-        return base64.b64encode(image_data).decode("utf-8")
-    elif format == "bytes":
         return image_data
+    elif format == "bytes":
+        return base64.b64decode(image_data)
     else:  # "raw"
         return image_data
 

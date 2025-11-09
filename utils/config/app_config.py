@@ -149,8 +149,8 @@ AIML_API_KEY = os.getenv("AIML_API_KEY")
 MODERATION_API_KEY = os.getenv("NAGA_API_KEY")
 
 # Cloudflare
-CLOUDFLARE_WORKERS_ACCOUNT_ID = os.getenv("CLOUDFLARE_WORKERS_ACCOUNT_ID")
-CLOUDFLARE_WORKERS_API_KEY = os.getenv("CLOUDFLARE_WORKERS_API_KEY")
+CF_WORKERS_ACC_ID = os.getenv("CF_WORKERS_ACC_ID")
+CF_WORKERS_API_KEY = os.getenv("CF_WORKERS_API_KEY")
 
 # Tokens des bots (selon le mode debug)
 BOT_TOKEN = _DEV_BOT_TOKEN if DEBUG else _BOT_TOKEN
@@ -261,16 +261,13 @@ def update_logs_channel_config(channel_id: int = None, channel_name: str = None,
         with open(config_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # verify si la section logs_channel existe
         if "[logs_channel]" not in content:
-            # add la section à la fin du fichier
             content += "\n# ===== Logs Channel Configuration =====\n[logs_channel]\n"
         
         lines = content.split('\n')
         logs_channel_start = None
         logs_channel_end = None
         
-        # find la section logs_channel
         for i, line in enumerate(lines):
             if line.strip() == "[logs_channel]":
                 logs_channel_start = i
@@ -281,7 +278,6 @@ def update_logs_channel_config(channel_id: int = None, channel_name: str = None,
         if logs_channel_end is None:
             logs_channel_end = len(lines)
         
-        # Reconstruire la section logs_channel
         new_section = ["[logs_channel]"]
         
         if channel_id is not None:
@@ -290,21 +286,15 @@ def update_logs_channel_config(channel_id: int = None, channel_name: str = None,
             new_section.append(f'channel_name = "{channel_name}"')
         if position is not None:
             new_section.append(f"position = {position}")
-        # Note: overwrites est ignoré car il ne peut pas être sérialisé facilement en TOML
-        # Les overwrites sont recréés lors de la recréation du salon
         
-        # Remplacer la section
         if logs_channel_start is not None:
-            # Supprimer l'ancienne section
             lines = lines[:logs_channel_start] + new_section + lines[logs_channel_end:]
         else:
-            # add la nouvelle section
             lines = lines + new_section
         
         with open(config_path, 'w', encoding='utf-8') as f:
             f.write('\n'.join(lines))
         
-        # Recharger la config en mémoire
         global CONFIG
         CONFIG = load_toml_config()
         

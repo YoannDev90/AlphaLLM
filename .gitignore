@@ -14,3 +14,4 @@ cert.pem
 key.pem
 resources.csv
 models/embedder/
+generated_images/

@@ -10,8 +10,8 @@ import litellm
 from utils.config.app_config import (
     LOGGER_NAME,
     IMAGE_ENHANCER_PREPROMPT,
-    CLOUDFLARE_WORKERS_ACCOUNT_ID,
-    CLOUDFLARE_WORKERS_API_KEY,
+    CF_WORKERS_ACC_ID,
+    CF_WORKERS_API_KEY,
     API_ENDPOINTS_OTHER,
     AIML_API_KEY,
     MAX_TOKENS_IMAGE_DESCRIPTION
@@ -56,9 +56,9 @@ def summarize(input_text: str, max_length: int = 100) -> str:
             "cloudflare_ai",
             "https://api.cloudflare.com/client/v4/accounts"
         )
-        url = f"{cloudflare_base}/{CLOUDFLARE_WORKERS_ACCOUNT_ID}/ai/run/@cf/facebook/bart-large-cnn"
+        url = f"{cloudflare_base}/{CF_WORKERS_ACC_ID}/ai/run/@cf/facebook/bart-large-cnn"
         headers = {
-            "Authorization": f"Bearer {CLOUDFLARE_WORKERS_API_KEY}",
+            "Authorization": f"Bearer {CF_WORKERS_API_KEY}",
             "Content-Type": "application/json"
         }
         payload = {

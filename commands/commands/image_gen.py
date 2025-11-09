@@ -23,20 +23,14 @@ async def setup(bot: discord.Client):
         enhance="Whether to enhance the image (default: Yes)"
     )
     @app_commands.choices(model=[
-        app_commands.Choice(name="Flux", value="flux"),
-        app_commands.Choice(name="Kontext", value="kontext"),
-        app_commands.Choice(name="Turbo", value="turbo"),
+        app_commands.Choice(name="Flux Schnell", value="flux"),
+        app_commands.Choice(name="Flux Kontext", value="kontext"),
         app_commands.Choice(name="Seedream", value="seedream"),
         app_commands.Choice(name="NanoBanana", value="nanobanana"),
         app_commands.Choice(name="DALL-E 3", value="dalle"),
-        app_commands.Choice(name="Flux Schnell", value="flux_schnell"),
-        app_commands.Choice(name="GPT Image 1", value="gpt_image"),
-        app_commands.Choice(name="Imagen 3 Fast", value="imagen"),
-        app_commands.Choice(name="Phoenix 1.0", value="phoenix"),
-        app_commands.Choice(name="Playground v2.5", value="playground"),
-        app_commands.Choice(name="Recraft 20B", value="recraft"),
-        app_commands.Choice(name="Sana", value="sana"),
-        app_commands.Choice(name="SD 3.5 Large", value="sdlarge"),
+        app_commands.Choice(name="GPT Image", value="gptimage"),
+        app_commands.Choice(name="Imagen 4", value="imagen"),
+        app_commands.Choice(name="Qwen Image", value="qwenimage"),
         app_commands.Choice(name="SDXL", value="sdxl"),
     ])
     @app_commands.choices(size=[

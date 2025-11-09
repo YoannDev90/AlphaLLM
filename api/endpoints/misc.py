@@ -10,7 +10,7 @@ import json
 import re
 from utils.config import (
     API_ENDPOINTS_TEXT, MODELS_CONFIG_TEXT, LOGGER_NAME,
-    CLOUDFLARE_WORKERS_ACCOUNT_ID, CLOUDFLARE_WORKERS_API_KEY
+    CF_WORKERS_ACC_ID, CF_WORKERS_API_KEY
 )
 from . import REQUEST_TIMEOUT
 
@@ -30,7 +30,7 @@ async def summarize_text(
     start_time = time.time()
     
     try:
-        if not CLOUDFLARE_WORKERS_ACCOUNT_ID or not CLOUDFLARE_WORKERS_API_KEY:
+        if not CF_WORKERS_ACC_ID or not CF_WORKERS_API_KEY:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Service de résumé temporairement indisponible"
