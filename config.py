@@ -14,11 +14,10 @@ def load_toml_config(file_path: str = "config.toml") -> Dict[str, Any]:
         return tomllib.load(f)
     
 def read_file(file_path: str) -> str:
-    """Lit le contenu d'un fichier texte et formate les placeholders <{code}> comme f-string"""
+    """Lit le contenu d'un fichier texte et remplace les placeholders <{code}> par {code}"""
     with open(file_path, "r", encoding="utf-8") as f:
         txt = f.read()
-        file_content = txt.replace("<", "{").replace(">", "}")
-        return eval(f'f"""{file_content}"""', {"datetime": datetime})
+        return txt.replace("<", "{").replace(">", "}")
 
 CONFIG = load_toml_config()
 

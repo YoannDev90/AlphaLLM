@@ -1,0 +1,137 @@
+# ===== Configuration générale =====
+[config]
+# Mode debug (true pour développement, false pour production)
+debug = true
+# IDs des développeurs (liste d'IDs Discord)
+dev_id = [123456789012345678, 987654321098765432]
+# ID du serveur administrateur
+admin_server = 123456789012345678
+# Lien du serveur de support Discord
+support_server = "https://discord.com/invite/your_invite_link"
+
+# ===== Configuration du lanceur =====
+[launcher]
+# Activer/désactiver les différents composants
+run_api = true
+run_main_bot = true
+run_secondary_bots = false
+run_admin_bot = true
+run_logger_bot = true
+
+# ===== Configuration de l'API =====
+[api]
+# Adresse d'écoute de l'API
+host = "0.0.0.0"
+# Port d'écoute
+port = 25692
+# Certificats SSL (laisser vide pour HTTP)
+ssl_certfile = "certfile.pem"
+ssl_keyfile = "keyfile.pem"
+# URL publique de l'API
+api_url = "https://your-api-domain.com"
+# Timeout des requêtes en secondes
+request_timeout = 300
+# Clé API requise pour accéder à l'API
+api_key_required = false
+# Hôtes autorisés (liste d'origines)
+allowed_hosts = ["*"]
+# Origines CORS autorisées
+cors_origins = ["*"]
+
+# ===== Configuration des logs =====
+[logs]
+# Niveau de logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+logging_level = "INFO"
+# Nom du logger
+logger_name = "AlphaLLM"
+# ID du canal de logs Discord
+channel_id = 123456789012345678
+# ID du rôle de log
+log_role_id = 123456789012345678
+# Nom du canal de logs
+channel_name = "📄-logs"
+# ID de la catégorie des logs
+category_id = 123456789012345678
+# URL Loki pour Grafana
+loki_url = "https://logs-prod-012.grafana.net/loki/api/v1/push"
+# ID utilisateur Grafana
+user_id = 123456
+
+# ===== Configuration de la mémoire =====
+[memory]
+# Nom de la base de données ChromaDB
+chroma_db_name = "AlphaLLM"
+# Modèle d'embeddings pour la vectorisation
+embedder_model = "sentence-transformers/all-MiniLM-L6-v2"
+# Répertoire de cache pour les embeddings
+embedder_cache_dir = "./cache/embedder"
+# Collection pour les documents RAG
+chroma_rag_collection = "rag_documents"
+# Collection pour la mémoire à court terme
+chroma_stm_collection = "stm_memories"
+# Collection pour la mémoire à long terme
+chroma_ltm_collection = "ltm_memories"
+# Âge maximum de la mémoire à court terme (en secondes, 4h = 14400s)
+stm_max_age = 14400
+# Similarité minimale pour la mémoire à long terme (0.0 à 1.0)
+ltm_min_similarity = 0.3
+
+# ===== Configuration des modèles =====
+[models]
+# Liste des modèles disponibles (doit correspondre aux fichiers dans configs/text-models/)
+available_models = [
+    "claude",
+    "cohere",
+    "deepseek",
+    "evilgpt",
+    "gemini",
+    "glm",
+    "granite",
+    "grok",
+    "hermes",
+    "hunyuan",
+    "jamba",
+    "kimi",
+    "llama",
+    "longcat",
+    "mercury",
+    "minimax",
+    "mistral",
+    "nemotron",
+    "openai",
+    "phi",
+    "qwen",
+    "rocinante",
+    "seed",
+    "sonar",
+    "yi"
+]
+
+# Configuration détaillée des modèles avec descriptions
+models = [
+  {"name"= "llama", "description"= "Fiable et polyvalent pour les conversations générales, le plus rapide et cohérent. Excellent pour divers sujets, supporte plusieurs langues, largement utilisé pour la recherche, les chatbots et les applications d'entreprise."},
+  {"name"= "openai", "description"= "Modèle GPT le plus avancé, idéal pour les tâches complexes, le raisonnement profond et les textes longs. Excellent en écriture créative, génération de code, analyse logique et résolution de problèmes multi-étapes."},
+  {"name"= "mistral", "description"= "Équilibré pour une large gamme de tâches, bon compromis entre vitesse et compréhension. Meilleur pour le français, supporte le raisonnement avancé, efficace pour un usage casual et professionnel."},
+  {"name"= "qwen", "description"= "Optimisé pour le raisonnement logique et la programmation. Excellent pour les tâches techniques et de codage, supporte les entrées multi-modales, très efficace pour la résolution de problèmes complexes."},
+  {"name"= "gemini", "description"= "Très rapide et flexible, excellent pour les réponses courtes et instantanées. Bon pour les chats casuals, supporte les interactions multi-modales, excellent dans les réponses rapides et contextuelles."},
+  {"name"= "sonar", "description"= "Spécialisé dans la recherche d'informations et les réponses factuelles. Meilleur pour Q&R et recherche. Peut accéder au web et donner des sources, idéal pour la vérification des faits et les requêtes intensives en connaissances."},
+  {"name"= "evilgpt", "description"= "Non filtré et créatif, adapté au contenu expérimental ou non conventionnel. Meilleur pour les tâches non censurées et edgy, permet l'exploration créative et le dépassement des limites."},
+  {"name"= "grok", "description"= "Humoristique et casual, bien adapté aux conversations légères. Génial pour les blagues et le divertissement, excellent dans la génération de contenu spirituel et engageant."},
+  {"name"= "claude", "description"= "Poétique et créatif, excellent pour l'écriture littéraire et réfléchie. Génial pour les histoires et poèmes, supporte le raisonnement long-contexte et l'expression nuancée."},
+  {"name"= "kimi", "description"= "Clair et pédagogique, idéal pour l'éducation, l'explication et les tâches d'apprentissage. Bon pour les étudiants et tâches de codage, excellent dans le guidage étape par étape et les explications techniques."},
+  {"name"= "deepseek", "description"= "Fort pour générer du contenu long et structuré. Idéal pour les essais et rapports détaillés. Meilleur pour le chinois, excellent dans le traitement de gros documents et le raisonnement complexe."},
+  {"name"= "glm", "description"= "Excellent support multilingue, génial pour la traduction et la compréhension cross-langue. Meilleur pour les langues asiatiques, excellent dans les tâches linguistiques nuancées et le contexte culturel."},
+  {"name"= "phi", "description"= "Léger et efficace, meilleur pour les requêtes simples et rapides. Bon pour mobile et environnements à faibles ressources, supporte le déploiement rapide et les interactions en temps réel."},
+  {"name"= "cohere", "description"= "Puissant en logique et raisonnement analytique, adapté aux comparaisons et analyses complexes. Excellent dans les applications d'entreprise, l'interprétation de données et les tâches de prise de décision."},
+  {"name"= "minimax", "description"= "Modèle multi-modal avancé avec fortes capacités de raisonnement, codage et vision. Idéal pour les agents, tâches long-contexte et traitement visuel, supporte les entrées texte et image."},
+  {"name"= "nemotron", "description"= "Modèle de langage vision open-source optimisé pour les workflows agentiques, raisonnement multi-image et données synthétiques à grande échelle. Meilleur pour construire des agents spécialisés et IA data-driven, excellent dans les tâches visuelles et multi-modales."},
+  {"name"= "mercury", "description"= "Modèle de langage ultra-rapide basé sur diffusion, 5-10x plus rapide que les LLMs traditionnels. Idéal pour les tâches temps réel, haut débit et génération de code, excellent dans les environnements faible latence."},
+  {"name"= "yi", "description"= "Modèle multimodal bilingue fort (anglais/chinois), excellent en codage, maths, raisonnement et compréhension visuelle. Meilleur pour les applications internationales et techniques, supporte le raisonnement multi-modal avancé."},
+  {"name"= "hermes", "description"= "Série open-source avec fort raisonnement, contexte étendu et capacités multi-modales. Optimisé pour chat, suivi d'instructions et tâches vision, excellent dans les conversations interactives et multi-tours."},
+  {"name"= "longcat", "description"= "Modèle Mixture-of-Experts efficace, excellent en raisonnement, codage et utilisation d'outils agentiques. Haut débit et faible latence, idéal pour recherche et industrie, supporte le déploiement rapide et scalable."},
+  {"name"= "seed", "description"= "Modèle multimodal avancé de ByteDance, fort en vision, génération 3D et interprétation temps réel. Excellent dans les tâches centrées agent et interactives, supporte les expériences immersives et dynamiques."},
+  {"name"= "granite", "description"= "Modèle open efficace d'IBM, optimisé pour le suivi d'instructions et workflows agentiques. Fournit des outputs haute qualité avec faibles coûts d'infrastructure, excellent dans les applications enterprise-grade."},
+  {"name"= "rocinante", "description"= "Modèle d'écriture créative et contenu professionnel, excellent dans les interactions nuancées, contextuelles et long-form. Meilleur pour le storytelling et contenu engageant, supporte la génération narrative détaillée."},
+  {"name"= "hunyuan", "description"= "Modèle de génération texte open-source de Tencent, excellent dans la production de vidéos haute qualité et réalistes à partir de prompts texte. Meilleur pour la création vidéo et média, supporte la génération de contenu multi-modal avancé."},
+  {"name"= "jamba", "description"= "Modèle multimodal équilibré, excellent en raisonnement général et tâches créatives. Bon pour les applications flexibles et créatives, supporte les cas d'usage techniques et artistiques."}
+]

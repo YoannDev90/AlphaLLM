@@ -461,3 +461,8 @@ class ChromaMemoryManager:
 
         self._logger.info("Cleared %s memory entries for user=%s", deleted, user_id)
         return deleted
+
+    async def delete_stm_memories(self, ids: List[str]) -> None:
+        stm_collection, _ = self._require_collections()
+        stm_collection.delete(ids=ids)
+        self._logger.info("Deleted %s STM memories", len(ids))

@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from fastapi import Response
 
 from api.api_utils.security_utils import get_api_key
-from utils.unified_manager import unified_manager, Origin
+from utils.unified_text import unified_manager, Origin
 
 
 router = APIRouter()

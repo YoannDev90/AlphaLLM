@@ -9,5 +9,5 @@ Rules:
 - **Output only:** the final title, with no explanations or additional text.
 
 Example:
-User: "Explain how photosynthesis works."
-Output: "Photosynthesis Process"
+User: \"Explain how photosynthesis works.\"
+Output: \"Photosynthesis Process\"

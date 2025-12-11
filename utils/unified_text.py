@@ -11,10 +11,9 @@ from config import LOGGER_NAME, AVAILABLE_MODELS, read_file
 
 logger = logging.getLogger(LOGGER_NAME)
 
-from utils.handlers.files import FileHandler
+from utils.ai_process.ai_utils import summarize
 
-API_SYSTEM_PROMPT = read_file("configs/prompts/api_prompt.txt")
-DISCORD_SYSTEM_PROMPT = read_file("configs/prompts/discord_prompt.txt")
+from utils.handlers.files import FileHandler
 
 @dataclass
 class RequestParameters:
@@ -196,20 +195,15 @@ async def unified_manager(
         if not query or query.isspace():
             logger.info(f"Empty message from {message.author.id}")
             query = "Hi! Please ask me a question."
-        
-        input = query
-        model = parameters.model
-    
+            
     memory_manager = None
     if use_memory:
         memory_manager = await get_memory_manager()
-    
-    server_id = conv_id
-    
+        
     await memory_manager.add_conversation_message(user_id, conv_id, input, "user")
     
     relevant_memories = await memory_manager.get_hybrid_memories(
-        user_id, conv_id, input, recent_limit=2, similar_limit=5
+        user_id, conv_id, input, recent_limit=4, similar_limit=5
     )
 
     for mem_list in relevant_memories.values():
@@ -223,21 +217,21 @@ async def unified_manager(
             role = "user" if mem['role'] == "user" else "assistant"
             history.append({"role": role, "content": mem.get('content')})
 
-    system_prompt = API_SYSTEM_PROMPT if origin == Origin.API else DISCORD_SYSTEM_PROMPT
-    
+    system_prompt = read_file("configs/prompts/api_prompt.txt") if origin == Origin.API else read_file("configs/prompts/discord_prompt.txt")
+    system_prompt = system_prompt.format(
+        date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
+        time=datetime.datetime.now().strftime('%H:%M:%S')
+    )
     if relevant_memories.get('ltm'):
         system_prompt += f"""
         \n**User's system prompt:**
         {'\n'.join([mem.get('content') for mem in relevant_memories.get('ltm', [])])}"""
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
-
-    final_messages = messages
-        
     from utils.ai_process.chat_model import ChatModel
     from utils.ai_process.base_chat_model import ChatParameters
     chat_model = ChatModel(model)
-    chat_params = ChatParameters(messages=final_messages, temperature=0.7, stream=stream, raw=True, files=processed_files)
+    chat_params = ChatParameters(messages=messages, temperature=0.7, stream=stream, raw=True, files=processed_files)
     
     if stream:
         async for chunk in chat_model.chat(chat_params):
@@ -255,6 +249,25 @@ async def unified_manager(
         logger.info(f"Réponse envoyée à {message.author.display_name}")
             
         if use_memory:
-            await memory_manager.add_conversation_message(user_id, server_id, result.response, "assistant")
+            await memory_manager.add_conversation_message(user_id, conv_id, result.response, "assistant")
+            
+            # Summarize older messages if more than 3
+            stm_memories = await memory_manager.get_memories(user_id, conv_id, limit_stm=300, limit_ltm=0)
+            stm_list = stm_memories.get('stm', [])
+            if len(stm_list) > 3:
+                older_messages = stm_list[:-3]
+                dialogue = ""
+                for mem in older_messages:
+                    role = mem.get('role', 'user')
+                    content = mem.get('content') or mem.get('text', '')
+                    dialogue += f"{role.capitalize()}: {content}\n"
+                try:
+                    summary = summarize(dialogue)
+                    await memory_manager.add_long_term_memory(user_id, conv_id, "Conversation Summary", summary, "conversation")
+                    old_ids = [mem['id'] for mem in older_messages]
+                    await memory_manager.delete_stm_memories(old_ids)
+                    logger.info(f"Summarized {len(older_messages)} old messages into LTM")
+                except Exception as e:
+                    logger.error(f"Failed to summarize and store in LTM: {e}")
         
         yield result

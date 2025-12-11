@@ -67,6 +67,9 @@ class MemoryManager:
     async def clear_history(self, user_id: int, server_id: Optional[int] = None, memory_type: str = "stm") -> int:
         return await self._chroma_manager.clear_history(user_id, server_id, memory_type)
 
+    async def delete_stm_memories(self, ids: List[str]) -> None:
+        await self._chroma_manager.delete_stm_memories(ids)
+
     async def store_document(self, user_id: int, server_id: int, document_text: str, document_id: str, metadata: Optional[Dict] = None) -> Tuple[str, int]:
         return await self._rag_handler.add_document(user_id, server_id, document_text, document_id, metadata)
 

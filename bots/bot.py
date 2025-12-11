@@ -4,7 +4,7 @@ from commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, LOGGER_NAME, DEV_IDS
 import logging
 from utils.discord_utils.permission_checker import PermissionChecker
-from utils.unified_manager import unified_manager, Origin, Model
+from utils.unified_text import unified_manager, Origin, Model
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
