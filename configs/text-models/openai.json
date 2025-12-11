@@ -1,0 +1,50 @@
+[
+    {
+        "model_name": "gpt-5-mini",
+        "litellm_params": {
+            "model": "openai/gpt-5-mini",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "gpt-4.1-mini",
+        "litellm_params": {
+            "model": "openai/gpt-4.1-mini",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "gpt-5-mini",
+        "litellm_params": {
+            "model": "openai/gpt-5-mini:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "gpt-4.1-mini",
+        "litellm_params": {
+            "model": "openai/gpt-4.1-mini:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "gpt-5-mini",
+        "litellm_params": {
+            "model": "openai/gpt-5-mini",
+            "api_base": "https://api.airforce/v1/",
+            "api_key": "AIRFORCE_API_KEY"
+        }
+    },
+    {
+        "model_name": "gpt-5-nano",
+        "litellm_params": {
+            "model": "openai/gpt-5-nano",
+            "api_base": "https://api.mnn.com/v1/",
+            "api_key": "MNN_API_KEY"
+        }
+    }
+]

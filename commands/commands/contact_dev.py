@@ -1,13 +1,12 @@
 import discord
 from discord import app_commands
-import logging
-from utils.config import logger_name, DEV_IDS
 from bots.admin_bot import bot as admin_bot
 from dotenv import load_dotenv
-import os
+from config import DEV_IDS, LOGGER_NAME
+import logging
 
 load_dotenv()
-logger = logging.getLogger(logger_name)
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="contact-dev", description="Contact the developer")
@@ -17,7 +16,6 @@ async def setup(bot: discord.Client):
         
         try:
             bot = admin_bot
-            # Envoie le message au premier développeur de la liste
             if not DEV_IDS:
                 await interaction.response.send_message("No developer configured.", ephemeral=True)
                 return

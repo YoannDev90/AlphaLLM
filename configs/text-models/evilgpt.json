@@ -1,0 +1,18 @@
+[
+    {
+        "model_name": "revenant-uncensored",
+        "litellm_params": {
+            "model": "openai/revenant-uncensored",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "devious-uncensored",
+        "litellm_params": {
+            "model": "openai/devious-uncensored",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    }
+]

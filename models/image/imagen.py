@@ -21,7 +21,7 @@ async def generate_imagen(prompt: str, size: str = "1024x1024") -> str:
         L'image encodée en base64
     """
     image = litellm.image_generation(
-        model="openai/imagen-3.0-generate-002",
+        model="openai/sd-3.5-medium",
         api_key=MNNAI_API_KEY,
         api_base="https://api.mnnai.ru/v1",
         size=size,

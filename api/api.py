@@ -1,39 +1,46 @@
 import uvicorn
-import asyncio
 import logging
-
-from api.utils.app_config import create_app
-from api.utils.server_utils import get_server_ip
-from api.endpoints import image_gen, main, text_gen, info, audio_gen, misc
-from utils.config import API_HOST, API_PORT, LOGGER_NAME
+from api.api_utils.app_config import create_app
+from api.api_utils.server_utils import get_public_ip
+#from api.endpoints import image_gen, main, text_gen, info, misc, image_edit
+from api.endpoints import text_gen, info, misc, main
+from config import LOGGER_NAME, HOST, PORT, SSL_CERTFILE, SSL_KEYFILE
 
 logger = logging.getLogger(LOGGER_NAME)
 
 app = create_app()
 
-logger.info("Configuration des routers de l'API")
+logger.info("Configuring API routers")
 app.include_router(main.router)
-logger.debug("Router 'main' ajouté")
-app.include_router(text_gen.router)
-logger.debug("Router 'text_generation' ajouté")
-app.include_router(image_gen.router)
-logger.debug("Router 'image_generation' ajouté")
-# app.include_router(audio_gen.router)
-# logger.debug("Router 'audio_generation' ajouté")
 app.include_router(info.router)
-logger.debug("Router 'info' ajouté")
+# app.include_router(image_gen.router)
+# app.include_router(image_edit.router)
+app.include_router(text_gen.router)
 app.include_router(misc.router)
-logger.debug("Router 'misc' ajouté")
-logger.info("Tous les routers ont été configurés avec succès")
+logger.info("API routers configured")
 
-async def start_api_async(host: str = API_HOST, port: int = API_PORT):
+async def start_api_async():
+    target_host = HOST
+    target_port = PORT
+    cert_file = SSL_CERTFILE
+    key_file = SSL_KEYFILE
+    # config = uvicorn.Config(
+    #     app=app,
+    #     host=target_host,
+    #     port=target_port,
+    #     log_level="error",
+    #     access_log=False,
+    #     ssl_certfile=cert_file,
+    #     ssl_keyfile=key_file,
+    # )
     config = uvicorn.Config(
         app=app,
-        host=host,
-        port=port,
+        host=target_host,
+        port=target_port,
         log_level="error",
-        access_log=False,
+        access_log=False
     )
     server = uvicorn.Server(config)
-    logger.info(f"API démarrée sur http://{get_server_ip()}:{port}")
+    public_ip = await get_public_ip()
+    logger.info(f"API running on http://{public_ip}:{target_port}")
     await server.serve()

@@ -1,0 +1,34 @@
+[
+    {
+        "model_name": "mercury",
+        "litellm_params": {
+            "model": "openai/mercury",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "mercury-coder",
+        "litellm_params": {
+            "model": "openai/mercury-coder",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "mercury",
+        "litellm_params": {
+            "model": "openai/mercury",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+        {
+        "model_name": "mercury-coder",
+        "litellm_params": {
+            "model": "openai/mercury-coder",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    }
+]

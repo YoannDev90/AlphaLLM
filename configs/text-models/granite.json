@@ -1,0 +1,10 @@
+[
+    {
+        "model_name": "granite-4.0",
+        "litellm_params": {
+            "model": "openai/@cf/ibm-granite/granite-4.0-h-micro",
+            "api_base": "https://api.cloudflare.com/client/v4/accounts/<CLOUDFLARE_ACCOUNT_ID>/ai/v1",
+            "api_key": "CLOUDFLARE_API_KEY"
+        }
+    }
+]

@@ -1,97 +1,63 @@
 import discord
 from discord.ext import commands
-import logging
-import datetime
 from commands.cmds import setup_commands
-from utils import process_ai_response
-from utils.database import get_blacklist
-from utils.database import get_supabase_client
-from utils.config import DEBUG, GUILD_ID, DEV_IDS, get_bot_token, LOGGER_NAME
-from utils import update_all_guilds_info
-from embeds.welcome import create_welcome_embed, WelcomeLanguageView
-from utils import command_id_manager
-from utils import message_process
-
-TOKEN = get_bot_token()
+from config import BOT_TOKEN, DEBUG, LOGGER_NAME, DEV_IDS
+import logging
+from utils.discord_utils.permission_checker import PermissionChecker
+from utils.unified_manager import unified_manager, Origin, Model
 
 intents = discord.Intents.default()
-
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
-
-supabase = get_supabase_client()
 logger = logging.getLogger(LOGGER_NAME)
+
+# Initialiser le vérificateur de permissions (blacklist et canaux vides pour l'instant)
+permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
+
+logging.getLogger('discord.ext.commands').setLevel(logging.CRITICAL)
 
 @bot.event
 async def on_ready():
+    logger.info(f"Logged in as {bot.user} (ID: {bot.user.id})")
     activity = discord.CustomActivity(name="🤖 Try @AlphaLLM or /commands")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
-    
-    # Initialiser le gestionnaire d'IDs de commandes
-    command_id_manager.set_bot(bot)
-    await command_id_manager.fetch_command_ids()
-    try:
-        await update_all_guilds_info(bot)
-    except Exception as e:
-        logger.error(f"Erreur lors de la mise à jour des serveurs: {e}")
-
-@bot.event
-async def on_guild_join(guild):
-    logger.info(f"Bot ajouté au serveur: {guild.name} (ID: {guild.id})")
-
-    try:
-        # Créer l'embed de bienvenue en anglais par défaut
-        embed = create_welcome_embed(bot, guild, 'en')
-
-        # Créer la vue avec les boutons de langues
-        view = WelcomeLanguageView(bot)
-        
-        target_channel = None
-        
-        if guild.system_channel and guild.system_channel.permissions_for(guild.me).send_messages:
-            target_channel = guild.system_channel
-
-        if not target_channel:
-            for channel in guild.text_channels:
-                if channel.permissions_for(guild.me).send_messages:
-                    target_channel = channel
-                    break
-        
-        if target_channel:
-            await target_channel.send(embed=embed, view=view)
-            logger.info(f"Message de bienvenue envoyé sur {guild.name} dans {target_channel.name}")
-        else:
-            logger.warning(f"Aucun canal accessible trouvé sur {guild.name} pour envoyer le message de bienvenue")
-            
-    except Exception as e:
-        logger.error(f"Erreur lors de l'envoi du message de bienvenue sur {guild.name}: {e}")
-
-
-@bot.event
-async def on_guild_remove(guild):
-    try:
-        logger.info(f"Bot retiré du serveur: {guild.name} (ID: {guild.id})")
-        
-        from utils import delete_server_settings
-        delete_server_settings(guild.id)
-        
-    except Exception as e:
-        logger.error(f"Erreur lors de la suppression du serveur {guild.name}: {e}")
 
 @bot.event
 async def on_message(message):
-    await message_process(bot, message)
+    if message.author.bot:
+        return
+    
+    # Collect attachments
+    files = []
+    if message.attachments:
+        for attachment in message.attachments:
+            files.append(attachment.url)  # or attachment.filename, but URL might be better for downloads
+    
+    async for _ in unified_manager(
+        user_id=message.author.id,
+        conv_id=message.channel.id,
+        input=message.content,
+        model=Model.LLAMA,
+        files=files if files else None,
+        origin=Origin.DISCORD,
+        message=message,
+        bot=bot,
+        permission_checker=permission_checker
+    ):
+        pass
 
-async def run_bot():
-    logger.info("Démarrage ...")
+async def run_bot(bot):
+    mode_label = "BetaLLM" if DEBUG else "AlphaLLM"
     await setup_commands(bot, is_admin_bot=False)
+    logger.info(f"Starting {mode_label}")
     try:
-        await bot.start(TOKEN)
-    except discord.LoginFailure as e:
-        logger.error(f"Erreur de connexion : {e}")
-    except Exception as e:
-        logger.error(f"Erreur inattendue : {e}")
+        logger.info("Logging in...")
+        await bot.start(BOT_TOKEN)
+    except discord.LoginFailure as exc:
+        logger.error(f"Login failure {exc}")
+    except Exception as exc:
+        logger.error(f"Bot runtime failure {exc}")
     finally:
         if not bot.is_closed():
             await bot.close()
-        logger.info("Arrêt du bot.")
+        logger.info("Bot stopped")

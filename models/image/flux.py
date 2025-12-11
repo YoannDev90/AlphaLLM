@@ -24,7 +24,6 @@ async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
     width, height = map(int, size.split("x"))
     
     params = {
-        "prompt": prompt,
         "model": "flux",
         "width": width,
         "height": height,
@@ -33,22 +32,24 @@ async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
         "private": "true",
         "nofeed": "true",
         "enhance": "false",
-        "safe": "false",
-        "token": POLLINATIONS_API_KEY
+        "safe": "false"
     }
 
-    url = f"https://enter.pollinations.ai/api/generate/image/{urllib.parse.quote(prompt)}"
+    url = f"https://gen.pollinations.ai/image/{urllib.parse.quote(prompt)}"
     url += "?" + urllib.parse.urlencode(params)
 
+    headers = {
+        "Authorization": f"Bearer {POLLINATIONS_API_KEY}"
+    }
+
     async with aiohttp.ClientSession() as session:
-        async with session.post(url) as response:
+        async with session.get(url, headers=headers) as response:
             if response.status == 200:
                 image_data = await response.read()
                 return base64.b64encode(image_data).decode('utf-8')
             else:
                 error_message = await response.text()
                 raise Exception(f"Erreur lors de la génération de l'image. Status: {response.status} - {error_message}")
-
 
 if __name__ == "__main__":
     prompt = input("Enter prompt (default: 'A serene lake with mountains'): ").strip() or "A serene lake with mountains"

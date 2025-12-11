@@ -10,7 +10,7 @@ from pathlib import Path
 load_dotenv()
 POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
 
-async def generate_seedream(prompt: str, size: str = "1024x1024") -> str:
+async def generate_seedream(prompt: str, size: str = "1024x1024", image_url : str = None) -> str:
     """
     Génère une image avec le modèle Seedream via Pollinations
 
@@ -24,7 +24,6 @@ async def generate_seedream(prompt: str, size: str = "1024x1024") -> str:
     width, height = map(int, size.split("x"))
     
     params = {
-        "prompt": prompt,
         "model": "seedream",
         "width": width,
         "height": height,
@@ -36,14 +35,17 @@ async def generate_seedream(prompt: str, size: str = "1024x1024") -> str:
         "safe": "false"
     }
 
-    url = f"https://enter.pollinations.ai/api/generate/image/{urllib.parse.quote(prompt)}"
+    if image_url:
+        params["image"] = image_url
+
+    url = f"https://gen.pollinations.ai/image/{urllib.parse.quote(prompt)}"
     url += "?" + urllib.parse.urlencode(params)
     headers = {
         "Authorization": f"Bearer {POLLINATIONS_API_KEY}"
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers) as response:
+        async with session.get(url, headers=headers) as response:
             if response.status == 200:
                 image_data = await response.read()
                 return base64.b64encode(image_data).decode('utf-8')

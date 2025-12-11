@@ -1,12 +1,13 @@
 import discord
 from discord import app_commands
 from typing import Optional
-from utils.database import get_supabase_client
-import logging
 from datetime import datetime
-from utils.config import LOGGER_NAME
 
-logger = logging.getLogger(LOGGER_NAME)
+from utils.config import LOGGER_NAME
+from utils.core.logger import get_logger
+from utils.database.client import get_supabase_client
+
+logger = get_logger(LOGGER_NAME)
 supabase = get_supabase_client()
 
 LANG_CHOICES = [
@@ -33,6 +34,7 @@ IMAGE_MODEL_CHOICES = [
     app_commands.Choice(name="GPT Image 1", value="gptimage"),
     app_commands.Choice(name="Imagen 3 Fast", value="imagen"),
     app_commands.Choice(name="Qwen Image", value="qwenimage"),
+    app_commands.Choice(name="Grok Image", value="grokimage"),
     app_commands.Choice(name="SDXL", value="sdxl"),
 ]
 
@@ -98,21 +100,20 @@ async def setup(bot: discord.Client):
 
         try:
             insert_data = {
-                    "name": interaction.user.global_name if interaction.user.global_name else interaction.user.name,
-                    "modified": datetime.now().isoformat(),
-                    **update_data
-                }
-            result = supabase.table("users_settings").update(insert_data).eq("id_discord", interaction.user.id).execute()
-            if not result.data:
-                logger.info(f"No existing record found for user {interaction.user.id}, inserting new record")
+                "name": interaction.user.global_name or interaction.user.name,
+                "modified": datetime.now().isoformat(),
+                **update_data,
+            }
+            response = supabase.table("users_settings").update(insert_data).eq("id_discord", interaction.user.id).execute()
+            if not response.data:
+                logger.info(f"No existing record for user {interaction.user.id}, creating one")
                 insert_data = {
                     "id_discord": interaction.user.id,
-                    "name": interaction.user.global_name if interaction.user.global_name else interaction.user.name,
+                    "name": interaction.user.global_name or interaction.user.name,
                     "modified": datetime.now().isoformat(),
-                    **update_data
+                    **update_data,
                 }
-                result = supabase.table("users_settings").insert(insert_data).execute()
-                print(f"Insert result: {result}")
+                response = supabase.table("users_settings").insert(insert_data).execute()
 
             summary_text = "\n".join(summary)
             if not summary_text:

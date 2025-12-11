@@ -1,55 +1,46 @@
-"""Module de mémoire STM/LTM - Gestion de la mémoire conversationnelle avec ChromaDB"""
+"""Memory helpers aligned with the refactor plan."""
+
+from __future__ import annotations
 
 import logging
 from typing import Optional
-import os
 
-# Disable ChromaDB telemetry BEFORE importing anything from ChromaDB
-os.environ["CHROMA_TELEMETRY_DISABLED"] = "true"
-
+from utils.memory.chroma_manager import ChromaMemoryManager
 from utils.memory.embedder import TextEmbedder
 from utils.memory.manager import MemoryManager
-from utils.memory.config import STM_MAX_AGE, LTM_MIN_SIMILARITY
+from utils.memory.rag_handler import DocumentChunker, RAGDocumentHandler
+
+_logger = logging.getLogger(__name__)
+_memory_manager: Optional[MemoryManager] = None
+
+
+async def initialize_memory_manager(embedder: Optional[TextEmbedder] = None) -> MemoryManager:
+    """Initialize the shared memory manager and its downstream services."""
+
+    global _memory_manager
+    if _memory_manager is None:
+        _logger.debug("Creating shared MemoryManager instance")
+        _memory_manager = MemoryManager(embedder=embedder)
+        await _memory_manager.initialize()
+        _logger.info("Shared MemoryManager ready")
+    return _memory_manager
+
+
+async def get_memory_manager(embedder: Optional[TextEmbedder] = None) -> MemoryManager:
+    """Return the shared MemoryManager, initializing it if needed."""
+
+    if _memory_manager is None:
+        await initialize_memory_manager(embedder=embedder)
+    assert _memory_manager is not None
+    return _memory_manager
+
 
 __all__ = [
     "TextEmbedder",
+    "ChromaMemoryManager",
     "MemoryManager",
-    "STM_MAX_AGE",
-    "LTM_MIN_SIMILARITY",
-    "initialize",
+    "DocumentChunker",
+    "RAGDocumentHandler",
+    "initialize_memory_manager",
     "get_memory_manager",
 ]
-
-logger = logging.getLogger("AlphaLLM")
-
-# Variables globales pour le gestionnaire de mémoire
-_memory_manager: Optional[MemoryManager] = None
-_text_embedder: Optional[TextEmbedder] = None
-
-
-async def initialize() -> None:
-    """Initialise le gestionnaire de mémoires
-    
-    Crée et initialise une instance de MemoryManager avec ChromaDB Cloud
-    """
-    global _memory_manager, _text_embedder
-    logger.debug("Initialisation du système de mémoire (STM + LTM)")
-    _text_embedder = TextEmbedder()
-    _memory_manager = MemoryManager(embedder=_text_embedder)
-    await _memory_manager.initialize()
-
-
-def get_memory_manager() -> MemoryManager:
-    """Retourne l'instance du gestionnaire de mémoires
-    
-    Returns:
-        L'instance MemoryManager
-        
-    Raises:
-        RuntimeError: Si le gestionnaire n'a pas été initialisé
-    """
-    global _memory_manager
-    if _memory_manager is None:
-        raise RuntimeError("MemoryManager non initialisé. Appelez initialize() d'abord.")
-    return _memory_manager
-

@@ -1,0 +1,34 @@
+[
+    {
+        "model_name": "longcat-flash-chat",
+        "litellm_params": {
+            "model": "openai/longcat-flash-chat",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "longcat-flash-chat",
+        "litellm_params": {
+            "model": "openai/longcat-flash-chat:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "longcat-flash-chat",
+        "litellm_params": {
+            "model": "openai/longcat-flash-chat",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "longcat-flash-chat",
+        "litellm_params": {
+            "model": "openai/longcat-flash-chat-thinking",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    }
+]

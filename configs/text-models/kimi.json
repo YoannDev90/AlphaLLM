@@ -1,0 +1,58 @@
+[
+    {
+        "model_name": "kimi-k2-instruct",
+        "litellm_params": {
+            "model": "openai/kimi-k2-instruct-0711:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "kimi-k2-instruct",
+        "litellm_params": {
+            "model": "openai/kimi-k2-instruct-0905:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "kimi-k2-instruct",
+        "litellm_params": {
+            "model": "openai/kimi-k2-instruct",
+            "api_base": "https://api.voidai.app/v1/",
+            "api_key": "VOID_API_KEY"
+        }
+    },
+    {
+        "model_name": "kimi-k2",
+        "litellm_params": {
+            "model": "openai/kimi-k2",
+            "api_base": "https://api.airforce/v1/",
+            "api_key": "AIRFORCE_API_KEY"
+        }
+    },
+    {
+        "model_name": "kimi-k2",
+        "litellm_params": {
+            "model": "openai/kimi-k2-0711-preview",
+            "api_base": "https://mnnai.ru/v1/",
+            "api_key": "MNN_API_KEY"
+        }
+    },
+    {
+        "model_name": "kimi-k2",
+        "litellm_params": {
+            "model": "openai/kimi-k2-0905-preview",
+            "api_base": "https://mnnai.ru/v1/",
+            "api_key": "MNN_API_KEY"
+        }
+    },
+    {
+        "model_name": "kimi-k2",
+        "litellm_params": {
+            "model": "openai/kimi-k2",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    }
+]

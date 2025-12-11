@@ -1,9 +1,10 @@
 import discord
-import logging
-from utils.config import logger_name
+
+from utils.config import LOGGER_NAME
+from utils.core.logger import get_logger
 from utils.memory import get_memory_manager
 
-logger = logging.getLogger(logger_name)
+logger = get_logger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="clear-history", description="Reset your conversation history with the bot")
@@ -12,7 +13,7 @@ async def setup(bot: discord.Client):
         await interaction.response.defer(ephemeral=True)
 
         try:
-            memory_manager = get_memory_manager()
+            memory_manager = await get_memory_manager()
             await memory_manager.clear_history(interaction.user.id)
 
             embed = discord.Embed(

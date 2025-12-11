@@ -1,0 +1,18 @@
+[
+    {
+        "model_name": "hunyuan-lite",
+        "litellm_params": {
+            "model": "openai/hunyuan-lite",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "hunyuan-a13b-instruct",
+        "litellm_params": {
+            "model": "openai/hunyuan-a13b-instruct",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    }
+]

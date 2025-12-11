@@ -1,10 +1,9 @@
 import discord
-from discord import app_commands
-from utils import command_id_manager
+from config import LOGGER_NAME
 import logging
-from utils.config import logger_name
+from utils.discord_utils.commands_ids import command_id_manager
 
-logger = logging.getLogger(logger_name)
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="help-bot", description="Show help informations")

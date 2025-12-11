@@ -1,7 +1,0 @@
-[contact]
-success = "Message envoyé avec succès au développeur."
-failure = "Impossible d'envoyer le message au développeur. Veuillez réessayer plus tard."
-
-[config]
-title = "Configuration"
-description = "Configurez vos paramètres"

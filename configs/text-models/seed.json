@@ -1,0 +1,18 @@
+[
+    {
+        "model_name": "seed-oss-36b-instruct",
+        "litellm_params": {
+            "model": "openai/seed-oss-36b-instruct:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "seed-oss-36b-instruct",
+        "litellm_params": {
+            "model": "openai/seed-oss-36b-instruct",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    }
+]

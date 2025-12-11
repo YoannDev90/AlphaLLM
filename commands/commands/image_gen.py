@@ -1,17 +1,21 @@
+import asyncio
+from io import BytesIO
+
 import discord
 from discord import app_commands
-from utils.processing.ai_handler.enhancement import enhance_image_prompt
-from io import BytesIO
-import logging
-from utils.config import logger_name
-from utils.database.user_config import get_image_model, get_image_size, get_image_private, get_image_enhance
-from utils.database.user_manager import new_interaction, new_image
-from utils.database import get_blacklist
-from embeds.image import ImageView, EditImageModal
-from utils.media.image import generate_image
-import random
 
-logger = logging.getLogger(logger_name)
+from utils.image_gen import ImageGeneration, ImageGenerationFormat
+from utils.ai_process.ai_utils import enhance_image_prompt
+from utils.config import LOGGER_NAME
+from utils.core.logger import get_logger
+from utils.database.models.blacklist import BlacklistManager
+from utils.database.models.user_manager import UserManager
+from embeds.image import ImageView
+
+logger = get_logger(LOGGER_NAME)
+
+blacklist_manager = BlacklistManager()
+user_manager = UserManager()
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="image", description="Generate an image from a prompt")
@@ -31,6 +35,7 @@ async def setup(bot: discord.Client):
         app_commands.Choice(name="GPT Image", value="gptimage"),
         app_commands.Choice(name="Imagen 4", value="imagen"),
         app_commands.Choice(name="Qwen Image", value="qwenimage"),
+        app_commands.Choice(name="Grok Image", value="grokimage"),
         app_commands.Choice(name="SDXL", value="sdxl"),
     ])
     @app_commands.choices(size=[
@@ -52,13 +57,27 @@ async def setup(bot: discord.Client):
     ):
         await interaction.response.defer()
 
-        blacklist_data = await get_blacklist()
-                
-        blacklist_entry = next((entry for entry in blacklist_data if entry.get('id_discord') == interaction.user.id), None)
+        entries = []
+        try:
+            entries = await asyncio.to_thread(blacklist_manager.fetch_all)
+        except Exception as exc:
+            logger.debug(f"Failed to fetch blacklist entries: {exc}")
+
+        def _matches_blacklist(entry: dict) -> bool:
+            try:
+                return int(entry.get("id_discord", 0)) == interaction.user.id
+            except Exception:
+                return False
+
+        blacklist_entry = next((entry for entry in entries if _matches_blacklist(entry)), None)
         if blacklist_entry:
-            reason = blacklist_entry.get('reason', 'Unspecified')
-            logger.info(f"Génération d'image de {interaction.user.display_name} (ID: {interaction.user.id}) ignorée - Liste noire - Motif: {reason}")
-            await interaction.followup.send(f"⛔️ You are blacklisted from the bot (<@{interaction.user.id}>) - Reason: **{reason}**")
+            reason = blacklist_entry.get("reason", "Unspecified")
+            logger.info(
+                f"Génération d'image de {interaction.user.display_name} (ID: {interaction.user.id}) ignorée - Liste noire - Motif: {reason}",
+            )
+            await interaction.followup.send(
+                f"⛔️ You are blacklisted from the bot (<@{interaction.user.id}>) - Reason: **{reason}**",
+            )
             return
         
         logger.info(f"Commande /image exécutée par {interaction.user.display_name} ({interaction.user.id})")
@@ -75,8 +94,11 @@ async def setup(bot: discord.Client):
             warning_message = f"⚠️ Number adjusted from {original_number} to 3 (maximum allowed).\n"
 
         for _ in range(number):
-            new_image(interaction.user.id)
-        new_interaction(interaction.user.id)
+            await asyncio.to_thread(user_manager.record_image_usage, interaction.user.id)
+        try:
+            await asyncio.to_thread(user_manager.record_interaction, interaction.user.id)
+        except Exception as exc:
+            logger.debug(f"Failed to record interaction: {exc}")
         model = "flux" if not model else model
         size = "1024x1024" if not size else size
         
@@ -97,7 +119,8 @@ async def setup(bot: discord.Client):
         for i, current_prompt in enumerate(prompts_to_generate, 1):
             try:
                 logger.info(f"Generating image {i}/{number} with prompt: {current_prompt}")
-                image_data = await generate_image(current_prompt, model, size, output_format="bytes")
+                gen = ImageGeneration(current_prompt, model, size, ImageGenerationFormat.BYTES)
+                image_data = await gen.generate()
                 
                 nsfw = False
                 images_data.append((image_data, nsfw, current_prompt, i))

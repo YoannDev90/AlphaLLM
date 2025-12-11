@@ -1,8 +1,8 @@
 import discord
+from config import LOGGER_NAME
 import logging
-from utils.config import logger_name
 
-logger = logging.getLogger(logger_name)
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="ping", description="Show the bot's latency")

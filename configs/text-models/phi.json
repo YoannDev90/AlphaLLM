@@ -1,0 +1,34 @@
+[
+    {
+        "model_name": "phi-4",
+        "litellm_params": {
+            "model": "openai/phi-4",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "phi-4",
+        "litellm_params": {
+            "model": "openai/phi-4",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "phi-3-medium",
+        "litellm_params": {
+            "model": "openai/phi-3-medium-128k-instruct:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "phi-3-medium",
+        "litellm_params": {
+            "model": "openai/phi-3-medium-128k-instruct",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    }
+]

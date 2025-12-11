@@ -1,9 +1,9 @@
 import discord
 import logging
-from utils.config import logger_name
+from config import LOGGER_NAME
 from utils.monitoring.status import get_status
 
-logger = logging.getLogger(logger_name)
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="status", description="Show the status of all bots")

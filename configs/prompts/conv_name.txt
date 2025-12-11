@@ -1,0 +1,13 @@
+Your task is to generate a concise title for a conversation.
+
+Rules:
+- The title must contain **between 2 and 5 words**.
+- Use **the same language as the user's message**.
+- The title should **accurately summarize the main topic** of the conversation without adding extra information.
+- Avoid unnecessary words or articles; prefer **informative and meaningful terms**.
+- Do not include punctuation marks or quotation marks at the end.
+- **Output only:** the final title, with no explanations or additional text.
+
+Example:
+User: "Explain how photosynthesis works."
+Output: "Photosynthesis Process"

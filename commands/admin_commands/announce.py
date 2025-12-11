@@ -1,21 +1,17 @@
 import discord
-import logging
-from utils.config import logger_name
-from dotenv import load_dotenv
-from utils import get_announce_channel
-from utils import TranslationManager, SUPPORTED_LANGUAGES, load_translations
-from embeds.announce import create_announcement_embed, AnnouncementTranslationView
-from embeds.admin import AnnounceConfirmView, create_announcement_confirmation_embed
-from utils import command_id_manager
-from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
-import os
 import json
-import aiofiles
+import os
 from datetime import datetime
 
-load_dotenv()
+from embeds.announce import create_announcement_embed, AnnouncementTranslationView
+from embeds.admin import AnnounceConfirmView, create_announcement_confirmation_embed
+from utils.config import LOGGER_NAME, is_dev_id
+from utils.core.logger import get_logger
+from utils.database.server_settings import get_announce_channel
+from utils.discord.cmd_register import command_id_manager
+from utils.translations import TranslationManager, SUPPORTED_LANGUAGES, load_translations
 
-logger = logging.getLogger(logger_name)
+logger = get_logger(LOGGER_NAME)
 
 class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
     """Modal Discord pour saisir l'annonce - Classe nécessaire pour Discord.py"""

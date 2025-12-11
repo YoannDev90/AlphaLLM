@@ -1,15 +1,13 @@
+import asyncio
 import discord
-import logging
-from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
-from utils.database import get_supabase_client, get_blacklist, blacklist_add, blacklist_remove
-import os
-from dotenv import load_dotenv
 from datetime import datetime
 
-load_dotenv()
-supabase = get_supabase_client()
+from utils.config import LOGGER_NAME, is_dev_id
+from utils.core.logger import get_logger
+from utils.database.models.blacklist import BlacklistManager
 
-logger = logging.getLogger(logger_name)
+logger = get_logger(LOGGER_NAME)
+blacklist_manager = BlacklistManager()
 
 CHOICES = [
     discord.app_commands.Choice(name="show", value=0),
@@ -34,7 +32,7 @@ async def setup(bot: discord.Client):
 
         match mode.value:
             case 0:
-                blacklisted_users = await get_blacklist()
+                blacklisted_users = await asyncio.to_thread(blacklist_manager.fetch_all)
                 if not blacklisted_users:
                     await interaction.followup.send("Aucun utilisateur n'est actuellement blacklisté.", ephemeral=True)
                     return
@@ -75,7 +73,7 @@ async def setup(bot: discord.Client):
                 if not user_id.isdigit() or int(user_id) <= 0:
                     await interaction.followup.send("L'ID utilisateur fourni est invalide.", ephemeral=True)
                     return
-                await blacklist_add(int(user_id), reason)
+                await asyncio.to_thread(blacklist_manager.add_entry, int(user_id), reason)
                 user = await bot.fetch_user(int(user_id))
                 if user is None:
                     await interaction.followup.send("Utilisateur introuvable.", ephemeral=True)
@@ -85,5 +83,5 @@ async def setup(bot: discord.Client):
                 if not user_id.isdigit() or int(user_id) <= 0:
                     await interaction.followup.send("L'ID utilisateur fourni est invalide.", ephemeral=True)
                     return
-                await blacklist_remove(int(user_id))
+                await asyncio.to_thread(blacklist_manager.remove_entry, int(user_id))
                 await interaction.followup.send(f"L'utilisateur avec l'ID `{user_id}` a été retiré de la liste noire.", ephemeral=True)

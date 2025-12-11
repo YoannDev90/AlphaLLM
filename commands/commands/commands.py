@@ -1,9 +1,9 @@
 import discord
-from discord import app_commands
 import logging
-from utils import command_id_manager
+from config import LOGGER_NAME
+from utils.discord_utils.commands_ids import command_id_manager
 
-logger = logging.getLogger('AlphaLLM')
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="commands", description="Show all available commands with their mentions")

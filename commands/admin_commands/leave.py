@@ -1,13 +1,10 @@
 import discord
-import logging
-from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
-import os
-from dotenv import load_dotenv
+
 from bots.bot import bot as main_bot
+from utils.config import LOGGER_NAME, is_dev_id
+from utils.core.logger import get_logger
 
-load_dotenv()
-
-logger = logging.getLogger(logger_name)
+logger = get_logger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="leave", description="Fait quitter le bot d'un serveur")

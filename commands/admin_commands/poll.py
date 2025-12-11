@@ -1,27 +1,24 @@
 import discord
-from discord.ext import commands, tasks
-import logging
-from utils.config import logger_name, GUILD_ID, is_dev_id, LOGGER_NAME
-from dotenv import load_dotenv
-from utils import get_announce_channel
-from utils import TranslationManager, SUPPORTED_LANGUAGES, load_translations
-from utils import command_id_manager
-from bots.bot import bot as main_bot
-from embeds.poll import PollView, ResultsCollectorView, PollConfirmationView, poll_results
-import os
+from discord.ext import tasks
 import json
-import aiofiles
+import os
 from datetime import datetime, timedelta
-from typing import Dict, List
-import numpy as np
 from io import BytesIO
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator
+from typing import Dict, List
+
+import aiofiles
 import matplotlib.font_manager as fm
+import matplotlib.pyplot as plt
+import numpy as np
 
-load_dotenv()
+from bots.bot import bot as main_bot
+from embeds.poll import PollView, PollConfirmationView, poll_results
+from utils.config import LOGGER_NAME, is_dev_id
+from utils.core.logger import get_logger
+from utils.database.server_settings import get_announce_channel
+from utils.translations import load_translations
 
-logger = logging.getLogger(logger_name)
+logger = get_logger(LOGGER_NAME)
 
 active_poll_messages: Dict[str, List[Dict]] = {}
 
@@ -150,7 +147,7 @@ async def send_poll_to_guilds(bot, question: str, options: List[str], poll_id: s
     
     for guild in bot.guilds:
         try:
-            announce_channel_id = await get_announce_channel(guild.id)
+            announce_channel_id = get_announce_channel(guild.id)
             if not announce_channel_id:
                 failed_count += 1
                 continue

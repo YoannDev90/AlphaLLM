@@ -1,16 +1,15 @@
 import discord
 from discord import app_commands
-from typing import Optional
-from embeds.config import ChannelSelectView, RoleSelectView
-from langs.language_manager import language_manager
-from utils import get_guild_language
-from utils.database import get_supabase_client
-import logging
-from utils.config import LOGGER_NAME
+from typing import Dict, Optional
 from datetime import datetime
 
-logger = logging.getLogger(LOGGER_NAME)
-supabase = get_supabase_client()
+from embeds.config import ChannelSelectView, RoleSelectView
+from langs.language_manager import language_manager
+from utils.config import LOGGER_NAME
+from utils.core.logger import get_logger
+from utils.database.server_settings import get_server_settings
+
+logger = get_logger(LOGGER_NAME)
 
 LANG_CHOICES = [
     app_commands.Choice(name="Français 🇫🇷", value="FR"),
@@ -40,12 +39,14 @@ ALLOWED_ROLES = [
     app_commands.Choice(name="Allow specific roles", value="specific"),
 ]
 
-def get_guild_lang_code(guild_id):
-    """Récupère le code langue du serveur et le convertit pour le gestionnaire de langues"""
-    guild_lang = get_guild_language(guild_id)
-    if guild_lang:
-        return guild_lang.lower()
-    return 'en'
+
+def get_guild_lang_code(guild_id: int) -> str:
+    """Return the lowercase language code or defaults to English."""
+    settings = get_server_settings(guild_id, "lang")
+    lang = settings.get("lang") if settings else None
+    if lang:
+        return lang.lower()
+    return "en"
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="guild-config", description="Configure server settings")

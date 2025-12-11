@@ -7,7 +7,7 @@ import asyncio
 from pathlib import Path
 
 load_dotenv()
-ELECTRONHUB_API_KEY = os.getenv("ELECTRONHUB_API_KEY")
+NAGA_API_KEY = os.getenv("NAGA_API_KEY")
 
 async def generate_sdxl(prompt: str, size: str = "1024x1024") -> str:
     """
@@ -21,9 +21,9 @@ async def generate_sdxl(prompt: str, size: str = "1024x1024") -> str:
         L'image encodée en base64
     """
     image = litellm.image_generation(
-        model="openai/sdxl",
-        api_key=ELECTRONHUB_API_KEY,
-        api_base="https://api.electronhub.ai/v1/",
+        model="openai/flux-1-schnell:free",
+        api_key=NAGA_API_KEY,
+        api_base="https://api.naga.ac/v1",
         size=size,
         prompt=prompt                
     )

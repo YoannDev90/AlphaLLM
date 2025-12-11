@@ -3,16 +3,17 @@ from typing import Optional
 import asyncio
 import aiohttp
 import socket
-
-from . import logger, REQUEST_TIMEOUT
-from api.utils.server_utils import get_server_ip, is_https_api_running
-from utils.monitoring.status import get_status
+import logging
+from config import LOGGER_NAME, REQUEST_TIMEOUT
+from api.api_utils.server_utils import is_https_api_running
+from utils.discord_utils.status import get_status
 
 router = APIRouter()
+logger = logging.getLogger(LOGGER_NAME)
 
 @router.get("/", tags=["general"])
 async def read_root(request: Request):
-    """Point d'entrée principal de l'API"""
+    """Main API entry point"""
     try:
         https_api = await asyncio.wait_for(
             is_https_api_running(), 
@@ -22,31 +23,31 @@ async def read_root(request: Request):
         
         return {
             "message": "AlphaLLM API", 
-            "version": "1.0.0", 
+            "version": "2.0.0", 
             "HTTP": "running", 
             "HTTPS": https_status,
             "authenticated": False,
             "client_ip": request.client.host if request.client else "unknown"
         }
     except asyncio.TimeoutError:
-        logger.error("Timeout lors de la vérification de l'API HTTPS")
+        logger.error("Timeout while checking HTTPS API status")
         return {
             "message": "AlphaLLM API", 
-            "version": "1.0.0", 
+            "version": "2.0.0", 
             "HTTP": "running", 
             "HTTPS": "timeout",
             "authenticated": False
         }
     except Exception as e:
-        logger.error(f"Erreur lors de la lecture de la racine : {str(e)}")
+        logger.error(f"Error reading root endpoint: {str(e)}")
         return {"status": "error", "message": "An internal server error occurred."}
 
 @router.get("/status", tags=["general"])
 async def status_check():
-    """Point de contrôle de statut de l'API"""
+    """API status check endpoint"""
     try:
         status_result = get_status()
         return status_result
     except Exception as e:
-        logger.error(f"Erreur lors du point de contrôle de statut : {str(e)}")
+        logger.error(f"Error during status check: {str(e)}")
         return {"status": "error", "message": "An internal server error occurred."}

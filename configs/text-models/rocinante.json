@@ -1,0 +1,25 @@
+[    {
+        "model_name": "rocinante-12b",
+        "litellm_params": {
+            "model": "openai/rocinante-12b",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "rocinante-12b-v1.1",
+        "litellm_params": {
+            "model": "openai/rocinante-12b-v1.1",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
+        "model_name": "rocinante-12b-v1",
+        "litellm_params": {
+            "model": "openai/rocinante-12b-v1",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    }
+]

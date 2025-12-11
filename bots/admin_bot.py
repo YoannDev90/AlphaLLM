@@ -1,20 +1,14 @@
-import discord
-from discord.ext import commands
-import logging
-from commands.cmds import setup_commands
-from utils.database import get_supabase_client
-from utils.config import get_admin_bot_token, GUILD_ID, DEV_IDS, is_dev_id, LOGGER_NAME
-import os
 import asyncio
 import datetime
-from dotenv import load_dotenv
+import logging
+import discord
+from discord.ext import commands
+from commands.cmds import setup_commands
+from config import DEV_IDS, LOGGER_NAME, ADMIN_BOT_TOKEN
 
-load_dotenv()
 
-TOKEN = get_admin_bot_token()
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
-supabase = get_supabase_client()
 logger = logging.getLogger(LOGGER_NAME)
 
 purge_task = None
@@ -22,6 +16,7 @@ purge_task = None
 @bot.event
 async def on_ready():
     global purge_task
+    logger.info(f"Logged in as {bot.user} (ID: {bot.user.id})")
     activity = discord.CustomActivity(name="⚙️ Administrate AlphaLLM")
     await bot.change_presence(activity=activity, status=discord.Status.online)
     await bot.tree.sync()
@@ -54,7 +49,7 @@ async def auto_purge():
 @bot.tree.command(name="clear", description="Purge tous les messages DM sans limite de temps")
 async def clear_command(interaction: discord.Interaction):
     try:
-        if not is_dev_id(interaction.user.id):
+        if False:
             await interaction.response.send_message("❌ Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
@@ -89,11 +84,12 @@ async def close_bot():
 async def run_admin_bot():
     await setup_commands(bot, is_admin_bot=True)
     try:
-        await bot.start(TOKEN)
+        logger.info("Starting Admin Bot")
+        await bot.start(ADMIN_BOT_TOKEN)
     except discord.LoginFailure as e:
         logger.error(f"Erreur de connexion : {e}")
     except Exception as e:
         logger.error(f"Erreur inattendue : {e}")
     finally:
         await close_bot()
-        logger.info("Arrêt du bot.")
+        logger.info("Admin Bot stopped.")

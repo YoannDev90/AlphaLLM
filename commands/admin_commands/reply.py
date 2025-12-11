@@ -1,13 +1,8 @@
 import discord
-import logging
-from utils.config import logger_name, GUILD_ID, is_dev_id, DEV_IDS, LOGGER_NAME
-from dotenv import load_dotenv
-from discord.ext import commands
-import os
+from utils.config import DEV_IDS, LOGGER_NAME, is_dev_id
+from utils.core.logger import get_logger
 
-load_dotenv()
-
-logger = logging.getLogger(logger_name)
+logger = get_logger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="reply", description="Répond à un utilisateur via DM")
