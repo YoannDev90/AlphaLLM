@@ -56,18 +56,24 @@ class Model(Enum):
     EVILGPT = "evilgpt"
     GEMINI = "gemini"
     GLM = "glm"
+    GRANITE = "granite"
     GROK = "grok"
     HERMES = "hermes"
+    HUNYUAN = "hunyuan"
+    JAMBA = "jamba"
     KIMI = "kimi"
     LLAMA = "llama"
+    LONGCAT = "longcat"
     MERCURY = "mercury"
     MINIMAX = "minimax"
     MISTRAL = "mistral"
     NEMOTRON = "nemotron"
     OPENAI = "openai"
-    PERPLEXITY = "perplexity"
     PHI = "phi"
     QWEN = "qwen"
+    ROCINANTE = "rocinante"
+    SEED = "seed"
+    SONAR = "sonar"
     YI = "yi"
 
 async def unified_manager(
@@ -251,7 +257,6 @@ async def unified_manager(
         if use_memory:
             await memory_manager.add_conversation_message(user_id, conv_id, result.response, "assistant")
             
-            # Summarize older messages if more than 3
             stm_memories = await memory_manager.get_memories(user_id, conv_id, limit_stm=300, limit_ltm=0)
             stm_list = stm_memories.get('stm', [])
             if len(stm_list) > 3:
