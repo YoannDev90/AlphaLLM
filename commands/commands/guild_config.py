@@ -2,14 +2,14 @@ import discord
 from discord import app_commands
 from typing import Dict, Optional
 from datetime import datetime
+import logging
 
-from embeds.config import ChannelSelectView, RoleSelectView
-from langs.language_manager import language_manager
-from utils.config import LOGGER_NAME
-from utils.core.logger import get_logger
-from utils.database.server_settings import get_server_settings
+# from embeds.config import ChannelSelectView, RoleSelectView
+# from langs.language_manager import language_manager
+from config import LOGGER_NAME
+from utils.database.db_manager import db_manager
 
-logger = get_logger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME)
 
 LANG_CHOICES = [
     app_commands.Choice(name="Français 🇫🇷", value="FR"),
@@ -161,7 +161,7 @@ async def setup(bot: discord.Client):
         try:
             logger.debug(f"Attempting database update for guild {interaction.guild.name} ({interaction.guild.id})")
             update_data["settings_update"] = datetime.now().isoformat()
-            supabase.table("server_settings").upsert(update_data).execute()
+            await db_manager.update_server_settings(interaction.guild.id, update_data)
             logger.debug("Database update successful")
 
             summary_text = "\n".join(summary)

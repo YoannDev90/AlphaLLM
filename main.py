@@ -10,6 +10,7 @@ from bots.logger_bot import run_logger_bot
 from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.memory import initialize_memory_manager
+from utils.database.db_manager import db_manager
 from utils.ressources import start_monitoring, stop_monitoring
 
 shutdown_event = asyncio.Event()
@@ -60,6 +61,10 @@ async def main() -> None:
         
         monitor.fill_gaps(datetime.datetime.now())
         await initialize_memory_manager()
+        
+        logger.info("Initialisation de la base de données...")
+        await db_manager.initialize()
+        await db_manager.clone_tables()
         
         tasks = [
             run_with_shutdown(run_logger_bot(), "Logger Bot"),

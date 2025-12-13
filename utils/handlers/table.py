@@ -117,7 +117,7 @@ def markdown_to_ascii_table(markdown_table: str, max_line_length: int = 100) -> 
 
         return "\n".join(ascii_lines)
     except Exception as exc:
-        logger.error("Table conversion failed %s", exc)
+        logger.error(f"Table conversion failed {exc}")
         return markdown_table
 
 
@@ -146,5 +146,5 @@ def detect_and_convert_tables(text: str, max_line_length: int = 100) -> str:
 
         return "\n".join(output_lines)
     except Exception as exc:
-        logger.error("Table detection failed %s", exc)
+        logger.error(f"Table detection failed {exc}")
         return text

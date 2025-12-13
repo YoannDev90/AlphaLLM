@@ -5,11 +5,17 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from config import AVAILABLE_MODELS as MODELS
-from config import (IO_INTELLIGENCE_API_KEY, LLM_SELECTOR_PREPROMPT,
+from config import AVAILABLE_MODELS, MODELS, read_file
+from config import (IO_INTELLIGENCE_API_KEY,
                     LOGGER_NAME, MEGALLM_API_KEY, OPENROUTER_API_KEY)
 
 logger = logging.getLogger(LOGGER_NAME)
+
+llm_selector_prompt = read_file("configs/prompts/llm_selector.txt")
+models_str = ""
+for model in MODELS:
+    models_str += f"- **{model['name']}**: {model['description']}\n"
+llm_selector_prompt = llm_selector_prompt.format(models=models_str)
 
 load_dotenv()
 
@@ -79,7 +85,7 @@ class LLMSelector:
 
     async def select_model(self, input: str) -> str:
         messages = [
-            {"role": "system", "content": LLM_SELECTOR_PREPROMPT},
+            {"role": "system", "content": llm_selector_prompt},
             {"role": "user", "content": input}
         ]
 
@@ -102,7 +108,7 @@ class LLMSelector:
 
     def _parse_llm_selection(self, text: str) -> str:
         t = text.lower()
-        for model_name in MODELS:
+        for model_name in AVAILABLE_MODELS:
             if model_name.lower() in t:
                 return model_name
         return "llama"

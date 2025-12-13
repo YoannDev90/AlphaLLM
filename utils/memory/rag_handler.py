@@ -24,7 +24,7 @@ class DocumentChunker:
         self.chunk_size = chunk_size
         self.overlap = overlap
         self.avg_chars_per_token = 4.5
-        logger.debug("DocumentChunker configured chunk_size=%s overlap=%s", chunk_size, overlap)
+        logger.debug(f"DocumentChunker configured chunk_size={chunk_size} overlap={overlap}")
 
     def estimate_tokens(self, text: str) -> int:
         return int(len(text) / self.avg_chars_per_token)
@@ -55,7 +55,7 @@ class DocumentChunker:
         if current:
             chunks.append(' '.join(current))
 
-        logger.debug("Chunked text into %s segments", len(chunks))
+        logger.debug(f"Chunked text into {len(chunks)} segments")
         return chunks
 
     def chunk_by_paragraph(self, text: str) -> List[str]:
@@ -77,7 +77,7 @@ class DocumentChunker:
         if current:
             chunks.append('\n\n'.join(current))
 
-        logger.debug("Paragraph chunked text into %s segments", len(chunks))
+        logger.debug(f"Paragraph chunked text into {len(chunks)} segments")
         return chunks
 
 
@@ -115,7 +115,7 @@ class RAGDocumentHandler:
             settings=Settings()
         )
         self._collection = self._client.get_or_create_collection(CHROMA_RAG_COLLECTION)
-        self._logger.info("ChromaDB collection %s initialized", CHROMA_RAG_COLLECTION)
+        self._logger.info(f"ChromaDB collection {CHROMA_RAG_COLLECTION} initialized")
 
     def _ensure_collection(self) -> Collection:
         if not self._collection:
@@ -137,7 +137,7 @@ class RAGDocumentHandler:
         collection = self._ensure_collection()
         chunks = self._chunker.chunk_by_token_count(document_text)
         if not chunks:
-            self._logger.warning("Document %s produced no chunks", document_id)
+            self._logger.warning(f"Document {document_id} produced no chunks")
             return document_id, 0
 
         chunk_ids: List[str] = []
@@ -170,7 +170,7 @@ class RAGDocumentHandler:
             metadatas.append(chunk_metadata)
 
         collection.add(ids=chunk_ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
-        self._logger.info("Stored document %s with %s chunks", document_id, len(chunks))
+        self._logger.info(f"Stored document {document_id} with {len(chunks)} chunks")
         return document_id, len(chunks)
 
     async def retrieve_relevant_chunks(
@@ -218,7 +218,7 @@ class RAGDocumentHandler:
                     }
                 )
 
-        self._logger.debug("Retrieved %s relevant chunks", len(retrieved))
+        self._logger.debug(f"Retrieved {len(retrieved)} relevant chunks")
         return retrieved
 
     async def get_document_summary(self, user_id: int, server_id: int, document_id: str) -> Optional[Dict[str, Any]]:
@@ -239,7 +239,7 @@ class RAGDocumentHandler:
         metadatas = results.get("metadatas") or []
 
         if not ids:
-            self._logger.warning("Document %s not found", document_id)
+            self._logger.warning(f"Document {document_id} not found")
             return None
 
         chunks = [
@@ -258,7 +258,7 @@ class RAGDocumentHandler:
             "total_tokens": sum(chunk["size_tokens"] for chunk in chunks),
             "chunks": chunks,
         }
-        self._logger.info("Document %s summary assembled", document_id)
+        self._logger.info(f"Document {document_id} summary assembled")
         return summary
 
     async def delete_document(self, user_id: int, server_id: int, document_id: str) -> int:
@@ -278,7 +278,7 @@ class RAGDocumentHandler:
             return 0
 
         collection.delete(ids=ids)
-        self._logger.info("Deleted document %s (%s chunks)", document_id, len(ids))
+        self._logger.info(f"Deleted document {document_id} ({len(ids)} chunks)")
         return len(ids)
 
     async def search_documents(self, user_id: int, server_id: int, query: str, limit: int = 10) -> Dict[str, List[Dict[str, Any]]]:
@@ -287,5 +287,5 @@ class RAGDocumentHandler:
         for chunk in chunks:
             doc_id = chunk["metadata"].get("document_id", "unknown")
             grouped.setdefault(doc_id, []).append(chunk)
-        self._logger.info("Search matched %s documents", len(grouped))
+        self._logger.info(f"Search matched {len(grouped)} documents")
         return grouped

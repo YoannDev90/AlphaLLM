@@ -31,7 +31,7 @@ class MarkdownConverter:
 
             return content
         except Exception as exc:
-            self._logger.error("Markdown conversion failed %s", exc)
+            self._logger.error(f"Markdown conversion failed {exc}")
             return None
 
     def convert_file_like(self, file_content: bytes, suffix: str = "") -> Optional[str]:
@@ -44,4 +44,4 @@ class MarkdownConverter:
             try:
                 os.unlink(temp_path)
             except Exception as exc:
-                self._logger.warning("Temporary file cleanup failed %s", exc)
+                self._logger.warning(f"Temporary file cleanup failed {exc}")

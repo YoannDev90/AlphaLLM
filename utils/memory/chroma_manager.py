@@ -1,7 +1,5 @@
 """Chromadb-backed memory manager for STM/LTM operations."""
 
-from __future__ import annotations
-
 import hashlib
 import logging
 import time
@@ -32,7 +30,6 @@ class ChromaMemoryManager:
         self._stm_collection_name = CHROMA_STM_COLLECTION
         self._ltm_collection_name = CHROMA_LTM_COLLECTION
         self._rag_collection_name = CHROMA_RAG_COLLECTION
-        self._logger.debug("ChromaMemoryManager configured (prefix=%s)")
 
     @property
     def embedder(self) -> TextEmbedder:
@@ -55,13 +52,9 @@ class ChromaMemoryManager:
             )
             self._stm_collection = self._client.get_or_create_collection(self._stm_collection_name)
             self._ltm_collection = self._client.get_or_create_collection(self._ltm_collection_name)
-            self._logger.info(
-                "ChromaDB collections initialized (stm=%s, ltm=%s)",
-                self._stm_collection_name,
-                self._ltm_collection_name,
-            )
+            self._logger.debug(f"ChromaDB collections initialized (stm={self._stm_collection_name}, ltm={self._ltm_collection_name})")
         except Exception as exc:  # pragma: no cover - rare failure path
-            self._logger.error("Failed to initialize ChromaDB: %s", exc)
+            self._logger.error(f"Failed to initialize ChromaDB: {exc}")
             raise
 
     def _require_collections(self) -> Tuple[Collection, Collection]:
@@ -111,13 +104,13 @@ class ChromaMemoryManager:
                     continue
                 if age > STM_MAX_AGE:
                     expired_ids.append(ids[idx])
-                    self._logger.debug("STM memory expired (id=%s, age=%.1fs)", ids[idx], age)
+                    self._logger.debug(f"STM memory expired (id={ids[idx]}, age={age:.1f}s)")
 
             if expired_ids:
                 stm_collection.delete(ids=expired_ids)
-                self._logger.info("Expired STM memories removed (%s entries)", len(expired_ids))
+                self._logger.info(f"Expired STM memories removed ({len(expired_ids)} entries)")
         except Exception as exc:
-            self._logger.error("Failed to cleanup STM memories: %s", exc)
+            self._logger.error(f"Failed to cleanup STM memories: {exc}")
 
     async def add_conversation_message(self, user_id: int, server_id: int, text: str, role: str = "user") -> str:
         stm_collection, _ = self._require_collections()
@@ -137,18 +130,18 @@ class ChromaMemoryManager:
                 }
             ],
         )
-        self._logger.debug("STM message stored (id=%s, role=%s)", entry_id, role)
+        self._logger.debug(f"STM message stored (id={entry_id}, role={role})")
         return entry_id
 
     async def add_long_term_memory(self, user_id: int, server_id: int, title: str, content: str, category: str = "general", source: Optional[str] = None, confidence: Optional[float] = None) -> str:
         _, ltm_collection = self._require_collections()
-        self._logger.debug("add_long_term_memory: user_id=%s, server_id=%s, title=%s, category=%s, source=%s, confidence=%s", user_id, server_id, title, category, source, confidence)
+        self._logger.debug(f"add_long_term_memory: user_id={user_id}, server_id={server_id}, title={title}, category={category}, source={source}, confidence={confidence}")
         content_hash = self._content_hash(content)
-        self._logger.debug("content_hash computed: %s", content_hash)
+        self._logger.debug(f"content_hash computed: {content_hash}")
         embedding = self._embedder.embed(content)
-        self._logger.debug("embedding computed: len=%s", len(embedding))
+        self._logger.debug(f"embedding computed: len={len(embedding)}")
         entry_id = self._generate_id(user_id, server_id, prefix="ltm")
-        self._logger.debug("entry_id generated: %s", entry_id)
+        self._logger.debug(f"entry_id generated: {entry_id}")
         metadata = {
             "user_id": user_id,
             "server_id": server_id,
@@ -161,7 +154,7 @@ class ChromaMemoryManager:
             metadata["source"] = source
         if confidence is not None:
             metadata["confidence"] = confidence
-        self._logger.debug("metadata prepared: %s", metadata)
+        self._logger.debug(f"metadata prepared: {metadata}")
         ltm_collection.add(
             ids=[entry_id],
             embeddings=[embedding],
@@ -169,24 +162,24 @@ class ChromaMemoryManager:
             metadatas=[metadata],
         )
         self._logger.debug("added to ltm_collection")
-        self._logger.info("LTM fact added: title='%s', content='%s...', category='%s', source='%s', confidence=%s", title, content[:50], category, source or 'manual', confidence)
+        self._logger.info(f"LTM fact added: title='{title}', content='{content[:50]}...', category='{category}', source='{source or 'manual'}', confidence={confidence}")
         return entry_id
 
     async def update_long_term_memory(self, user_id: int, server_id: int, title: str, content: str, category: str = "general", source: Optional[str] = None, confidence: Optional[float] = None) -> str:
         _, ltm_collection = self._require_collections()
-        self._logger.debug("update_long_term_memory: user_id=%s, server_id=%s, title=%s, category=%s, source=%s, confidence=%s", user_id, server_id, title, category, source, confidence)
+        self._logger.debug(f"update_long_term_memory: user_id={user_id}, server_id={server_id}, title={title}, category={category}, source={source}, confidence={confidence}")
         where = self._build_where_clause(user_id, server_id)
         if isinstance(where, dict) and "$and" in where:
             where = {"$and": where["$and"] + [{"title": {"$eq": title}}]}
         else:
             where = {"$and": [where, {"title": {"$eq": title}}]}
-        self._logger.debug("where clause: %s", where)
+        self._logger.debug(f"where clause: {where}")
         existing = ltm_collection.get(where=where)
-        self._logger.debug("existing results: ids=%s", existing.get('ids'))
+        self._logger.debug(f"existing results: ids={existing.get('ids')}")
         content_hash = self._content_hash(content)
-        self._logger.debug("content_hash computed: %s", content_hash)
+        self._logger.debug(f"content_hash computed: {content_hash}")
         embedding = self._embedder.embed(content)
-        self._logger.debug("embedding computed: len=%s", len(embedding))
+        self._logger.debug(f"embedding computed: len={len(embedding)}")
         metadata = {
             "user_id": user_id,
             "server_id": server_id,
@@ -199,36 +192,36 @@ class ChromaMemoryManager:
             metadata["source"] = source
         if confidence is not None:
             metadata["confidence"] = confidence
-        self._logger.debug("metadata prepared: %s", metadata)
+        self._logger.debug(f"metadata prepared: {metadata}")
 
         if existing.get("ids"):
             entry_id = existing["ids"][0]
-            self._logger.debug("updating existing entry_id: %s", entry_id)
+            self._logger.debug(f"updating existing entry_id: {entry_id}")
             ltm_collection.update(
                 ids=[entry_id],
                 embeddings=[embedding],
                 documents=[content],
                 metadatas=[metadata],
             )
-            self._logger.info("LTM fact updated: title='%s', content='%s...', category='%s', source='%s', confidence=%s", title, content[:50], category, source or 'manual', confidence)
+            self._logger.info(f"LTM fact updated: title='{title}', content='{content[:50]}...', category='{category}', source='{source or 'manual'}', confidence={confidence}")
             return entry_id
 
         entry_id = self._generate_id(user_id, server_id, prefix="ltm")
-        self._logger.debug("creating new entry_id: %s", entry_id)
+        self._logger.debug(f"creating new entry_id: {entry_id}")
         ltm_collection.add(
             ids=[entry_id],
             embeddings=[embedding],
             documents=[content],
             metadatas=[metadata],
         )
-        self._logger.info("LTM fact created: title='%s', content='%s...', category='%s', source='%s', confidence=%s", title, content[:50], category, source or 'manual', confidence)
+        self._logger.info(f"LTM fact created: title='{title}', content='{content[:50]}...', category='{category}', source='{source or 'manual'}', confidence={confidence}")
         return entry_id
 
     async def add_document(self, user_id: int, server_id: int, text_clair: str, text_embed: str) -> bool:
         _, ltm_collection = self._require_collections()
-        self._logger.debug("add_document: user_id=%s, server_id=%s, text_clair=%s..., text_embed=%s...", user_id, server_id, text_clair[:50], text_embed[:50])
+        self._logger.debug(f"add_document: user_id={user_id}, server_id={server_id}, text_clair={text_clair[:50]}..., text_embed={text_embed[:50]}...")
         content_hash = self._content_hash(text_embed)
-        self._logger.debug("content_hash for text_embed: %s", content_hash)
+        self._logger.debug(f"content_hash for text_embed: {content_hash}")
         # pre-check exact duplicate via content_hash
         base_where = self._build_where_clause(user_id, server_id)
         if isinstance(base_where, dict) and "$and" in base_where:
@@ -236,13 +229,13 @@ class ChromaMemoryManager:
         else:
             where = {"$and": [base_where, {"content_hash": {"$eq": content_hash}}]}
         exists = ltm_collection.get(where=where)
-        self._logger.debug("duplicate check: exists ids=%s", exists.get('ids'))
+        self._logger.debug(f"duplicate check: exists ids={exists.get('ids')}")
         if exists.get("ids"):
             self._logger.debug("Document skipped (exact duplicate hash)")
             self._logger.info("Document skipped (exact duplicate hash)")
             return False
         embedding = self._embedder.embed(text_embed)
-        self._logger.debug("embedding computed for text_embed: len=%s", len(embedding))
+        self._logger.debug(f"embedding computed for text_embed: len={len(embedding)}")
         results = ltm_collection.query(
             query_embeddings=[embedding],
             where=self._build_where_clause(user_id, server_id),
@@ -250,13 +243,13 @@ class ChromaMemoryManager:
             include=["metadatas", "documents", "distances"],
         )
         distances = results.get("distances") or []
-        self._logger.debug("similarity query results: distances=%s", distances)
+        self._logger.debug(f"similarity query results: distances={distances}")
         if distances and distances[0]:
             min_distance = min(distances[0])
-            self._logger.debug("min_distance=%s, LTM_MIN_SIMILARITY=%s", min_distance, LTM_MIN_SIMILARITY)
+            self._logger.debug(f"min_distance={min_distance}, LTM_MIN_SIMILARITY={LTM_MIN_SIMILARITY}")
             if min_distance < LTM_MIN_SIMILARITY:
                 self._logger.debug("Document skipped (redundant, distance too low)")
-                self._logger.info("Document skipped (redundant, distance=%.3f)", min_distance)
+                self._logger.info(f"Document skipped (redundant, distance={min_distance:.3f})")
                 return False
 
         self._logger.debug("Calling add_long_term_memory for document")
@@ -267,7 +260,7 @@ class ChromaMemoryManager:
             content=text_embed,
             category="document",
         )
-        self._logger.info("Document stored in LTM for user=%s", user_id)
+        self._logger.info(f"Document stored in LTM for user={user_id}")
         return True
 
     async def add_memory(self, user_id: int, server_id: int, text_to_embed: str) -> str:
@@ -463,10 +456,10 @@ class ChromaMemoryManager:
                 ltm_collection.delete(ids=ltm_ids)
                 deleted += len(ltm_ids)
 
-        self._logger.info("Cleared %s memory entries for user=%s", deleted, user_id)
+        self._logger.info(f"Cleared {deleted} memory entries for user={user_id}")
         return deleted
 
     async def delete_stm_memories(self, ids: List[str]) -> None:
         stm_collection, _ = self._require_collections()
         stm_collection.delete(ids=ids)
-        self._logger.info("Deleted %s STM memories", len(ids))
+        self._logger.info(f"Deleted {len(ids)} STM memories")

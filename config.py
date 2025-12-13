@@ -3,7 +3,6 @@ import logging
 import os
 import tomllib
 from typing import Any, Dict, Iterable
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,7 +26,6 @@ LAUNCHER_SECTION: Dict[str, Any] = CONFIG.get("launcher")
 API_SECTION: Dict[str, Any] = CONFIG.get("api")
 LOGS_SECTION: Dict[str, Any] = CONFIG.get("logs")
 MEMORY_SECTION: Dict[str, Any] = CONFIG.get("memory")
-PROMPTS_SECTION: Dict[str, Any] = CONFIG.get("prompts")
 MODELS_SECTION: Dict[str, Any] = CONFIG.get("models")
 
 LOGGING_LEVEL_STR = LOGS_SECTION.get("logging_level")
@@ -43,10 +41,6 @@ DEBUG: bool = bool(CONFIG_SECTION.get("debug"))
 
 AVAILABLE_MODELS: Iterable[str] = MODELS_SECTION.get("available_models")
 MODELS: Iterable[Dict[str, str]] = MODELS_SECTION.get("models")
-LLM_SELECTOR_PREPROMPT: str = PROMPTS_SECTION.get("llm_selector").replace(
-    "<INSERT MODELS LIST HERE>",
-    "\n".join(f"- {model['name']}: {model['description']}" for model in MODELS)
-)
 
 LOGGING_LEVEL: int = level_mapping.get(LOGGING_LEVEL_STR.upper())
 LOGGER_NAME: str = LOGS_SECTION.get("logger_name")
@@ -101,3 +95,7 @@ GROQ_API_KEY: str = os.environ.get("GROQ_API_KEY")
 POLLINATIONS_API_KEY: str = os.environ.get("POLLINATIONS_API_KEY")
 MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY")
 NAVY_API_KEY: str = os.environ.get("NAVY_API_KEY")
+
+SUPABASE_URL: str = os.environ.get("SUPABASE_URL")
+SUPABASE_KEY: str = os.environ.get("SUPABASE_KEY")
+JWT_KEY: str = os.environ.get("JWT_KEY")

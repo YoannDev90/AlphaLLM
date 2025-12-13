@@ -7,3 +7,4 @@ resource_monitoring.csv
 config.toml
 cache/
 TODO.md
+local_db.db

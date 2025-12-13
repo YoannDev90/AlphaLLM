@@ -23,14 +23,14 @@ class TextEmbedder:
         self._embedder: Optional[TextEmbedding] = None
         self._embedding_cache: Dict[str, List[float]] = {}
         self._cache_dir = CACHE_DIR
-        self._logger.debug("Initializing TextEmbedder (model=%s, cache=%s)", self.model_name, self.enable_cache)
+        self._logger.debug(f"Initializing TextEmbedder (model={self.model_name}, cache={self.enable_cache})")
 
     def _ensure_initialized(self) -> None:
         if self._embedder is not None:
             return
         os.makedirs(self._cache_dir, exist_ok=True)
         self._embedder = TextEmbedding(model_name=self.model_name, cache_dir=str(self._cache_dir))
-        self._logger.debug("FastEmbed model %s loaded", self.model_name)
+        self._logger.debug(f"FastEmbed model {self.model_name} loaded")
 
     @staticmethod
     def _cache_key(text: str) -> str:
@@ -40,7 +40,7 @@ class TextEmbedder:
         self._ensure_initialized()
         cache_key = self._cache_key(text)
         if self.enable_cache and cache_key in self._embedding_cache:
-            self._logger.debug("Cache hit for string of length %s", len(text))
+            self._logger.debug(f"Cache hit for string of length {len(text)}")
             return self._embedding_cache[cache_key]
 
         assert self._embedder is not None
@@ -80,7 +80,7 @@ class TextEmbedder:
     def clear_cache(self) -> int:
         count = len(self._embedding_cache)
         self._embedding_cache.clear()
-        self._logger.info("Cleared embedding cache (%s entries)", count)
+        self._logger.info(f"Cleared embedding cache ({count} entries)")
         return count
 
     def get_cache_stats(self) -> Dict[str, int]:

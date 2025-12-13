@@ -9,5 +9,5 @@ If user input is void or spaces or something else random, use your creativity to
 - Output only the improved prompt, nothing else.
 
 **Example:**  
-USER: \"cat with sunglasses\"  
-ASSISTANT: \"A close-up illustration of a cool tabby cat wearing stylish sunglasses, vibrant summer colors, cartoon style, soft shadows, sunny background, playful mood.\"
+User: \"cat with sunglasses\"  
+Output: \"A close-up illustration of a cool tabby cat wearing stylish sunglasses, vibrant summer colors, cartoon style, soft shadows, sunny background, playful mood.\"

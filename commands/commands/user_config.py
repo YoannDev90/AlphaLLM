@@ -2,13 +2,12 @@ import discord
 from discord import app_commands
 from typing import Optional
 from datetime import datetime
+import logging
 
-from utils.config import LOGGER_NAME
-from utils.core.logger import get_logger
-from utils.database.client import get_supabase_client
+from config import LOGGER_NAME
+from utils.database.db_manager import db_manager
 
-logger = get_logger(LOGGER_NAME)
-supabase = get_supabase_client()
+logger = logging.getLogger(LOGGER_NAME)
 
 LANG_CHOICES = [
     app_commands.Choice(name="Français 🇫🇷", value="FR"),
@@ -104,16 +103,7 @@ async def setup(bot: discord.Client):
                 "modified": datetime.now().isoformat(),
                 **update_data,
             }
-            response = supabase.table("users_settings").update(insert_data).eq("id_discord", interaction.user.id).execute()
-            if not response.data:
-                logger.info(f"No existing record for user {interaction.user.id}, creating one")
-                insert_data = {
-                    "id_discord": interaction.user.id,
-                    "name": interaction.user.global_name or interaction.user.name,
-                    "modified": datetime.now().isoformat(),
-                    **update_data,
-                }
-                response = supabase.table("users_settings").insert(insert_data).execute()
+            response = await db_manager.update_user_settings(interaction.user.id, insert_data)
 
             summary_text = "\n".join(summary)
             if not summary_text:
