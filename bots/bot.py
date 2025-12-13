@@ -23,6 +23,9 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if "-*+" in message.content : 
+        logger.error("End of test logs"*1000)
+        logger.info("Test logs completed")
     if message.author.bot:
         return
     

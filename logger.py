@@ -7,9 +7,55 @@ from typing import Optional
 import asyncio
 import aiohttp
 import discord
-from config import CONFIG, LOGGING_LEVEL, LOGGER_NAME, GRAFANA_USER_ID, GRAFANA_API_KEY, DEV_IDS, LOGS_CHANNEL_ID
+from discord import ui
+from config import CONFIG, LOGGING_LEVEL, LOGGER_NAME, GRAFANA_USER_ID, GRAFANA_API_KEY, GRAFANA_URL, DEV_IDS, LOGS_CHANNEL_ID
 
 init(autoreset=True)
+
+logging_components = {}
+
+class LogButtonsView(discord.ui.View):
+    def __init__(self, level, logger, timestamp):
+        super().__init__(timeout=None)
+        url = generate_grafana_log_url(level, logger, timestamp)
+        self.add_item(discord.ui.Button(label="Grafana", url=url, emoji="📊", style=discord.ButtonStyle.link))
+
+
+def generate_grafana_log_url(level: str, logger: str, timestamp: float, job: str = "AlphaLLM") -> str:
+    """
+    Génère l'URL Grafana Explore pour visualiser les logs correspondant.
+    """
+    import json
+    from urllib.parse import urlencode
+    import datetime
+
+    log_time = datetime.datetime.fromtimestamp(timestamp)
+    start_time = (log_time - datetime.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")[:-3] + "Z"
+    end_time = (log_time + datetime.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")[:-3] + "Z"
+
+    query = f"{{job=\"{job}\", level=\"{level}\", logger=\"{logger}\"}}"
+    left_panel = {
+        "datasource": "loki",
+        "queries": [
+            {
+                "refId": "A",
+                "expr": query,
+                "queryType": "range"
+            }
+        ],
+        "range": {
+            "from": start_time,
+            "to": end_time
+        }
+    }
+
+    params = {
+        "orgId": 1,
+        "left": json.dumps(left_panel)
+    }
+
+    url = f"{GRAFANA_URL}/explore?{urlencode(params)}"
+    return url
 
 
 class ColoredFormatter(logging.Formatter):
@@ -19,7 +65,8 @@ class ColoredFormatter(logging.Formatter):
         'DEBUG': Fore.CYAN,
         'INFO': Fore.GREEN,
         'WARNING': Fore.YELLOW,
-        'ERROR': Fore.RED
+        'ERROR': Fore.RED,
+        'CRITICAL': Back.WHITE + Fore.BLACK
     }
 
     def format(self, record):
@@ -72,33 +119,37 @@ class DiscordLogHandler(logging.Handler):
     async def _send_logs(self):
         self.running = True
         while self.running:
-            message = await self.log_queue.get()
-            if message is None:
+            item = await self.log_queue.get()
+            if item is None:
                 break
-            await self.mp_logs(message)
+            message_text, record = item
+            await self.private_channel_logs(message_text, record)
             self.log_queue.task_done()
 
-    async def mp_logs(self, message):
+    async def private_channel_logs(self, message_text, record):
         try:
             channel = await self.bot.fetch_channel(LOGS_CHANNEL_ID)
-            await channel.send(message)
+            view = LogButtonsView(record.levelname, record.name, record.created)
+            message_obj = await channel.send(message_text, view=view)
         except Exception as e:
             print(f"Error sending log to channel: {e}")
 
     def emit(self, record):
         message = self.format(record)
+        if len(message) > 1000:
+            import copy
+            new_record = copy.copy(record)
+            new_record.msg = "Log entry too long, see on Grafana: "
+            message = self.format(new_record)
         try:
-            # Essayer d'obtenir la boucle d'événements en cours
             loop = asyncio.get_running_loop()
-            if not self.bot.is_ready():
-                return  # Ignore logs until bot is ready
-            # Si on est dans une boucle, créer la tâche
-            asyncio.create_task(self.log_queue.put(message))
+            if not self.bot.is_ready() or self.bot.is_closed():
+                return
+            asyncio.create_task(self.log_queue.put((message, record)))
             if self.log_task is None or self.log_task.done():
                 self.log_task = asyncio.create_task(self._send_logs())
         except RuntimeError:
-            # Pas de boucle en cours, ignorer silencieusement
-            # Cela se produit quand le logging est appelé depuis un thread non-async
+
             pass
 
     def stop(self):
@@ -108,6 +159,10 @@ class DiscordLogHandler(logging.Handler):
             asyncio.create_task(self.log_queue.put(None))
         except RuntimeError:
             pass
+
+    def close(self):
+        """Close the handler properly."""
+        self.stop()
 
 
 class DiscordFormatter(logging.Formatter):
@@ -128,37 +183,30 @@ class DiscordFormatter(logging.Formatter):
 
 def setup_logging(bot=None):
     """Setup logging with console, file, and custom handlers."""
-
-    # Get config
     logs_config = CONFIG.get("logs", {})
     loki_url = logs_config.get("loki_url")
 
-    # Root logger
     logger = logging.getLogger()
-    logger.setLevel(logging.CRITICAL)  # Only CRITICAL and above for libraries
+    logger.setLevel(logging.CRITICAL)
 
-    # Remove existing handlers
     for handler in logger.handlers[:]:
         logger.removeHandler(handler)
 
-    # Console handler with colors
     console_handler = logging.StreamHandler()
     console_handler.setLevel(LOGGING_LEVEL)
     console_formatter = ColoredFormatter('%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
-    # File handler
     file_handler = logging.handlers.RotatingFileHandler('bot.log')
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
     file_handler.setFormatter(file_formatter)
     logger.addHandler(file_handler)
 
-    # Queue for async handlers
     log_queue = queue.Queue()
 
-    # Discord handler
+    discord_handler = None
     if bot:
         discord_handler = DiscordLogHandler(bot)
         discord_formatter = DiscordFormatter()
@@ -166,9 +214,9 @@ def setup_logging(bot=None):
         discord_handler.setLevel(logging.INFO)
         logger.addHandler(discord_handler)
 
-    # Grafana Loki handler (async via queue)
+    queue_handler_loki = None
     if loki_url:
-        loki_labels = {"job": "betallm", "host": "server"}
+        loki_labels = {"job": "AlphaLLM", "host": "server"}
         loki_handler = GrafanaLokiHandler(loki_url, loki_labels, level=logging.INFO)
         loki_formatter = logging.Formatter('%(message)s')
         loki_handler.setFormatter(loki_formatter)
@@ -176,21 +224,29 @@ def setup_logging(bot=None):
         queue_handler_loki.setLevel(logging.INFO)
         logger.addHandler(queue_handler_loki)
 
-    # Start queue listener if any async handlers
     handlers_list = []
     if loki_url:
         handlers_list.append(loki_handler)
+    listener = None
     if handlers_list:
         listener = logging.handlers.QueueListener(log_queue, *handlers_list)
         listener.start()
 
-    # Set specific logger level
+    logging_components['handlers'] = [h for h in [console_handler, file_handler, discord_handler, queue_handler_loki] if h is not None]
+    logging_components['listener'] = listener
+
     bot_logger = logging.getLogger(LOGGER_NAME)
     bot_logger.setLevel(LOGGING_LEVEL)
 
 
-# For async cleanup
-async def close_logging():
+def close_logging():
     """Close any async resources in handlers."""
-    # If DiscordWebhookHandler used session, close it
-    pass  # For now, since we used requests
+    logger = logging.getLogger()
+    for handler in logging_components.get('handlers', []):
+        logger.removeHandler(handler)
+        if hasattr(handler, 'close'):
+            handler.close()
+    listener = logging_components.get('listener')
+    if listener:
+        listener.stop()
+    logging_components.clear()

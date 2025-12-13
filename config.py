@@ -54,6 +54,7 @@ LOGS_CATEGORY_ID: int = LOGS_SECTION.get("category_id")
 LOG_ROLE_ID: int = LOGS_SECTION.get("log_role_id")
 GRAFANA_USER_ID: str = LOGS_SECTION.get("user_id")
 GRAFANA_API_KEY: str = os.environ.get("GRAFANA_API_KEY")
+GRAFANA_URL : str = LOGS_SECTION.get("grafana_url")
 
 HOST: str = API_SECTION.get("host")
 PORT: int = API_SECTION.get("port")
