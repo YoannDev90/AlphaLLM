@@ -205,8 +205,6 @@ async def unified_manager(
     if use_memory:
         memory_manager = await get_memory_manager()
         
-    await memory_manager.add_conversation_message(user_id, conv_id, input, "user")
-    
     relevant_memories = await memory_manager.get_hybrid_memories(
         user_id, conv_id, input, recent_limit=4, similar_limit=5
     )
@@ -253,6 +251,7 @@ async def unified_manager(
         logger.info(f"Réponse envoyée à {user.display_name}")
             
         if use_memory:
+            await memory_manager.add_conversation_message(user_id, conv_id, input, "user")
             await memory_manager.add_conversation_message(user_id, conv_id, result.response, "assistant")
             
             stm_memories = await memory_manager.get_memories(user_id, conv_id, limit_stm=300, limit_ltm=0)

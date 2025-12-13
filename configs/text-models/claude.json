@@ -19,7 +19,7 @@
         "model_name": "claude-3.5-haiku",
         "litellm_params": {
             "model": "openai/claude-3.5-haiku",
-            "api_base": "https://api.mnn.com/v1/",
+            "api_base": "https://api.mnnai.ru/v1/",
             "api_key": "MNN_API_KEY"
         }
     },

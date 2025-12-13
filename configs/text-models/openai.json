@@ -43,7 +43,7 @@
         "model_name": "gpt-5-nano",
         "litellm_params": {
             "model": "openai/gpt-5-nano",
-            "api_base": "https://api.mnn.com/v1/",
+            "api_base": "https://api.mnnai.ru/v1/",
             "api_key": "MNN_API_KEY"
         }
     }
