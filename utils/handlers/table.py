@@ -1,7 +1,8 @@
+import logging
 import re
 import textwrap
 from typing import List
-import logging
+
 from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)

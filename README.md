@@ -30,7 +30,7 @@ Le bot supporte une vingtaine de modèles d'IA différents :
 
 ### Prérequis
 
-- Python 3.8+
+- Python 3.12
 - Un serveur Discord avec des bots configurés
 - Clés API pour les différents services IA
 

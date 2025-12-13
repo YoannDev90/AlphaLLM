@@ -14,3 +14,4 @@ python-magic
 uvicorn
 fastapi
 python-multipart
+supabase

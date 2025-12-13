@@ -1,9 +1,13 @@
-import logging
 import asyncio
-from config import LOGGER_NAME, MEGALLM_API_KEY, OPENROUTER_API_KEY, IO_INTELLIGENCE_API_KEY, LLM_SELECTOR_PREPROMPT, AVAILABLE_MODELS as MODELS
-from dotenv import load_dotenv
+import logging
 import os
+
 import requests
+from dotenv import load_dotenv
+
+from config import AVAILABLE_MODELS as MODELS
+from config import (IO_INTELLIGENCE_API_KEY, LLM_SELECTOR_PREPROMPT,
+                    LOGGER_NAME, MEGALLM_API_KEY, OPENROUTER_API_KEY)
 
 logger = logging.getLogger(LOGGER_NAME)
 

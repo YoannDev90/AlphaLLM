@@ -1,10 +1,12 @@
+import logging
+
 import discord
 from discord.ext import commands
+
 from commands.cmds import setup_commands
-from config import BOT_TOKEN, DEBUG, LOGGER_NAME, DEV_IDS
-import logging
+from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
 from utils.discord_utils.permission_checker import PermissionChecker
-from utils.unified_text import unified_manager, Origin, Model
+from utils.unified_text import Model, Origin, unified_manager
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)

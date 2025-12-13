@@ -2,10 +2,12 @@
 Utilitaire pour gérer les IDs des commandes slash Discord.
 Permet de récupérer automatiquement les IDs des commandes et de créer des mentions.
 """
-import discord
 import logging
-from config import LOGGER_NAME
 from typing import Dict, Optional
+
+import discord
+
+from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 

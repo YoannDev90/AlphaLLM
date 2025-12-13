@@ -1,12 +1,14 @@
 import asyncio
 import datetime
+import logging
 import tomllib
 from collections import deque
+
 import discord
 from discord.ext import commands
-from config import LOGGER_NAME, LOGGER_BOT_TOKEN
-import logging
+
 import config
+from config import LOGGER_BOT_TOKEN, LOGGER_NAME
 
 intents = discord.Intents.default()
 intents.message_content = True

@@ -1,8 +1,10 @@
 """Bot status snapshot derived from the refactor stack."""
+import logging
 import math
 from typing import Any, Dict, List, Optional, Tuple
+
 import discord
-import logging
+
 from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)

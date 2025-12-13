@@ -1,10 +1,12 @@
 """Utility helpers for monitoring and pinging the API server."""
 
-import aiohttp
 import asyncio
-import random
-from config import API_URL, REQUEST_TIMEOUT, LOGGER_NAME
 import logging
+import random
+
+import aiohttp
+
+from config import API_URL, LOGGER_NAME, REQUEST_TIMEOUT
 
 logger = logging.getLogger(LOGGER_NAME)
 

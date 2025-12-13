@@ -1,10 +1,12 @@
-import uvicorn
 import logging
+
+import uvicorn
+
 from api.api_utils.app_config import create_app
 from api.api_utils.server_utils import get_public_ip
 #from api.endpoints import image_gen, main, text_gen, info, misc, image_edit
-from api.endpoints import text_gen, info, misc, main
-from config import LOGGER_NAME, HOST, PORT, SSL_CERTFILE, SSL_KEYFILE
+from api.endpoints import info, main, misc, text_gen
+from config import HOST, LOGGER_NAME, PORT, SSL_CERTFILE, SSL_KEYFILE
 
 logger = logging.getLogger(LOGGER_NAME)
 

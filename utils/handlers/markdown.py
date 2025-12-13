@@ -1,9 +1,12 @@
+import logging
 import os
 import tempfile
 from typing import Optional
+
 from markitdown import MarkItDown
-import logging
+
 from config import LOGGER_NAME
+
 
 class MarkdownConverter:
     def __init__(self) -> None:

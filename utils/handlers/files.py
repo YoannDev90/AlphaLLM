@@ -1,18 +1,21 @@
+import logging
+import mimetypes
 import os
 import tempfile
+from typing import Dict, List, Optional, Union
+from urllib.parse import unquote, urlparse
+
 import requests
-from urllib.parse import urlparse, unquote
-import mimetypes
-import logging
-from typing import List, Dict, Union, Optional
 
 from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+from starlette.datastructures import UploadFile
+
 from utils.handlers.markdown import MarkdownConverter
 from utils.handlers.vision import VisionHandler
-from starlette.datastructures import UploadFile
+
 
 class FileHandler:
     """

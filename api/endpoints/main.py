@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Request, Depends, HTTPException, status
-from typing import Optional
 import asyncio
-import aiohttp
-import socket
 import logging
-from config import LOGGER_NAME, REQUEST_TIMEOUT
+import socket
+from typing import Optional
+
+import aiohttp
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+
 from api.api_utils.server_utils import is_https_api_running
+from config import LOGGER_NAME, REQUEST_TIMEOUT
 from utils.discord_utils.status import get_status
 
 router = APIRouter()

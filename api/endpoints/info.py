@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status
 import asyncio
 import logging
-from config import LOGGER_NAME
+
+from fastapi import APIRouter, Depends, HTTPException, status
+
 from api.api_utils.models_utils import load_models_data
+from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 router = APIRouter()

@@ -1,16 +1,18 @@
 """Resource monitor that replaced the legacy helpers."""
 
 import csv
+import logging
 import os
 import resource
 import threading
-import time    
-import psutil
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-import logging
+
+import psutil
+
 from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)

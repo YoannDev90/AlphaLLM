@@ -1,14 +1,18 @@
+import asyncio
 import logging
 import logging.handlers
 import queue
-import requests
-from colorama import Fore, Back, Style, init
 from typing import Optional
-import asyncio
+
 import aiohttp
 import discord
+import requests
+from colorama import Back, Fore, Style, init
 from discord import ui
-from config import CONFIG, LOGGING_LEVEL, LOGGER_NAME, GRAFANA_USER_ID, GRAFANA_API_KEY, GRAFANA_URL, DEV_IDS, LOGS_CHANNEL_ID
+
+from config import (CONFIG, DEV_IDS, GRAFANA_API_KEY, GRAFANA_URL,
+                    GRAFANA_USER_ID, LOGGER_NAME, LOGGING_LEVEL,
+                    LOGS_CHANNEL_ID)
 
 init(autoreset=True)
 
@@ -25,9 +29,9 @@ def generate_grafana_log_url(level: str, logger: str, timestamp: float, job: str
     """
     Génère l'URL Grafana Explore pour visualiser les logs correspondant.
     """
+    import datetime
     import json
     from urllib.parse import urlencode
-    import datetime
 
     log_time = datetime.datetime.fromtimestamp(timestamp)
     start_time = (log_time - datetime.timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")[:-3] + "Z"

@@ -1,15 +1,19 @@
-import discord
 import json
 import os
 from datetime import datetime
 
-from embeds.announce import create_announcement_embed, AnnouncementTranslationView
-from embeds.admin import AnnounceConfirmView, create_announcement_confirmation_embed
+import discord
+from embeds.admin import (AnnounceConfirmView,
+                          create_announcement_confirmation_embed)
+from embeds.announce import (AnnouncementTranslationView,
+                             create_announcement_embed)
+
 from utils.config import LOGGER_NAME, is_dev_id
 from utils.core.logger import get_logger
 from utils.database.server_settings import get_announce_channel
 from utils.discord.cmd_register import command_id_manager
-from utils.translations import TranslationManager, SUPPORTED_LANGUAGES, load_translations
+from utils.translations import (SUPPORTED_LANGUAGES, TranslationManager,
+                                load_translations)
 
 logger = get_logger(LOGGER_NAME)
 

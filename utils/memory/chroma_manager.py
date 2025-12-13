@@ -11,8 +11,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import chromadb
 from chromadb.api.models.Collection import Collection
 
-from config import CHROMA_API_KEY, CHROMA_DB_NAME, CHROMA_TENANT_ID, LOGGER_NAME, STM_MAX_AGE, LTM_MIN_SIMILARITY, CHROMA_LTM_COLLECTION, CHROMA_STM_COLLECTION, CHROMA_RAG_COLLECTION
+from config import (CHROMA_API_KEY, CHROMA_DB_NAME, CHROMA_LTM_COLLECTION,
+                    CHROMA_RAG_COLLECTION, CHROMA_STM_COLLECTION,
+                    CHROMA_TENANT_ID, LOGGER_NAME, LTM_MIN_SIMILARITY,
+                    STM_MAX_AGE)
 from utils.memory.embedder import TextEmbedder
+
 
 class ChromaMemoryManager:
     """API for storing and querying STM/LTM memories inside ChromaDB."""

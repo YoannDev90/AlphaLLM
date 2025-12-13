@@ -1,7 +1,9 @@
 import base64
-import litellm
 import logging
-from config import LOGGER_NAME, GEMINI_API_KEY
+
+import litellm
+
+from config import GEMINI_API_KEY, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 

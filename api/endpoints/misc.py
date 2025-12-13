@@ -4,16 +4,18 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import os
 import re
 import time
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
+
 import requests
-import logging
 from fastapi import APIRouter, Depends, HTTPException, status
-from utils.ai_process.ai_utils import summarize, conv_name
+
 from api.api_utils.security_utils import get_api_key
 from config import LOGGER_NAME
+from utils.ai_process.ai_utils import conv_name, summarize
 
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)

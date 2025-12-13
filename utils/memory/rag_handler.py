@@ -4,11 +4,15 @@ import logging
 import time
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
+
 import chromadb
-from chromadb.config import Settings
 from chromadb.api.models.Collection import Collection
+from chromadb.config import Settings
+
+from config import (CHROMA_API_KEY, CHROMA_DB_NAME, CHROMA_LTM_COLLECTION,
+                    CHROMA_RAG_COLLECTION, CHROMA_STM_COLLECTION,
+                    CHROMA_TENANT_ID, LOGGER_NAME)
 from utils.memory.embedder import TextEmbedder
-from config import CHROMA_API_KEY, CHROMA_DB_NAME, CHROMA_TENANT_ID, LOGGER_NAME, CHROMA_RAG_COLLECTION, CHROMA_STM_COLLECTION, CHROMA_LTM_COLLECTION
 
 logger = logging.getLogger(LOGGER_NAME)
 

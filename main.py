@@ -1,15 +1,16 @@
 import asyncio
+import datetime
 import logging
 import signal
-import datetime
-from bots.bot import bot, run_bot
-from bots.admin_bot import run_admin_bot
-from bots.logger_bot import run_logger_bot
+
 from api.api import start_api_async
-from logger import setup_logging, close_logging
+from bots.admin_bot import run_admin_bot
+from bots.bot import bot, run_bot
+from bots.logger_bot import run_logger_bot
 from config import LOGGER_NAME
-from utils.ressources import start_monitoring, stop_monitoring
+from logger import close_logging, setup_logging
 from utils.memory import initialize_memory_manager
+from utils.ressources import start_monitoring, stop_monitoring
 
 shutdown_event = asyncio.Event()
 

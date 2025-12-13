@@ -2,11 +2,13 @@
 Configuration de l'application FastAPI pour AlphaLLM
 """
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+
 from config import LOGGER_NAME
-import logging
 
 logger = logging.getLogger(LOGGER_NAME)
 

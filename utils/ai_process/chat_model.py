@@ -1,13 +1,15 @@
 import logging
-from typing import Dict, List, Any, AsyncGenerator, Union
-from datetime import datetime
 import os
+import re
+from datetime import datetime
+from typing import Any, AsyncGenerator, Dict, List, Union
+
 import litellm
 from langfuse import get_client
-import re
 
-from utils.ai_process.base_chat_model import BaseChatModel, ChatParameters, ChatResult, StreamChunk
 from config import LOGGER_NAME
+from utils.ai_process.base_chat_model import (BaseChatModel, ChatParameters,
+                                              ChatResult, StreamChunk)
 
 logger = logging.getLogger(LOGGER_NAME)
 

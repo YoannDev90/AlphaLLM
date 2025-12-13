@@ -1,9 +1,10 @@
 """Utilities for loading model metadata for the API."""
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict
+
 from config import LOGGER_NAME
-import logging
 
 logger = logging.getLogger(LOGGER_NAME)
 

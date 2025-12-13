@@ -1,9 +1,11 @@
 """Coordinator for conversational memory features."""
 import logging
 from typing import Dict, List, Optional, Tuple
+
 from utils.memory.chroma_manager import ChromaMemoryManager
 from utils.memory.embedder import TextEmbedder
 from utils.memory.rag_handler import RAGDocumentHandler
+
 
 class MemoryManager:
     """Provides STM/LTM access and RAG orchestration."""

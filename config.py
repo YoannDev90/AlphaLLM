@@ -1,9 +1,10 @@
+import datetime
 import logging
 import os
 import tomllib
-import datetime
-from dotenv import load_dotenv
 from typing import Any, Dict, Iterable
+
+from dotenv import load_dotenv
 
 load_dotenv()
 

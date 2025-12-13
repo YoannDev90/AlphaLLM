@@ -4,8 +4,10 @@ import logging
 import os
 from pathlib import Path
 from typing import Dict, List, Optional
+
 from fastembed import TextEmbedding
-from config import EMBEDDER_MODEL, LOGGER_NAME, EMBEDDER_CACHE_DIR
+
+from config import EMBEDDER_CACHE_DIR, EMBEDDER_MODEL, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 CACHE_DIR = Path(EMBEDDER_CACHE_DIR)

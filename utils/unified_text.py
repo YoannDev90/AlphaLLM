@@ -1,14 +1,15 @@
 import datetime
+import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Optional, Union, Dict
-from utils.memory import initialize_memory_manager, get_memory_manager
-from utils.ai_process.llm_selector import LLMSelector
-import logging
+from typing import Any, Dict, List, Optional, Union
+
+from config import AVAILABLE_MODELS, LOGGER_NAME, read_file
 from utils.ai_process.ai_utils import summarize
+from utils.ai_process.llm_selector import LLMSelector
 from utils.handlers.files import FileHandler
-from config import LOGGER_NAME, AVAILABLE_MODELS, read_file
+from utils.memory import get_memory_manager, initialize_memory_manager
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -235,8 +236,8 @@ async def unified_manager(
         {'\n'.join([mem.get('content') for mem in relevant_memories.get('ltm', [])])}"""
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
-    from utils.ai_process.chat_model import ChatModel
     from utils.ai_process.base_chat_model import ChatParameters
+    from utils.ai_process.chat_model import ChatModel
     chat_model = ChatModel(model)
     chat_params = ChatParameters(messages=messages, temperature=0.7, stream=stream, raw=True, files=processed_files)
     

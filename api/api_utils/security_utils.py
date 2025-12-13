@@ -1,11 +1,12 @@
 """FastAPI helpers that guard the routes with API keys."""
 
-from fastapi import HTTPException, Request, status
-from fastapi.security import HTTPBearer
+import logging
 from typing import Optional
 
+from fastapi import HTTPException, Request, status
+from fastapi.security import HTTPBearer
+
 from config import API_KEY_REQUIRED, API_KEYS, API_KEYS_MAPPING, LOGGER_NAME
-import logging
 
 logger = logging.getLogger(LOGGER_NAME)
 
