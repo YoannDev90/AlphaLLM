@@ -95,7 +95,8 @@ class ChatModel(BaseChatModel):
             "api_key": os.getenv(litellm_params["api_key"]),
             "messages": messages,
             "stream": True,
-            "temperature": parameters.temperature
+            "temperature": parameters.temperature,
+            "drop_params": True
         }
 
         if parameters.max_tokens:
@@ -209,7 +210,8 @@ class ChatModel(BaseChatModel):
                 "model": primary_config["model"],
                 "api_key": os.getenv(primary_config["api_key"]),
                 "messages": parameters.messages,
-                "temperature": parameters.temperature
+                "temperature": parameters.temperature,
+                "drop_params": True
             }
 
             if parameters.max_tokens:

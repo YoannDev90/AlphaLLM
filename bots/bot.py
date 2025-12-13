@@ -10,7 +10,6 @@ intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
 
-# Initialiser le vérificateur de permissions (blacklist et canaux vides pour l'instant)
 permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
 
 logging.getLogger('discord.ext.commands').setLevel(logging.CRITICAL)
@@ -27,24 +26,27 @@ async def on_message(message):
     if message.author.bot:
         return
     
-    # Collect attachments
     files = []
     if message.attachments:
         for attachment in message.attachments:
-            files.append(attachment.url)  # or attachment.filename, but URL might be better for downloads
+            files.append(attachment.url)
     
-    async for _ in unified_manager(
+    response = [result async for result in unified_manager(
         user_id=message.author.id,
         conv_id=message.channel.id,
         input=message.content,
-        model=Model.LLAMA,
+        model=Model.AUTO,
         files=files if files else None,
         origin=Origin.DISCORD,
         message=message,
         bot=bot,
-        permission_checker=permission_checker
-    ):
-        pass
+        permission_checker=permission_checker,
+        stream=False
+    )]
+    result = response[0]
+    async with message.channel.typing():
+        await message.channel.send(result.response)
+
 
 async def run_bot(bot):
     mode_label = "BetaLLM" if DEBUG else "AlphaLLM"

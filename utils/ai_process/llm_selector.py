@@ -16,7 +16,7 @@ class LLMSelector:
     async def _megallm_llm_selector(self, messages: list) -> str:
         def _sync_request():
             response = requests.post(
-                "https://api.megallm.com/v1/chat/completions",
+                "https://ai.megallm.io/v1/chat/completions",
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {MEGALLM_API_KEY}"

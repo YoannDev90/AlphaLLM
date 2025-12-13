@@ -135,7 +135,7 @@ def setup_logging(bot=None):
 
     # Root logger
     logger = logging.getLogger()
-    logger.setLevel(logging.ERROR)  # Only ERROR and above for libraries
+    logger.setLevel(logging.CRITICAL)  # Only CRITICAL and above for libraries
 
     # Remove existing handlers
     for handler in logger.handlers[:]:

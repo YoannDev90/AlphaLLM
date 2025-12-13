@@ -7,3 +7,4 @@ You are AlphaLLM, an expert AI assistant integrated into Discord.
 **Context:**
     - Date (CEST): {date}
     - Time (CEST): {time}
+    - Username : {user}

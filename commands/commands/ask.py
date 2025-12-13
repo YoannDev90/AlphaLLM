@@ -1,5 +1,7 @@
 import discord
 from discord import app_commands
+from utils.unified_text import unified_manager, Origin, Model
+from utils.discord_utils.permission_checker import PermissionChecker
 from config import LOGGER_NAME
 import logging
 
@@ -15,24 +17,47 @@ MODELS = [
         app_commands.Choice(name="Evil", value="evil"),
         app_commands.Choice(name="Grok", value="grok"),
         app_commands.Choice(name="Claude", value="claude"),
-        app_commands.Choice(name="Kimi-K2", value="kimi"),
+        app_commands.Choice(name="Kimi", value="kimi"),
         app_commands.Choice(name="DeepSeek", value="deepseek"),
         app_commands.Choice(name="GLM", value="glm"),
         app_commands.Choice(name="Phi", value="phi"),
-        app_commands.Choice(name="Cohere", value="cohere")
+        app_commands.Choice(name="Cohere", value="cohere"),
+        app_commands.Choice(name="Granite", value="granite"),
+        app_commands.Choice(name="Hermes", value="hermes"),
+        app_commands.Choice(name="Hunyuan", value="hunyuan"),
+        app_commands.Choice(name="Jamba", value="jamba"),
+        app_commands.Choice(name="Longcat", value="longcat"),
+        app_commands.Choice(name="Mercury", value="mercury"),
+        app_commands.Choice(name="Minimax", value="minimax"),
+        app_commands.Choice(name="Nemotron", value="nemotron"),
+        app_commands.Choice(name="Rocinante", value="rocinante"),
+        app_commands.Choice(name="Seed", value="seed"),
+        app_commands.Choice(name="Yi", value="yi")
     ]
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="ask", description="Ask something")
     @app_commands.describe(input="Ask something")
     @app_commands.choices(model=MODELS)
-    async def ask(interaction: discord.Interaction, input: str, model: str = "llama"):
+    async def ask(interaction: discord.Interaction, input: str, model: str = "auto"):
         logger.info(f"Commande /ask exécutée par {interaction.user.display_name}")
-        try:
-            pass
+        permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
+        await interaction.response.defer()
+        try:  
+            results = [result async for result in unified_manager(
+                user_id=interaction.user.id,
+                conv_id=interaction.channel.id,
+                input=input,
+                model=model,
+                files=None,
+                origin=Origin.DISCORD,
+                message=interaction,
+                bot=bot,
+                permission_checker=permission_checker,
+                stream=False
+            )]
+            result = results[0]
+            await interaction.followup.send(result.response)
         except Exception as e:
             logger.error(f"Error in ask command: {e}")
-            if not interaction.response.is_done():
-                await interaction.response.send_message("An error occurred while processing your request.", ephemeral=True)
-            else:
-                await interaction.followup.send("An error occurred while processing your request.", ephemeral=True)
+            await interaction.followup.send("An error occurred while processing your request.", ephemeral=True)

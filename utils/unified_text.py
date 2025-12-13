@@ -6,14 +6,11 @@ from typing import Any, List, Optional, Union, Dict
 from utils.memory import initialize_memory_manager, get_memory_manager
 from utils.ai_process.llm_selector import LLMSelector
 import logging
-
+from utils.ai_process.ai_utils import summarize
+from utils.handlers.files import FileHandler
 from config import LOGGER_NAME, AVAILABLE_MODELS, read_file
 
 logger = logging.getLogger(LOGGER_NAME)
-
-from utils.ai_process.ai_utils import summarize
-
-from utils.handlers.files import FileHandler
 
 @dataclass
 class RequestParameters:
@@ -113,8 +110,11 @@ async def unified_manager(
     if origin == Origin.DISCORD and permission_checker and message:
         authorized, reason = permission_checker.is_authorized(message)
         if not authorized:
-            logger.debug(f"Message non autorisé de {message.author.display_name} (ID: {message.author.id}): {reason}")
+            user = message.author if hasattr(message, 'author') else message.user
+            logger.debug(f"Message non autorisé de {user.display_name} (ID: {user.id}): {reason}")
             return
+
+    user = message.author if hasattr(message, 'author') else message.user if message else None
 
     file_handler = None
     processed_files = []
@@ -148,7 +148,6 @@ async def unified_manager(
     
     if origin == Origin.DISCORD:
         parameters = RequestParameters()
-        parameters.model = Model.LLAMA.value
         
         query = input
         while True:
@@ -199,7 +198,7 @@ async def unified_manager(
 
         logger.info(f"Query: {query}")
         if not query or query.isspace():
-            logger.info(f"Empty message from {message.author.id}")
+            logger.info(f"Empty message from {user.id}")
             query = "Hi! Please ask me a question."
             
     memory_manager = None
@@ -227,6 +226,10 @@ async def unified_manager(
     system_prompt = system_prompt.format(
         date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
         time=datetime.datetime.now().strftime('%H:%M:%S')
+    ) if origin == Origin.API else system_prompt.format(
+        date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
+        time=datetime.datetime.now().strftime('%H:%M:%S'),
+        user=user.display_name
     )
     if relevant_memories.get('ltm'):
         system_prompt += f"""
@@ -243,16 +246,11 @@ async def unified_manager(
         async for chunk in chat_model.chat(chat_params):
             yield chunk
     else:
-        if origin == Origin.DISCORD:
-            async with message.channel.typing():
-                result = await chat_model.chat(chat_params)
-                await message.channel.send(result.response)
-        else:
-            result = await chat_model.chat(chat_params)
+        result = await chat_model.chat(chat_params)
         
         logger.info(f"Réponse générée - Modèle: {result.model}, Usage: {result.usage} tokens, Temps: {result.elapsed_time}")
-        logger.debug(f"Contenu de la réponse: {result.response[:200]}...")
-        logger.info(f"Réponse envoyée à {message.author.display_name}")
+        logger.debug(f"Contenu de la réponse: {result.response}...")
+        logger.info(f"Réponse envoyée à {user.display_name}")
             
         if use_memory:
             await memory_manager.add_conversation_message(user_id, conv_id, result.response, "assistant")
