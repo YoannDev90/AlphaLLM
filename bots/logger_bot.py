@@ -13,16 +13,8 @@ from config import LOGGER_BOT_TOKEN, LOGGER_NAME
 intents = discord.Intents.default()
 intents.message_content = True
 
-logger_bot = commands.Bot(command_prefix="", intents=intents)
+bot = commands.Bot(command_prefix="", intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
-
-def create_logger_bot():
-    """Create a new logger bot instance"""
-    global logger_bot
-    intents = discord.Intents.default()
-    intents.message_content = True
-    logger_bot = commands.Bot(command_prefix="", intents=intents)
-    return logger_bot
 
 LOGS_CHANNEL_CONFIG = {
     "channel_id": None,
@@ -60,7 +52,7 @@ async def setup_logs_channel():
     """Initialiser la connexion au salon de logs existant"""
     global logs_channel
     if LOGS_CHANNEL_CONFIG["channel_id"]:
-        logs_channel = logger_bot.get_channel(LOGS_CHANNEL_CONFIG["channel_id"])
+        logs_channel = bot.get_channel(LOGS_CHANNEL_CONFIG["channel_id"])
         if logs_channel:
             logger.info(f"Logs channel connected: {logs_channel.name}")
         else:
@@ -137,21 +129,21 @@ async def flush_logs_queue():
         logger.error(f"Error flushing logs queue: {e}")
 
 
-@logger_bot.event
+@bot.event
 async def on_ready():
     global logs_channel, purge_task
     activity = discord.CustomActivity(name="🎛️ Monitoring AlphaLLM")
-    await logger_bot.change_presence(activity=activity)
-    await logger_bot.tree.sync()
+    await bot.change_presence(activity=activity)
+    await bot.tree.sync()
     
     await setup_logs_channel()
     
-    logger_bot._logs_channel = logs_channel
+    bot._logs_channel = logs_channel
     
     if purge_task is None or purge_task.done():
         purge_task = asyncio.create_task(purge_loop())
 
-@logger_bot.tree.command(name="clear-logs", description="Clear logs channel and create a new one")
+@bot.tree.command(name="clear-logs", description="Clear logs channel and create a new one")
 async def clear_logs_command(interaction: discord.Interaction):
     """Créer un nouveau salon de logs et supprimer l'ancien"""
     global logs_channel, is_rotating
@@ -172,7 +164,7 @@ async def clear_logs_command(interaction: discord.Interaction):
                 handler.setLevel(logging.CRITICAL)
                 break
         
-        admin_guild = logger_bot.get_guild(LOGS_CHANNEL_CONFIG.get("category_id")) or logger_bot.guilds[0]
+        admin_guild = bot.get_guild(LOGS_CHANNEL_CONFIG.get("category_id")) or bot.guilds[0]
         if not admin_guild:
             is_rotating = False
             return
@@ -215,7 +207,7 @@ async def clear_logs_command(interaction: discord.Interaction):
             logger.info(f"New logs channel created: {new_channel.name} (ID: {new_channel.id})")
             logs_channel = new_channel
             
-            logger_bot._logs_channel = new_channel
+            bot._logs_channel = new_channel
             
             await flush_logs_queue()
             
@@ -260,7 +252,7 @@ async def clear_logs_command(interaction: discord.Interaction):
         is_rotating = False
 
 
-async def run_logger_bot(bot):
+async def run_logger_bot():
     try:
         await bot.start(LOGGER_BOT_TOKEN)
     except discord.LoginFailure as e:

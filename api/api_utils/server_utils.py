@@ -49,7 +49,7 @@ async def ping_https_server(url: str, interval_range: tuple = (30, 300)):
             
     while True:
         try:
-            timeout = aiohttp.ClientTimeout(total=REQUEST_TIMEOUT)
+            timeout = aiohttp.ClientTimeout(total=API_REQUEST_TIMEOUT)
             async with aiohttp.ClientSession(timeout=timeout) as session:
                 start_time = asyncio.get_event_loop().time()
                 async with session.get(url) as response:
@@ -62,7 +62,7 @@ async def ping_https_server(url: str, interval_range: tuple = (30, 300)):
                         logger.warning(f"Ping vers {url} - Status: {response.status} - {ping_time:.2f}ms")
                         
         except asyncio.TimeoutError:
-            logger.error(f"Ping vers {url} - Timeout après {REQUEST_TIMEOUT}s")
+            logger.error(f"Ping vers {url} - Timeout après {API_REQUEST_TIMEOUT}s")
         except Exception as e:
             logger.error(f"Ping vers {url} - Erreur: {str(e)}")
         

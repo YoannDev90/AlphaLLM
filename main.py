@@ -6,18 +6,15 @@ import os
 import signal
 
 from api.api import start_api_async
-from bots.admin_bot import create_admin_bot, run_admin_bot
-from bots.bot import create_bot, run_bot
-from bots.logger_bot import create_logger_bot, run_logger_bot
+from bots.admin_bot import run_admin_bot
+from bots.bot import run_bot
+from bots.logger_bot import run_logger_bot
 from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.database.db_manager import DatabaseManager
 from utils.memory import initialize_memory_manager
 from utils.ressources import get_default_monitor, start_monitoring, stop_monitoring
 import utils.ressources as ressources
-
-shutdown_event = asyncio.Event()
-db_manager = DatabaseManager()
 
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
@@ -94,11 +91,7 @@ async def main() -> None:
     while True:
         shutdown_event.clear()
         
-        bot = create_bot()
-        admin_bot = create_admin_bot()
-        logger_bot = create_logger_bot()
-        
-        setup_logging(bot)
+        setup_logging()
         logger = logging.getLogger(LOGGER_NAME)
         logger.info(f"Booting {LOGGER_NAME}")
         
@@ -120,9 +113,9 @@ async def main() -> None:
             await db_manager.clone_tables()
             
             tasks = [
-                run_with_shutdown(run_logger_bot(logger_bot), "Logger Bot"),
-                run_with_shutdown(run_bot(bot), "Main Bot"),
-                run_with_shutdown(run_admin_bot(admin_bot), "Admin Bot"),
+                run_with_shutdown(run_logger_bot(), "Logger Bot"),
+                run_with_shutdown(run_bot(), "Main Bot"),
+                run_with_shutdown(run_admin_bot(), "Admin Bot"),
                 run_with_shutdown(start_api_async(), "API Server"),
                 run_with_shutdown(check_stop_file(restart_pending), "Stop-File Checker"),
             ]

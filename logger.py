@@ -13,9 +13,9 @@ from discord import ui
 from config import (CONFIG, DEV_IDS, GRAFANA_API_KEY, GRAFANA_URL,
                     GRAFANA_USER_ID, LOGGER_NAME, LOGGING_LEVEL,
                     LOGS_CHANNEL_ID)
+from bots.logger_bot import bot
 
 init(autoreset=True)
-
 logging_components = {}
 
 class LogButtonsView(discord.ui.View):
@@ -188,7 +188,7 @@ class DiscordFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def setup_logging(bot=None):
+def setup_logging():
     """Setup logging with console, file, and custom handlers."""
     logs_config = CONFIG.get("logs", {})
     loki_url = logs_config.get("loki_url")

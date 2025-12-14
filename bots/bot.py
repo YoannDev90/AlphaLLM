@@ -12,13 +12,6 @@ intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
 
-def create_bot():
-    """Create a new bot instance"""
-    global bot
-    intents = discord.Intents.default()
-    bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
-    return bot
-
 permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
 
 logging.getLogger('discord.ext.commands').setLevel(logging.CRITICAL)
@@ -32,9 +25,6 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if "-*+" in message.content : 
-        logger.error("End of test logs"*1000)
-        logger.info("Test logs completed")
     if message.author.bot:
         return
     
@@ -60,7 +50,7 @@ async def on_message(message):
         await message.channel.send(result.response)
 
 
-async def run_bot(bot):
+async def run_bot():
     mode_label = "BetaLLM" if DEBUG else "AlphaLLM"
     await setup_commands(bot, is_admin_bot=False)
     logger.info(f"Starting {mode_label}")

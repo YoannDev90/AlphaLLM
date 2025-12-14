@@ -73,7 +73,7 @@ async def generate_text(
                 files=files if isinstance(files, list) else None,
             ):
                 result = r
-                break  # Only one result for non-stream
+                break
             if result and hasattr(result, 'response'):
                 full_text = result.response
             else:

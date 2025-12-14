@@ -35,10 +35,6 @@ class ResourceSnapshot:
     context_switches_vol: Optional[int] = None
     context_switches_invol: Optional[int] = None
     swaps: Optional[int] = None
-    network_bytes_sent: Optional[int] = None
-    network_bytes_recv: Optional[int] = None
-    network_packets_sent: Optional[int] = None
-    network_packets_recv: Optional[int] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -56,10 +52,6 @@ class ResourceSnapshot:
             "context_switches_vol": self.context_switches_vol,
             "context_switches_invol": self.context_switches_invol,
             "swaps": self.swaps,
-            "network_bytes_sent": self.network_bytes_sent,
-            "network_bytes_recv": self.network_bytes_recv,
-            "network_packets_sent": self.network_packets_sent,
-            "network_packets_recv": self.network_packets_recv,
         }
 
 
@@ -106,10 +98,6 @@ class ResourceMonitor:
                     "context_switches_vol",
                     "context_switches_invol",
                     "swaps",
-                    "network_bytes_sent",
-                    "network_bytes_recv",
-                    "network_packets_sent",
-                    "network_packets_recv",
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
@@ -136,10 +124,6 @@ class ResourceMonitor:
                     "context_switches_vol",
                     "context_switches_invol",
                     "swaps",
-                    "network_bytes_sent",
-                    "network_bytes_recv",
-                    "network_packets_sent",
-                    "network_packets_recv",
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writerow(snapshot.to_dict())
@@ -174,22 +158,6 @@ class ResourceMonitor:
             else:
                 max_memory_mb = max_memory_kb / 1024
 
-            network_bytes_sent = None
-            network_bytes_recv = None
-            network_packets_sent = None
-            network_packets_recv = None
-            
-            try:
-                process = psutil.Process(self.process_id)
-                net_io = process.net_io_counters()
-                if net_io:
-                    network_bytes_sent = net_io.bytes_sent
-                    network_bytes_recv = net_io.bytes_recv
-                    network_packets_sent = net_io.packets_sent
-                    network_packets_recv = net_io.packets_recv
-            except (psutil.NoSuchProcess, psutil.AccessDenied, AttributeError):
-                pass
-
             snapshot = ResourceSnapshot(
                 timestamp=datetime.now(),
                 process_id=self.process_id,
@@ -205,10 +173,6 @@ class ResourceMonitor:
                 context_switches_vol=rusage.ru_nvcsw,
                 context_switches_invol=rusage.ru_nivcsw,
                 swaps=rusage.ru_nswap,
-                network_bytes_sent=network_bytes_sent,
-                network_bytes_recv=network_bytes_recv,
-                network_packets_sent=network_packets_sent,
-                network_packets_recv=network_packets_recv,
             )
             self._previous_snapshot = snapshot
             return snapshot
@@ -340,10 +304,6 @@ class ResourceMonitor:
                     "context_switches_vol",
                     "context_switches_invol",
                     "swaps",
-                    "network_bytes_sent",
-                    "network_bytes_recv",
-                    "network_packets_sent",
-                    "network_packets_recv",
                 ]
                 with open(path, "a", newline="") as csvfile:
                     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -444,10 +404,6 @@ class ResourceMonitor:
             "context_switches_vol",
             "context_switches_invol",
             "swaps",
-            "network_bytes_sent",
-            "network_bytes_recv",
-            "network_packets_sent",
-            "network_packets_recv",
         ]
         try:
             with open(self.csv_file, "a", newline="") as csvfile:
@@ -471,10 +427,6 @@ class ResourceMonitor:
                             context_switches_vol=0,
                             context_switches_invol=0,
                             swaps=0,
-                            network_bytes_sent=0,
-                            network_bytes_recv=0,
-                            network_packets_sent=0,
-                            network_packets_recv=0,
                         )
                         writer.writerow(zero_snapshot.to_dict())
                         next_expected += timedelta(seconds=1)
@@ -498,10 +450,6 @@ class ResourceMonitor:
                         context_switches_vol=0,
                         context_switches_invol=0,
                         swaps=0,
-                        network_bytes_sent=0,
-                        network_bytes_recv=0,
-                        network_packets_sent=0,
-                        network_packets_recv=0,
                     )
                     writer.writerow(zero_snapshot.to_dict())
                     next_ts += timedelta(seconds=1)

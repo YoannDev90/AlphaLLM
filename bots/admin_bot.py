@@ -12,13 +12,6 @@ intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
 
-def create_admin_bot():
-    """Create a new admin bot instance"""
-    global bot
-    intents = discord.Intents.default()
-    bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
-    return bot
-
 purge_task = None
 
 @bot.event
@@ -89,7 +82,7 @@ async def close_bot(bot):
             pass
     await bot.close()
 
-async def run_admin_bot(bot):
+async def run_admin_bot():
     await setup_commands(bot, is_admin_bot=True)
     try:
         logger.info("Starting Admin Bot")
