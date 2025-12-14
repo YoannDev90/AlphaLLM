@@ -1,11 +1,12 @@
-import discord
-import json
 import datetime
+import json
+import logging
 
-from utils.config import LOGGER_NAME, is_dev_id
-from utils.core.logger import get_logger
+import discord
 
-logger = get_logger(LOGGER_NAME)
+from config import LOGGER_NAME, is_dev_id
+
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="stop", description="Arrête le bot")

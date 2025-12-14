@@ -1,24 +1,24 @@
-import discord
-from discord.ext import tasks
 import json
+import logging
 import os
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Dict, List
 
 import aiofiles
+import discord
 import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
+from discord.ext import tasks
+from embeds.poll import PollConfirmationView, PollView, poll_results
 
 from bots.bot import bot as main_bot
-from embeds.poll import PollView, PollConfirmationView, poll_results
-from utils.config import LOGGER_NAME, is_dev_id
-from utils.core.logger import get_logger
+from config import LOGGER_NAME
 from utils.database.server_settings import get_announce_channel
 from utils.translations import load_translations
 
-logger = get_logger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME)
 
 active_poll_messages: Dict[str, List[Dict]] = {}
 
@@ -331,13 +331,6 @@ async def setup(bot: discord.Client):
     
     @bot.tree.command(name="poll", description="Crée et envoie un sondage sur tous les serveurs")
     async def poll_command(interaction: discord.Interaction):
-        if not is_dev_id(interaction.user.id):
-            logger.warning(f"Refus d'accès pour {interaction.user} (ID: {interaction.user.id})")
-            await interaction.response.send_message(
-                "Vous n'avez pas la permission d'utiliser cette commande.", 
-                ephemeral=True
-            )
-            return
         
         logger.info(f"Commande /poll exécutée par {interaction.user.display_name}")
         

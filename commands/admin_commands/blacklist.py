@@ -1,14 +1,14 @@
 import asyncio
+import logging
 from datetime import datetime
 
 import discord
 
-from utils.config import LOGGER_NAME, is_dev_id
-from utils.core.logger import get_logger
-from utils.database.models.blacklist import BlacklistManager
+from config import LOGGER_NAME
+from utils.database.perms_conf import (add_to_blacklist, get_blacklist,
+                                       remove_from_blacklist)
 
-logger = get_logger(LOGGER_NAME)
-blacklist_manager = BlacklistManager()
+logger = logging.getLogger(LOGGER_NAME)
 
 CHOICES = [
     discord.app_commands.Choice(name="show", value=0),
@@ -27,13 +27,9 @@ async def setup(bot: discord.Client):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /blacklist [{mode.name}] exécutée par {interaction.user.display_name}")
 
-        if not is_dev_id(interaction.user.id):
-            await interaction.followup.send("Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
-            return
-
         match mode.value:
             case 0:
-                blacklisted_users = await asyncio.to_thread(blacklist_manager.fetch_all)
+                blacklisted_users = await get_blacklist(details=True)
                 if not blacklisted_users:
                     await interaction.followup.send("Aucun utilisateur n'est actuellement blacklisté.", ephemeral=True)
                     return
@@ -46,9 +42,9 @@ async def setup(bot: discord.Client):
                 embed.set_footer(text=f"Total: {len(blacklisted_users)} utilisateur(s)")
 
                 for user_data in blacklisted_users:
-                    user_id = user_data["id_discord"]
-                    reason = user_data["reason"]
-                    ban_date = user_data["datetime"]
+                    user_id = user_data[0]
+                    reason = user_data[1]
+                    ban_date = user_data[2]
                     
                     try:
                         date_obj = datetime.fromisoformat(ban_date.replace('Z', '+00:00'))
@@ -74,7 +70,7 @@ async def setup(bot: discord.Client):
                 if not user_id.isdigit() or int(user_id) <= 0:
                     await interaction.followup.send("L'ID utilisateur fourni est invalide.", ephemeral=True)
                     return
-                await asyncio.to_thread(blacklist_manager.add_entry, int(user_id), reason)
+                await add_to_blacklist(int(user_id), reason)
                 user = await bot.fetch_user(int(user_id))
                 if user is None:
                     await interaction.followup.send("Utilisateur introuvable.", ephemeral=True)
@@ -84,5 +80,5 @@ async def setup(bot: discord.Client):
                 if not user_id.isdigit() or int(user_id) <= 0:
                     await interaction.followup.send("L'ID utilisateur fourni est invalide.", ephemeral=True)
                     return
-                await asyncio.to_thread(blacklist_manager.remove_entry, int(user_id))
+                await remove_from_blacklist(int(user_id))
                 await interaction.followup.send(f"L'utilisateur avec l'ID `{user_id}` a été retiré de la liste noire.", ephemeral=True)

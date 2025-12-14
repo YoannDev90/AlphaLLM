@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 
 from config import LOGGER_NAME
-from utils.database.db_manager import db_manager
+from utils.database.user_settings import update_user_settings
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -103,7 +103,7 @@ async def setup(bot: discord.Client):
                 "modified": datetime.now().isoformat(),
                 **update_data,
             }
-            response = await db_manager.update_user_settings(interaction.user.id, insert_data)
+            response = await update_user_settings(interaction.user.id, insert_data)
 
             summary_text = "\n".join(summary)
             if not summary_text:

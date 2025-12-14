@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import datetime
+import logging
 
 import discord
 from embeds.admin import (AnnounceConfirmView,
@@ -8,14 +9,13 @@ from embeds.admin import (AnnounceConfirmView,
 from embeds.announce import (AnnouncementTranslationView,
                              create_announcement_embed)
 
-from utils.config import LOGGER_NAME, is_dev_id
-from utils.core.logger import get_logger
+from config import LOGGER_NAME
 from utils.database.server_settings import get_announce_channel
 from utils.discord.cmd_register import command_id_manager
 from utils.translations import (SUPPORTED_LANGUAGES, TranslationManager,
                                 load_translations)
 
-logger = get_logger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME)
 
 class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
     """Modal Discord pour saisir l'annonce - Classe nécessaire pour Discord.py"""
@@ -35,10 +35,6 @@ class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
 
     async def on_submit(self, interaction: discord.Interaction):
         logger.info(f"Modal soumis par {interaction.user} (ID: {interaction.user.id})")
-
-        if not await check_announce_permission(interaction):
-            return
-
         message = self.message.value
         
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -81,16 +77,6 @@ class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
             embed=embed,
             view=confirmation_view
         )
-
-async def check_announce_permission(interaction: discord.Interaction) -> bool:
-    if not is_dev_id(interaction.user.id):
-        logger.warning(f"Refus d'accès pour {interaction.user} (ID: {interaction.user.id})")
-        await interaction.response.send_message(
-            "Vous n'avez pas la permission d'utiliser cette commande.", 
-            ephemeral=True
-        )
-        return False
-    return True
 
 async def find_announcement_channel(guild):
     announce_channel_id = get_announce_channel(guild.id)

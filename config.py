@@ -12,12 +12,14 @@ def load_toml_config(file_path: str = "config.toml") -> Dict[str, Any]:
     """Charge la configuration depuis un fichier TOML"""
     with open(file_path, "rb") as f:
         return tomllib.load(f)
-    
+
+
 def read_file(file_path: str) -> str:
     """Lit le contenu d'un fichier texte et remplace les placeholders <{code}> par {code}"""
     with open(file_path, "r", encoding="utf-8") as f:
         txt = f.read()
         return txt.replace("<", "{").replace(">", "}")
+
 
 CONFIG = load_toml_config()
 
@@ -27,6 +29,7 @@ API_SECTION: Dict[str, Any] = CONFIG.get("api")
 LOGS_SECTION: Dict[str, Any] = CONFIG.get("logs")
 MEMORY_SECTION: Dict[str, Any] = CONFIG.get("memory")
 MODELS_SECTION: Dict[str, Any] = CONFIG.get("models")
+DATABASE_SECTION: Dict[str, Any] = CONFIG.get("database")
 
 LOGGING_LEVEL_STR = LOGS_SECTION.get("logging_level")
 level_mapping = {
@@ -49,7 +52,7 @@ LOGS_CATEGORY_ID: int = LOGS_SECTION.get("category_id")
 LOG_ROLE_ID: int = LOGS_SECTION.get("log_role_id")
 GRAFANA_USER_ID: str = LOGS_SECTION.get("user_id")
 GRAFANA_API_KEY: str = os.environ.get("GRAFANA_API_KEY")
-GRAFANA_URL : str = LOGS_SECTION.get("grafana_url")
+GRAFANA_URL: str = LOGS_SECTION.get("grafana_url")
 
 HOST: str = API_SECTION.get("host")
 PORT: int = API_SECTION.get("port")
@@ -76,8 +79,14 @@ EMBEDDER_CACHE_DIR: str = MEMORY_SECTION.get("embedder_cache_dir")
 STM_MAX_AGE = MEMORY_SECTION.get("stm_max_age")
 LTM_MIN_SIMILARITY = MEMORY_SECTION.get("ltm_min_similarity")
 
-BOT_TOKEN: str = os.environ.get("BOT_TOKEN") if not DEBUG else os.environ.get("DEV_BOT_TOKEN")
-ADMIN_BOT_TOKEN: str = os.environ.get("ADMIN_BOT_TOKEN") if not DEBUG else os.environ.get("DEV_ADMIN_BOT_TOKEN")
+BOT_TOKEN: str = (
+    os.environ.get("BOT_TOKEN") if not DEBUG else os.environ.get("DEV_BOT_TOKEN")
+)
+ADMIN_BOT_TOKEN: str = (
+    os.environ.get("ADMIN_BOT_TOKEN")
+    if not DEBUG
+    else os.environ.get("DEV_ADMIN_BOT_TOKEN")
+)
 LOGGER_BOT_TOKEN: str = os.environ.get("LOGGER_BOT_TOKEN")
 
 OPENROUTER_API_KEY: str = os.environ.get("OPENROUTER_API_KEY")
@@ -87,7 +96,7 @@ MEGALLM_API_KEY: str = os.environ.get("MEGALLM_API_KEY")
 IO_INTELLIGENCE_API_KEY: str = os.environ.get("IO_INTELLIGENCE_API_KEY")
 VOID_API_KEY: str = os.environ.get("VOID_API_KEY")
 MNN_AI_API_KEY: str = os.environ.get("MNN_AI_API_KEY")
-#NAGA_API_KEY: str = os.environ.get("NAGA_API_KEY")
+# NAGA_API_KEY: str = os.environ.get("NAGA_API_KEY")
 ELECTRONHUB_API_KEY: str = os.environ.get("ELECTRONHUB_API_KEY")
 AIRFORCE_API_KEY: str = os.environ.get("AIRFORCE_API_KEY")
 COHERE_API_KEY: str = os.environ.get("COHERE_API_KEY")
@@ -99,3 +108,10 @@ NAVY_API_KEY: str = os.environ.get("NAVY_API_KEY")
 SUPABASE_URL: str = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY: str = os.environ.get("SUPABASE_KEY")
 JWT_KEY: str = os.environ.get("JWT_KEY")
+USER: str = os.environ.get("SUPABASE_USER")
+PASSWORD: str = os.environ.get("SUPABASE_PASSWORD")
+HOST: str = os.environ.get("SUPABASE_HOST")
+PORT: str = os.environ.get("SUPABASE_PORT")
+DBNAME: str = os.environ.get("SUPABASE_DBNAME")
+SUPABASE_PG: str = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
+TABLES_TO_CLONE: Iterable[str] = DATABASE_SECTION.get("tables_to_clone")

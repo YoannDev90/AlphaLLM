@@ -1,21 +1,18 @@
-import discord
-import json
 import datetime
+import json
+import logging
 
-from utils.config import LOGGER_NAME, is_dev_id
-from utils.core.logger import get_logger
+import discord
 
-logger = get_logger(LOGGER_NAME)
+from config import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="restart", description="Redémarre le bot")
     async def restart(interaction: discord.Interaction):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /restart exécutée par {interaction.user.display_name}")
-
-        if not is_dev_id(interaction.user.id):
-            await interaction.followup.send("Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
-            return
 
         await interaction.followup.send("🛑 Redémarrage complet du bot...", ephemeral=True)
         logger.info("Demande de redémarrage reçue")

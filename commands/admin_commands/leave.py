@@ -1,10 +1,11 @@
+import logging
+
 import discord
 
 from bots.bot import bot as main_bot
-from utils.config import LOGGER_NAME, is_dev_id
-from utils.core.logger import get_logger
+from config import LOGGER_NAME
 
-logger = get_logger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="leave", description="Fait quitter le bot d'un serveur")
@@ -13,10 +14,6 @@ async def setup(bot: discord.Client):
         guild_id: str):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /leave exécutée par {interaction.user.display_name} pour le serveur {guild_id}")
-
-        if not is_dev_id(interaction.user.id):
-            await interaction.followup.send("Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
-            return
 
         if not guild_id.isdigit() or int(guild_id) <= 0:
             await interaction.followup.send("L'ID du serveur fourni est invalide.", ephemeral=True)

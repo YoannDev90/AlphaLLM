@@ -7,7 +7,7 @@ import logging
 # from embeds.config import ChannelSelectView, RoleSelectView
 # from langs.language_manager import language_manager
 from config import LOGGER_NAME
-from utils.database.db_manager import db_manager
+from utils.database.server_settings import update_server_settings
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -161,7 +161,7 @@ async def setup(bot: discord.Client):
         try:
             logger.debug(f"Attempting database update for guild {interaction.guild.name} ({interaction.guild.id})")
             update_data["settings_update"] = datetime.now().isoformat()
-            await db_manager.update_server_settings(interaction.guild.id, update_data)
+            await update_server_settings(interaction.guild.id, update_data)
             logger.debug("Database update successful")
 
             summary_text = "\n".join(summary)

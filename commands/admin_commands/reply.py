@@ -1,18 +1,16 @@
-import discord
-from utils.config import DEV_IDS, LOGGER_NAME, is_dev_id
-from utils.core.logger import get_logger
+import logging
 
-logger = get_logger(LOGGER_NAME)
+import discord
+
+from config import DEV_IDS, LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="reply", description="Répond à un utilisateur via DM")
     async def reply(interaction: discord.Interaction, user_id: str, message: str):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /reply exécutée par {interaction.user.display_name}")
-
-        if not is_dev_id(interaction.user.id):
-            await interaction.followup.send("Vous n'avez pas la permission d'utiliser cette commande.", ephemeral=True)
-            return
 
         try:
             user_id = int(user_id)
