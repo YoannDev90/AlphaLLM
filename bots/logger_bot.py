@@ -16,6 +16,14 @@ intents.message_content = True
 logger_bot = commands.Bot(command_prefix="", intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
 
+def create_logger_bot():
+    """Create a new logger bot instance"""
+    global logger_bot
+    intents = discord.Intents.default()
+    intents.message_content = True
+    logger_bot = commands.Bot(command_prefix="", intents=intents)
+    return logger_bot
+
 LOGS_CHANNEL_CONFIG = {
     "channel_id": None,
     "log_role_id": None,
@@ -252,9 +260,9 @@ async def clear_logs_command(interaction: discord.Interaction):
         is_rotating = False
 
 
-async def run_logger_bot():
+async def run_logger_bot(bot):
     try:
-        await logger_bot.start(LOGGER_BOT_TOKEN)
+        await bot.start(LOGGER_BOT_TOKEN)
     except discord.LoginFailure as e:
         logger.error(f"Connection error: {e}")
     except Exception as e:
@@ -262,5 +270,5 @@ async def run_logger_bot():
     finally:
         if purge_task and not purge_task.done():
             purge_task.cancel()
-        await logger_bot.close()
+        await bot.close()
         logger.info("Logger bot stopped.")

@@ -12,6 +12,13 @@ intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
 
+def create_bot():
+    """Create a new bot instance"""
+    global bot
+    intents = discord.Intents.default()
+    bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
+    return bot
+
 permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
 
 logging.getLogger('discord.ext.commands').setLevel(logging.CRITICAL)

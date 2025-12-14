@@ -1,10 +1,11 @@
 .env
 __pycache__/
 .venv/
-resource_monitoring.csv
+monitoring.csv
 *.log
 *.sh
 config.toml
 cache/
 TODO.md
 local_db.db
+stop.json

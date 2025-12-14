@@ -76,8 +76,7 @@ class ResourceMonitor:
         self.samples: List[ResourceSnapshot] = []
         self._previous_snapshot: Optional[ResourceSnapshot] = None
         self.csv_file = csv_file
-        self.csv_writer = None
-        self.csv_handle = None
+        self._csv_initialized = False
         self._previous_network_sent = 0
         self._previous_network_recv = 0
         if csv_file:
@@ -90,37 +89,62 @@ class ResourceMonitor:
         path = Path(self.csv_file)
         path.parent.mkdir(parents=True, exist_ok=True)
         file_exists = path.exists() and path.stat().st_size > 0
-        self.csv_handle = open(path, "a", newline="")
-        fieldnames = [
-            "timestamp",
-            "process_id",
-            "cpu_time_sec",
-            "cpu_user_time_sec",
-            "cpu_sys_time_sec",
-            "cpu_percent",
-            "max_memory_mb",
-            "page_faults_minor",
-            "page_faults_major",
-            "io_reads",
-            "io_writes",
-            "context_switches_vol",
-            "context_switches_invol",
-            "swaps",
-            "network_bytes_sent",
-            "network_bytes_recv",
-            "network_packets_sent",
-            "network_packets_recv",
-        ]
-        self.csv_writer = csv.DictWriter(self.csv_handle, fieldnames=fieldnames)
         if not file_exists:
-            self.csv_writer.writeheader()
-            self.csv_handle.flush()
+            with open(path, "w", newline="") as csvfile:
+                fieldnames = [
+                    "timestamp",
+                    "process_id",
+                    "cpu_time_sec",
+                    "cpu_user_time_sec",
+                    "cpu_sys_time_sec",
+                    "cpu_percent",
+                    "max_memory_mb",
+                    "page_faults_minor",
+                    "page_faults_major",
+                    "io_reads",
+                    "io_writes",
+                    "context_switches_vol",
+                    "context_switches_invol",
+                    "swaps",
+                    "network_bytes_sent",
+                    "network_bytes_recv",
+                    "network_packets_sent",
+                    "network_packets_recv",
+                ]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+        self._csv_initialized = True
 
     def _write_snapshot_to_csv(self, snapshot: ResourceSnapshot) -> None:
         """Write a snapshot to the CSV file."""
-        if self.csv_writer and snapshot:
-            self.csv_writer.writerow(snapshot.to_dict())
-            self.csv_handle.flush()
+        if not self._csv_initialized or not snapshot:
+            return
+        try:
+            with open(self.csv_file, "a", newline="") as csvfile:
+                fieldnames = [
+                    "timestamp",
+                    "process_id",
+                    "cpu_time_sec",
+                    "cpu_user_time_sec",
+                    "cpu_sys_time_sec",
+                    "cpu_percent",
+                    "max_memory_mb",
+                    "page_faults_minor",
+                    "page_faults_major",
+                    "io_reads",
+                    "io_writes",
+                    "context_switches_vol",
+                    "context_switches_invol",
+                    "swaps",
+                    "network_bytes_sent",
+                    "network_bytes_recv",
+                    "network_packets_sent",
+                    "network_packets_recv",
+                ]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writerow(snapshot.to_dict())
+        except Exception as e:
+            logger.error(f"Failed to write snapshot to CSV: {e}")
 
     def _collect_snapshot(self) -> Optional[ResourceSnapshot]:
         try:
@@ -212,7 +236,7 @@ class ResourceMonitor:
         self.is_monitoring = True
         self._thread = threading.Thread(target=self._monitor_loop, daemon=True, name="ResourceMonitor")
         self._thread.start()
-        logger.info("Resource monitoring started")
+        logger.debug("Resource monitoring started")
 
     def stop(self) -> None:
         if not self.is_monitoring:
@@ -221,9 +245,7 @@ class ResourceMonitor:
         self.is_monitoring = False
         if self._thread:
             self._thread.join(timeout=5.0)
-        if self.csv_handle:
-            self.csv_handle.close()
-        logger.info("Resource monitoring stopped")
+        logger.debug("Resource monitoring stopped")
 
     def get_latest_snapshot(self) -> Optional[ResourceSnapshot]:
         with self._lock:
@@ -380,8 +402,8 @@ class ResourceMonitor:
 
     def fill_gaps(self, current_time: datetime) -> None:
         """Fill gaps in CSV with zero values for missing seconds in recent history."""
-        if not self.csv_writer:
-            logger.debug("No CSV writer, skipping fill_gaps")
+        if not self._csv_initialized:
+            logger.debug("CSV not initialized, skipping fill_gaps")
             return
         timestamps = []
         if Path(self.csv_file).exists():
@@ -407,64 +429,87 @@ class ResourceMonitor:
         timestamps.sort()
         
         filled_count = 0
-        for i in range(len(timestamps) - 1):
-            current_ts = timestamps[i]
-            next_expected = current_ts + timedelta(seconds=1)
-            while next_expected < timestamps[i+1]:
-                zero_snapshot = ResourceSnapshot(
-                    timestamp=next_expected,
-                    process_id=self.process_id,
-                    cpu_time=0.0,
-                    cpu_user_time=0.0,
-                    cpu_sys_time=0.0,
-                    cpu_percent=0.0,
-                    max_memory=0.0,
-                    page_faults_minor=0,
-                    page_faults_major=0,
-                    io_reads=0,
-                    io_writes=0,
-                    context_switches_vol=0,
-                    context_switches_invol=0,
-                    swaps=0,
-                    network_bytes_sent=0,
-                    network_bytes_recv=0,
-                    network_packets_sent=0,
-                    network_packets_recv=0,
-                )
-                self.csv_writer.writerow(zero_snapshot.to_dict())
-                self.csv_handle.flush()
-                next_expected += timedelta(seconds=1)
-                filled_count += 1
+        fieldnames = [
+            "timestamp",
+            "process_id",
+            "cpu_time_sec",
+            "cpu_user_time_sec",
+            "cpu_sys_time_sec",
+            "cpu_percent",
+            "max_memory_mb",
+            "page_faults_minor",
+            "page_faults_major",
+            "io_reads",
+            "io_writes",
+            "context_switches_vol",
+            "context_switches_invol",
+            "swaps",
+            "network_bytes_sent",
+            "network_bytes_recv",
+            "network_packets_sent",
+            "network_packets_recv",
+        ]
+        try:
+            with open(self.csv_file, "a", newline="") as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                for i in range(len(timestamps) - 1):
+                    current_ts = timestamps[i]
+                    next_expected = current_ts + timedelta(seconds=1)
+                    while next_expected < timestamps[i+1]:
+                        zero_snapshot = ResourceSnapshot(
+                            timestamp=next_expected,
+                            process_id=self.process_id,
+                            cpu_time=0.0,
+                            cpu_user_time=0.0,
+                            cpu_sys_time=0.0,
+                            cpu_percent=0.0,
+                            max_memory=0.0,
+                            page_faults_minor=0,
+                            page_faults_major=0,
+                            io_reads=0,
+                            io_writes=0,
+                            context_switches_vol=0,
+                            context_switches_invol=0,
+                            swaps=0,
+                            network_bytes_sent=0,
+                            network_bytes_recv=0,
+                            network_packets_sent=0,
+                            network_packets_recv=0,
+                        )
+                        writer.writerow(zero_snapshot.to_dict())
+                        next_expected += timedelta(seconds=1)
+                        filled_count += 1
+                
+                last_ts = timestamps[-1]
+                next_ts = last_ts + timedelta(seconds=1)
+                while next_ts <= current_time:
+                    zero_snapshot = ResourceSnapshot(
+                        timestamp=next_ts,
+                        process_id=self.process_id,
+                        cpu_time=0.0,
+                        cpu_user_time=0.0,
+                        cpu_sys_time=0.0,
+                        cpu_percent=0.0,
+                        max_memory=0.0,
+                        page_faults_minor=0,
+                        page_faults_major=0,
+                        io_reads=0,
+                        io_writes=0,
+                        context_switches_vol=0,
+                        context_switches_invol=0,
+                        swaps=0,
+                        network_bytes_sent=0,
+                        network_bytes_recv=0,
+                        network_packets_sent=0,
+                        network_packets_recv=0,
+                    )
+                    writer.writerow(zero_snapshot.to_dict())
+                    next_ts += timedelta(seconds=1)
+                    filled_count += 1
+        except Exception as e:
+            logger.error(f"Failed to write gap fills to CSV: {e}")
         
-        last_ts = timestamps[-1]
-        next_ts = last_ts + timedelta(seconds=1)
-        while next_ts <= current_time:
-            zero_snapshot = ResourceSnapshot(
-                timestamp=next_ts,
-                process_id=self.process_id,
-                cpu_time=0.0,
-                cpu_user_time=0.0,
-                cpu_sys_time=0.0,
-                cpu_percent=0.0,
-                max_memory=0.0,
-                page_faults_minor=0,
-                page_faults_major=0,
-                io_reads=0,
-                io_writes=0,
-                context_switches_vol=0,
-                context_switches_invol=0,
-                swaps=0,
-                network_bytes_sent=0,
-                network_bytes_recv=0,
-                network_packets_sent=0,
-                network_packets_recv=0,
-            )
-            self.csv_writer.writerow(zero_snapshot.to_dict())
-            self.csv_handle.flush()
-            next_ts += timedelta(seconds=1)
-            filled_count += 1
-        
-        logger.info(f"Filled {filled_count} gap entries")
+        logger.debug(f"Filled {filled_count} gap entries")
 
 _monitor_instance: Optional[ResourceMonitor] = None
 

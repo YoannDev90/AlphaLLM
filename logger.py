@@ -131,12 +131,15 @@ class DiscordLogHandler(logging.Handler):
             self.log_queue.task_done()
 
     async def private_channel_logs(self, message_text, record):
+        if self.bot.is_closed():
+            return
         try:
             channel = await self.bot.fetch_channel(LOGS_CHANNEL_ID)
             view = LogButtonsView(record.levelname, record.name, record.created)
             message_obj = await channel.send(message_text, view=view)
         except Exception as e:
-            print(f"Error sending log to channel: {e}")
+            # Ignore errors during shutdown
+            pass
 
     def emit(self, record):
         message = self.format(record)

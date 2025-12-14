@@ -6,7 +6,7 @@ import random
 
 import aiohttp
 
-from config import API_URL, LOGGER_NAME, REQUEST_TIMEOUT
+from config import API_URL, LOGGER_NAME, API_REQUEST_TIMEOUT
 
 logger = logging.getLogger(LOGGER_NAME)
 

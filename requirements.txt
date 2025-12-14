@@ -13,6 +13,5 @@ python-dotenv
 python-magic
 python-multipart
 requests
-supabase
 tiktoken
 uvicorn

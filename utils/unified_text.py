@@ -136,17 +136,6 @@ async def unified_manager(
             mention_str = f"<@{bot_user.id}>"
             input = input.replace(mention_str, "").strip()
 
-    if model == "auto":
-        logger.info("Auto-selecting model...")
-        selector = LLMSelector()
-        selected_model = await selector.select_model(input)
-        if selected_model.lower() in AVAILABLE_MODELS:
-            model = selected_model.lower()
-            logger.info(f"Model auto-selected: {model}")
-        else:
-            model = Model.LLAMA.value
-            logger.info(f"No suitable model found, defaulting to: {model}")
-    
     if origin == Origin.DISCORD:
         parameters = RequestParameters()
         
@@ -201,6 +190,20 @@ async def unified_manager(
         if not query or query.isspace():
             logger.info(f"Empty message from {user.id}")
             query = "Hi! Please ask me a question."
+            
+        if parameters.model:
+            model = parameters.model
+
+    if model == "auto":
+        logger.info("Auto-selecting model...")
+        selector = LLMSelector()
+        selected_model = await selector.select_model(input)
+        if selected_model.lower() in AVAILABLE_MODELS:
+            model = selected_model.lower()
+            logger.info(f"Model auto-selected: {model}")
+        else:
+            model = Model.LLAMA.value
+            logger.info(f"No suitable model found, defaulting to: {model}")
             
     memory_manager = None
     if use_memory:

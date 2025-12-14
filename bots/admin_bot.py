@@ -12,6 +12,13 @@ intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
 
+def create_admin_bot():
+    """Create a new admin bot instance"""
+    global bot
+    intents = discord.Intents.default()
+    bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
+    return bot
+
 purge_task = None
 
 @bot.event
@@ -72,7 +79,7 @@ async def clear_command(interaction: discord.Interaction):
         logger.error(f"Erreur inattendue lors de la commande /clear : {e}")
         await interaction.followup.send(f"Erreur inattendue : {e}", ephemeral=True)
 
-async def close_bot():
+async def close_bot(bot):
     global purge_task
     if purge_task and not purge_task.done():
         purge_task.cancel()
@@ -82,7 +89,7 @@ async def close_bot():
             pass
     await bot.close()
 
-async def run_admin_bot():
+async def run_admin_bot(bot):
     await setup_commands(bot, is_admin_bot=True)
     try:
         logger.info("Starting Admin Bot")
@@ -92,5 +99,5 @@ async def run_admin_bot():
     except Exception as e:
         logger.error(f"Erreur inattendue : {e}")
     finally:
-        await close_bot()
+        await close_bot(bot)
         logger.info("Admin Bot stopped.")

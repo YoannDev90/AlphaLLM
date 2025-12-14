@@ -240,7 +240,7 @@ class ChatModel(BaseChatModel):
             usage = response.usage.total_tokens
             model = response.model
             response_text = response.choices[0].message.content
-            if response_text is None or " ":
+            if response_text is None or response_text.strip() == "":
                 raise Exception("Model returned empty response")
             response_text = self._process_perplexity_citations(response_text, response)
 

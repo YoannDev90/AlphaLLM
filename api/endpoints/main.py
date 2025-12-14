@@ -7,7 +7,7 @@ import aiohttp
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from api.api_utils.server_utils import is_https_api_running
-from config import LOGGER_NAME, REQUEST_TIMEOUT
+from config import LOGGER_NAME, API_REQUEST_TIMEOUT
 from utils.discord_utils.status import get_status
 
 router = APIRouter()
@@ -19,7 +19,7 @@ async def read_root(request: Request):
     try:
         https_api = await asyncio.wait_for(
             is_https_api_running(), 
-            timeout=REQUEST_TIMEOUT
+            timeout=API_REQUEST_TIMEOUT
         )
         https_status = "running" if https_api else "stopped"
         

@@ -1,13 +1,13 @@
-from supabase import create_client, Client, ClientOptions
-from datetime import datetime
-import logging
-import sqlite3
 import asyncio
 import json
-import psycopg2
+import logging
 import re
+import sqlite3
+from datetime import datetime
 
-from config import SUPABASE_URL, SUPABASE_KEY, JWT_KEY, LOGGER_NAME, TABLES_TO_CLONE, SUPABASE_PG
+import psycopg2
+
+from config import (LOGGER_NAME, SUPABASE_PG, TABLES_TO_CLONE, SUPABASE_PASSWORD)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -21,29 +21,12 @@ class DatabaseManager:
 
     def __init__(self):
         if not hasattr(self, 'initialized'):
-            self.supabase_client = None
             self.sqlite_conn = None
             self.pg_conn = None
             self.initialized = True
 
     async def initialize(self):
         """Initialise les connexions aux bases de données"""
-        try:
-            self.supabase_client = create_client(
-                SUPABASE_URL,
-                SUPABASE_KEY,
-                options=ClientOptions(
-                    schema="public",
-                    headers={"Authorization": f"Bearer {JWT_KEY}"},
-                    auto_refresh_token=True,
-                    persist_session=True
-                )
-            )
-            logger.debug("Client Supabase initialisé avec succès")
-        except Exception as e:
-            logger.error(f"Erreur lors de l'initialisation du client Supabase: {e}")
-            raise
-
         try:
             self.sqlite_conn = sqlite3.connect("local_db.db")
             logger.debug("Connexion SQLite établie avec succès")
@@ -60,17 +43,33 @@ class DatabaseManager:
 
     async def clone_tables(self):
         """Clone les tables spécifiées de Supabase vers SQLite"""
-        if not self.supabase_client or not self.sqlite_conn:
+        if not self.pg_conn or not self.sqlite_conn:
             await self.initialize()
 
         for table_name in TABLES_TO_CLONE:
             try:
-                logger.info(f"Clonage de la table {table_name}")
-                response = self.supabase_client.table(table_name).select("*").execute()
-                data = response.data
-
+                logger.debug(f"Clonage de la table {table_name}")
+                
+                with self.pg_conn.cursor() as cursor:
+                    cursor.execute("""
+                        SELECT column_name 
+                        FROM information_schema.columns 
+                        WHERE table_schema = 'public' AND table_name = %s 
+                        ORDER BY ordinal_position
+                    """, (table_name,))
+                    columns = [row[0] for row in cursor.fetchall()]
+                
+                if not columns:
+                    logger.warning(f"Aucune colonne trouvée pour la table {table_name}")
+                    continue
+                
+                with self.pg_conn.cursor() as cursor:
+                    cursor.execute(f"SELECT * FROM {table_name}")
+                    rows = cursor.fetchall()
+                
+                data = [dict(zip(columns, row)) for row in rows]
+                
                 if data:
-                    columns = list(data[0].keys())
                     column_defs = ", ".join([f"{col} TEXT" for col in columns])
 
                     self.sqlite_conn.execute(f"DROP TABLE IF EXISTS {table_name}")
@@ -81,9 +80,13 @@ class DatabaseManager:
                         values = [json.dumps(row[col]) if isinstance(row[col], (list, dict)) else row[col] for col in columns]
                         self.sqlite_conn.execute(insert_sql, values)
                     self.sqlite_conn.commit()
-                    logger.info(f"Table {table_name} clonée avec succès ({len(data)} lignes)")
+                    logger.debug(f"Table {table_name} clonée avec succès ({len(data)} lignes)")
                 else:
-                    logger.info(f"Table {table_name} vide, création de table vide")
+                    logger.debug(f"Table {table_name} vide, création de table vide")
+                    column_defs = ", ".join([f"{col} TEXT" for col in columns])
+                    self.sqlite_conn.execute(f"DROP TABLE IF EXISTS {table_name}")
+                    self.sqlite_conn.execute(f"CREATE TABLE {table_name} ({column_defs})")
+                    self.sqlite_conn.commit()
             except Exception as e:
                 logger.error(f"Erreur lors du clonage de {table_name}: {e}")
 

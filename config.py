@@ -54,14 +54,13 @@ GRAFANA_USER_ID: str = LOGS_SECTION.get("user_id")
 GRAFANA_API_KEY: str = os.environ.get("GRAFANA_API_KEY")
 GRAFANA_URL: str = LOGS_SECTION.get("grafana_url")
 
-HOST: str = API_SECTION.get("host")
-PORT: int = API_SECTION.get("port")
-SSL_CERTFILE: str = API_SECTION.get("ssl_certfile")
-SSL_KEYFILE: str = API_SECTION.get("ssl_keyfile")
+API_HOST: str = API_SECTION.get("host")
+API_PORT: int = API_SECTION.get("port")
+API_SSL_CERTFILE: str = API_SECTION.get("ssl_certfile")
+API_SSL_KEYFILE: str = API_SECTION.get("ssl_keyfile")
 API_URL: str = API_SECTION.get("api_url")
-REQUEST_TIMEOUT: int = API_SECTION.get("request_timeout")
+API_REQUEST_TIMEOUT: int = API_SECTION.get("request_timeout")
 API_KEY_REQUIRED: bool = bool(API_SECTION.get("api_key_required"))
-
 API_KEYS: Iterable[str] = []
 API_KEYS_MAPPING: Dict[str, str] = {}
 
@@ -105,13 +104,10 @@ POLLINATIONS_API_KEY: str = os.environ.get("POLLINATIONS_API_KEY")
 MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY")
 NAVY_API_KEY: str = os.environ.get("NAVY_API_KEY")
 
-SUPABASE_URL: str = os.environ.get("SUPABASE_URL")
-SUPABASE_KEY: str = os.environ.get("SUPABASE_KEY")
-JWT_KEY: str = os.environ.get("JWT_KEY")
-USER: str = os.environ.get("SUPABASE_USER")
-PASSWORD: str = os.environ.get("SUPABASE_PASSWORD")
-HOST: str = os.environ.get("SUPABASE_HOST")
-PORT: str = os.environ.get("SUPABASE_PORT")
-DBNAME: str = os.environ.get("SUPABASE_DBNAME")
-SUPABASE_PG: str = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
+SUPABASE_USER: str = os.environ.get("SUPABASE_USER")
+SUPABASE_PASSWORD: str = os.environ.get("SUPABASE_PASSWORD")
+SUPABASE_HOST: str = os.environ.get("SUPABASE_HOST")
+SUPABASE_PORT: str = os.environ.get("SUPABASE_PORT")
+SUPABASE_DBNAME: str = os.environ.get("SUPABASE_DBNAME")
+SUPABASE_PG: str = f"postgresql://{SUPABASE_USER}:{SUPABASE_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DBNAME}"
 TABLES_TO_CLONE: Iterable[str] = DATABASE_SECTION.get("tables_to_clone")
