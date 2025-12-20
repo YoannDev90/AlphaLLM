@@ -22,7 +22,6 @@ async def on_ready():
     await bot.tree.sync()
     command_id_manager.set_bot(bot)
     await command_id_manager.fetch_command_ids()
-    logger.info("Command IDs fetched successfully")
 
 @bot.event
 async def on_message(message):

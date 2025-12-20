@@ -13,7 +13,7 @@ from utils.memory import get_memory_manager, initialize_memory_manager
 from utils.discord_utils.permission_checker import PermissionChecker
 
 logger = logging.getLogger(LOGGER_NAME)
-permission_checker = PermissionChecker()
+perms_checker = PermissionChecker()
 
 
 @dataclass
@@ -110,8 +110,8 @@ async def unified_text_manager(
     if isinstance(model, Text_Model):
         model = model.value
 
-    if origin == Origin.DISCORD and permission_checker and message:
-        authorized, reason = permission_checker.is_authorized_msg(message)
+    if origin == Origin.DISCORD and perms_checker and message:
+        authorized, reason = await perms_checker.is_authorized_msg(message)
         if not authorized:
             user = message.author if hasattr(message, 'author') else message.user
             logger.debug(f"Message non autorisé de {user.display_name} (ID: {user.id}): {reason}")

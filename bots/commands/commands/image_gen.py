@@ -1,5 +1,8 @@
 import asyncio
 from io import BytesIO
+import random
+import string
+from datetime import datetime
 
 import discord
 import logging
@@ -50,8 +53,8 @@ async def setup(bot: discord.Client):
         enhance: bool = True,
     ):
         await interaction.response.defer()
-        checker = PermissionChecker()
-        authorized, reason = checker.is_authorized(interaction)
+        perms_checker = PermissionChecker()
+        authorized, reason = await perms_checker.is_authorized_int(interaction)
         if not authorized:
             await interaction.followup.send(f"⛔️ {reason}")
             return
@@ -68,58 +71,36 @@ async def setup(bot: discord.Client):
         elif number > 3:
             number = 3
             warning_message = f"⚠️ Number adjusted from {original_number} to 3 (maximum allowed).\n"
-
-        for _ in range(number):
-            await asyncio.to_thread(user_manager.record_image_usage, interaction.user.id)
-        try:
-            await asyncio.to_thread(user_manager.record_interaction, interaction.user.id)
-        except Exception as exc:
-            logger.debug(f"Failed to record interaction: {exc}")
         model = "flux" if not model else model
         size = "1024x1024" if not size else size
         
-        if enhance:
-            enhanced_prompts = await enhance_image_prompt(prompt, number)
-            prompts_to_generate = []
-            for i in range(1, number + 1):
-                if i in enhanced_prompts:
-                    prompts_to_generate.append(enhanced_prompts[i])
-                else:
-                    prompts_to_generate.append(prompt)
-        else:
-            prompts_to_generate = [prompt] * number
 
-        images_data = []
-        
-        for current_prompt in prompts_to_generate:
-            try:
-                logger.info(f"Generating image with prompt: {current_prompt}")
-                result = await unified_image_manager(current_prompt, model, num_images=1, size=size, enhance=False, format=Format.BYTES, user_id=interaction.user.id)
-                image_data = result[0] if result else None
-                images_data.append((image_data, current_prompt))
-                if image_data:
-                    logger.info(f"Image generated for {interaction.user.display_name}")
-                else:
-                    logger.error(f"Failed to generate image")
-            except Exception as e:
-                logger.error(f"Error generating image: {str(e)}")
-                images_data.append((None, current_prompt))
+        try:
+            logger.info(f"Generating image with prompt: {current_prompt}")
+            result = await unified_image_manager(current_prompt, model, number, size=size, enhance=False, format=Format.BYTES, user_id=interaction.user.id)
+            if result:
+                logger.info(f"Image generated for {interaction.user.display_name}")
+            else:
+                logger.error(f"Failed to generate image")
+        except Exception as e:
+            logger.error(f"Error generating image: {str(e)}")
 
         success_count = 0
         failed_count = 0
         
-        logger.debug(f"Début de l'envoi de {len(images_data)} image(s) pour {interaction.user.display_name}")
+        logger.debug(f"Début de l'envoi de {len(result)} image(s) pour {interaction.user.display_name}")
         
         if warning_message:
             await interaction.followup.send(warning_message.rstrip())
         
-        for idx, (image_data, current_prompt) in enumerate(images_data, 1):
+        for idx, (image_data, current_prompt) in enumerate(result, 1):
             image_num = idx
             logger.debug(f"Traitement de l'image {image_num}/{number} - Données présentes: {image_data is not None}")
             if image_data:
                 try:
-                    file = discord.File(image_data, filename=f"generated_image_{image_num}.png")
-                    view = ImageView(current_prompt, model, size, enhance)
+                    filename = f"{datetime.now().strftime('%m%d_%H%M%S%f')}_{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.png"
+                    file = discord.File(image_data, filename=filename)
+                    #view = ImageView(current_prompt, model, size, enhance)
                     
                     logger.debug(f"Tentative d'envoi de l'image {image_num}/{number}")
                     
@@ -127,16 +108,16 @@ async def setup(bot: discord.Client):
                         message = await interaction.followup.send(
                             f"🎨 Image {image_num}/{number}:\n```{current_prompt}```", 
                             file=file, 
-                            view=view
+                            #view=view
                         )
                     else:
                         message = await interaction.followup.send(
                             f"🎨 Image {image_num}/{number}:\n```{current_prompt}```", 
                             file=file, 
-                            view=view
+                            #view=view
                         )
                     
-                    view.message = message
+                    #view.message = message
                     success_count += 1
                 except Exception as e:
                     logger.error(f"Erreur lors de l'envoi de l'image {image_num}/{number}: {str(e)}")

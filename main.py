@@ -19,6 +19,11 @@ import utils.ressources as ressources
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
 
+RUN_API = False
+RUN_LOGGER_BOT = False
+RUN_MAIN_BOT = True
+RUN_ADMIN_BOT = False
+
 async def check_stop_file(restart_pending):
     """Vérifie périodiquement la présence du fichier stop.json"""
     logger = logging.getLogger(LOGGER_NAME)
@@ -113,10 +118,10 @@ async def main() -> None:
             await db_manager.clone_tables()
             
             tasks = [
-                run_with_shutdown(run_logger_bot(), "Logger Bot"),
-                run_with_shutdown(run_bot(), "Main Bot"),
-                run_with_shutdown(run_admin_bot(), "Admin Bot"),
-                run_with_shutdown(start_api_async(), "API Server"),
+                run_with_shutdown(run_logger_bot(), "Logger Bot") if RUN_LOGGER_BOT else asyncio.sleep(0),
+                run_with_shutdown(run_bot(), "Main Bot") if RUN_MAIN_BOT else asyncio.sleep(0),
+                run_with_shutdown(run_admin_bot(), "Admin Bot") if RUN_ADMIN_BOT else asyncio.sleep(0),
+                run_with_shutdown(start_api_async(), "API Server") if RUN_API else asyncio.sleep(0),
                 run_with_shutdown(check_stop_file(restart_pending), "Stop-File Checker"),
             ]
             
