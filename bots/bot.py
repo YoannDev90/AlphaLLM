@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from bots.commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
+from utils.discord_utils.commands_ids import command_id_manager
 from utils.unified_text import Text_Model, Origin, unified_text_manager
 
 intents = discord.Intents.default()
@@ -19,6 +20,9 @@ async def on_ready():
     activity = discord.CustomActivity(name="🤖 Try @AlphaLLM or /commands")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
+    command_id_manager.set_bot(bot)
+    await command_id_manager.fetch_command_ids()
+    logger.info("Command IDs fetched successfully")
 
 @bot.event
 async def on_message(message):

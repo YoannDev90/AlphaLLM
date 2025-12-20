@@ -34,7 +34,6 @@ async def setup(bot: discord.Client):
             embed.add_field(
                 name="⚙️ Configuration Commands",
                 value=(
-                    f"{command_id_manager.get_command_mention('user-config')} - Configure your personal settings\n"
                     f"{command_id_manager.get_command_mention('guild-config')} - Configure server settings (Admin only)"
                 ),
                 inline=False
@@ -45,19 +44,9 @@ async def setup(bot: discord.Client):
                 name="🆘 Help & Support Commands",
                 value=(
                     f"{command_id_manager.get_command_mention('help-bot')} - Show detailed help information\n"
-                    f"{command_id_manager.get_command_mention('status')} - Show details ping informations\n"
+                    #f"{command_id_manager.get_command_mention('status')} - Show details ping informations\n"
                     f"{command_id_manager.get_command_mention('support')} - Get support server link\n"
                     f"{command_id_manager.get_command_mention('contact-dev')} - Contact the developer directly"
-                ),
-                inline=False
-            )
-            
-            # Commands d'installation
-            embed.add_field(
-                name="🔧 Installation Commands",
-                value=(
-                    f"{command_id_manager.get_command_mention('install')} - Install other AlphaLLM specialized bots\n"
-                    f"{command_id_manager.get_command_mention('uninstall')} - Remove AlphaLLM bots from server"
                 ),
                 inline=False
             )

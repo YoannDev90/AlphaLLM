@@ -14,7 +14,7 @@ async def setup_commands(bot, is_admin_bot=False):
         directory_path = os.path.join(current_dir, commands_directory)
         for filename in os.listdir(directory_path):
             if filename.endswith('.py') and filename != '__init__.py':
-                module_name = f'commands.{commands_directory}.{filename[:-3]}'
+                module_name = f'bots.commands.{commands_directory}.{filename[:-3]}'
                 try:
                     module = importlib.import_module(module_name)
                     if hasattr(module, 'setup'):

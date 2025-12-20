@@ -1,7 +1,6 @@
 import discord
 from discord import app_commands
-from utils.unified_text import unified_text_manager, Origin, Model
-from utils.discord_utils.permission_checker import PermissionChecker
+from utils.unified_text import unified_text_manager, Origin
 from config import LOGGER_NAME
 import logging
 
@@ -41,7 +40,6 @@ async def setup(bot: discord.Client):
     @app_commands.choices(model=MODELS)
     async def ask(interaction: discord.Interaction, input: str, model: str = "auto"):
         logger.info(f"Commande /ask exécutée par {interaction.user.display_name}")
-        permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
         await interaction.response.defer()
         try:  
             results = [result async for result in unified_text_manager(
@@ -53,7 +51,6 @@ async def setup(bot: discord.Client):
                 origin=Origin.DISCORD,
                 message=interaction,
                 bot=bot,
-                permission_checker=permission_checker,
                 stream=False
             )]
             result = results[0]

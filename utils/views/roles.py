@@ -45,9 +45,7 @@ class RoleSelectView(View):
             part = options[i:i + 25]
             self.add_item(RoleSelect(part))
         self.add_item(DoneButton())
-        logger.info("RoleSelectView initialized")
     
     async def on_timeout(self):
-        logger.warning("RoleSelectView timed out")
         for item in self.children:
             item.disabled = True

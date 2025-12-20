@@ -30,12 +30,26 @@ class CommandIDManager:
             return {}
         
         try:
-            commands = await self.bot.tree.fetch_commands()
-            
             command_ids = {}
-            for command in commands:
-                command_ids[command.name] = command.id
-                logger.debug(f"Commande trouvée: {command.name} (ID: {command.id})")
+            
+            # Fetch global commands
+            try:
+                commands = await self.bot.tree.fetch_commands()
+                for command in commands:
+                    command_ids[command.name] = command.id
+                    logger.debug(f"Commande globale trouvée: {command.name} (ID: {command.id})")
+            except Exception as e:
+                logger.error(f"Erreur lors de la récupération des commandes globales: {e}")
+            
+            # Fetch guild commands
+            for guild in self.bot.guilds:
+                try:
+                    commands = await self.bot.tree.fetch_commands(guild=guild)
+                    for command in commands:
+                        command_ids[command.name] = command.id
+                        logger.debug(f"Commande trouvée dans {guild.name}: {command.name} (ID: {command.id})")
+                except Exception as e:
+                    logger.error(f"Erreur lors de la récupération des commandes pour {guild.name}: {e}")
             
             self.command_ids = command_ids
             return command_ids
