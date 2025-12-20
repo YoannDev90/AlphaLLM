@@ -2,7 +2,7 @@
 
 [![GitHub stars](https://img.shields.io/github/stars/YoannDev90/AlphaLLM?style=flat-square)](https://github.com/YoannDev90/AlphaLLM/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/YoannDev90/AlphaLLM?style=flat-square)](https://github.com/YoannDev90/AlphaLLM/issues)
-[![GitHub license](https://img.shields.io/github/license/YoannDev90/AlphaLLM?style=flat-square)](https://github.com/YoannDev90/AlphaLLM/blob/dev/LICENSE)
+[![GitHub license](https://img.shields.io/github/license/YoannDev90/AlphaLLM?style=flat-square&type=mit)](https://github.com/YoannDev90/AlphaLLM/blob/dev/LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square)](https://www.python.org/downloads/)
 [![Discord](https://img.shields.io/discord/1327996079786168441?color=blue&label=Discord&logo=discord&style=flat-square)](https://discord.com/invite/QGvyrUgwdK)
 
