@@ -1,12 +1,17 @@
 import asyncio
 import base64
 import os
-import random
-import urllib.parse
 from pathlib import Path
+import logging
+import random
+import urllib
 
 import aiohttp
 from dotenv import load_dotenv
+
+from config import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 load_dotenv()
 POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
@@ -52,8 +57,8 @@ async def generate_nanobanana(prompt: str, size: str = "1024x1024", image_url : 
                 return base64.b64encode(image_data).decode('utf-8')
             else:
                 error_message = await response.text()
-                raise Exception(f"Erreur lors de la génération de l'image. Status: {response.status} - {error_message}")
-
+                logger.error(f"Erreur lors de la génération de l'image. Status: {response.status} - {error_message}")
+                return None
 
 if __name__ == "__main__":
     prompt = input("Enter prompt (default: 'A vibrant coral reef with fish'): ").strip() or "A vibrant coral reef with fish"

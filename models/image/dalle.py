@@ -2,13 +2,18 @@ import asyncio
 import base64
 import os
 from pathlib import Path
+import logging
 
 import aiohttp
 import litellm
 from dotenv import load_dotenv
 
+from config import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
+
 load_dotenv()
-MNNAI_API_KEY = os.getenv("MNN_AI_API_KEY")
+MNNAI_API_KEY = os.getenv("MNN_API_KEY")
 
 async def generate_dalle(prompt: str, size: str = "1024x1024") -> str:
     """
@@ -35,7 +40,8 @@ async def generate_dalle(prompt: str, size: str = "1024x1024") -> str:
                 image_data = await response.read()
                 return base64.b64encode(image_data).decode('utf-8')
             else:
-                raise Exception(f"Erreur lors du téléchargement de l'image: {response.status}")
+                logger.error(f"Erreur lors du téléchargement de l'image: {response.status}")
+                return None
 
 
 if __name__ == "__main__":

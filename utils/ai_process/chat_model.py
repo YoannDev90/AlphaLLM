@@ -193,7 +193,7 @@ class ChatModel(BaseChatModel):
                     logger.warning(f"Erreur avec {config['litellm_params']['model']}: {str(e)}")
                     continue
 
-            raise Exception("Tous les fallbacks ont échoué")
+            logger.error("Tous les fallbacks ont échoué")
 
     async def _non_stream_chat(self, parameters: ChatParameters, start_time: datetime) -> ChatResult:
         """Chat non-streaming avec fallbacks natifs"""
@@ -241,7 +241,7 @@ class ChatModel(BaseChatModel):
             model = response.model
             response_text = response.choices[0].message.content
             if response_text is None or response_text.strip() == "":
-                raise Exception("Model returned empty response")
+                logger.error("Model returned empty response")
             response_text = self._process_perplexity_citations(response_text, response)
 
             gen.update(

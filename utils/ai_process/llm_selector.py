@@ -39,7 +39,7 @@ class LLMSelector:
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
             else:
-                raise Exception(f"Megallm API error: {response.status_code} {response.text}")
+                logger.error(f"Megallm API error: {response.status_code} {response.text}")
         
         return await asyncio.to_thread(_sync_request)
 
@@ -59,7 +59,7 @@ class LLMSelector:
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
             else:
-                raise Exception(f"IO Intelligence API error: {response.status_code} {response.text}")
+                logger.error(f"IO Intelligence API error: {response.status_code} {response.text}")
         
         return await asyncio.to_thread(_sync_request)
 
@@ -79,7 +79,7 @@ class LLMSelector:
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
             else:
-                raise Exception(f"OpenRouter API error: {response.status_code} {response.text}")
+                logger.error(f"OpenRouter API error: {response.status_code} {response.text}")
         
         return await asyncio.to_thread(_sync_request)
 

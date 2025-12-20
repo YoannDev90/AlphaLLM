@@ -61,12 +61,12 @@ def _generate_memory_graph(snapshots) -> BytesIO:
             return None
 
         times = [s.timestamp for s in snapshots]
-        memories = [float(s.max_memory) if s.max_memory is not None else 0 for s in snapshots]
+        memories = [float(s.memory_percent) if s.memory_percent is not None else 0 for s in snapshots]
 
         fig, ax = plt.subplots(figsize=(10, 5), facecolor='black')
         ax.set_facecolor('black')
         ax.plot(times, memories, color='blue', linewidth=2)
-        ax.set_ylabel('Memory (MB)', color='white')
+        ax.set_ylabel('Memory %', color='white')
         ax.grid(True, alpha=0.3, color='gray')
         ax.tick_params(colors='white')
         ax.set_xticklabels([])  # Hide X-axis timestamps
@@ -117,13 +117,13 @@ async def setup(bot: discord.Client):
                 # Current values
                 if latest_snapshot:
                     cpu_percent = float(latest_snapshot.cpu_percent) if latest_snapshot.cpu_percent else 0
-                    memory_mb = float(latest_snapshot.max_memory) if latest_snapshot.max_memory else 0
+                    memory_percent = float(latest_snapshot.memory_percent) if latest_snapshot.memory_percent else 0
 
                     embed.add_field(
                         name="⚡ Current Usage",
                         value=(
                             f"**CPU:** {cpu_percent:.2f}% | {latest_snapshot.cpu_time:.2f}s\n"
-                            f"**RAM:** {memory_mb:.1f} MB"
+                            f"**RAM:** {memory_percent:.1f}%"
                         ),
                         inline=False
                     )
@@ -131,7 +131,7 @@ async def setup(bot: discord.Client):
                 # Averages from last 10 minutes
                 if recent_snapshots:
                     cpu_percents = [float(s.cpu_percent) for s in recent_snapshots if s.cpu_percent]
-                    memories = [float(s.max_memory) for s in recent_snapshots if s.max_memory]
+                    memories = [float(s.memory_percent) for s in recent_snapshots if s.memory_percent]
 
                     avg_cpu = sum(cpu_percents) / len(cpu_percents) if cpu_percents else 0
                     avg_memory = sum(memories) / len(memories) if memories else 0
@@ -140,7 +140,7 @@ async def setup(bot: discord.Client):
                         name="📈 Averages (10 min)",
                         value=(
                             f"**CPU Usage:** {avg_cpu:.2f}%\n"
-                            f"**RAM Usage:** {avg_memory:.1f} MB"
+                            f"**RAM Usage:** {avg_memory:.1f}%"
                         ),
                         inline=False
                     )

@@ -6,7 +6,7 @@ from discord.ext import commands
 from commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
 from utils.discord_utils.permission_checker import PermissionChecker
-from utils.unified_text import Model, Origin, unified_manager
+from utils.unified_text import Model, Origin, unified_text_manager
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
@@ -33,7 +33,7 @@ async def on_message(message):
         for attachment in message.attachments:
             files.append(attachment.url)
     
-    response = [result async for result in unified_manager(
+    response = [result async for result in unified_text_manager(
         user_id=message.author.id,
         conv_id=message.channel.id,
         input=message.content,

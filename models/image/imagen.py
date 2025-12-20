@@ -2,13 +2,18 @@ import asyncio
 import base64
 import os
 from pathlib import Path
+import logging
 
 import aiohttp
 import litellm
 from dotenv import load_dotenv
 
+from config import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
+
 load_dotenv()
-MNNAI_API_KEY = os.getenv("MNN_AI_API_KEY")
+MNNAI_API_KEY = os.getenv("MNN_API_KEY")
 
 async def generate_imagen(prompt: str, size: str = "1024x1024") -> str:
     """
@@ -22,11 +27,11 @@ async def generate_imagen(prompt: str, size: str = "1024x1024") -> str:
         L'image encodée en base64
     """
     image = litellm.image_generation(
-        model="openai/sd-3.5-medium",
+        model="openai/flux-dev",
         api_key=MNNAI_API_KEY,
         api_base="https://api.mnnai.ru/v1",
         size=size,
-        prompt=prompt                
+        prompt=prompt             
     )
     
     async with aiohttp.ClientSession() as session:
@@ -35,11 +40,12 @@ async def generate_imagen(prompt: str, size: str = "1024x1024") -> str:
                 image_data = await response.read()
                 return base64.b64encode(image_data).decode('utf-8')
             else:
-                raise Exception(f"Erreur lors du téléchargement de l'image: {response.status}")
+                logger.error(f"Erreur lors du téléchargement de l'image: {response.status}")
+                return None
 
 
 if __name__ == "__main__":
-    prompt = input("Enter prompt (default: 'A fantasy landscape with dragons'): ").strip() or "A fantasy landscape with dragons"
+    prompt = input("Enter prompt (default: 'A serene lake with mountain'): ").strip() or "A serene lake with mountain"
     size = input("Enter size (default: '1024x1024'): ").strip() or "1024x1024"
     
     print(f"Generating image with prompt: '{prompt}'")

@@ -27,7 +27,7 @@ class ResourceSnapshot:
     cpu_user_time: Optional[float] = None
     cpu_sys_time: Optional[float] = None
     cpu_percent: Optional[float] = None
-    max_memory: Optional[float] = None
+    memory_percent: Optional[float] = None
     page_faults_minor: Optional[int] = None
     page_faults_major: Optional[int] = None
     io_reads: Optional[int] = None
@@ -44,7 +44,7 @@ class ResourceSnapshot:
             "cpu_user_time_sec": f"{self.cpu_user_time:.5f}" if self.cpu_user_time is not None else None,
             "cpu_sys_time_sec": f"{self.cpu_sys_time:.5f}" if self.cpu_sys_time is not None else None,
             "cpu_percent": f"{self.cpu_percent:.5f}" if self.cpu_percent is not None else None,
-            "max_memory_mb": f"{self.max_memory:.5f}" if self.max_memory is not None else None,
+            "memory_percent": f"{self.memory_percent:.5f}" if self.memory_percent is not None else None,
             "page_faults_minor": self.page_faults_minor,
             "page_faults_major": self.page_faults_major,
             "io_reads": self.io_reads,
@@ -90,7 +90,7 @@ class ResourceMonitor:
                     "cpu_user_time_sec",
                     "cpu_sys_time_sec",
                     "cpu_percent",
-                    "max_memory_mb",
+                    "memory_percent",
                     "page_faults_minor",
                     "page_faults_major",
                     "io_reads",
@@ -116,7 +116,7 @@ class ResourceMonitor:
                     "cpu_user_time_sec",
                     "cpu_sys_time_sec",
                     "cpu_percent",
-                    "max_memory_mb",
+                    "memory_percent",
                     "page_faults_minor",
                     "page_faults_major",
                     "io_reads",
@@ -158,6 +158,8 @@ class ResourceMonitor:
             else:
                 max_memory_mb = max_memory_kb / 1024
 
+            memory_percent = (max_memory_mb / 4096) * 100
+
             snapshot = ResourceSnapshot(
                 timestamp=datetime.now(),
                 process_id=self.process_id,
@@ -165,7 +167,7 @@ class ResourceMonitor:
                 cpu_user_time=cpu_user,
                 cpu_sys_time=cpu_system,
                 cpu_percent=cpu_percent,
-                max_memory=max_memory_mb,
+                memory_percent=memory_percent,
                 page_faults_minor=rusage.ru_minflt,
                 page_faults_major=rusage.ru_majflt,
                 io_reads=rusage.ru_inblock,
@@ -237,7 +239,7 @@ class ResourceMonitor:
                     "cpu_percent_max": max(cpu_percents),
                     "cpu_percent_avg": sum(cpu_percents) / len(cpu_percents),
                 })
-            memory_values = [snapshot.max_memory for snapshot in self.samples if snapshot.max_memory is not None]
+            memory_values = [snapshot.memory_percent for snapshot in self.samples if snapshot.memory_percent is not None]
             if memory_values:
                 stats.update({
                     "memory_min": min(memory_values),
@@ -296,7 +298,7 @@ class ResourceMonitor:
                     "cpu_user_time_sec",
                     "cpu_sys_time_sec",
                     "cpu_percent",
-                    "max_memory_mb",
+                    "memory_percent",
                     "page_faults_minor",
                     "page_faults_major",
                     "io_reads",
@@ -396,7 +398,7 @@ class ResourceMonitor:
             "cpu_user_time_sec",
             "cpu_sys_time_sec",
             "cpu_percent",
-            "max_memory_mb",
+            "memory_percent",
             "page_faults_minor",
             "page_faults_major",
             "io_reads",
@@ -419,7 +421,7 @@ class ResourceMonitor:
                             cpu_user_time=0.0,
                             cpu_sys_time=0.0,
                             cpu_percent=0.0,
-                            max_memory=0.0,
+                            memory_percent=0.0,
                             page_faults_minor=0,
                             page_faults_major=0,
                             io_reads=0,
@@ -442,7 +444,7 @@ class ResourceMonitor:
                         cpu_user_time=0.0,
                         cpu_sys_time=0.0,
                         cpu_percent=0.0,
-                        max_memory=0.0,
+                        memory_percent=0.0,
                         page_faults_minor=0,
                         page_faults_major=0,
                         io_reads=0,

@@ -1,6 +1,6 @@
 import discord
 from discord import app_commands
-from utils.unified_text import unified_manager, Origin, Model
+from utils.unified_text import unified_text_manager, Origin, Model
 from utils.discord_utils.permission_checker import PermissionChecker
 from config import LOGGER_NAME
 import logging
@@ -44,7 +44,7 @@ async def setup(bot: discord.Client):
         permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
         await interaction.response.defer()
         try:  
-            results = [result async for result in unified_manager(
+            results = [result async for result in unified_text_manager(
                 user_id=interaction.user.id,
                 conv_id=interaction.channel.id,
                 input=input,

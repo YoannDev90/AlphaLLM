@@ -35,7 +35,7 @@ def get_daily_data():
                 data.append({
                     'timestamp': ts,
                     'cpu_percent': float(row['cpu_percent']) if row['cpu_percent'] else 0.0,
-                    'max_memory_mb': float(row['max_memory_mb']) if row['max_memory_mb'] else 0.0,
+                    'memory_percent': float(row['memory_percent']) if row['memory_percent'] else 0.0,
                 })
     except Exception as e:
         logger.error(f"Error reading CSV: {e}")
@@ -51,11 +51,11 @@ def get_daily_data():
     for minute, samples in sorted(minute_data.items()):
         if samples:
             avg_cpu = sum(s['cpu_percent'] for s in samples) / len(samples)
-            avg_mem = sum(s['max_memory_mb'] for s in samples) / len(samples)
+            avg_mem = sum(s['memory_percent'] for s in samples) / len(samples)
             aggregated.append({
                 'timestamp': minute.isoformat(),
                 'cpu_percent': round(avg_cpu, 2),
-                'max_memory_mb': round(avg_mem, 2),
+                'memory_percent': round(avg_mem, 2),
             })
     return aggregated
 
@@ -68,7 +68,7 @@ def get_realtime_data():
     return [{
         'timestamp': s.timestamp.isoformat(),
         'cpu_percent': round(s.cpu_percent, 2) if s.cpu_percent else 0.0,
-        'max_memory_mb': round(s.max_memory, 2) if s.max_memory else 0.0,
+        'memory_percent': round(s.memory_percent, 2) if s.memory_percent else 0.0,
     } for s in recent]
 
 @router.get("/resources", tags=["general"])

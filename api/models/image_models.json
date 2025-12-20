@@ -3,21 +3,20 @@
     "name": "Flux",
     "author": "Black Forest Labs",
     "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bfl.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bfl.svg"
-  },
-  "sdxl": {
-    "name": "SDXL",
-    "author": "Stability AI",
-    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/stability-color.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/stability.svg",
-    "sizes": [
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bfl.svg",
+    "supported_sizes": [
       "768x768",
       "1024x1024",
       "1024x1792",
       "1792x1024",
+      "1152x896",
+      "896x1152",
+      "1536x1536",
       "2048x2048",
-      "2048x1792",
-      "1792x2048"
+      "2048x3072",
+      "3072x2048",
+      "3072x3072",
+      "4096x4096"
     ]
   },
   "dalle": {
@@ -25,7 +24,7 @@
     "author": "OpenAI",
     "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/dalle-color.svg",
     "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/dalle.svg",
-    "sizes": [
+    "supported_sizes": [
       "1024x1024",
       "1024x1792",
       "1792x1024"
@@ -35,36 +34,97 @@
     "name": "GPT-Image",
     "author": "OpenAI",
     "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/openai.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/openai.svg"
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/openai.svg",
+    "supported_sizes": [
+      "1024x1024",
+      "1024x1536",
+      "1536x1024"
+    ]
   },
   "imagen": {
     "name": "Imagen",
     "author": "Google",
     "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/deepmind-color.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/deepmind.svg"
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/deepmind.svg",
+    "supported_sizes": [
+      "1024x1024",
+      "1024x1792",
+      "1792x1024"
+    ]
   },
   "kontext": {
     "name": "Kontext",
     "author": "Black Forest Labs",
     "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bfl.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bfl.svg"
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bfl.svg",
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152",
+      "1536x1536",
+      "2048x2048",
+      "2048x3072",
+      "3072x2048",
+      "3072x3072",
+      "4096x4096"
+    ]
   },
   "nanobanana": {
     "name": "Nanobanana",
     "author": "Google",
     "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/gemini-color.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/gemini.svg"
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/gemini.svg",
+    "supported_sizes": [
+      "512x512",
+      "768x768",
+      "1024x1024",
+      "1152x896",
+      "896x1152",
+      "1536x1536",
+      "2048x2048",
+      "2048x3072",
+      "3072x2048",
+      "3072x3072",
+      "4096x4096"
+    ]
   },
   "seedream": {
     "name": "Seedream",
     "author": "ByteDance",
     "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bytedance-color.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bytedance.svg"
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bytedance.svg",
+    "supported_sizes": [
+      "1024x1024",
+      "1152x896",
+      "896x1152",
+      "1024x1792",
+      "1792x1024",
+      "1536x1536",
+      "2048x2048",
+      "2048x3072",
+      "3072x2048",
+      "3072x3072",
+      "4096x4096"
+    ]
   },
-  "grokimage": {
-    "name": "Grok-Image",
-    "author": "xAI",
-    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/grok.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/grok.svg"
+  "zimage": {
+    "name": "Z-Image",
+    "author": "Github",
+    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.77.0/icons/github.svg",
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.77.0/icons/github.svg",
+    "supported_sizes": [
+      "768x768",
+      "1024x1024",
+      "1024x1792",
+      "1792x1024",
+      "1536x1536",
+      "2048x2048",
+      "2048x3072",
+      "3072x2048",
+      "3072x3072",
+      "4096x4096"
+    ]
   }
 }

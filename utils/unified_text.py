@@ -45,7 +45,7 @@ class Origin:
 Origin.API = Origin("api")
 Origin.DISCORD = Origin("discord")
 
-class Model(Enum):
+class Text_Model(Enum):
     """Enum pour définir les modèles disponibles."""
     AUTO = "auto"
     CLAUDE = "claude"
@@ -74,11 +74,11 @@ class Model(Enum):
     SONAR = "sonar"
     YI = "yi"
 
-async def unified_manager(
+async def unified_text_manager(
         user_id: int, 
         conv_id: str, 
         input: str, 
-        model: Union[str, Model], 
+        model: Union[str, Text_Model], 
         files: Optional[List[Any]] = None, 
         origin: Optional[Origin] = None, 
         message: Optional[Any] = None, 
@@ -104,8 +104,8 @@ async def unified_manager(
         use_memory: Si True, utilise la mémoire. (API seulement)
     """
     origin = origin or Origin.API
-    model = model or Model.AUTO.value
-    if isinstance(model, Model):
+    model = model or Text_Model.AUTO.value
+    if isinstance(model, Text_Model):
         model = model.value
 
     if origin == Origin.DISCORD and permission_checker and message:
@@ -202,7 +202,7 @@ async def unified_manager(
             model = selected_model.lower()
             logger.info(f"Model auto-selected: {model}")
         else:
-            model = Model.LLAMA.value
+            model = Text_Model.LLAMA.value
             logger.info(f"No suitable model found, defaulting to: {model}")
             
     memory_manager = None
