@@ -3,16 +3,13 @@ import logging
 import discord
 from discord.ext import commands
 
-from commands.cmds import setup_commands
+from bots.commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
-from utils.discord_utils.permission_checker import PermissionChecker
-from utils.unified_text import Model, Origin, unified_text_manager
+from utils.unified_text import Text_Model, Origin, unified_text_manager
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
-
-permission_checker = PermissionChecker(blacklist=[], allowed_channels=[1445804368652931254])
 
 logging.getLogger('discord.ext.commands').setLevel(logging.CRITICAL)
 
@@ -37,12 +34,11 @@ async def on_message(message):
         user_id=message.author.id,
         conv_id=message.channel.id,
         input=message.content,
-        model=Model.AUTO,
+        model=Text_Model.AUTO,
         files=files if files else None,
         origin=Origin.DISCORD,
         message=message,
         bot=bot,
-        permission_checker=permission_checker,
         stream=False
     )]
     result = response[0]

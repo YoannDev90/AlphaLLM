@@ -10,8 +10,11 @@ from utils.ai_process.ai_utils import summarize
 from utils.ai_process.llm_selector import LLMSelector
 from utils.handlers.files import FileHandler
 from utils.memory import get_memory_manager, initialize_memory_manager
+from utils.discord_utils.permission_checker import PermissionChecker
 
 logger = logging.getLogger(LOGGER_NAME)
+permission_checker = PermissionChecker()
+
 
 @dataclass
 class RequestParameters:
@@ -83,7 +86,6 @@ async def unified_text_manager(
         origin: Optional[Origin] = None, 
         message: Optional[Any] = None, 
         bot: Optional[Any] = None, 
-        permission_checker: Optional[Any] = None, 
         stream: bool = False, 
         use_memory: bool = True
     ):
@@ -94,7 +96,7 @@ async def unified_text_manager(
         user_id: ID de l'utilisateur.
         conv_id: ID de la conversation.
         input: Texte d'entrée de l'utilisateur.
-        model: Modèle à utiliser (e.g., 'claude' or Model.CLAUDE).
+        model: Modèle à utiliser (e.g., 'claude' or Text_Model.CLAUDE).
         files: Liste des fichiers attachés (optionnel).
         origin: Origine de la requête (API ou Discord, via Origin).
         message: Message supplémentaire pour Discord (optionnel).
@@ -109,7 +111,7 @@ async def unified_text_manager(
         model = model.value
 
     if origin == Origin.DISCORD and permission_checker and message:
-        authorized, reason = permission_checker.is_authorized(message)
+        authorized, reason = permission_checker.is_authorized_msg(message)
         if not authorized:
             user = message.author if hasattr(message, 'author') else message.user
             logger.debug(f"Message non autorisé de {user.display_name} (ID: {user.id}): {reason}")

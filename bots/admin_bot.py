@@ -5,7 +5,7 @@ import logging
 import discord
 from discord.ext import commands
 
-from commands.cmds import setup_commands
+from bots.commands.cmds import setup_commands
 from config import ADMIN_BOT_TOKEN, DEV_IDS, LOGGER_NAME
 
 intents = discord.Intents.default()

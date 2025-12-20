@@ -2,7 +2,9 @@ import importlib
 import logging
 import os
 
-logger = logging.getLogger()
+from config import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup_commands(bot, is_admin_bot=False):
     commands_dir = ['admin_commands'] if is_admin_bot else ['commands']
@@ -21,5 +23,4 @@ async def setup_commands(bot, is_admin_bot=False):
                     else:
                         logger.warning(f"Le fichier {filename} n'a pas de fonction 'setup'")
                 except Exception as e:
-                    pass
-                    #logger.error(f"Erreur lors du chargement de {filename}: {str(e)}")
+                    logger.error(f"Erreur lors du chargement de {filename}: {str(e)}")

@@ -2,20 +2,16 @@ import asyncio
 from io import BytesIO
 
 import discord
+import logging
 from discord import app_commands
 
-from utils.image_gen import ImageGeneration, ImageGenerationFormat
+from utils.unified_image import unified_image_manager, Format
 from utils.ai_process.ai_utils import enhance_image_prompt
-from utils.config import LOGGER_NAME
-from utils.core.logger import get_logger
-from utils.database.models.blacklist import BlacklistManager
-from utils.database.models.user_manager import UserManager
-from embeds.image import ImageView
+from utils.discord_utils.permission_checker import PermissionChecker
 
-logger = get_logger(LOGGER_NAME)
+from config import LOGGER_NAME
 
-blacklist_manager = BlacklistManager()
-user_manager = UserManager()
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="image", description="Generate an image from a prompt")
@@ -27,16 +23,14 @@ async def setup(bot: discord.Client):
         enhance="Whether to enhance the image (default: Yes)"
     )
     @app_commands.choices(model=[
-        app_commands.Choice(name="Flux Schnell", value="flux"),
+        app_commands.Choice(name="Flux 2", value="flux"),
         app_commands.Choice(name="Flux Kontext", value="kontext"),
-        app_commands.Choice(name="Seedream", value="seedream"),
+        app_commands.Choice(name="Seedream 4", value="seedream"),
         app_commands.Choice(name="NanoBanana", value="nanobanana"),
         app_commands.Choice(name="DALL-E 3", value="dalle"),
-        app_commands.Choice(name="GPT Image", value="gptimage"),
+        app_commands.Choice(name="GPT Image 1", value="gptimage"),
         app_commands.Choice(name="Imagen 4", value="imagen"),
-        app_commands.Choice(name="Qwen Image", value="qwenimage"),
-        app_commands.Choice(name="Grok Image", value="grokimage"),
-        app_commands.Choice(name="SDXL", value="sdxl"),
+        app_commands.Choice(name="Z-Image", value="zimage"),
     ])
     @app_commands.choices(size=[
         app_commands.Choice(name="Square (1024x1024)", value="1024x1024"),
@@ -56,28 +50,10 @@ async def setup(bot: discord.Client):
         enhance: bool = True,
     ):
         await interaction.response.defer()
-
-        entries = []
-        try:
-            entries = await asyncio.to_thread(blacklist_manager.fetch_all)
-        except Exception as exc:
-            logger.debug(f"Failed to fetch blacklist entries: {exc}")
-
-        def _matches_blacklist(entry: dict) -> bool:
-            try:
-                return int(entry.get("id_discord", 0)) == interaction.user.id
-            except Exception:
-                return False
-
-        blacklist_entry = next((entry for entry in entries if _matches_blacklist(entry)), None)
-        if blacklist_entry:
-            reason = blacklist_entry.get("reason", "Unspecified")
-            logger.info(
-                f"Génération d'image de {interaction.user.display_name} (ID: {interaction.user.id}) ignorée - Liste noire - Motif: {reason}",
-            )
-            await interaction.followup.send(
-                f"⛔️ You are blacklisted from the bot (<@{interaction.user.id}>) - Reason: **{reason}**",
-            )
+        checker = PermissionChecker()
+        authorized, reason = checker.is_authorized(interaction)
+        if not authorized:
+            await interaction.followup.send(f"⛔️ {reason}")
             return
         
         logger.info(f"Commande /image exécutée par {interaction.user.display_name} ({interaction.user.id})")
@@ -114,26 +90,21 @@ async def setup(bot: discord.Client):
             prompts_to_generate = [prompt] * number
 
         images_data = []
-        nsfw_detected = False
         
-        for i, current_prompt in enumerate(prompts_to_generate, 1):
+        for current_prompt in prompts_to_generate:
             try:
-                logger.info(f"Generating image {i}/{number} with prompt: {current_prompt}")
-                gen = ImageGeneration(current_prompt, model, size, ImageGenerationFormat.BYTES)
-                image_data = await gen.generate()
-                
-                nsfw = False
-                images_data.append((image_data, nsfw, current_prompt, i))
-                logger.info(f"Image {i}/{number} générée pour {interaction.user.display_name}")
+                logger.info(f"Generating image with prompt: {current_prompt}")
+                result = await unified_image_manager(current_prompt, model, num_images=1, size=size, enhance=False, format=Format.BYTES, user_id=interaction.user.id)
+                image_data = result[0] if result else None
+                images_data.append((image_data, current_prompt))
+                if image_data:
+                    logger.info(f"Image generated for {interaction.user.display_name}")
+                else:
+                    logger.error(f"Failed to generate image")
             except Exception as e:
-                logger.error(f"Erreur génération image {i}: {str(e)}")
-                images_data.append((None, False, current_prompt, i))
+                logger.error(f"Error generating image: {str(e)}")
+                images_data.append((None, current_prompt))
 
-        if nsfw_detected and not interaction.channel.is_nsfw():
-            logger.warning(f"Image NSFW générée par {interaction.user.display_name} dans un canal non NSFW")
-            await interaction.followup.send("🔞 One or more images are NSFW and cannot be sent in a non-NSFW channel.")
-            return
-        
         success_count = 0
         failed_count = 0
         
@@ -142,11 +113,12 @@ async def setup(bot: discord.Client):
         if warning_message:
             await interaction.followup.send(warning_message.rstrip())
         
-        for image_data, nsfw, current_prompt, image_num in images_data:
+        for idx, (image_data, current_prompt) in enumerate(images_data, 1):
+            image_num = idx
             logger.debug(f"Traitement de l'image {image_num}/{number} - Données présentes: {image_data is not None}")
             if image_data:
                 try:
-                    file = discord.File(BytesIO(image_data), filename=f"generated_image_{image_num}.png")
+                    file = discord.File(image_data, filename=f"generated_image_{image_num}.png")
                     view = ImageView(current_prompt, model, size, enhance)
                     
                     logger.debug(f"Tentative d'envoi de l'image {image_num}/{number}")

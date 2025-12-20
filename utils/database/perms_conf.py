@@ -36,3 +36,25 @@ async def remove_from_blacklist(user_id: int):
         logger.info(f"Utilisateur {user_id} retiré de la blacklist")
     except Exception as e:
         logger.error(f"Erreur lors de la suppression de la blacklist: {e}")
+
+async def get_channel_allowed(channel_id: int) -> bool:
+    try:
+        result = await db_manager.exc_get_query(
+            "SELECT id_channel FROM allowed_channels WHERE id_channel = ?",
+            (channel_id,)
+        )
+        return len(result) > 0
+    except Exception as e:
+        logger.error(f"Erreur lors de la vérification du canal autorisé: {e}")
+        return False
+    
+async def get_allowed_image_gen(channel_id: int) -> bool:
+    try:
+        result = await db_manager.exc_get_query(
+            "SELECT id_channel FROM allowed_image_gen WHERE id_channel = ?",
+            (channel_id,)
+        )
+        return len(result) > 0
+    except Exception as e:
+        logger.error(f"Erreur lors de la vérification du canal d'image autorisé: {e}")
+        return False
