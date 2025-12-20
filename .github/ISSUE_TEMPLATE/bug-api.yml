@@ -1,0 +1,79 @@
+name: Bug Report - API
+description: Report a bug in the API functionality
+title: "[BUG] API: "
+labels: ["bug", "api"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+      placeholder: Describe what happened.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Make a request to '...'
+        2. With parameters '....'
+        3. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened.
+    validations:
+      required: true
+  - type: input
+    id: endpoint
+    attributes:
+      label: API Endpoint
+      description: Which API endpoint is affected?
+      placeholder: e.g., /text_gen
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: What version of AlphaLLM are you using?
+      placeholder: e.g., v1.0.0
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Describe your environment (OS, Python version, etc.)
+      placeholder: e.g., Ubuntu 20.04, Python 3.12
+  - type: textarea
+    id: request
+    attributes:
+      label: Request Details
+      description: Provide the request method, headers, body, etc.
+      render: json
+  - type: textarea
+    id: response
+    attributes:
+      label: Response Details
+      description: Provide the response status, body, etc.
+      render: json
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: If applicable, add server logs to help explain your problem.
+      render: shell
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here.
