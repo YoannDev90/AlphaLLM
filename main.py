@@ -5,6 +5,7 @@ import logging
 import os
 import signal
 
+import utils.ressources as ressources
 from api.api import start_api_async
 from bots.admin_bot import run_admin_bot
 from bots.bot import run_bot
@@ -13,8 +14,8 @@ from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.database.db_manager import DatabaseManager
 from utils.memory import initialize_memory_manager
-from utils.ressources import get_default_monitor, start_monitoring, stop_monitoring
-import utils.ressources as ressources
+from utils.ressources import (get_default_monitor, start_monitoring,
+                              stop_monitoring)
 
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()

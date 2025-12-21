@@ -2,13 +2,14 @@
 Command for displaying system resource usage statistics
 """
 
-import discord
-from io import BytesIO
-from datetime import datetime, timedelta
 import logging
-from discord import app_commands
-from config import LOGGER_NAME
+from datetime import datetime, timedelta
+from io import BytesIO
 
+import discord
+from discord import app_commands
+
+from config import LOGGER_NAME
 from utils.ressources import get_default_monitor
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -16,8 +17,8 @@ logger = logging.getLogger(LOGGER_NAME)
 def _generate_cpu_graph(snapshots) -> BytesIO:
     """Generate CPU usage graph."""
     try:
-        import matplotlib.pyplot as plt
         import matplotlib
+        import matplotlib.pyplot as plt
         matplotlib.use('Agg')
     except ImportError:
         return None
@@ -50,8 +51,8 @@ def _generate_cpu_graph(snapshots) -> BytesIO:
 def _generate_memory_graph(snapshots) -> BytesIO:
     """Generate memory usage graph."""
     try:
-        import matplotlib.pyplot as plt
         import matplotlib
+        import matplotlib.pyplot as plt
         matplotlib.use('Agg')
     except ImportError:
         return None

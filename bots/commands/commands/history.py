@@ -1,10 +1,11 @@
+import logging
+
 import discord
 
-from utils.config import LOGGER_NAME
-from utils.core.logger import get_logger
+from config import LOGGER_NAME
 from utils.memory import get_memory_manager
 
-logger = get_logger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
     @bot.tree.command(name="clear-history", description="Reset your conversation history with the bot")

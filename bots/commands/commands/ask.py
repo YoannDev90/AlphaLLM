@@ -1,8 +1,10 @@
+import logging
+
 import discord
 from discord import app_commands
-from utils.unified_text import unified_text_manager, Origin
+
 from config import LOGGER_NAME
-import logging
+from utils.unified_text import Origin, unified_text_manager
 
 logger = logging.getLogger(LOGGER_NAME)
 

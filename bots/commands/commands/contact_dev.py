@@ -1,9 +1,11 @@
+import logging
+
 import discord
 from discord import app_commands
-from bots.admin_bot import bot as admin_bot
 from dotenv import load_dotenv
+
+from bots.admin_bot import bot as admin_bot
 from config import DEV_IDS, LOGGER_NAME
-import logging
 
 load_dotenv()
 logger = logging.getLogger(LOGGER_NAME)

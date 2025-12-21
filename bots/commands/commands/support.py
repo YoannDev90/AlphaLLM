@@ -1,7 +1,9 @@
+import logging
+
 import discord
 from discord import app_commands
+
 from config import LOGGER_NAME, SUPPORT_SERVER
-import logging
 
 logger = logging.getLogger(LOGGER_NAME)
 

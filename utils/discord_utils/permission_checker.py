@@ -1,7 +1,8 @@
-from utils.database.perms_conf import get_blacklist, get_allowed_channels, get_allowed_roles
 import logging
 
 from config import LOGGER_NAME
+from utils.database.perms_conf import (get_allowed_channels, get_allowed_roles,
+                                       get_blacklist)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -67,7 +68,12 @@ class PermissionChecker:
             return True, "Autorisé en MP"
         
         # Vérification des canaux autorisés (si configuré)
-        if not await get_allowed_channels(channel.id):
+        if channel.id not in await get_allowed_channels(guild.id):
             return False, "Canal non autorisé"
+                
+        # Vérification des rôles autorisés (si configuré)
+        user_roles_ids = [role.id for role in user.roles]
+        if not any(role_id in user_roles_ids for role_id in await get_allowed_roles(guild.id)):
+            return False, "Rôle non autorisé"
 
         return True, "Autorisé"

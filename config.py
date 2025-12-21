@@ -15,16 +15,15 @@ def load_toml_config(file_path: str = "config.toml") -> Dict[str, Any]:
 
 
 def read_file(file_path: str) -> str:
-    """Lit le contenu d'un fichier texte et remplace les placeholders <{code}> par {code}"""
+    """Lit le contenu d'un fichier texte"""
     with open(file_path, "r", encoding="utf-8") as f:
         txt = f.read()
-        return txt.replace("<", "{").replace(">", "}")
+        return txt
 
 
 CONFIG = load_toml_config()
 
 CONFIG_SECTION: Dict[str, Any] = CONFIG.get("config")
-LAUNCHER_SECTION: Dict[str, Any] = CONFIG.get("launcher")
 API_SECTION: Dict[str, Any] = CONFIG.get("api")
 LOGS_SECTION: Dict[str, Any] = CONFIG.get("logs")
 MEMORY_SECTION: Dict[str, Any] = CONFIG.get("memory")

@@ -1,12 +1,11 @@
+import base64
+import json
 import logging
+from enum import Enum
 from io import BytesIO
 from typing import Any, List, Optional, Union
-from enum import Enum
-import json
 
 from config import LOGGER_NAME
-from utils.ai_process.ai_utils import enhance_image_prompt
-
 from models.image.dalle import generate_dalle
 from models.image.flux import generate_flux
 from models.image.gptimage import generate_gptimage
@@ -15,6 +14,7 @@ from models.image.kontext import generate_kontext
 from models.image.nanobanana import generate_nanobanana
 from models.image.seedream import generate_seedream
 from models.image.zimage import generate_zimage
+from utils.ai_process.ai_utils import enhance_image_prompt
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -66,13 +66,13 @@ async def unified_image_manager(
         enhance: bool = True,
         format: Union[str, Format] = Format.BASE64,
         user_id: int = None,
-    ) -> list[Union[str, BytesIO]]:
+    ) -> list[tuple[Union[str, BytesIO], str]]:
     """Gère la génération d'images en fonction du modèle spécifié."""
-    logger.info(f"Image generation request: user_id={user_id}, model={model}, num_images={num_images}, size={size}, prompt={prompt[:50]}...")
     model = model or Image_Model.FLUX.value
     num_images = min(max(1, num_images), 4)
     if enhance:
-        prompts = enhance_image_prompt(prompt, num_images)
+        enhanced_dict = await enhance_image_prompt(prompt, num_images)
+        prompts = list(enhanced_dict.values())
     else : 
         prompts = [prompt] * num_images
 
@@ -82,7 +82,11 @@ async def unified_image_manager(
     for p in prompts:
         logger.debug(f"Using prompt: {p}")
         img_b64 = await _generate_with_fallbacks(p, size, model.lower())
-        results.append(img_b64)
+        if img_b64 is not None:
+            result = await convert_format(img_b64, Format(format))
+            results.append((result, p))
+        else:
+            results.append((None, p))
     
     return results
 
@@ -129,3 +133,13 @@ async def _generate_with_fallbacks(prompt: str, size: str, primary_model: str) -
     
     logger.error("All models failed to generate image.")
     return None
+
+async def convert_format(image_data: str, target_format: Format) -> Union[str, BytesIO]:
+    """Convertit les données d'image au format souhaité."""
+    if target_format == Format.BASE64:
+        return image_data
+    elif target_format == Format.BYTES:
+        image_bytes = base64.b64decode(image_data)
+        return BytesIO(image_bytes)
+    else:
+        raise ValueError(f"Unsupported format: {target_format}")

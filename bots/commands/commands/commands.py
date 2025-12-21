@@ -1,5 +1,7 @@
-import discord
 import logging
+
+import discord
+
 from config import LOGGER_NAME
 from utils.discord_utils.commands_ids import command_id_manager
 

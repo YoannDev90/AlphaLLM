@@ -5,9 +5,8 @@ import os
 import requests
 from dotenv import load_dotenv
 
-from config import AVAILABLE_MODELS, MODELS, read_file
-from config import (IO_INTELLIGENCE_API_KEY,
-                    LOGGER_NAME, MEGALLM_API_KEY, OPENROUTER_API_KEY)
+from config import (AVAILABLE_MODELS, IO_INTELLIGENCE_API_KEY, LOGGER_NAME,
+                    MEGALLM_API_KEY, MODELS, OPENROUTER_API_KEY, read_file)
 
 logger = logging.getLogger(LOGGER_NAME)
 

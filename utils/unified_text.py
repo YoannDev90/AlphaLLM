@@ -8,9 +8,9 @@ from typing import Any, Dict, List, Optional, Union
 from config import AVAILABLE_MODELS, LOGGER_NAME, read_file
 from utils.ai_process.ai_utils import summarize
 from utils.ai_process.llm_selector import LLMSelector
+from utils.discord_utils.permission_checker import PermissionChecker
 from utils.handlers.files import FileHandler
 from utils.memory import get_memory_manager, initialize_memory_manager
-from utils.discord_utils.permission_checker import PermissionChecker
 
 logger = logging.getLogger(LOGGER_NAME)
 perms_checker = PermissionChecker()
