@@ -47,7 +47,7 @@ Le bot supporte **25 modèles d'IA** différents :
 - **🌱 Seed** : Multimodal avancé de ByteDance
 - **🏔️ Granite** : Modèle open efficace d'IBM
 - **📚 Rocinante** : Pour l'écriture créative et contenu professionnel
-- **🎬 Hunyuan** : Pour la génération de vidéos haute qualité
+- **📝 Hunyuan** : Modèle de texte avancé de Tencent
 - **🎭 Jamba** : Multimodal équilibré pour tâches créatives
 
 ## 📦 Installation
@@ -102,11 +102,35 @@ Le bot répond aux mentions (@AlphaLLM) et aux commandes slash :
 
 - ❓ `/ask` : Poser une question à l'IA
 - 📋 `/commands` : Liste des commandes disponibles
-- ❓ `/help` : Aide générale
-- 📊 `/status` : État du bot
-- 📜 `/history` : Historique des conversations
-- 🎨 `/image_gen` : Génération d'images
-- Et bien d'autres...
+- ❓ `/help-bot` : Aide générale
+- 📊 `/ping` : Latence du bot
+- 🎨 `/image-gen` : Génération d'images
+- 🖍️ `/image-edit` : Edition d'images
+- ⚙️ `/guild-config` : Configuration des paramètres du serveur
+- 🆘 `/support` : Lien vers le serveur de support
+- 💬 `/contact-dev` : Contacter le développeur
+- 🧹 `/clear-history` : Réinitialiser l'historique de conversation
+- 📈 `/resources` : Afficher l'utilisation des ressources système
+- 🧪 `/test` : Envoyer un message de test Markdown
+
+### Commandes administrateur
+
+Le bot administrateur dispose des commandes suivantes (réservées aux administrateurs) :
+
+- 🔄 `/restart` : Redémarrer le bot
+- 🚪 `/leave` : Faire quitter le bot d'un serveur
+- ℹ️ `/guild-info` : Afficher les informations d'un serveur
+- 🛑 `/stop` : Arrêter le bot
+- 📊 `/poll` : Créer et envoyer un sondage sur tous les serveurs
+- 📢 `/announce` : Annoncer un message sur tous les serveurs
+- 💬 `/reply` : Répondre à un utilisateur via DM
+- 🏠 `/guilds` : Afficher la liste des serveurs où le bot est présent
+- 🚫 `/blacklist` : Ajouter un utilisateur à la blacklist
+- 🧹 `/clear` : Purger tous les messages DM sans limite de temps
+
+### Commandes du bot logger
+
+- 📝 `/clear-logs` : Effacer le canal de logs et en créer un nouveau
 
 ### API REST
 
