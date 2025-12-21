@@ -13,6 +13,11 @@ async def send_code_block_with_return(channel, code_block: str, max_length: int 
         language = code_block[3:first_line_end].strip()
         code = code_block[first_line_end+1:-3]
 
+    if language.lower() in ['latex', 'tex']:
+        # Treat as LaTeX
+        from utils.handlers.messages import send_latex_image_with_return
+        return await send_latex_image_with_return(channel, code_block)
+
     code_lines = code.splitlines(keepends=True)
     code_prefix = f"```{language}\n" if language else "```"
     code_suffix = "```"
@@ -44,6 +49,12 @@ async def send_code_block(channel, code_block: str, max_length: int = 2000):
     else:
         language = code_block[3:first_line_end].strip()
         code = code_block[first_line_end+1:-3]
+
+    if language.lower() in ['latex', 'tex']:
+        # Treat as LaTeX
+        from utils.handlers.messages import send_latex_image
+        await send_latex_image(channel, code_block)
+        return
 
     code_lines = code.splitlines(keepends=True)
     code_prefix = f"```{language}\n" if language else "```"
