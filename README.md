@@ -19,6 +19,7 @@ AlphaLLM est un bot Discord avancé qui intègre plusieurs modèles d'IA pour la
 - **🎨 Génération d'images** : Support de multiples modèles de génération d'images
 - **📈 Monitoring des ressources** : Suivi de l'utilisation CPU et mémoire
 - **🔒 Gestion des permissions** : Système de blacklist et canaux autorisés
+- **🗃️ Gestion de fichiers/URLs/LaTeX** : Parsing intelligent et formatage propre pour Discord
 
 ## 🤖 Modèles IA supportés
 
@@ -111,7 +112,6 @@ Le bot répond aux mentions (@AlphaLLM) et aux commandes slash :
 - 💬 `/contact-dev` : Contacter le développeur
 - 🧹 `/clear-history` : Réinitialiser l'historique de conversation
 - 📈 `/resources` : Afficher l'utilisation des ressources système
-- 🧪 `/test` : Envoyer un message de test Markdown
 
 ### Commandes administrateur
 
