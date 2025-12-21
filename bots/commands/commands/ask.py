@@ -4,6 +4,7 @@ import discord
 from discord import app_commands
 
 from config import LOGGER_NAME
+from utils.handlers.messages import smart_long_messages
 from utils.unified_text import Origin, unified_text_manager
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -56,7 +57,7 @@ async def setup(bot: discord.Client):
                 stream=False
             )]
             result = results[0]
-            await interaction.followup.send(result.response)
+            await smart_long_messages(interaction.channel, result.response)
         except Exception as e:
             logger.error(f"Error in ask command: {e}")
             await interaction.followup.send("An error occurred while processing your request.", ephemeral=True)

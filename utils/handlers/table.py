@@ -84,10 +84,10 @@ def markdown_to_ascii_table(markdown_table: str, max_line_length: int = 100) -> 
         else:
             col_widths = natural_col_widths
 
-        def build_separator() -> str:
-            return "+" + "+".join("-" * (width + 2) for width in col_widths) + "+"
+        def build_separator(char: str = '-') -> str:
+            return "+" + "+".join(char * (width + 2) for width in col_widths) + "+"
 
-        ascii_lines = [build_separator()]
+        ascii_lines = [build_separator('=')]
 
         if rows:
             header_cells = rows[0] + [""] * (max_cols - len(rows[0]))
@@ -100,7 +100,7 @@ def markdown_to_ascii_table(markdown_table: str, max_line_length: int = 100) -> 
                 row_cells = [wrapped_headers[idx][i] if i < len(wrapped_headers[idx]) else "" for idx in range(len(col_widths))]
                 row_text = "|" + "|".join(f" {cell:<{col_widths[idx]}} " for idx, cell in enumerate(row_cells)) + "|"
                 ascii_lines.append(row_text)
-            ascii_lines.append(build_separator())
+            ascii_lines.append(build_separator('='))
 
         for row in rows[1:]:
             wrapped_cells: List[List[str]] = []

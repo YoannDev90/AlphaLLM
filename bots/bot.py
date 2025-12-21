@@ -6,6 +6,7 @@ from discord.ext import commands
 from bots.commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
 from utils.discord_utils.commands_ids import command_id_manager
+from utils.handlers.messages import smart_long_messages
 from utils.unified_text import Origin, Text_Model, unified_text_manager
 
 intents = discord.Intents.default()
@@ -46,7 +47,7 @@ async def on_message(message):
     )]
     result = response[0]
     async with message.channel.typing():
-        await message.channel.send(result.response)
+        await smart_long_messages(message.channel, result.response)
 
 
 async def run_bot():
