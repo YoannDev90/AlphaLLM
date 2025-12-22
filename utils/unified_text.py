@@ -226,7 +226,13 @@ async def unified_text_gen(
             role = "user" if mem['role'] == "user" else "assistant"
             history.append({"role": role, "content": mem.get('content')})
 
-    system_prompt = read_file("configs/prompts/api_prompt.txt") if origin == Origin.API else read_file("configs/prompts/discord_prompt.txt")
+    system_prompt = ""
+    if model == Text_Model.EVILGPT.value:
+        system_prompt = read_file("configs/prompts/evilgpt_prompt.txt")
+    if origin == Origin.API:
+        system_prompt += read_file("configs/prompts/api_prompt.txt")
+    else:
+        system_prompt += read_file("configs/prompts/discord_prompt.txt")
     system_prompt = system_prompt.format(
         date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
         time=datetime.datetime.now().strftime('%H:%M:%S')

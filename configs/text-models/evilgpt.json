@@ -1,18 +1,33 @@
 [
     {
-        "model_name": "revenant-uncensored",
+        "model_name": "evilgpt",
         "litellm_params": {
-            "model": "openai/revenant-uncensored",
+            "model": "mistral/mistral-medium-latest",
+            "api_key": "MISTRAL_API_KEY"
+        }
+    },
+    {
+        "model_name": "evilgpt",
+        "litellm_params": {
+            "model": "openai/mistral-medium-latest",
             "api_base": "https://api.navy/v1",
             "api_key": "NAVY_API_KEY"
         }
     },
     {
-        "model_name": "devious-uncensored",
+        "model_name": "evilgpt",
         "litellm_params": {
-            "model": "openai/devious-uncensored",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
+            "model": "openai/mistral-small-latest",
+            "api_base": "https://api.voidai.app/v1/",
+            "api_key": "VOID_API_KEY"
+        }
+    },
+    {
+        "model_name": "evilgpt",
+        "litellm_params": {
+            "model": "openai/mistral-medium-latest",
+            "api_base": "https://api.mnnai.ru/v1/",
+            "api_key": "MNN_API_KEY"
         }
     }
 ]
