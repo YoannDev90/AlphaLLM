@@ -192,6 +192,8 @@ async def unified_image_edit(
 
     model = model or Image_Model.GPT_IMAGE.value
     num_images = min(max(1, num_images), 4)
+    file_bytes = BytesIO(await (await aiohttp.ClientSession().get(images_url[0])).read())
+    size = get_size(file_bytes)
     images_url = await upload_images(images_url)
 
     if enhance:
@@ -199,8 +201,6 @@ async def unified_image_edit(
         prompts = list(enhanced_dict.values())
     else : 
         prompts = [prompt] * num_images
-
-    size = validate_image_size(model.lower(), size)
 
     results = []
     for p in prompts:
@@ -214,7 +214,7 @@ async def unified_image_edit(
     
     return results
 
-async def _edit_with_fallbacks(prompt: str, images_url: list[str], primary_model: str) -> Optional[str]:
+async def _edit_with_fallbacks(prompt: str, size: str, images_url: list[str], primary_model: str) -> Optional[str]:
     """Tente de générer une image avec le modèle primaire, puis les fallbacks."""
     models_to_try = [primary_model] + EDIT_FALLBACK_ORDER
     
@@ -222,7 +222,7 @@ async def _edit_with_fallbacks(prompt: str, images_url: list[str], primary_model
         if model in IMAGE_EDIT_FUNCTIONS:
             try:
                 logger.debug(f"Trying model: {model}")
-                result = await IMAGE_EDIT_FUNCTIONS[model](prompt, images_url)
+                result = await IMAGE_EDIT_FUNCTIONS[model](prompt, size, images_url)
                 if result is not None:
                     logger.info(f"Successfully generated image with model: {model}")
                     return result
@@ -235,6 +235,14 @@ async def _edit_with_fallbacks(prompt: str, images_url: list[str], primary_model
     
     logger.error("All models failed to generate image.")
     return None
+
+def get_size(file_bytes: BytesIO) -> str:
+    """Renvoie les dimensions (width, height) d'une image à partir de ses bytes."""
+    from PIL import Image
+    file_bytes.seek(0)
+    with Image.open(file_bytes) as img:
+        width, height = img.size
+        return f"{width}x{height}"
 
 ##############################################################################################
 
