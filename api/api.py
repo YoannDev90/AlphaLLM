@@ -4,9 +4,12 @@ import uvicorn
 
 from api.api_utils.app_config import create_app
 from api.api_utils.server_utils import get_public_ip
-#from api.endpoints import image_gen, main, text_gen, info, misc, image_edit
-from api.endpoints import main, text_gen, status, conv_name, summarize, resources, text_models, image_models
-from config import API_HOST, LOGGER_NAME, API_PORT, API_SSL_CERTFILE, API_SSL_KEYFILE
+from api.endpoints import (auto_enhance, conv_name, enhance, gen_restore,
+                           image_edit, image_gen, image_models, improve, main,
+                           remove_bg, resources, status, summarize, text_gen,
+                           text_models, upscale)
+from config import (API_HOST, API_PORT, API_SSL_CERTFILE, API_SSL_KEYFILE,
+                    LOGGER_NAME)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -19,6 +22,14 @@ app.include_router(summarize.router)
 app.include_router(resources.router)
 app.include_router(text_models.router)
 app.include_router(image_models.router)
+app.include_router(image_edit.router)
+app.include_router(image_gen.router)
+app.include_router(improve.router)
+app.include_router(enhance.router)
+app.include_router(auto_enhance.router)
+app.include_router(upscale.router)
+app.include_router(gen_restore.router)
+app.include_router(remove_bg.router)
 
 async def start_api_async():
     # config = uvicorn.Config(

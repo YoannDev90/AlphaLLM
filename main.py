@@ -20,7 +20,7 @@ from utils.ressources import (get_default_monitor, start_monitoring,
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
 
-RUN_API = False
+RUN_API = True
 RUN_LOGGER_BOT = False
 RUN_MAIN_BOT = True
 RUN_ADMIN_BOT = False
