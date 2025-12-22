@@ -5,6 +5,7 @@ from typing import List, Optional, Union
 
 import aiohttp
 import cloudinary
+import cloudinary.uploader
 import requests
 
 from config import CLOUDINARY_URL, IMGBB_API_KEY, LOGGER_NAME
@@ -83,12 +84,18 @@ def remove_background(image_url: str) -> str:
     Returns:
         URL de l'image transformée.
     """
-    transformed_url, options = cloudinary.utils.cloudinary_url(
-        image_url,
-        transformation=[{'effect': 'bgremoval'}]
-    )
-    return transformed_url
-
+    try:
+        upload_result = cloudinary.uploader.upload(image_url)
+        public_id = upload_result['public_id']
+        transformed_url, options = cloudinary.utils.cloudinary_url(
+            public_id,
+            transformation=[{'effect': 'bgremoval'}]
+        )
+        return transformed_url
+    except Exception as e:
+        logger.error(f"Error during remove_background: {e}")
+        return image_url
+    
 def upscale_image(image_url: str) -> str:
     """
     Améliore la résolution de l'image en utilisant la super résolution de Cloudinary.
@@ -99,11 +106,17 @@ def upscale_image(image_url: str) -> str:
     Returns:
         URL de l'image transformée.
     """
-    transformed_url, options = cloudinary.utils.cloudinary_url(
-        image_url,
-        transformation=[{'effect': 'upscale'}]
-    )
-    return transformed_url
+    try:
+        upload_result = cloudinary.uploader.upload(image_url)
+        public_id = upload_result['public_id']
+        transformed_url, options = cloudinary.utils.cloudinary_url(
+            public_id,
+            transformation=[{'effect': 'upscale'}]
+        )
+        return transformed_url
+    except Exception as e:
+        logger.error(f"Error during upscale_image: {e}")
+        return image_url
 
 def enhance_image(image_url: str) -> str:
     """
@@ -115,11 +128,17 @@ def enhance_image(image_url: str) -> str:
     Returns:
         URL de l'image transformée.
     """
-    transformed_url, options = cloudinary.utils.cloudinary_url(
-        image_url,
-        transformation=[{'effect': 'enhance'}]
-    )
-    return transformed_url
+    try:
+        upload_result = cloudinary.uploader.upload(image_url)
+        public_id = upload_result['public_id']
+        transformed_url, options = cloudinary.utils.cloudinary_url(
+            public_id,
+            transformation=[{'effect': 'enhance'}]
+        )
+        return transformed_url
+    except Exception as e:
+        logger.error(f"Error during enhance_image: {e}")
+        return image_url
 
 def generative_restore(image_url: str) -> str:
     """
@@ -131,11 +150,17 @@ def generative_restore(image_url: str) -> str:
     Returns:
         URL de l'image transformée.
     """
-    transformed_url, options = cloudinary.utils.cloudinary_url(
-        image_url,
-        transformation=[{'effect': 'gen_restore'}]
-    )
-    return transformed_url
+    try:
+        upload_result = cloudinary.uploader.upload(image_url)
+        public_id = upload_result['public_id']
+        transformed_url, options = cloudinary.utils.cloudinary_url(
+            public_id,
+            transformation=[{'effect': 'gen_restore'}]
+        )
+        return transformed_url
+    except Exception as e:
+        logger.error(f"Error during generative_restore: {e}")
+        return image_url
 
 def improve_image(image_url: str) -> str:
     """
@@ -147,11 +172,17 @@ def improve_image(image_url: str) -> str:
     Returns:
         URL de l'image transformée.
     """
-    transformed_url, options = cloudinary.utils.cloudinary_url(
-        image_url,
-        transformation=[{'effect': 'improve'}]
-    )
-    return transformed_url
+    try:
+        upload_result = cloudinary.uploader.upload(image_url)
+        public_id = upload_result['public_id']
+        transformed_url, options = cloudinary.utils.cloudinary_url(
+            public_id,
+            transformation=[{'effect': 'improve'}]
+        )
+        return transformed_url
+    except Exception as e:
+        logger.error(f"Error during improve_image: {e}")
+        return image_url
 
 def auto_enhance_image(image_url: str) -> str:
     """
@@ -163,9 +194,15 @@ def auto_enhance_image(image_url: str) -> str:
     Returns:
         URL de l'image transformée.
     """
-    transformed_url, options = cloudinary.utils.cloudinary_url(
-        image_url,
-        transformation=[{'effect': 'auto_enhance'}]
-    )
-    return transformed_url
+    try:
+        upload_result = cloudinary.uploader.upload(image_url)
+        public_id = upload_result['public_id']
+        transformed_url, options = cloudinary.utils.cloudinary_url(
+            public_id,
+            transformation=[{'effect': 'auto_enhance'}]
+        )
+        return transformed_url
+    except Exception as e:
+        logger.error(f"Error during auto_enhance_image: {e}")
+        return image_url
 

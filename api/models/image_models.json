@@ -19,17 +19,6 @@
       "4096x4096"
     ]
   },
-  "dalle": {
-    "name": "DALL-E",
-    "author": "OpenAI",
-    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/dalle-color.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/dalle.svg",
-    "supported_sizes": [
-      "1024x1024",
-      "1024x1792",
-      "1792x1024"
-    ]
-  },
   "gptimage": {
     "name": "GPT-Image",
     "author": "OpenAI",
@@ -39,17 +28,6 @@
       "1024x1024",
       "1024x1536",
       "1536x1024"
-    ]
-  },
-  "imagen": {
-    "name": "Imagen",
-    "author": "Google",
-    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/deepmind-color.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/deepmind.svg",
-    "supported_sizes": [
-      "1024x1024",
-      "1024x1792",
-      "1792x1024"
     ]
   },
   "kontext": {

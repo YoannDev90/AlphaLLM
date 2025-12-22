@@ -176,7 +176,6 @@ AlphaLLM/
 │   ├── text_models.json
 │   ├── image_models.json
 │   └── image/
-│       ├── dalle.py
 │       ├── flux.py
 │       ├── gptimage.py
 │       └── ...

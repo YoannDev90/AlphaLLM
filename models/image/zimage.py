@@ -16,7 +16,7 @@ logger = logging.getLogger(LOGGER_NAME)
 load_dotenv()
 POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
 
-async def generate_zimage(prompt: str, size: str = "1024x1024", image_url : str = None) -> str:
+async def generate_zimage(prompt: str, size: str = "1024x1024") -> str:
     """
     Génère une image avec le modèle Z-Image via Pollinations
 
@@ -40,9 +40,6 @@ async def generate_zimage(prompt: str, size: str = "1024x1024", image_url : str 
         "enhance": "false",
         "safe": "false"
     }
-
-    if image_url:
-        params["image"] = image_url
 
     url = f"https://gen.pollinations.ai/image/{urllib.parse.quote(prompt)}"
     url += "?" + urllib.parse.urlencode(params)

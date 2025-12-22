@@ -29,9 +29,7 @@ async def setup(bot: discord.Client):
         app_commands.Choice(name="Flux Kontext", value="kontext"),
         app_commands.Choice(name="Seedream 4", value="seedream"),
         app_commands.Choice(name="NanoBanana", value="nanobanana"),
-        app_commands.Choice(name="DALL-E 3", value="dalle"),
         app_commands.Choice(name="GPT Image 1", value="gptimage"),
-        app_commands.Choice(name="Imagen 4", value="imagen"),
         app_commands.Choice(name="Z-Image", value="zimage"),
     ])
     @app_commands.choices(size=[
@@ -73,7 +71,6 @@ async def setup(bot: discord.Client):
         model = "flux" if not model else model
         size = "1024x1024" if not size else size
         
-
         try:
             logger.debug(f"Generating images with prompt: {prompt}")
             results = await unified_image_gen(prompt, model, number, size=size, enhance=enhance, format=Format.BYTES, user_id=interaction.user.id)

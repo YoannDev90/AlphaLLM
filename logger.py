@@ -201,7 +201,7 @@ def setup_logging():
 
     console_handler = logging.StreamHandler()
     console_handler.setLevel(LOGGING_LEVEL)
-    console_formatter = ColoredFormatter('%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
+    console_formatter = ColoredFormatter('%(asctime)s - %(levelname)s - %(filename)s (%(lineno)d) - %(message)s')
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 

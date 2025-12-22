@@ -8,10 +8,8 @@ from typing import Any, List, Optional, Union
 import aiohttp
 
 from config import LOGGER_NAME
-from models.image.dalle import generate_dalle
 from models.image.flux import generate_flux
 from models.image.gptimage import generate_gptimage
-from models.image.imagen import generate_imagen
 from models.image.kontext import generate_kontext
 from models.image.nanobanana import generate_nanobanana
 from models.image.seedream import generate_seedream
@@ -26,14 +24,10 @@ logger = logging.getLogger(LOGGER_NAME)
 
 class Image_Model(Enum):
     """Enum pour définir les modèles disponibles."""
-    DALLE = "dalle"
     FLUX = "flux"
     GPT_IMAGE = "gptimage"
-    GROK_IMAGE = "grokimage"
-    IMAGEN = "imagen"
     KONTEXT = "kontext"
     NANOBANANA = "nanobanana"
-    SDXL = "sdxl"
     SEEDREAM = "seedream"
     ZIMAGE = "zimage"
 
@@ -56,7 +50,6 @@ FALLBACK_ORDER = [
     Image_Model.FLUX.value,
     Image_Model.ZIMAGE.value,
     Image_Model.GPT_IMAGE.value,
-    Image_Model.IMAGEN.value,
     Image_Model.SEEDREAM.value,
     Image_Model.NANOBANANA.value,
     Image_Model.KONTEXT.value,
@@ -70,10 +63,8 @@ EDIT_FALLBACK_ORDER = [
 ]
 
 IMAGE_GEN_FUNCTIONS = {
-    Image_Model.DALLE.value: generate_dalle,
     Image_Model.FLUX.value: generate_flux,
     Image_Model.GPT_IMAGE.value: generate_gptimage,
-    Image_Model.IMAGEN.value: generate_imagen,
     Image_Model.KONTEXT.value: generate_kontext,
     Image_Model.NANOBANANA.value: generate_nanobanana,
     Image_Model.SEEDREAM.value: generate_seedream,
@@ -192,7 +183,6 @@ async def unified_image_edit(
         prompt: str,
         model: Union[str, Image_Model],
         num_images: int = 1,
-        size: str = "1024x1024",
         enhance: bool = True,
         format: Union[str, Format] = Format.BASE64,
         images_url: List[str] = [],
@@ -224,7 +214,7 @@ async def unified_image_edit(
     
     return results
 
-async def _edit_with_fallbacks(prompt: str, size: str, images_url: list[str], primary_model: str) -> Optional[str]:
+async def _edit_with_fallbacks(prompt: str, images_url: list[str], primary_model: str) -> Optional[str]:
     """Tente de générer une image avec le modèle primaire, puis les fallbacks."""
     models_to_try = [primary_model] + EDIT_FALLBACK_ORDER
     
@@ -232,7 +222,7 @@ async def _edit_with_fallbacks(prompt: str, size: str, images_url: list[str], pr
         if model in IMAGE_EDIT_FUNCTIONS:
             try:
                 logger.debug(f"Trying model: {model}")
-                result = await IMAGE_EDIT_FUNCTIONS[model](prompt, size, images_url)
+                result = await IMAGE_EDIT_FUNCTIONS[model](prompt, images_url)
                 if result is not None:
                     logger.info(f"Successfully generated image with model: {model}")
                     return result
@@ -256,23 +246,23 @@ async def unified_image_transform(
     ) -> list[tuple[Union[str, BytesIO], str]]:
     """Gère les transformations d'une image spécifiée."""
 
-    image_url = await upload_images(image_url)
+    image_url = await upload_images([image_url])
+    image_url = image_url[0]
 
     logger.info(f"Applying transformations {', '.join(transformations)} to image.")
     for trans in transformations:
-        print(image_url)
         match trans:
-            case Transformation_Type.REMOVE_BG | "remove_bg":
+            case Transformation_Type.REMOVE_BG.value | "remove_bg":
                 image_url = remove_background(image_url)
-            case Transformation_Type.ENHANCE | "enhance":
+            case Transformation_Type.ENHANCE.value | "enhance":
                 image_url = enhance_image(image_url)
-            case Transformation_Type.UPSCALE | "upscale":
+            case Transformation_Type.UPSCALE.value | "upscale":
                 image_url = upscale_image(image_url)
-            case Transformation_Type.GENERATIVE_RESTORE | "generative_restore":
+            case Transformation_Type.GENERATIVE_RESTORE.value | "generative_restore":
                 image_url = generative_restore(image_url)
-            case Transformation_Type.IMPROVE | "improve":
+            case Transformation_Type.IMPROVE.value | "improve":
                 image_url = improve_image(image_url)
-            case Transformation_Type.AUTO_ENHANCE | "auto_enhance":
+            case Transformation_Type.AUTO_ENHANCE.value | "auto_enhance":
                 image_url = auto_enhance_image(image_url)
             case _:
                 logger.warning(f"Unknown transformation: {trans}, skipping.")
