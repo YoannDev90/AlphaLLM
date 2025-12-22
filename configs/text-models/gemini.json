@@ -2,17 +2,25 @@
     {
         "model_name": "gemini-2.5-flash",
         "litellm_params": {
-            "model": "openai/gemini-2.0-flash",
-            "api_base": "https://generativelanguage.googleapis.com/v1beta/openai/",
-            "api_key": "GEMINI_API_KEY"
+            "model": "openai/gemini-2.5-flash:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
         }
     },
     {
         "model_name": "gemini-2.5-flash",
         "litellm_params": {
-            "model": "openai/gemini-2.5-flash:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
+            "model": "openai/gemini-2.5-flash-lite",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
+        "model_name": "gemini-2.5-flash",
+        "litellm_params": {
+            "model": "openai/gemini-2.0-flash",
+            "api_base": "https://generativelanguage.googleapis.com/v1beta/openai/",
+            "api_key": "GEMINI_API_KEY"
         }
     },
     {
