@@ -5,7 +5,7 @@ from discord import app_commands
 
 from config import LOGGER_NAME
 from utils.handlers.messages import smart_long_messages
-from utils.unified_text import Origin, unified_text_manager
+from utils.unified_text import Origin, unified_text_gen
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -41,16 +41,21 @@ async def setup(bot: discord.Client):
     @bot.tree.command(name="ask", description="Ask something")
     @app_commands.describe(input="Ask something")
     @app_commands.choices(model=MODELS)
-    async def ask(interaction: discord.Interaction, input: str, model: str = "auto"):
+    async def ask(
+        interaction: discord.Interaction, 
+        input: str, 
+        model: str = "auto",
+        files: discord.Attachment = None
+        ):
         logger.info(f"Commande /ask exécutée par {interaction.user.display_name}")
         await interaction.response.defer()
         try:  
-            results = [result async for result in unified_text_manager(
+            results = [result async for result in unified_text_gen(
                 user_id=interaction.user.id,
                 conv_id=interaction.channel.id,
                 input=input,
                 model=model,
-                files=None,
+                files=files,
                 origin=Origin.DISCORD,
                 message=interaction,
                 bot=bot,

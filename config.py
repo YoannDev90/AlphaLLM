@@ -3,6 +3,7 @@ import logging
 import os
 import tomllib
 from typing import Any, Dict, Iterable
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -102,6 +103,9 @@ GROQ_API_KEY: str = os.environ.get("GROQ_API_KEY")
 POLLINATIONS_API_KEY: str = os.environ.get("POLLINATIONS_API_KEY")
 MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY")
 NAVY_API_KEY: str = os.environ.get("NAVY_API_KEY")
+
+IMGBB_API_KEY: str = os.environ.get("IMGBB_API_KEY")
+CLOUDINARY_URL: str = os.environ.get("CLOUDINARY_URL")
 
 SUPABASE_USER: str = os.environ.get("SUPABASE_USER")
 SUPABASE_PASSWORD: str = os.environ.get("SUPABASE_PASSWORD")

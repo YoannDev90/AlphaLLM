@@ -7,7 +7,7 @@ from bots.commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
 from utils.discord_utils.commands_ids import command_id_manager
 from utils.handlers.messages import smart_long_messages
-from utils.unified_text import Origin, Text_Model, unified_text_manager
+from utils.unified_text import Origin, Text_Model, unified_text_gen
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
@@ -34,7 +34,7 @@ async def on_message(message):
         for attachment in message.attachments:
             files.append(attachment.url)
     
-    response = [result async for result in unified_text_manager(
+    response = [result async for result in unified_text_gen(
         user_id=message.author.id,
         conv_id=message.channel.id,
         input=message.content,

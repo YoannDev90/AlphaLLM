@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 
 from api.api_utils.security_utils import get_api_key
 from config import AVAILABLE_MODELS, LOGGER_NAME
-from utils.unified_text import Origin, unified_text_manager
+from utils.unified_text import Origin, unified_text_gen
 
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)
@@ -40,7 +40,7 @@ async def generate_text(
         async def generate():
             logger.debug("Starting streaming text generation")
             try:
-                async for result in unified_text_manager(
+                async for result in unified_text_gen(
                     user_id=user_id,
                     conv_id=str(conv_id),
                     input=prompt,
@@ -63,7 +63,7 @@ async def generate_text(
         full_text = ""
         try:
             result = None
-            async for r in unified_text_manager(
+            async for r in unified_text_gen(
                 user_id=user_id,
                 conv_id=str(conv_id),
                 input=prompt,

@@ -2,7 +2,7 @@ import discord
 import logging
 from config import LOGGER_NAME
 from utils.handlers.table import detect_and_convert_tables
-from utils.unified_text import Origin, unified_text_manager
+from utils.unified_text import Origin, unified_text_gen
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -29,7 +29,7 @@ class MessageView(discord.ui.View):
         await interaction.response.defer()
         from utils.handlers.messages import smart_long_messages_with_view
         try:
-            results = [result async for result in unified_text_manager(
+            results = [result async for result in unified_text_gen(
                 user_id=interaction.user.id,
                 conv_id=interaction.channel.id,
                 input=self.original_question,

@@ -14,7 +14,6 @@ async def send_code_block_with_return(channel, code_block: str, max_length: int 
         code = code_block[first_line_end+1:-3]
 
     if language.lower() in ['latex', 'tex']:
-        # Treat as LaTeX
         from utils.handlers.messages import send_latex_image_with_return
         return await send_latex_image_with_return(channel, code_block)
 

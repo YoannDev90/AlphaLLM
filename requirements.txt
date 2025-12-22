@@ -16,3 +16,5 @@ requests
 tiktoken
 uvicorn
 cairosvg
+cloudinary
+aiohttp

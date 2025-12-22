@@ -16,7 +16,7 @@ logger = logging.getLogger(LOGGER_NAME)
 load_dotenv()
 POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
 
-async def generate_gptimage(prompt: str, size: str = "1024x1024", image_url : str = None) -> str:
+async def generate_gptimage(prompt: str, size: str = "1024x1024", images_url: list[str] = None) -> str:
     """
     Génère une image avec le modèle GPT-Image-1
     
@@ -42,8 +42,9 @@ async def generate_gptimage(prompt: str, size: str = "1024x1024", image_url : st
         "safe": "false"
     }
 
-    if image_url:
-        params["image"] = image_url
+    if images_url:
+        logger.info(f"Adding {len(images_url)} images for gptimage: {images_url}")
+        params["image"] = ",".join(images_url)
 
     url = f"https://gen.pollinations.ai/image/{urllib.parse.quote(prompt)}"
     url += "?" + urllib.parse.urlencode(params)

@@ -11,12 +11,12 @@ from discord import app_commands
 from config import LOGGER_NAME
 from utils.ai_process.ai_utils import enhance_image_prompt
 from utils.discord_utils.permission_checker import PermissionChecker
-from utils.unified_image import Format, unified_image_manager
+from utils.unified_image import Format, unified_image_gen
 
 logger = logging.getLogger(LOGGER_NAME)
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="image", description="Generate an image from a prompt")
+    @bot.tree.command(name="image-gen", description="Generate an image from a prompt")
     @app_commands.describe(
         prompt="The prompt to generate the image from",
         model="The model to use for image generation (default: flux)",
@@ -43,7 +43,7 @@ async def setup(bot: discord.Client):
         app_commands.Choice(name="Small portrait (768x1536)", value="768x1536"),
         app_commands.Choice(name="Large square (2048x2048)", value="2048x2048")
     ])
-    async def image(
+    async def image_gen(
         interaction: discord.Interaction,
         prompt: str,
         model: str = "flux",
@@ -58,7 +58,7 @@ async def setup(bot: discord.Client):
             await interaction.followup.send(f"⛔️ {reason}")
             return
         
-        logger.info(f"Commande /image exécutée par {interaction.user.display_name} ({interaction.user.id})")
+        logger.info(f"Commande /image-gen exécutée par {interaction.user.display_name} ({interaction.user.id})")
         logger.info(f"Prompt: {prompt}, model: {model}, size: {size}, number: {number}")
 
         original_number = number
@@ -76,7 +76,7 @@ async def setup(bot: discord.Client):
 
         try:
             logger.debug(f"Generating images with prompt: {prompt}")
-            results = await unified_image_manager(prompt, model, number, size=size, enhance=enhance, format=Format.BYTES, user_id=interaction.user.id)
+            results = await unified_image_gen(prompt, model, number, size=size, enhance=enhance, format=Format.BYTES, user_id=interaction.user.id)
             if results:
                 logger.info(f"Images generated for {interaction.user.display_name}")
             else:

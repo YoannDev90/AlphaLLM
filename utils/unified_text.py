@@ -77,7 +77,7 @@ class Text_Model(Enum):
     SONAR = "sonar"
     YI = "yi"
 
-async def unified_text_manager(
+async def unified_text_gen(
         user_id: int, 
         conv_id: str, 
         input: str, 
