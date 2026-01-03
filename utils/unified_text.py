@@ -114,10 +114,13 @@ async def unified_text_gen(
         authorized, reason = await perms_checker.is_authorized_msg(message)
         if not authorized:
             user = message.author if hasattr(message, 'author') else message.user
-            logger.debug(f"Message non autorisé de {user.display_name} (ID: {user.id}): {reason}")
+            logger.warning(f"Message non autorisé de {user.display_name} (ID: {user.id}): {reason}")
             return
 
     user = message.author if hasattr(message, 'author') else message.user if message else None
+    logger.debug(f"Utilisateur: {user.display_name if user else user_id}, "
+                 f"Modèle: {model}, Origine: {origin}, "
+                 f"Fichiers: {len(files) if files else 0}")
 
     file_handler = None
     processed_files = []

@@ -5,7 +5,9 @@ import tempfile
 from typing import Dict, List, Optional, Union
 from urllib.parse import unquote, urlparse
 
+import discord
 import requests
+from PIL import Image
 
 from config import LOGGER_NAME
 
@@ -15,6 +17,16 @@ from starlette.datastructures import UploadFile
 
 from utils.handlers.markdown import MarkdownConverter
 from utils.handlers.vision import VisionHandler
+
+# Formats de fichiers supportés
+SUPPORTED_FORMATS = {
+    'images': ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff'],
+    'documents': ['docx', 'pdf', 'txt', 'html', 'htm', 'rtf', 'xml', 
+                  'json', 'csv', 'xlsx', 'pptx', 'odp', 'ods', 'odt', 
+                  'md', 'tex', 'epub', 'ipynb', 'py', 'js', 'ts', 
+                  'java', 'cpp', 'c', 'cs', 'php', 'rb', 'go', 'rs', 
+                  'sh', 'yml', 'yaml', 'toml', 'ini', 'cfg', 'conf', 'log']   
+}
 
 
 class FileHandler:
@@ -47,6 +59,35 @@ class FileHandler:
         self.text_contents: List[str] = []
         # process_files will be called asynchronously
 
+    def _check_supported_format(self, path: str):
+        """Vérifie si le format du fichier est supporté et log un warning sinon."""
+        ext = path.lower().split('.')[-1] if '.' in path else ''
+        all_supported = SUPPORTED_FORMATS['images'] + SUPPORTED_FORMATS['documents']
+        if ext and ext not in all_supported:
+            logger.warning(f"Format de fichier non supporté : .{ext} (fichier : {path}). Le traitement peut échouer.")
+
+    def _convert_image_to_supported_format(self, path: str) -> str:
+        """Convertit les images non supportées (e.g., GIF, WebP) en PNG."""
+        try:
+            logger.debug(f"Ouverture image avec Pillow: {path}")
+            with Image.open(path) as img:
+                logger.debug(f"Format détecté: {img.format}")
+                if img.format in ['GIF', 'WEBP', 'BMP', 'TIFF']:
+                    # Convertir en PNG
+                    new_path = path.rsplit('.', 1)[0] + '.png'
+                    img.convert('RGB').save(new_path, 'PNG')
+                    logger.info(f"Image convertie de {img.format} à PNG: {path} -> {new_path}")
+                    # Supprimer l'ancien fichier
+                    os.remove(path)
+                    return new_path
+                else:
+                    # Déjà supporté (PNG, JPG, JPEG)
+                    logger.debug(f"Image déjà supportée: {img.format}")
+                    return path
+        except Exception as e:
+            logger.error(f"Erreur lors de la conversion d'image {path}: {e}")
+            return path  # Retourner le chemin original en cas d'erreur
+
     async def process_files(self):
         """Traite tous les fichiers : téléchargement/sauvegarde et classification."""
         for file in self.files:
@@ -63,6 +104,9 @@ class FileHandler:
                         'content_type': file.content_type
                     }
                     await self._save_direct_file(file_dict)
+                elif isinstance(file, discord.message.Attachment):
+                    url = file.url
+                    await self._download_file(url)
                 else:
                     logger.warning(f"Type de fichier non supporté: {type(file)}")
             except Exception as e:
@@ -70,11 +114,12 @@ class FileHandler:
 
     async def _download_file(self, url: str):
         """Télécharge un fichier depuis une URL."""
-        logger.info(f"Téléchargement du fichier depuis {url}")
+        logger.info(f"Début téléchargement et traitement de {url}")
         response = requests.get(url, timeout=30)
         response.raise_for_status()
 
         filename = self._extract_filename(url, response)
+        logger.debug(f"Filename extrait: {filename}")
         if not filename:
             filename = "unknown_file"
 
@@ -87,19 +132,31 @@ class FileHandler:
             temp_file.write(response.content)
             path = temp_file.name
 
+        logger.debug(f"Fichier téléchargé vers {path}")
+
+        self._check_supported_format(path)
         file_type = self._detect_type(path, response.headers.get('content-type'))
-        if file_type == 'image':
-            description = await self.vision_handler.describe_image(path)
-            self.text_contents.append(f"Image description:\n{description}")
-            logger.info(f"Image décrite: {filename}")
-        else:
-            markdown_content = self.converter.convert_to_markdown(path)
-            if markdown_content:
-                self.text_contents.append(markdown_content)
-                logger.info(f"Fichier converti en markdown: {filename}")
+        logger.debug(f"file_type détecté pour {filename}: {file_type}")
+        try:
+            if file_type == 'image':
+                logger.debug(f"Conversion image pour {filename}")
+                path = self._convert_image_to_supported_format(path)
+                logger.debug(f"Description image pour {filename} avec path: {path}")
+                description = await self.vision_handler.describe_image(path)
+                self.text_contents.append(f"Image description:\n{description}")
+                logger.info(f"Image décrite: {filename}")
             else:
-                self.saved_files[file_type].append(path)
-                logger.info(f"Fichier sauvegardé: {filename} (type: {file_type})")
+                logger.debug(f"Conversion markdown pour {filename}")
+                markdown_content = self.converter.convert_to_markdown(path)
+                if markdown_content:
+                    self.text_contents.append(markdown_content)
+                    logger.info(f"Fichier converti en markdown: {filename}")
+                else:
+                    self.saved_files[file_type].append(path)
+                    logger.info(f"Fichier sauvegardé: {filename} (type: {file_type})")
+        except Exception as e:
+            logger.error(f"Erreur lors du traitement du fichier {filename} (type: {file_type}): {e}")
+            self.saved_files['other'].append(path)
 
     async def _save_direct_file(self, file_dict: Dict):
         """Sauvegarde un fichier direct."""
@@ -120,19 +177,29 @@ class FileHandler:
             temp_file.write(content)
             path = temp_file.name
 
+        self._check_supported_format(path)
         file_type = self._detect_type(path, content_type)
-        if file_type == 'image':
-            description = await self.vision_handler.describe_image(path)
-            self.text_contents.append(f"Image description:\n{description}")
-            logger.info(f"Image directe décrite: {filename}")
-        else:
-            markdown_content = self.converter.convert_to_markdown(path)
-            if markdown_content:
-                self.text_contents.append(markdown_content)
-                logger.info(f"Fichier direct converti en markdown: {filename}")
+        logger.debug(f"file_type détecté pour {filename}: {file_type}")
+        try:
+            if file_type == 'image':
+                logger.debug(f"Conversion image pour {filename}")
+                path = self._convert_image_to_supported_format(path)
+                logger.debug(f"Description image pour {filename} avec path: {path}")
+                description = await self.vision_handler.describe_image(path)
+                self.text_contents.append(f"Image description:\n{description}")
+                logger.info(f"Image directe décrite: {filename}")
             else:
-                self.saved_files[file_type].append(path)
-                logger.info(f"Fichier direct sauvegardé: {filename} (type: {file_type})")
+                logger.debug(f"Conversion markdown pour {filename}")
+                markdown_content = self.converter.convert_to_markdown(path)
+                if markdown_content:
+                    self.text_contents.append(markdown_content)
+                    logger.info(f"Fichier direct converti en markdown: {filename}")
+                else:
+                    self.saved_files[file_type].append(path)
+                    logger.info(f"Fichier direct sauvegardé: {filename} (type: {file_type})")
+        except Exception as e:
+            logger.error(f"Erreur lors du traitement du fichier direct {filename} (type: {file_type}): {e}")
+            self.saved_files['other'].append(path)
 
     def _extract_filename(self, url: str, response) -> Optional[str]:
         """Extrait le nom du fichier depuis l'URL ou les headers."""
@@ -207,8 +274,17 @@ class FileHandler:
         except Exception as e:
             logger.debug(f"Erreur avec magic: {e}")
 
-        logger.debug("Type par défaut: other")
-        return 'other'
+        # Fallback basé sur extension
+        ext = path.lower().split('.')[-1] if '.' in path else ''
+        if ext in SUPPORTED_FORMATS['images']:
+            logger.debug(f"Type détecté via extension: image ({ext})")
+            return 'image'
+        elif ext in SUPPORTED_FORMATS['documents']:
+            logger.debug(f"Type détecté via extension: text ({ext})")
+            return 'text'
+        else:
+            logger.debug("Type par défaut: other")
+            return 'other'
 
     def get_files_by_type(self, file_type: str) -> List[str]:
         """Retourne la liste des chemins des fichiers d'un type donné."""
