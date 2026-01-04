@@ -122,6 +122,10 @@ class DatabaseManager:
     async def _sync_with_supabase(self, query: str, params: tuple):
         """Convertit la requête SQLite en PostgreSQL et l'exécute sur Supabase"""
         try:
+            if self.pg_conn.closed:
+                logger.debug("Connexion PostgreSQL fermée, reconnexion...")
+                self.pg_conn = psycopg2.connect(SUPABASE_PG)
+            
             pg_query = self._convert_sqlite_to_postgres(query)
             logger.debug(f"Executing PG query: {pg_query} with params: {params}")
             with self.pg_conn.cursor() as cursor:

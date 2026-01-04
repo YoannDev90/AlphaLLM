@@ -83,7 +83,42 @@ cp .env-sample .env
    - Clés API pour les services IA (OpenRouter, Gemini, etc.)
    - Clés pour ChromaDB et Grafana si utilisés
 
-## 🚀 Utilisation
+## 🔧 Workflows Locaux
+
+Le projet inclut des scripts shell pour faciliter la gestion locale :
+
+### Configuration initiale
+```bash
+./setup.sh
+```
+- Vérifie les prérequis (Python 3.12+)
+- Crée et configure l'environnement virtuel
+- Installe les dépendances
+- Copie les fichiers de configuration d'exemple
+
+### Démarrage du bot
+```bash
+./run.sh
+```
+- Active l'environnement virtuel
+- Vérifie la configuration
+- Lance `python main.py`
+
+### Mode développement
+```bash
+./dev.sh
+```
+- Lance le bot en mode développement
+- Recharge automatiquement en cas de modification (si uvicorn disponible)
+
+### Nettoyage du projet
+```bash
+./clean.sh
+```
+- Supprime les logs, caches Python et fichiers temporaires
+- Nettoie le dossier cache (préserve les modèles embedder)
+
+## �🚀 Utilisation
 
 ### Lancement
 
@@ -136,15 +171,74 @@ Le bot administrateur dispose des commandes suivantes (réservées aux administr
 
 L'API est accessible sur `http://localhost:25692` (configurable).
 
+**Documentation complète :** [APIDOCS.md](APIDOCS.md)
+
 Endpoints principaux :
 - ℹ️ `GET /info` : Informations sur le bot
-- 📝 `POST /text_gen` : Génération de texte
+- 📝 `POST /text/generation` : Génération de texte
+- 🎨 `POST /image/generation` : Génération d'images
+- 🖍️ `POST /image/edit` : Édition d'images
 - 🔧 `POST /misc` : Fonctions diverses
+
+**Documentation interactive :**
+- Swagger UI : `http://localhost:25692/docs`
+- ReDoc : `http://localhost:25692/redoc`
+
+## 💡 Exemples d'utilisation
+
+### Utilisation basique
+
+```python
+import requests
+
+# Configuration
+API_URL = "http://localhost:25692"
+API_KEY = "votre_clé_api"
+
+# Génération de texte
+response = requests.post(
+    f"{API_URL}/text/generation",
+    headers={"X-API-Key": API_KEY},
+    data={
+        "prompt": "Explique-moi l'IA en termes simples",
+        "user_id": 12345,
+        "conv_id": 67890
+    }
+)
+
+print(response.text)
+```
+### Génération d'images
+
+```python
+import base64
+from PIL import Image
+import io
+
+# Génération d'image
+response = requests.post(
+    f"{API_URL}/image/generation",
+    headers={"X-API-Key": API_KEY},
+    data={
+        "prompt": "Un paysage futuriste avec des robots",
+        "user_id": 12345,
+        "num_images": 1
+    }
+)
+
+image_data = response.json()["images"][0]
+image = Image.open(io.BytesIO(base64.b64decode(image_data)))
+image.save("generated_image.png")
+```
 
 ## Architecture du Projet
 
 ```
 AlphaLLM/
+├── setup.sh
+├── run.sh
+├── dev.sh
+├── clean.sh
 ├── main.py
 ├── config.py
 ├── config.toml
@@ -261,6 +355,8 @@ Le système utilise ChromaDB pour la mémoire :
 - ✅ Vérification des permissions Discord
 - 🚫 Blacklist d'utilisateurs
 - 🔑 Clés API requises pour l'API REST
+- 🛡️ Validation des entrées utilisateur
+- 📊 Logging sécurisé sans exposition des secrets
 
 ## 🛠️ Développement
 
@@ -274,14 +370,49 @@ Le système utilise ChromaDB pour la mémoire :
 ### Ajout d'un nouveau modèle IA
 
 1. ➕ Ajoutez la configuration dans `configs/text-models/`
-2. 🏗️ Implémentez la classe dans `models/`
+2. 🏗️ Implémentez la classe dans `models/text/`
 3. ⚙️ Ajoutez le modèle dans `config.toml`
-4. 🎯 Mettez à jour le sélecteur de modèles
+4. 🎯 Mettez à jour le sélecteur de modèles dans `utils/ai_process/llm_selector.py`
 
-## 🆘 Support
+## 🐛 Dépannage
 
-- 💬 **Serveur Discord** : [Lien d'invitation](https://discord.com/invite/QGvyrUgwdK)
-- 🐛 **Issues GitHub** : Pour les bugs et demandes de fonctionnalités
+### Problèmes courants
+
+**Erreur "Clé API manquante"**
+```bash
+cat .env
+./clean.sh && ./run.sh
+```
+
+**Erreur "Port déjà utilisé"**
+```bash
+sudo lsof -ti:25692 | xargs kill -9
+```
+
+### Logs et debugging
+
+Les logs sont disponibles dans :
+- Console du terminal
+- Fichiers `.log` dans le répertoire racine
+- Canal Discord de logs (si configuré)
+- Grafana Loki (si configuré)
+
+Niveaux de logging : `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
+
+## 📊 Métriques et monitoring
+
+### Métriques collectées
+
+- 📈 Utilisation CPU et mémoire
+- ⏱️ Temps de réponse des APIs
+- 📊 Nombre de requêtes par heure
+- 🔄 Taux d'erreur par endpoint
+
+### Visualisation
+
+- **Grafana** : Tableaux de bord en temps réel
+- **CSV export** : `monitoring.csv` pour analyse
+- **API endpoints** : `/status`, `/resources`
 
 ## 📄 Licence
 
@@ -289,6 +420,11 @@ Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
 
 ## 👥 Contributeurs
 
-- 👨‍💻 YoannDev90 (Développeur principal)
+- 👨‍💻 **YoannDev90** (Développeur principal)
 
----
+## 🙏 Remerciements
+
+- 🤖 Communauté des modèles d'IA open-source
+- 📚 Documentation FastAPI et Discord.py
+- 🛠️ Outils de développement Python
+

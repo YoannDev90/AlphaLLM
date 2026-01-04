@@ -246,34 +246,6 @@ class ResourceMonitor:
                     "memory_max": max(memory_values),
                     "memory_avg": sum(memory_values) / len(memory_values),
                 })
-            network_bytes_sent_values = [snapshot.network_bytes_sent for snapshot in self.samples if snapshot.network_bytes_sent is not None]
-            if network_bytes_sent_values:
-                stats.update({
-                    "network_bytes_sent_min": min(network_bytes_sent_values),
-                    "network_bytes_sent_max": max(network_bytes_sent_values),
-                    "network_bytes_sent_avg": sum(network_bytes_sent_values) / len(network_bytes_sent_values),
-                })
-            network_bytes_recv_values = [snapshot.network_bytes_recv for snapshot in self.samples if snapshot.network_bytes_recv is not None]
-            if network_bytes_recv_values:
-                stats.update({
-                    "network_bytes_recv_min": min(network_bytes_recv_values),
-                    "network_bytes_recv_max": max(network_bytes_recv_values),
-                    "network_bytes_recv_avg": sum(network_bytes_recv_values) / len(network_bytes_recv_values),
-                })
-            network_packets_sent_values = [snapshot.network_packets_sent for snapshot in self.samples if snapshot.network_packets_sent is not None]
-            if network_packets_sent_values:
-                stats.update({
-                    "network_packets_sent_min": min(network_packets_sent_values),
-                    "network_packets_sent_max": max(network_packets_sent_values),
-                    "network_packets_sent_avg": sum(network_packets_sent_values) / len(network_packets_sent_values),
-                })
-            network_packets_recv_values = [snapshot.network_packets_recv for snapshot in self.samples if snapshot.network_packets_recv is not None]
-            if network_packets_recv_values:
-                stats.update({
-                    "network_packets_recv_min": min(network_packets_recv_values),
-                    "network_packets_recv_max": max(network_packets_recv_values),
-                    "network_packets_recv_avg": sum(network_packets_recv_values) / len(network_packets_recv_values),
-                })
             return stats
 
     def get_current_usage(self) -> Dict[str, Any]:
@@ -332,14 +304,6 @@ class ResourceMonitor:
             logger.info(f"  CPU Usage - Avg: {stats['cpu_percent_avg']:.2f}%, Max: {stats['cpu_percent_max']:.2f}%")
         if 'memory_avg' in stats:
             logger.info(f"  Memory - Min: {stats['memory_min']:.1f}MB, Avg: {stats['memory_avg']:.1f}MB, Max: {stats['memory_max']:.1f}MB")
-        if 'network_bytes_sent_avg' in stats:
-            logger.info(f"  Network Sent - Min: {stats['network_bytes_sent_min']}, Avg: {stats['network_bytes_sent_avg']:.0f}, Max: {stats['network_bytes_sent_max']}")
-        if 'network_bytes_recv_avg' in stats:
-            logger.info(f"  Network Received - Min: {stats['network_bytes_recv_min']}, Avg: {stats['network_bytes_recv_avg']:.0f}, Max: {stats['network_bytes_recv_max']}")
-        if 'network_packets_sent_avg' in stats:
-            logger.info(f"  Network Packets Sent - Min: {stats['network_packets_sent_min']}, Avg: {stats['network_packets_sent_avg']:.0f}, Max: {stats['network_packets_sent_max']}")
-        if 'network_packets_recv_avg' in stats:
-            logger.info(f"  Network Packets Received - Min: {stats['network_packets_recv_min']}, Avg: {stats['network_packets_recv_avg']:.0f}, Max: {stats['network_packets_recv_max']}")
 
     def get_last_timestamp(self) -> Optional[datetime]:
         """Get the last timestamp from the CSV file."""

@@ -3,7 +3,6 @@ __pycache__/
 .venv/
 monitoring.csv
 *.log
-*.sh
 config.toml
 cache/
 TODO.md
