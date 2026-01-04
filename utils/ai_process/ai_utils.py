@@ -77,13 +77,13 @@ def summarize(input_text: str, max_length: int = None) -> str:
 
     try:
         api_key = os.getenv(config["api_key"])
-        url = f"{config["api_base"]}/run/{config["model"]}"
+        url = f"{config['api_base']}/run/{config['model']}"
         headers = {"Authorization": f"Bearer {api_key}"}
-        playload = {
+        payload = {
             "input_text": input_text,
             "max_length": max_length
             }
-        response = requests.post(url, json=playload, headers=headers)
+        response = requests.post(url, json=payload, headers=headers)
         response.raise_for_status()
         result = response.json()
         return result['result']['summary']
