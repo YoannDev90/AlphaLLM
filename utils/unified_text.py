@@ -209,6 +209,7 @@ async def unified_text_gen(
             model = Text_Model.LLAMA.value
             logger.info(f"No suitable model found, defaulting to: {model}")
             
+    logger.debug(f"Final model to use: {model}")
     memory_manager = None
     if use_memory:
         memory_manager = await get_memory_manager()
@@ -217,16 +218,25 @@ async def unified_text_gen(
         user_id, conv_id, input, recent_limit=4, similar_limit=5
     )
 
+    logger.debug(f"Relevant memories fetched: "
+                 f"STM: {len(relevant_memories.get('stm', []))}, "
+                 f"LTM: {len(relevant_memories.get('ltm', []))}")
+
     for mem_list in relevant_memories.values():
         for mem in mem_list:
             if 'content' not in mem or mem['content'] is None:
                 mem['content'] = mem.get('text', '')
+
+    logger.debug(f"Processed relevant memories to ensure 'content' field is populated")
 
     history = []
     if relevant_memories.get('stm'):
         for mem in relevant_memories.get('stm', []):
             role = "user" if mem['role'] == "user" else "assistant"
             history.append({"role": role, "content": mem.get('content')})
+
+    logger.debug(f"Conversation history prepared with {len(history)} messages")
+    logger.debug(f"Input prepared for model: {input}")
 
     system_prompt = ""
     if model == Text_Model.EVILGPT.value:
@@ -249,6 +259,8 @@ async def unified_text_gen(
 
         **User's system prompt:**
         {ltm_content}"""
+
+    logger.debug(f"System prompt prepared for model: {system_prompt[:100]}...")
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
     from utils.ai_process.base_chat_model import ChatParameters

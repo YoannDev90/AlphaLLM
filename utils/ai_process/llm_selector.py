@@ -33,7 +33,8 @@ class LLMSelector:
                 json={
                     "model": "openai-gpt-oss-20b",
                     "messages": messages
-                }
+                },
+                timeout=5
             )
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
@@ -53,7 +54,8 @@ class LLMSelector:
                 json={
                     "model": "openai/gpt-oss-20b",
                     "messages": messages
-                    }
+                    },
+                timeout=5
             )
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
@@ -73,7 +75,8 @@ class LLMSelector:
                 json={
                     "model": "openai/gpt-oss-20b",
                     "messages": messages
-                }
+                },
+                timeout=5
             )
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
@@ -90,17 +93,20 @@ class LLMSelector:
 
         try:
             text = await self._megallm_llm_selector(messages)
+            logger.debug(f"Megallm LLM Selector response: {text}")
         except Exception as e:
             logger.error(f"Megallm LLM Selector failed: {e}. Falling back to OpenRouter LLM Selector.")
             try:
                 text = await self._openrouter_llm_selector(messages)
+                logger.debug(f"OpenRouter LLM Selector response: {text}")
             except Exception as e2:
                 logger.error(f"OpenRouter LLM Selector failed: {e2}. Falling back to IO Intelligence LLM Selector.")
                 try:
                     text = await self._io_intelligence_llm(messages)
+                    logger.debug(f"IO Intelligence LLM Selector response: {text}")
                 except Exception as e3:
                     logger.error(f"IO Intelligence LLM Selector also failed: {e3}. Using default model.")
-                    return "cerebras/llama3.3-70b"
+                    return "llama"
         
         model = self._parse_llm_selection(text)
         return model

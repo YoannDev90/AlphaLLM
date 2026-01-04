@@ -23,7 +23,7 @@ class TextEmbedder:
         self._embedder: Optional[TextEmbedding] = None
         self._embedding_cache: Dict[str, List[float]] = {}
         self._cache_dir = CACHE_DIR
-        self._logger.debug(f"Initializing TextEmbedder (model={self.model_name}, cache={self.enable_cache})")
+        self._ensure = self._ensure_initialized()
 
     def _ensure_initialized(self) -> None:
         if self._embedder is not None:
