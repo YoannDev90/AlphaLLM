@@ -2,9 +2,9 @@ import logging
 
 import discord
 
-from bots.admin_bot import bot as admin_bot
 from config import LOGGER_NAME
 from utils.database.server_conf import add_to_allowed_channels, add_to_allowed_roles
+from bots.bot import bot as main_bot
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -14,16 +14,14 @@ async def setup(bot: discord.Client):
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(f"Commande /whitelist_all exécutée par {interaction.user.display_name}")
 
-        bot = admin_bot
-
-        if not bot.guilds:
+        if not main_bot.guilds:
             await interaction.followup.send("Le bot n'est présent dans aucun serveur.", ephemeral=True)
             return
 
-        total_guilds = len(bot.guilds)
+        total_guilds = len(main_bot.guilds)
         updated_guilds = 0
 
-        for guild in bot.guilds:
+        for guild in main_bot.guilds:
             try:
                 # Whitelist all channels
                 for channel in guild.channels:

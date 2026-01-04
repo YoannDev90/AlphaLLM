@@ -116,8 +116,10 @@ async def unified_text_gen(
     if origin == Origin.DISCORD and perms_checker and message:
         authorized, reason = await perms_checker.is_authorized_msg(message)
         if not authorized:
-            yield ChatResult(response=f"Erreur : {reason}", usage=0, model="none", elapsed_time="0s")
+            if not reason in ["Bot non mentionné","Mention @everyone, @here ou rôle"]:
+                yield ChatResult(response=f"Erreur : {reason}", usage=0, model="none", elapsed_time="0s")
             return
+        
 
     user = message.author if hasattr(message, 'author') else message.user if message else None
     logger.debug(f"Utilisateur: {user.display_name if user else user_id}, "
