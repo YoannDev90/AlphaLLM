@@ -110,10 +110,13 @@ async def unified_text_gen(
     if isinstance(model, Text_Model):
         model = model.value
 
+    from utils.ai_process.base_chat_model import ChatParameters, ChatResult
+    from utils.ai_process.chat_model import ChatModel
+
     if origin == Origin.DISCORD and perms_checker and message:
         authorized, reason = await perms_checker.is_authorized_msg(message)
         if not authorized:
-            user = message.author if hasattr(message, 'author') else message.user
+            yield ChatResult(response=f"Erreur : {reason}", usage=0, model="none", elapsed_time="0s")
             return
 
     user = message.author if hasattr(message, 'author') else message.user if message else None
@@ -263,8 +266,6 @@ async def unified_text_gen(
     logger.debug(f"System prompt prepared for model: {system_prompt[:100]}...")
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
-    from utils.ai_process.base_chat_model import ChatParameters
-    from utils.ai_process.chat_model import ChatModel
     chat_model = ChatModel(model)
     chat_params = ChatParameters(messages=messages, temperature=0.7, stream=stream, raw=True, files=processed_files)
     

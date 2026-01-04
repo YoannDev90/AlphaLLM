@@ -50,11 +50,7 @@ async def setup(bot: discord.Client):
         ):
         logger.info(f"Commande /ask exécutée par {interaction.user.display_name}")
         await interaction.response.defer()
-        try:  
-            print(f"Processing /ask command from {interaction.user.display_name} with model {model}")
-            print(f"Input: {input}")
-            print(f"Attachments: {attachment}")
-            print("Generating response...")
+        try:
             results = [result async for result in unified_text_gen(
                 user_id=interaction.user.id,
                 conv_id=interaction.channel.id,
