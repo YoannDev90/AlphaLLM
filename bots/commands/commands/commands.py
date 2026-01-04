@@ -26,7 +26,8 @@ async def setup(bot: discord.Client):
                 name="💬 Main Commands",
                 value=(
                     f"{command_id_manager.get_command_mention('ask')} - Ask questions to various AI models\n"
-                    f"{command_id_manager.get_command_mention('image')} - Generate images from text prompts\n"
+                    f"{command_id_manager.get_command_mention('image-gen')} - Generate images from text prompts\n"
+                    f"{command_id_manager.get_command_mention('image-edit')} - Edit images based on text prompts\n"
                     f"{command_id_manager.get_command_mention('ping')} - Check the bot's latency and status"
                 ),
                 inline=False
@@ -36,7 +37,9 @@ async def setup(bot: discord.Client):
             embed.add_field(
                 name="⚙️ Configuration Commands",
                 value=(
-                    f"{command_id_manager.get_command_mention('guild-config')} - Configure server settings (Admin only)"
+                    f"{command_id_manager.get_command_mention('guild-config')} - Configure server settings (Admin only)\n"
+                    f"{command_id_manager.get_command_mention('clear-history')} - Delete chat history\n"
+                    f"{command_id_manager.get_command_mention('resources')} - Show resources metrics"
                 ),
                 inline=False
             )
@@ -46,7 +49,7 @@ async def setup(bot: discord.Client):
                 name="🆘 Help & Support Commands",
                 value=(
                     f"{command_id_manager.get_command_mention('help-bot')} - Show detailed help information\n"
-                    #f"{command_id_manager.get_command_mention('status')} - Show details ping informations\n"
+                    f"{command_id_manager.get_command_mention('status')} - Show details ping informations\n"
                     f"{command_id_manager.get_command_mention('support')} - Get support server link\n"
                     f"{command_id_manager.get_command_mention('contact-dev')} - Contact the developer directly"
                 ),
@@ -65,7 +68,7 @@ async def setup(bot: discord.Client):
             
             # Footer avec informations utiles
             embed.set_footer(
-                text=f"Requested by {interaction.user.display_name} • Total: 11 commands available",
+                text=f"Requested by {interaction.user.display_name}",
                 icon_url=interaction.user.display_avatar.url
             )
             

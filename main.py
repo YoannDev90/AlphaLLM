@@ -21,9 +21,9 @@ shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
 
 RUN_API = True
-RUN_LOGGER_BOT = False
+RUN_LOGGER_BOT = True
 RUN_MAIN_BOT = True
-RUN_ADMIN_BOT = False
+RUN_ADMIN_BOT = True
 
 async def check_stop_file(restart_pending):
     """Vérifie périodiquement la présence du fichier stop.json"""

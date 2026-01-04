@@ -2,7 +2,9 @@
 Utilitaire pour gérer les IDs des commandes slash Discord.
 Permet de récupérer automatiquement les IDs des commandes et de créer des mentions.
 """
+import json
 import logging
+import os
 from typing import Dict, Optional
 
 import discord
@@ -11,10 +13,32 @@ from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+COMMAND_IDS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "cache", "command_ids.json")
+
 class CommandIDManager:
     def __init__(self):
         self.command_ids: Dict[str, int] = {}
         self.bot: Optional[discord.Client] = None
+        self.load_command_ids()
+    
+    def load_command_ids(self):
+        """Charge les IDs de commandes depuis le fichier"""
+        if os.path.exists(COMMAND_IDS_FILE):
+            try:
+                with open(COMMAND_IDS_FILE, "r") as f:
+                    self.command_ids = json.load(f)
+                logger.debug(f"IDs de commandes chargés depuis {COMMAND_IDS_FILE}")
+            except Exception as e:
+                logger.error(f"Erreur lors du chargement des IDs de commandes: {e}")
+    
+    def save_command_ids(self):
+        """Sauvegarde les IDs de commandes dans le fichier"""
+        try:
+            with open(COMMAND_IDS_FILE, "w") as f:
+                json.dump(self.command_ids, f, indent=4)
+            logger.debug(f"IDs de commandes sauvegardés dans {COMMAND_IDS_FILE}")
+        except Exception as e:
+            logger.error(f"Erreur lors de la sauvegarde des IDs de commandes: {e}")
     
     def set_bot(self, bot: discord.Client):
         """Définit le bot pour récupérer les IDs des commandes"""
@@ -41,17 +65,8 @@ class CommandIDManager:
             except Exception as e:
                 logger.error(f"Erreur lors de la récupération des commandes globales: {e}")
             
-            # Fetch guild commands
-            for guild in self.bot.guilds:
-                try:
-                    commands = await self.bot.tree.fetch_commands(guild=guild)
-                    for command in commands:
-                        command_ids[command.name] = command.id
-                        logger.debug(f"Commande trouvée dans {guild.name}: {command.name} (ID: {command.id})")
-                except Exception as e:
-                    logger.error(f"Erreur lors de la récupération des commandes pour {guild.name}: {e}")
-            
             self.command_ids = command_ids
+            self.save_command_ids()
             return command_ids
             
         except Exception as e:
@@ -70,6 +85,9 @@ class CommandIDManager:
         Returns:
             Mention formatée pour Discord (ex: </ask:123456789>)
         """
+        if not self.command_ids and os.path.exists(COMMAND_IDS_FILE):
+            self.load_command_ids()
+        
         command_id = self.command_ids.get(command_name)
         
         if command_id is None:

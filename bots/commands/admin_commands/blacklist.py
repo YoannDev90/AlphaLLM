@@ -5,8 +5,8 @@ from datetime import datetime
 import discord
 
 from config import LOGGER_NAME
-from utils.database.perms_conf import (add_to_blacklist, get_blacklist,
-                                       remove_from_blacklist)
+from utils.database.perms_conf import get_blacklist
+from utils.database.blacklist import add_to_blacklist, remove_from_blacklist
 
 logger = logging.getLogger(LOGGER_NAME)
 

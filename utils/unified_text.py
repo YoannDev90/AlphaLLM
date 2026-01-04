@@ -114,7 +114,6 @@ async def unified_text_gen(
         authorized, reason = await perms_checker.is_authorized_msg(message)
         if not authorized:
             user = message.author if hasattr(message, 'author') else message.user
-            logger.warning(f"Message non autorisé de {user.display_name} (ID: {user.id}): {reason}")
             return
 
     user = message.author if hasattr(message, 'author') else message.user if message else None

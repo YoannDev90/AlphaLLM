@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import os
 
 import discord
 from discord.ext import commands
@@ -22,7 +24,9 @@ async def on_ready():
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
     command_id_manager.set_bot(bot)
-    await command_id_manager.fetch_command_ids()
+    # Fetch in background
+    asyncio.create_task(command_id_manager.fetch_command_ids())
+    logger.info("Fetch des IDs de commandes lancé en arrière-plan")
 
 @bot.event
 async def on_message(message):
