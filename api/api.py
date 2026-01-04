@@ -1,15 +1,16 @@
+import asyncio
 import logging
 
 import uvicorn
 
 from api.api_utils.app_config import create_app
-from api.api_utils.server_utils import get_public_ip
+from api.api_utils.server_utils import get_public_ip, ping_https_server
 from api.endpoints import (auto_enhance, conv_name, enhance, gen_restore,
                            image_edit, image_gen, image_models, improve, main,
                            remove_bg, resources, status, summarize, text_gen,
                            text_models, upscale)
 from config import (API_HOST, API_PORT, API_SSL_CERTFILE, API_SSL_KEYFILE,
-                    LOGGER_NAME)
+                    LOGGER_NAME, API_URL)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -51,4 +52,5 @@ async def start_api_async():
     server = uvicorn.Server(config)
     public_ip = await get_public_ip()
     logger.info(f"API running on http://{public_ip}:{API_PORT}")
+    asyncio.create_task(ping_https_server(API_URL))
     await server.serve()
