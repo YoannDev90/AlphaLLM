@@ -136,7 +136,7 @@ async def unified_image_gen(
     num_images = min(max(1, num_images), 4)
 
     if enhance:
-        enhanced_dict = await enhance_image_prompt(prompt, num_images)
+        enhanced_dict = await enhance_image_prompt(prompt, num_images, is_edit=False)
         prompts = list(enhanced_dict.values())
     else : 
         prompts = [prompt] * num_images
@@ -197,7 +197,7 @@ async def unified_image_edit(
     images_url = await upload_images(images_url)
 
     if enhance:
-        enhanced_dict = await enhance_image_prompt(prompt, num_images)
+        enhanced_dict = await enhance_image_prompt(prompt, num_images, is_edit=True)
         prompts = list(enhanced_dict.values())
     else : 
         prompts = [prompt] * num_images

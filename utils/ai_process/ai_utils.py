@@ -12,7 +12,8 @@ from config import LOGGER_NAME, read_file
 
 logger = logging.getLogger(LOGGER_NAME)
 
-IMG_ENHANCER_PREPROMPT = read_file("configs/prompts/img_enhancer.txt")
+IMG_GEN_ENHANCER_PREPROMPT = read_file("configs/prompts/img_gen_enhancer.txt")
+IMG_EDIT_ENHANCER_PREPROMPT = read_file("configs/prompts/img_edit_enhancer.txt")
 CONV_NAME_PREPROMPT = read_file("configs/prompts/conv_name.txt")
 
 def load_configs(config_path: str) -> List[Dict[str, Any]]:
@@ -32,11 +33,17 @@ def load_configs(config_path: str) -> List[Dict[str, Any]]:
         logger.error(f"Erreur lors du chargement des configs {config_path}: {e}")
         raise
 
-async def enhance_image_prompt(original_prompt: str, number: int = 2) -> dict:
+async def enhance_image_prompt(original_prompt: str, number: int = 2, is_edit: bool = False) -> dict:
     """Enhance image generation prompt with multiple models."""
     enhancement_models = load_configs("configs/misc/img_enhancer.json")
     try:
         tasks = []
+
+        if not is_edit:
+            system_prompt = IMG_GEN_ENHANCER_PREPROMPT
+        else:
+            system_prompt = IMG_EDIT_ENHANCER_PREPROMPT
+            number = 1
         
         for i in range(min(number, 4)):
             model_config = enhancement_models[i % len(enhancement_models)]['litellm_params']
@@ -44,7 +51,7 @@ async def enhance_image_prompt(original_prompt: str, number: int = 2) -> dict:
             api_key = os.getenv(model_config['api_key'])
             api_base = model_config.get('api_base')
             messages = [
-                {"role": "system", "content": IMG_ENHANCER_PREPROMPT},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": original_prompt}
             ]
             task = litellm.acompletion(model=model, messages=messages, api_key=api_key, api_base=api_base)
