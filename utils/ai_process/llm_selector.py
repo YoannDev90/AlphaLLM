@@ -34,7 +34,7 @@ class LLMSelector:
                     "model": "openai-gpt-oss-20b",
                     "messages": messages
                 },
-                timeout=5
+                timeout=10
             )
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
@@ -55,7 +55,7 @@ class LLMSelector:
                     "model": "openai/gpt-oss-20b",
                     "messages": messages
                     },
-                timeout=5
+                timeout=10
             )
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
@@ -76,7 +76,7 @@ class LLMSelector:
                     "model": "openai/gpt-oss-20b",
                     "messages": messages
                 },
-                timeout=5
+                timeout=10
             )
             if response.status_code == 200:
                 return response.json()["choices"][0]["message"]["content"]
