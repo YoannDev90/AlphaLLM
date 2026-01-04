@@ -244,9 +244,11 @@ async def unified_text_gen(
         user=user.display_name
     )
     if relevant_memories.get('ltm'):
+        ltm_content = '\n'.join([mem.get('content') for mem in relevant_memories.get('ltm', [])])
         system_prompt += f"""
-        \n**User's system prompt:**
-        {'\n'.join([mem.get('content') for mem in relevant_memories.get('ltm', [])])}"""
+
+        **User's system prompt:**
+        {ltm_content}"""
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
     from utils.ai_process.base_chat_model import ChatParameters
