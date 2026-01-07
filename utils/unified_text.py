@@ -120,11 +120,11 @@ async def unified_text_gen(
                 yield ChatResult(response=f"Erreur : {reason}", usage=0, model="none", elapsed_time="0s")
             return
         
-
-    user = message.author if hasattr(message, 'author') else message.user if message else None
-    logger.debug(f"Utilisateur: {user.display_name if user else user_id}, "
-                 f"Modèle: {model}, Origine: {origin}, "
-                 f"Fichiers: {len(files) if files else 0}")
+    if origin == Origin.DISCORD:
+        user = message.author if hasattr(message, 'author') else message.user if message else None
+        logger.debug(f"Utilisateur: {user.display_name if user else user_id}, "
+                    f"Modèle: {model}, Origine: {origin}, "
+                    f"Fichiers: {len(files) if files else 0}")
 
     file_handler = None
     processed_files = []

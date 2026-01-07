@@ -108,13 +108,13 @@ async def main() -> None:
             ressources._monitor_instance = None
             
             csv_file = "monitoring.csv"        
-            logger.info("Démarrage du monitoring des ressources...")
+            logger.debug("Démarrage du monitoring des ressources...")
             monitor = start_monitoring(interval=1, csv_file=csv_file)
             
             monitor.fill_gaps(datetime.datetime.now())
             await initialize_memory_manager()
             
-            logger.info("Initialisation de la base de données...")
+            logger.debug("Initialisation de la base de données...")
             await db_manager.initialize()
             await db_manager.clone_tables()
             

@@ -25,6 +25,15 @@ class LogButtonsView(discord.ui.View):
         self.add_item(discord.ui.Button(label="Grafana", url=url, emoji="📊", style=discord.ButtonStyle.link))
 
 
+EMBED_COLORS = {
+    'DEBUG': 0x3498db,
+    'INFO': 0x2ecc71,
+    'WARNING': 0xf39c12,
+    'ERROR': 0xe74c3c,
+    'CRITICAL': 0x9b59b6
+}
+
+
 def generate_grafana_log_url(level: str, logger: str, timestamp: float, job: str = "AlphaLLM") -> str:
     """
     Génère l'URL Grafana Explore pour visualiser les logs correspondant.
@@ -135,10 +144,16 @@ class DiscordLogHandler(logging.Handler):
             return
         try:
             channel = await self.bot.fetch_channel(LOGS_CHANNEL_ID)
-            view = LogButtonsView(record.levelname, record.name, record.created)
-            message_obj = await channel.send(message_text, view=view)
+            ts = int(record.created)
+            embed = discord.Embed(color=EMBED_COLORS.get(record.levelname, 0x95a5a6))
+            embed.add_field(name="", value=f"<t:{ts}:F> (<t:{ts}:R>)", inline=False)
+            embed.add_field(name="", value=f"```txt\n{message_text}\n```", inline=False)
+            if record.levelno >= logging.ERROR:
+                view = LogButtonsView(record.levelname, record.name, record.created)
+                await channel.send(embed=embed, view=view)
+            else:
+                await channel.send(embed=embed)
         except Exception as e:
-            # Ignore errors during shutdown
             pass
 
     def emit(self, record):
@@ -174,12 +189,12 @@ class DiscordLogHandler(logging.Handler):
 
 class DiscordFormatter(logging.Formatter):
     FORMATS = {
-        logging.DEBUG: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m *️⃣ %(asctime)s - %(message)s [0m\n```',
-        logging.INFO: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m ✅ %(asctime)s - %(message)s [0m\n```',
-        logging.WARNING: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m[0m[2;33m 🚧 %(asctime)s - %(message)s [0m\n```',
-        logging.ERROR: '```ansi\n[2;31m[0m[2;47m[0m[2;31m ❌ %(asctime)s - %(message)s [0m\n```',
-        logging.CRITICAL: '```ansi\n[2;31m[0m[2;47m[0m[2;31m[0m[2;34m[0m[2;32m[0m[2;33m[0m[2;30m[0m[2;37m[0m[2;30m 🔳 %(asctime)s - %(message)s [0m\n```'
-        }
+        logging.DEBUG: '%(message)s',
+        logging.INFO: '%(message)s',
+        logging.WARNING: '%(message)s',
+        logging.ERROR: '%(message)s',
+        logging.CRITICAL: '%(message)s'
+    }
     
 
     def format(self, record):
