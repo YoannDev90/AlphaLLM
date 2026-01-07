@@ -1,10 +1,13 @@
 import logging
 import csv
 import os
+import json
+import asyncio
 from datetime import datetime, timedelta
 from collections import defaultdict
 
 from fastapi import APIRouter
+from fastapi.responses import StreamingResponse
 
 from config import LOGGER_NAME
 from utils.ressources import get_default_monitor
@@ -71,16 +74,30 @@ def get_realtime_data():
         'memory_percent': round(s.memory_percent, 2) if s.memory_percent else 0.0,
     } for s in recent]
 
+async def event_generator():
+    """Generator for Server-Sent Events to stream resource data."""
+    daily_cache = None
+    cache_time = datetime.now()
+    
+    while True:
+        try:
+            now = datetime.now()
+            if daily_cache is None or (now - cache_time).total_seconds() > 300:
+                daily_cache = get_daily_data()
+                cache_time = now
+            
+            realtime = get_realtime_data()
+            data = {
+                "realtime": realtime,
+                "daily": daily_cache
+            }
+            yield f"data: {json.dumps(data)}\n\n"
+        except Exception as e:
+            logger.error(f"Error during resources streaming: {str(e)}")
+            yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
+            await asyncio.sleep(2)
+
 @router.get("/resources", tags=["general"])
 async def resources_check():
-    """API resources check endpoint with graph data"""
-    try:
-        realtime = get_realtime_data()
-        daily = get_daily_data()
-        return {
-            "realtime": realtime,
-            "daily": daily
-        }
-    except Exception as e:
-        logger.error(f"Error during resources check: {str(e)}")
-        return {"status": "error", "message": "An internal server error occurred."}
+    """API resources check endpoint with SSE streaming"""
+    return StreamingResponse(event_generator(), media_type="text/event-stream")
