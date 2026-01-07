@@ -92,10 +92,11 @@ async def event_generator():
                 "daily": daily_cache
             }
             yield f"data: {json.dumps(data)}\n\n"
+            await asyncio.sleep(1)
         except Exception as e:
             logger.error(f"Error during resources streaming: {str(e)}")
             yield f"data: {{\"error\": \"{str(e)}\"}}\n\n"
-            await asyncio.sleep(2)
+            await asyncio.sleep(1)
 
 @router.get("/resources", tags=["general"])
 async def resources_check():

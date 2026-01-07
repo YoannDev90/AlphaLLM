@@ -255,8 +255,7 @@ async def unified_text_gen(
         time=datetime.datetime.now().strftime('%H:%M:%S')
     ) if origin == Origin.API else system_prompt.format(
         date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
-        time=datetime.datetime.now().strftime('%H:%M:%S'),
-        user=user.display_name
+        time=datetime.datetime.now().strftime('%H:%M:%S')
     )
     if relevant_memories.get('ltm'):
         ltm_content = '\n'.join([mem.get('content') for mem in relevant_memories.get('ltm', [])])
@@ -279,7 +278,6 @@ async def unified_text_gen(
         
         logger.info(f"Réponse générée - Modèle: {result.model}, Usage: {result.usage} tokens, Temps: {result.elapsed_time}")
         logger.debug(f"Contenu de la réponse: {result.response}...")
-        logger.info(f"Réponse envoyée à {user.display_name}")
             
         if use_memory:
             await memory_manager.add_conversation_message(user_id, conv_id, input, "user")
