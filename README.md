@@ -6,6 +6,8 @@
 [![Python](https://img.shields.io/badge/python-3.12+-blue?style=flat-square)](https://www.python.org/downloads/)
 [![Discord](https://img.shields.io/discord/1327996079786168441?color=blue&label=Discord&logo=discord&style=flat-square)](https://discord.com/invite/QGvyrUgwdK)
 
+![Alt](https://repobeats.axiom.co/api/embed/d1ef951054604efff035919fef4255170881619b.svg "Repobeats analytics image")
+
 AlphaLLM est un bot Discord avancé qui intègre plusieurs modèles d'IA pour la génération de texte et d'images. Il offre une API REST, un système de mémoire RAG (Retrieval-Augmented Generation), et des fonctionnalités d'administration.
 
 ## 🚀 Fonctionnalités
