@@ -55,37 +55,6 @@ class ChatModel(BaseChatModel):
         processed_text = re.sub(r'\[(\d+)\]', replace_citation, response_text)
         return processed_text
 
-    def _estimate_usage(self, tokenizer_name: str, messages: List[Dict[str, Any]], response_text: str) -> int:
-        """Estime l'usage des tokens"""
-        try:
-            input_tokens = litellm.token_counter(model=tokenizer_name, messages=messages)
-            output_tokens = litellm.token_counter(model=tokenizer_name, text=response_text)
-            total_tokens = input_tokens + output_tokens
-            logger.info(f"Usage estimé avec tokenizer '{tokenizer_name}': {total_tokens} tokens")
-            return total_tokens
-
-        except Exception as e:
-            logger.warning(f"Impossible d'estimer l'usage avec litellm, fallback sur tiktoken: {e}")
-            return self._estimate_usage_tiktoken(messages, response_text)
-
-    def _estimate_usage_tiktoken(self, messages: List[Dict[str, Any]], response_text: str) -> int:
-        """Fallback d'estimation avec tiktoken"""
-        try:
-            import tiktoken
-            encoding = tiktoken.get_encoding("cl100k_base")
-
-            input_text = " ".join([msg.get("content", "") for msg in messages if isinstance(msg.get("content"), str)])
-            input_tokens = len(encoding.encode(input_text))
-            output_tokens = len(encoding.encode(response_text))
-
-            total_tokens = input_tokens + output_tokens
-            logger.info(f"Usage estimé avec tiktoken: {total_tokens} tokens")
-            return total_tokens
-
-        except Exception as e:
-            logger.warning(f"Impossible d'estimer l'usage avec tiktoken: {e}")
-            return 0
-
     async def _try_stream_config(self, config: Dict[str, Any], messages: List[Dict[str, Any]],
                                parameters: ChatParameters) -> AsyncGenerator[StreamChunk, None]:
         """Essaie de streamer avec une configuration spécifique"""
@@ -126,8 +95,6 @@ class ChatModel(BaseChatModel):
 
         if last_chunk and hasattr(last_chunk, 'usage') and last_chunk.usage:
             usage = last_chunk.usage.total_tokens
-        else:
-            usage = self._estimate_usage(tokenizer_name, messages, response_text)
 
         if self.model_name == "sonar" and (not hasattr(last_chunk, 'citations') or not last_chunk.citations):
             non_stream_params = current_params.copy()
@@ -182,7 +149,7 @@ class ChatModel(BaseChatModel):
                                 done=True,
                                 response=chunk.response,
                                 usage=chunk.usage,
-                                model=chunk.model,
+                                model=parameters.model,
                                 elapsed_time=elapsed_time
                             )
                             return
@@ -238,7 +205,7 @@ class ChatModel(BaseChatModel):
             response = litellm.completion(**params)
 
             usage = response.usage.total_tokens
-            model = response.model
+            model = parameters.model
             response_text = response.choices[0].message.content
             if response_text is None or response_text.strip() == "":
                 logger.error("Model returned empty response")

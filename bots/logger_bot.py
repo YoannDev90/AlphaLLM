@@ -56,7 +56,24 @@ async def setup_logs_channel():
         if logs_channel:
             logger.info(f"Logs channel connected: {logs_channel.name}")
         else:
-            logger.error(f"Cannot find logs channel with ID: {LOGS_CHANNEL_CONFIG['channel_id']}")
+            logger.warning(f"Cannot find logs channel with ID: {LOGS_CHANNEL_CONFIG['channel_id']}, attempting to find or create by name")
+            # Try to find by name in category
+            category = bot.get_channel(LOGS_CHANNEL_CONFIG["category_id"])
+            if category and isinstance(category, discord.CategoryChannel):
+                for channel in category.channels:
+                    if channel.name == LOGS_CHANNEL_CONFIG["channel_name"]:
+                        logs_channel = channel
+                        logger.info(f"Logs channel found by name: {logs_channel.name}")
+                        break
+                else:
+                    # Create new channel
+                    try:
+                        logs_channel = await category.create_text_channel(LOGS_CHANNEL_CONFIG["channel_name"])
+                        logger.info(f"Logs channel created: {logs_channel.name}")
+                    except Exception as e:
+                        logger.error(f"Failed to create logs channel: {e}")
+            else:
+                logger.error("Logs category not found or invalid")
     else:
         logger.warning("Logs channel ID not configured")
 

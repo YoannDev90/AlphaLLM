@@ -94,21 +94,29 @@ class LLMSelector:
         try:
             text = await self._megallm_llm_selector(messages)
             logger.debug(f"Megallm LLM Selector response: {text}")
+            model = self._parse_llm_selection(text)
+            if model is None:
+                raise ValueError("Parsing failed: no valid model found in response")
         except Exception as e:
             logger.error(f"Megallm LLM Selector failed: {e}. Falling back to OpenRouter LLM Selector.")
             try:
                 text = await self._openrouter_llm_selector(messages)
                 logger.debug(f"OpenRouter LLM Selector response: {text}")
+                model = self._parse_llm_selection(text)
+                if model is None:
+                    raise ValueError("Parsing failed: no valid model found in response")
             except Exception as e2:
                 logger.error(f"OpenRouter LLM Selector failed: {e2}. Falling back to IO Intelligence LLM Selector.")
                 try:
                     text = await self._io_intelligence_llm(messages)
                     logger.debug(f"IO Intelligence LLM Selector response: {text}")
+                    model = self._parse_llm_selection(text)
+                    if model is None:
+                        raise ValueError("Parsing failed: no valid model found in response")
                 except Exception as e3:
                     logger.error(f"IO Intelligence LLM Selector also failed: {e3}. Using default model.")
                     return "llama"
         
-        model = self._parse_llm_selection(text)
         return model
 
     def _parse_llm_selection(self, text: str) -> str:
@@ -116,5 +124,5 @@ class LLMSelector:
         for model_name in AVAILABLE_MODELS:
             if model_name.lower() in t:
                 return model_name
-        return "llama"
+        return None
     

@@ -77,9 +77,9 @@ class MessageView(discord.ui.View):
         
         try:
             embed = discord.Embed(title="📊 Response Details")
-            embed.add_field(name="🤖 Model", value=f"`{response_data['model']}`", inline=False)
-            embed.add_field(name="🔢 Tokens Used", value=f"`{response_data['usage']}`", inline=False)
-            embed.add_field(name="⏱️ Response Time", value=f"`{response_data['elapsed_time']}`", inline=False)
+            embed.add_field(name="🤖 Model", value=f"`{response_data.model}`", inline=False)
+            embed.add_field(name="🔢 Tokens Used", value=f"`{response_data.usage}`", inline=False)
+            embed.add_field(name="⏱️ Response Time", value=f"`{response_data.elapsed_time}`", inline=False)
             await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=60)
         except Exception as e:
             logger.error(f"Erreur lors de la création de l'embed de détails pour {interaction.user.display_name}: {str(e)}")
