@@ -70,17 +70,18 @@ pip install -r requirements.txt
 ### Configuration
 
 1. 📋 Copiez le fichier d'exemple de configuration :
+
 ```bash
 cp config-sample.toml config.toml
 cp .env-sample .env
 ```
 
-2. ⚙️ Éditez `config.toml` avec vos paramètres :
+1. ⚙️ Éditez `config.toml` avec vos paramètres :
    - Configurez les IDs Discord (serveurs, canaux, rôles)
    - Ajustez les paramètres de l'API
    - Configurez les modèles de mémoire
 
-3. 🔐 Éditez `.env` avec vos clés API :
+2. 🔐 Éditez `.env` avec vos clés API :
    - Tokens Discord pour les bots
    - Clés API pour les services IA (OpenRouter, Gemini, etc.)
    - Clés pour ChromaDB et Grafana si utilisés
@@ -90,33 +91,41 @@ cp .env-sample .env
 Le projet inclut des scripts shell pour faciliter la gestion locale :
 
 ### Configuration initiale
+
 ```bash
 ./setup.sh
 ```
+
 - Vérifie les prérequis (Python 3.12+)
 - Crée et configure l'environnement virtuel
 - Installe les dépendances
 - Copie les fichiers de configuration d'exemple
 
 ### Démarrage du bot
+
 ```bash
 ./run.sh
 ```
+
 - Active l'environnement virtuel
 - Vérifie la configuration
 - Lance `python main.py`
 
 ### Mode développement
+
 ```bash
 ./dev.sh
 ```
+
 - Lance le bot en mode développement
 - Recharge automatiquement en cas de modification (si uvicorn disponible)
 
 ### Nettoyage du projet
+
 ```bash
 ./clean.sh
 ```
+
 - Supprime les logs, caches Python et fichiers temporaires
 - Nettoie le dossier cache (préserve les modèles embedder)
 
@@ -129,6 +138,7 @@ python main.py
 ```
 
 Le programme démarrera automatiquement :
+
 - 🤖 Le bot principal Discord
 - 👑 Le bot administrateur
 - 📊 Le bot logger
@@ -176,6 +186,7 @@ L'API est accessible sur `http://localhost:25692` (configurable).
 **Documentation complète :** [APIDOCS.md](APIDOCS.md)
 
 Endpoints principaux :
+
 - ℹ️ `GET /info` : Informations sur le bot
 - 📝 `POST /text/generation` : Génération de texte
 - 🎨 `POST /image/generation` : Génération d'images
@@ -183,6 +194,7 @@ Endpoints principaux :
 - 🔧 `POST /misc` : Fonctions diverses
 
 **Documentation interactive :**
+
 - Swagger UI : `http://localhost:25692/docs`
 - ReDoc : `http://localhost:25692/redoc`
 
@@ -210,6 +222,7 @@ response = requests.post(
 
 print(response.text)
 ```
+
 ### Génération d'images
 
 ```python
@@ -235,7 +248,7 @@ image.save("generated_image.png")
 
 ## Architecture du Projet
 
-```
+```txt
 AlphaLLM/
 ├── setup.sh
 ├── run.sh
@@ -342,6 +355,7 @@ AlphaLLM/
 ### Mémoire RAG
 
 Le système utilise ChromaDB pour la mémoire :
+
 - 🕒 **STM (Short-Term Memory)** : Mémoire à court terme (4h par défaut)
 - 🗂️ **LTM (Long-Term Memory)** : Mémoire à long terme avec similarité
 - 📚 **RAG** : Documents pour le contexte enrichi
@@ -380,13 +394,15 @@ Le système utilise ChromaDB pour la mémoire :
 
 ### Problèmes courants
 
-**Erreur "Clé API manquante"**
+#### Erreur "Clé API manquante"
+
 ```bash
 cat .env
 ./clean.sh && ./run.sh
 ```
 
-**Erreur "Port déjà utilisé"**
+#### Erreur "Port déjà utilisé"
+
 ```bash
 sudo lsof -ti:25692 | xargs kill -9
 ```
@@ -394,6 +410,7 @@ sudo lsof -ti:25692 | xargs kill -9
 ### Logs et debugging
 
 Les logs sont disponibles dans :
+
 - Console du terminal
 - Fichiers `.log` dans le répertoire racine
 - Canal Discord de logs (si configuré)
