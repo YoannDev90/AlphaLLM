@@ -430,3 +430,6 @@ Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
 - 📚 Documentation FastAPI et Discord.py
 - 🛠️ Outils de développement Python
 
+## Crédits
+
+![Alt](https://raw.githubusercontent.com/pollinations/pollinations/b306f893f390757363c20216f316f43096b5a6ab/assets/logo-text.svg "Repobeats analytics image")
