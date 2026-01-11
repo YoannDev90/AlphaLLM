@@ -8,8 +8,11 @@ from discord.ext import commands
 from bots.commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
 from utils.discord_utils.commands_ids import command_id_manager
-from utils.handlers.messages import smart_long_messages
+from utils.handlers.messages import smart_long_messages_with_view
 from utils.unified_text import Origin, Text_Model, unified_text_gen
+from utils.discord_utils.permission_checker import PermissionChecker
+
+perms_checker = PermissionChecker()
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
@@ -24,13 +27,15 @@ async def on_ready():
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
     command_id_manager.set_bot(bot)
-    # Fetch in background
     asyncio.create_task(command_id_manager.fetch_command_ids())
     logger.info("Fetch des IDs de commandes lancé en arrière-plan")
 
 @bot.event
 async def on_message(message):
-    if message.author.bot:
+    authorized, reason = await perms_checker.is_authorized_msg(message)
+    if not authorized:
+        if reason not in ["Bot non mentionné", "Mention @everyone, @here ou rôle"]:
+            await message.channel.send(f"Erreur : {reason}")
         return
     
     files = []
@@ -49,10 +54,38 @@ async def on_message(message):
         bot=bot,
         stream=False
     )]
-    result = response[0]
-    async with message.channel.typing():
-        await smart_long_messages(message.channel, result.response)
+    result = response[0] if response else None
+    if result:
+        async with message.channel.typing():
+            await smart_long_messages_with_view(message.channel, result.response, message.content, result.model, result, bot)
+    else:
+        await message.channel.send("Sorry, an error occurred while processing your request.")
 
+@bot.event
+async def on_guild_join(guild):
+    logger.info(f"Joined new guild: {guild.name} (ID: {guild.id})")
+
+@bot.event
+async def on_guild_remove(guild):
+    logger.info(f"Removed from guild: {guild.name} (ID: {guild.id})")
+
+@bot.event
+async def on_error(event_method, *args, **kwargs):
+    logger.error(f"An error occurred in {event_method}", exc_info=True)
+
+@bot.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        return
+    logger.error(f"An error occurred in command {ctx.command}: {error}", exc_info=True)
+
+@bot.event
+async def on_disconnect():
+    logger.debug("Bot disconnected from Discord")
+
+@bot.event
+async def on_resumed():
+    logger.debug("Bot resumed connection to Discord")
 
 async def run_bot():
     mode_label = "BetaLLM" if DEBUG else "AlphaLLM"

@@ -7,13 +7,15 @@ from utils.unified_text import Origin, unified_text_gen
 logger = logging.getLogger(LOGGER_NAME)
 
 class MessageView(discord.ui.View):
-    def __init__(self, original_message, model, response_data=None, bot=None):
+    def __init__(self, original_question, model, response_data=None, bot=None):
         super().__init__(timeout=300)
-        self.original_message = original_message
+        self.original_question = original_question
         self.model = model
-        self.response_data = response_data
+        self.responses = [response_data] if response_data else []
+        self.current_index = 0
         self.bot = bot
         self.message = None
+        self.regenerated = False
 
     async def on_timeout(self):
         """Supprime les boutons lorsque la vue expire après 30 secondes"""
@@ -25,9 +27,14 @@ class MessageView(discord.ui.View):
 
     @discord.ui.button(emoji="🔄", label="Regenerate", style=discord.ButtonStyle.gray)
     async def regenerate(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if self.regenerated:
+            await interaction.response.send_message("❌ Regeneration already done.", ephemeral=True)
+            return
         logger.info(f"Régénération de réponse demandée par {interaction.user.display_name}")
         await interaction.response.defer()
-        from utils.handlers.messages import smart_long_messages_with_view
+        button.disabled = True
+        self.regenerated = True
+        await interaction.message.edit(view=self)
         try:
             results = [result async for result in unified_text_gen(
                 user_id=interaction.user.id,
@@ -40,9 +47,20 @@ class MessageView(discord.ui.View):
                 bot=self.bot,
                 stream=False
             )]
+            if not results:
+                await interaction.followup.send("❌ No response generated.")
+                return
             result = results[0]
+            self.responses.append(result)
+            self.current_index = 1
             response_text = result.response
-            await smart_long_messages_with_view(interaction.channel, response_text, self.original_question, self.model, result, self.bot)
+            # Enable and set switch button
+            for child in self.children:
+                if hasattr(child, 'label') and 'Switch' in child.label:
+                    child.disabled = False
+                    child.label = "View Original"
+                    child.emoji = "⬅️"
+            await interaction.message.edit(content=response_text, view=self)
             
         except Exception as e:
             logger.error(f"Erreur lors de la régénération de réponse pour {interaction.user.display_name}: {str(e)}")
@@ -50,72 +68,40 @@ class MessageView(discord.ui.View):
 
     @discord.ui.button(emoji="📊", label="Details", style=discord.ButtonStyle.gray)
     async def show_details(self, interaction: discord.Interaction, button: discord.ui.Button):
-        logger.info(f"Affichage des détails demandé par {interaction.user.display_name}")
+        logger.debug(f"Affichage des détails demandé par {interaction.user.display_name}")
         
-        if not self.response_data:
-            await interaction.response.send_message("❌ No detailed information available.", ephemeral=True)
+        response_data = self.responses[self.current_index] if self.responses else None
+        if not response_data:
+            await interaction.response.send_message("❌ No detailed information available.", ephemeral=True, delete_after=60)
             return
         
-        # Créer un embed avec les informations détaillées
-        embed = discord.Embed(
-            title="📊 Response Details",
-            color=0x00ff00
-        )
-        
-        # Ajouter les informations disponibles
-        if isinstance(self.response_data, dict):
-            if "model" in self.response_data:
-                embed.add_field(name="🤖 Model", value=f"`{self.response_data['model']}`", inline=True)
-            
-            if "usage" in self.response_data:
-                usage = self.response_data['usage']
-                if isinstance(usage, dict):
-                    if "total_tokens" in usage:
-                        embed.add_field(name="🔢 Total Tokens", value=f"`{usage['total_tokens']}`", inline=True)
-                    if "prompt_tokens" in usage:
-                        embed.add_field(name="📝 Prompt Tokens", value=f"`{usage['prompt_tokens']}`", inline=True)
-                    if "completion_tokens" in usage:
-                        embed.add_field(name="💬 Completion Tokens", value=f"`{usage['completion_tokens']}`", inline=True)
-                else:
-                    embed.add_field(name="🔢 Tokens Used", value=f"`{usage}`", inline=True)
-            
-            if "elapsed_time" in self.response_data:
-                embed.add_field(name="⏱️ Response Time", value=f"`{self.response_data['elapsed_time']}`", inline=True)
-            
-            if "finish_reason" in self.response_data:
-                embed.add_field(name="🏁 Finish Reason", value=f"`{self.response_data['finish_reason']}`", inline=True)
-            
-            # Ajouter d'autres champs disponibles
-            for key, value in self.response_data.items():
-                if key not in ["response", "model", "usage", "elapsed_time", "finish_reason"]:
-                    if isinstance(value, (str, int, float)):
-                        embed.add_field(name=f"🔍 {key.replace('_', ' ').title()}", value=f"`{value}`", inline=True)
-        
-        embed.add_field(name="❓ Original Question", value=f"```{self.original_message.content[:1000]}{'...' if len(self.original_message.content) > 1000 else ''}```", inline=False)
-        
-        await interaction.response.send_message(embed=embed, ephemeral=True)
+        try:
+            embed = discord.Embed(title="📊 Response Details")
+            embed.add_field(name="🤖 Model", value=f"`{response_data['model']}`", inline=False)
+            embed.add_field(name="🔢 Tokens Used", value=f"`{response_data['usage']}`", inline=False)
+            embed.add_field(name="⏱️ Response Time", value=f"`{response_data['elapsed_time']}`", inline=False)
+            await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=60)
+        except Exception as e:
+            logger.error(f"Erreur lors de la création de l'embed de détails pour {interaction.user.display_name}: {str(e)}")
 
-    @discord.ui.button(emoji="📌", label="Pin", style=discord.ButtonStyle.gray)
-    async def pin(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if not interaction.channel.permissions_for(interaction.user).manage_messages:
-            await interaction.response.send_message("You do not have permission to pin messages.", ephemeral=True)
+    @discord.ui.button(label="Switch Response", emoji="🔄", style=discord.ButtonStyle.gray, disabled=True)
+    async def switch_response(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if len(self.responses) < 2:
+            await interaction.response.send_message("❌ No alternative response available.", ephemeral=True)
             return
-        logger.info(f"Épinglage de message demandé par {interaction.user.display_name}")
-        await interaction.response.defer()
-        await interaction.message.pin()
-        await interaction.followup.send("Message pinned.", delete_after=2)
+        self.current_index = 1 - self.current_index
+        response_text = self.responses[self.current_index].response
+        if self.current_index == 0:
+            button.label = "View Regenerated"
+            button.emoji = "➡️"
+        else:
+            button.label = "View Original"
+            button.emoji = "⬅️"
+        await interaction.response.edit_message(content=response_text, view=self)
 
     @discord.ui.button(emoji="🗑️", label="Delete", style=discord.ButtonStyle.gray)
     async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
-        logger.info(f"Suppression de message demandée par {interaction.user.display_name}")
+        logger.debug(f"Suppression de message demandée par {interaction.user.display_name}")
         
-        # Si possible, supprimer aussi le message de la question originale
-        if hasattr(self, 'original_message') and self.original_message:
-            try:
-                await self.original_message.delete()
-            except Exception as e:
-                logger.debug(f"Impossible de supprimer le message original: {e}")
-        
-        # Supprimer le message de réponse
         await interaction.message.edit(view=None)
         await interaction.message.delete()

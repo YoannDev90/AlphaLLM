@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from config import AVAILABLE_MODELS, LOGGER_NAME, read_file
+from config import AVAILABLE_MODELS, MODELS_OWNERS, LOGGER_NAME, read_file
 from utils.ai_process.ai_utils import summarize
 from utils.ai_process.llm_selector import LLMSelector
 from utils.discord_utils.permission_checker import PermissionChecker
@@ -101,7 +101,6 @@ async def unified_text_gen(
         origin: Origine de la requête (API ou Discord, via Origin).
         message: Message supplémentaire pour Discord (optionnel).
         bot: Bot supplémentaire pour Discord (optionnel).
-        permission_checker: Vérificateur de permissions pour Discord (optionnel).
         stream: Si True, streaming de la réponse.
         use_memory: Si True, utilise la mémoire. (API seulement)
     """
@@ -113,13 +112,6 @@ async def unified_text_gen(
     from utils.ai_process.base_chat_model import ChatParameters, ChatResult
     from utils.ai_process.chat_model import ChatModel
 
-    if origin == Origin.DISCORD and perms_checker and message:
-        authorized, reason = await perms_checker.is_authorized_msg(message)
-        if not authorized:
-            if not reason in ["Bot non mentionné","Mention @everyone, @here ou rôle"]:
-                yield ChatResult(response=f"Erreur : {reason}", usage=0, model="none", elapsed_time="0s")
-            return
-        
     if origin == Origin.DISCORD:
         user = message.author if hasattr(message, 'author') else message.user if message else None
         logger.debug(f"Utilisateur: {user.display_name if user else user_id}, "
@@ -166,11 +158,6 @@ async def unified_text_gen(
                 parameters.history = False
                 logger.info("History disabled")
                 command_found = True
-            elif query.endswith(" -p"):
-                query = query[:-3].rstrip()
-                parameters.preprompt = False
-                logger.info("Preprompt disabled")
-                command_found = True
             elif query.endswith(" -t"):
                 query = query[:-3].rstrip()
                 parameters.tools = False
@@ -185,11 +172,6 @@ async def unified_text_gen(
                 query = query[:-3].rstrip()
                 parameters.audio = True
                 logger.info("Audio enabled")
-                command_found = True
-            elif query.endswith(" +r"):
-                query = query[:-3].rstrip()
-                parameters.raw = True
-                logger.info("Raw mode enabled")
                 command_found = True
             
             if not command_found:
@@ -209,10 +191,11 @@ async def unified_text_gen(
         selected_model = await selector.select_model(input)
         if selected_model.lower() in AVAILABLE_MODELS:
             model = selected_model.lower()
-            logger.info(f"Model auto-selected: {model}")
-        else:
-            model = Text_Model.LLAMA.value
-            logger.info(f"No suitable model found, defaulting to: {model}")
+            logger.debug(f"Model auto-selected: {model}")
+            
+    if model not in AVAILABLE_MODELS:
+        model = Text_Model.LLAMA.value
+        logger.debug(f"Model not available, defaulting to: {model}")
             
     logger.debug(f"Final model to use: {model}")
     memory_manager = None
@@ -245,26 +228,48 @@ async def unified_text_gen(
 
     system_prompt = ""
     if model == Text_Model.EVILGPT.value:
-        system_prompt = read_file("configs/prompts/evilgpt_prompt.txt")
+        try:
+            system_prompt = read_file("configs/prompts/evilgpt_prompt.txt")
+        except Exception as e:
+            logger.error(f"Failed to read EvilGPT prompt file: {e}")
     if origin == Origin.API:
-        system_prompt += read_file("configs/prompts/api_prompt.txt")
+        try:
+            system_prompt += read_file("configs/prompts/api_prompt.txt")
+        except Exception as e:
+            logger.error(f"Failed to read API prompt file: {e}")
     else:
-        system_prompt += read_file("configs/prompts/discord_prompt.txt")
-    system_prompt = system_prompt.format(
-        date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
-        time=datetime.datetime.now().strftime('%H:%M:%S')
-    ) if origin == Origin.API else system_prompt.format(
-        date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
-        time=datetime.datetime.now().strftime('%H:%M:%S')
-    )
-    if relevant_memories.get('ltm'):
-        ltm_content = '\n'.join([mem.get('content') for mem in relevant_memories.get('ltm', [])])
-        system_prompt += f"""
+        try:
+            system_prompt += read_file("configs/prompts/discord_prompt.txt")
+        except Exception as e:
+            logger.error(f"Failed to read Discord prompt file: {e}")
+    
+    logger.debug(f"Base system prompt loaded {system_prompt}...")
 
-        **User's system prompt:**
-        {ltm_content}"""
+    user_name = user.display_name if origin == Origin.DISCORD and user else f"User_{user_id}"
+    owner = MODELS_OWNERS.get(model, "Unknown")
+    logger.debug(f"User: {user_name}, ID: {user.id if user else user_id}")
+    logger.debug(f"Model owner: {owner}")
 
-    logger.debug(f"System prompt prepared for model: {system_prompt[:100]}...")
+    try:
+        if origin == Origin.API:
+            system_prompt = system_prompt.format(
+                date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
+                time=datetime.datetime.now().strftime('%H:%M:%S'),
+                model=model,
+                owner=owner
+            )
+        else:
+            system_prompt = system_prompt.format(
+                date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
+                time=datetime.datetime.now().strftime('%H:%M:%S'),
+                user=user_name,
+                model=model,
+                owner=owner
+            )
+    except Exception as e:
+        logger.error(f"Error formatting system prompt: {e}")
+
+    logger.debug(f"System prompt prepared for model: {system_prompt}...")
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
     chat_model = ChatModel(model)

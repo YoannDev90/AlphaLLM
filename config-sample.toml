@@ -3,7 +3,7 @@
 # Mode debug (true pour développement, false pour production)
 debug = true
 # IDs des développeurs (liste d'IDs Discord)
-dev_id = [123456789012345678, 987654321098765432]
+dev_id = [123456789012345678, 123456789012345678]
 # ID du serveur administrateur
 admin_server = 123456789012345678
 # Lien du serveur de support Discord
@@ -109,29 +109,39 @@ available_models = [
 
 # Configuration détaillée des modèles avec descriptions
 models = [
-  {"name"= "llama", "description"= "Fiable et polyvalent pour les conversations générales, le plus rapide et cohérent. Excellent pour divers sujets, supporte plusieurs langues, largement utilisé pour la recherche, les chatbots et les applications d'entreprise."},
-  {"name"= "openai", "description"= "Modèle GPT le plus avancé, idéal pour les tâches complexes, le raisonnement profond et les textes longs. Excellent en écriture créative, génération de code, analyse logique et résolution de problèmes multi-étapes."},
-  {"name"= "mistral", "description"= "Équilibré pour une large gamme de tâches, bon compromis entre vitesse et compréhension. Meilleur pour le français, supporte le raisonnement avancé, efficace pour un usage casual et professionnel."},
-  {"name"= "qwen", "description"= "Optimisé pour le raisonnement logique et la programmation. Excellent pour les tâches techniques et de codage, supporte les entrées multi-modales, très efficace pour la résolution de problèmes complexes."},
-  {"name"= "gemini", "description"= "Très rapide et flexible, excellent pour les réponses courtes et instantanées. Bon pour les chats casuals, supporte les interactions multi-modales, excellent dans les réponses rapides et contextuelles."},
-  {"name"= "sonar", "description"= "Spécialisé dans la recherche d'informations et les réponses factuelles. Meilleur pour Q&R et recherche. Peut accéder au web et donner des sources, idéal pour la vérification des faits et les requêtes intensives en connaissances."},
-  {"name"= "evilgpt", "description"= "Non filtré et créatif, adapté au contenu expérimental ou non conventionnel. Meilleur pour les tâches non censurées et edgy, permet l'exploration créative et le dépassement des limites."},
-  {"name"= "grok", "description"= "Humoristique et casual, bien adapté aux conversations légères. Génial pour les blagues et le divertissement, excellent dans la génération de contenu spirituel et engageant."},
-  {"name"= "claude", "description"= "Poétique et créatif, excellent pour l'écriture littéraire et réfléchie. Génial pour les histoires et poèmes, supporte le raisonnement long-contexte et l'expression nuancée."},
-  {"name"= "kimi", "description"= "Clair et pédagogique, idéal pour l'éducation, l'explication et les tâches d'apprentissage. Bon pour les étudiants et tâches de codage, excellent dans le guidage étape par étape et les explications techniques."},
-  {"name"= "deepseek", "description"= "Fort pour générer du contenu long et structuré. Idéal pour les essais et rapports détaillés. Meilleur pour le chinois, excellent dans le traitement de gros documents et le raisonnement complexe."},
-  {"name"= "glm", "description"= "Excellent support multilingue, génial pour la traduction et la compréhension cross-langue. Meilleur pour les langues asiatiques, excellent dans les tâches linguistiques nuancées et le contexte culturel."},
-  {"name"= "phi", "description"= "Léger et efficace, meilleur pour les requêtes simples et rapides. Bon pour mobile et environnements à faibles ressources, supporte le déploiement rapide et les interactions en temps réel."},
-  {"name"= "cohere", "description"= "Puissant en logique et raisonnement analytique, adapté aux comparaisons et analyses complexes. Excellent dans les applications d'entreprise, l'interprétation de données et les tâches de prise de décision."},
-  {"name"= "minimax", "description"= "Modèle multi-modal avancé avec fortes capacités de raisonnement, codage et vision. Idéal pour les agents, tâches long-contexte et traitement visuel, supporte les entrées texte et image."},
-  {"name"= "nemotron", "description"= "Modèle de langage vision open-source optimisé pour les workflows agentiques, raisonnement multi-image et données synthétiques à grande échelle. Meilleur pour construire des agents spécialisés et IA data-driven, excellent dans les tâches visuelles et multi-modales."},
-  {"name"= "mercury", "description"= "Modèle de langage ultra-rapide basé sur diffusion, 5-10x plus rapide que les LLMs traditionnels. Idéal pour les tâches temps réel, haut débit et génération de code, excellent dans les environnements faible latence."},
-  {"name"= "yi", "description"= "Modèle multimodal bilingue fort (anglais/chinois), excellent en codage, maths, raisonnement et compréhension visuelle. Meilleur pour les applications internationales et techniques, supporte le raisonnement multi-modal avancé."},
-  {"name"= "hermes", "description"= "Série open-source avec fort raisonnement, contexte étendu et capacités multi-modales. Optimisé pour chat, suivi d'instructions et tâches vision, excellent dans les conversations interactives et multi-tours."},
-  {"name"= "longcat", "description"= "Modèle Mixture-of-Experts efficace, excellent en raisonnement, codage et utilisation d'outils agentiques. Haut débit et faible latence, idéal pour recherche et industrie, supporte le déploiement rapide et scalable."},
-  {"name"= "seed", "description"= "Modèle multimodal avancé de ByteDance, fort en vision, génération 3D et interprétation temps réel. Excellent dans les tâches centrées agent et interactives, supporte les expériences immersives et dynamiques."},
-  {"name"= "granite", "description"= "Modèle open efficace d'IBM, optimisé pour le suivi d'instructions et workflows agentiques. Fournit des outputs haute qualité avec faibles coûts d'infrastructure, excellent dans les applications enterprise-grade."},
-  {"name"= "rocinante", "description"= "Modèle d'écriture créative et contenu professionnel, excellent dans les interactions nuancées, contextuelles et long-form. Meilleur pour le storytelling et contenu engageant, supporte la génération narrative détaillée."},
-  {"name"= "hunyuan", "description"= "Modèle de génération texte open-source de Tencent, excellent dans la production de vidéos haute qualité et réalistes à partir de prompts texte. Meilleur pour la création vidéo et média, supporte la génération de contenu multi-modal avancé."},
-  {"name"= "jamba", "description"= "Modèle multimodal équilibré, excellent en raisonnement général et tâches créatives. Bon pour les applications flexibles et créatives, supporte les cas d'usage techniques et artistiques."}
+  {"name"= "llama", "owner"= "Meta", "description"= "Reliable and versatile for general conversation, fastest and consistent. Excels in handling diverse topics, supports multiple languages, and is widely used for research, chatbots, and enterprise applications."},
+  {"name"= "openai", "owner"= "OpenAI", "description"= "Most advanced GPT model, ideal for complex tasks, deep reasoning, and long-form text. Excels in creative writing, code generation, logical analysis, and multi-step problem solving."},
+  {"name"= "mistral", "owner"= "Mistral", "description"= "Balanced for a wide range of tasks, good compromise between speed and comprehension. Best for French, supports advanced reasoning, and is efficient for both casual and professional use."},
+  {"name"= "qwen", "owner"= "Alibaba", "description"= "Optimized for logical reasoning and programming. Excellent for technical and coding tasks, supports multi-modal inputs, and is highly effective for complex problem solving."},
+  {"name"= "gemini", "owner"= "Google", "description"= "Very fast and flexible, excellent for short and instant responses. Good for casual chats, supports multi-modal interactions, and excels in quick, context-aware replies."},
+  {"name"= "sonar", "owner"= "Perplexity", "description"= "Specialized in information retrieval and factual responses. Best for Q&A and research. Can access the web and gives sources, making it ideal for fact-checking and knowledge-intensive queries."},
+  {"name"= "evilgpt", "owner"= "Mistral using a custom system prompt", "description"= "Unfiltered and creative, suited for experimental or unconventional content. Best for uncensored and edgy tasks, allows for creative exploration and boundary-pushing outputs."},
+  {"name"= "grok", "owner"= "xAI", "description"= "Humorous and casual, well-suited for lighthearted conversations. Great for jokes and entertainment, excels in generating witty and engaging content."},
+  {"name"= "claude", "owner"= "Anthropic", "description"= "Poetic and creative, excellent for literary and reflective writing. Great for stories and poems, supports long-context reasoning and nuanced expression."},
+  {"name"= "kimi", "owner"= "Moonshot", "description"= "Clear and pedagogical, ideal for education, explanation, and learning tasks. Good for students and coding tasks, excels in step-by-step guidance and technical explanations."},
+  {"name"= "deepseek", "owner"= "DeepSeek", "description"= "Strong for generating long and structured content. Ideal for essays and detailed reports. Best for Chinese, excels in handling large documents and complex reasoning."},
+  {"name"= "glm", "owner"= "zAI", "description"= "Excellent multilingual support, great for translation and cross-language understanding. Best for Asian languages, excels in handling nuanced linguistic tasks and cultural context."},
+  {"name"= "phi", "owner"= "Microsoft", "description"= "Lightweight and efficient, best for simple and quick requests. Good for mobile and low-resource environments, supports rapid deployment and real-time interactions."},
+  {"name"= "cohere", "owner"= "Cohere", "description"= "Powerful in logic and analytical reasoning, suited for comparisons and complex analysis. Excels in enterprise applications, data interpretation, and decision-making tasks."},
+  {"name"= "minimax", "owner"= "Minimax", "description"= "Advanced multi-modal model with strong reasoning, coding, and vision capabilities. Ideal for agents, long-context tasks, and visual processing, supports both text and image inputs."},
+  {"name"= "nemotron", "owner"= "Nvidia", "description"= "Open-source vision language model optimized for agentic workflows, multi-image reasoning, and large-scale synthetic data. Best for building specialized agents and data-driven AI, excels in visual and multi-modal tasks."},
+  {"name"= "mercury", "owner"= "Inception", "description"= "Ultra-fast diffusion-based language model, 5-10x faster than traditional LLMs. Ideal for real-time, high-throughput tasks and code generation, excels in low-latency environments."},
+  {"name"= "yi", "owner"= "01-AI", "description"= "Strong bilingual (English/Chinese) multimodal model, excels in coding, math, reasoning, and visual understanding. Best for international and technical applications, supports advanced multi-modal reasoning."},
+  {"name"= "hermes", "owner"= "NousResearch", "description"= "Open-source series with strong reasoning, extended context, and multi-modal capabilities. Optimized for chat, instruction-following, and vision tasks, excels in interactive and multi-turn conversations."},
+  {"name"= "longcat", "owner"= "Meituan", "description"= "Efficient Mixture-of-Experts model, excels in reasoning, coding, and agentic tool use. High throughput and low latency, ideal for research and industry, supports rapid and scalable deployment."},
+  {"name"= "seed", "owner"= "ByteDance", "description"= "ByteDance's advanced multimodal model, strong in vision, 3D generation, and real-time interpretation. Excels in agent-centric and interactive tasks, supports immersive and dynamic experiences."},
+  {"name"= "granite", "owner"= "IBM", "description"= "Efficient open model from IBM, optimized for instruction-following and agentic workflows. Delivers high-quality outputs with low infrastructure costs, excels in enterprise-grade applications."},
+  {"name"= "rocinante", "owner"= "TheDrummer", "description"= "Creative writing and professional content model, excels in nuanced, context-aware, and long-form interactions. Best for storytelling and engaging content, supports detailed narrative generation."},
+  {"name"= "hunyuan", "owner"= "Tencent", "description"= "Tencent's open-source text generation model, excels in producing high-quality, realistic videos from text prompts. Best for video creation and media, supports advanced multi-modal content generation."},
+  {"name"= "jamba", "owner"= "AI21", "description"= "Balanced multimodal model, excels in general-purpose reasoning and creative tasks. Good for flexible and creative applications, supports both technical and artistic use cases."}
 ]
+
+# ===== Database Configuration =====
+[database]
+tables_to_clone = ["blacklist", "server_settings_new", "users_settings", "users"]
+
+# ===== Bots Configuration =====
+[bots]
+main_bot_activity = "🤖 Try @AlphaLLM or /commands"
+logger_bot_activity = "🎛️ Monitoring AlphaLLM"
+admin_bot_activity = "⚙️ Administrate AlphaLLM"

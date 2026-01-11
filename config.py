@@ -43,7 +43,9 @@ level_mapping = {
 DEBUG: bool = bool(CONFIG_SECTION.get("debug"))
 
 AVAILABLE_MODELS: Iterable[str] = MODELS_SECTION.get("available_models")
-MODELS: Iterable[Dict[str, str]] = MODELS_SECTION.get("models")
+_MODELS_LIST = MODELS_SECTION.get("models", [])
+MODELS: Dict[str, str] = {model["name"]: model["description"] for model in _MODELS_LIST}
+MODELS_OWNERS: Dict[str, str] = {model["name"]: model.get("owner", "") for model in _MODELS_LIST}
 
 LOGGING_LEVEL: int = level_mapping.get(LOGGING_LEVEL_STR.upper())
 LOGGER_NAME: str = LOGS_SECTION.get("logger_name")

@@ -13,7 +13,7 @@ logger = logging.getLogger(LOGGER_NAME)
 llm_selector_prompt = read_file("configs/prompts/llm_selector.txt")
 models_str = ""
 for model in MODELS:
-    models_str += f"- **{model['name']}**: {model['description']}\n"
+    models_str += f"- **{model[0]}**: {model[1]}\n"
 llm_selector_prompt = llm_selector_prompt.format(models=models_str)
 
 load_dotenv()

@@ -4,9 +4,13 @@ import discord
 from discord import app_commands
 
 from config import LOGGER_NAME
+from utils.discord_utils.permission_checker import PermissionChecker
 from utils.handlers.messages import smart_long_messages
 from utils.unified_text import Origin, unified_text_gen
 from utils.views import message
+
+logger = logging.getLogger(LOGGER_NAME)
+perms_checker = PermissionChecker()
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -49,6 +53,13 @@ async def setup(bot: discord.Client):
         attachment: discord.Attachment = None
         ):
         logger.info(f"Commande /ask exécutée par {interaction.user.display_name}")
+        
+        # Check permissions
+        authorized, reason = await perms_checker.is_authorized_int(interaction)
+        if not authorized:
+            await interaction.response.send_message(f"Erreur : {reason}", ephemeral=True)
+            return
+        
         await interaction.response.defer()
         try:
             results = [result async for result in unified_text_gen(
@@ -62,8 +73,11 @@ async def setup(bot: discord.Client):
                 bot=bot,
                 stream=False
             )]
-            result = results[0]
-            await smart_long_messages(interaction.channel, result.response)
+            result = results[0] if results else None
+            if result:
+                await smart_long_messages(interaction.channel, result.response)
+            else:
+                await interaction.followup.send("Sorry, an error occurred while processing your request.")
         except Exception as e:
             logger.error(f"Error in ask command: {e}")
             await interaction.followup.send("An error occurred while processing your request.", ephemeral=True)
