@@ -72,7 +72,7 @@ class MessageView(discord.ui.View):
         
         response_data = self.responses[self.current_index] if self.responses else None
         if not response_data:
-            await interaction.response.send_message("❌ No detailed information available.", ephemeral=True, delete_after=60)
+            await interaction.response.send_message("❌ No detailed information available.", ephemeral=True)
             return
         
         try:
@@ -80,7 +80,7 @@ class MessageView(discord.ui.View):
             embed.add_field(name="🤖 Model", value=f"`{response_data.model}`", inline=False)
             embed.add_field(name="🔢 Tokens Used", value=f"`{response_data.usage}`", inline=False)
             embed.add_field(name="⏱️ Response Time", value=f"`{response_data.elapsed_time}`", inline=False)
-            await interaction.followup.send(embed=embed, ephemeral=True, delete_after=60)
+            await interaction.followup.send(embed=embed, ephemeral=True)
         except Exception as e:
             logger.error(f"Erreur lors de la création de l'embed de détails pour {interaction.user.display_name}: {str(e)}")
 

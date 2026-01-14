@@ -21,8 +21,8 @@ logger = logging.getLogger(LOGGER_NAME)
 
 llm_selector_prompt = read_file("configs/prompts/llm_selector.txt")
 models_str = ""
-for model in MODELS:
-    models_str += f"- **{model[0]}**: {model[1]}\n"
+for name, desc in MODELS.items():
+    models_str += f"- **{name}**: {desc}\n"
 llm_selector_prompt = llm_selector_prompt.format(models=models_str)
 
 load_dotenv()
@@ -100,8 +100,9 @@ class LLMSelector:
                 model="openai/gpt-oss-20b",
                 base_url="https://api.llmgateway.io/v1",
                 api_key=LLM_GATEWAY_API_KEY,
-                messages=messages
-            )
+                messages=messages,
+                timeout=15
+            ).choices[0].message.content
         except Exception as e:
             logger.error(f"LLM Gateway API error: {e}")
 
@@ -111,8 +112,9 @@ class LLMSelector:
                 model="openai/gemini-2.5-flash-lite",
                 base_url="https://api.llm7.io/v1",
                 api_key=LLM7_API_KEY,
-                messages=messages
-            )
+                messages=messages,
+                timeout=15
+            ).choices[0].message.content
         except Exception as e:
             logger.error(f"LLM7 API error: {e}")
 
@@ -122,8 +124,9 @@ class LLMSelector:
                 model="openai/llama-3.1-8b-instruct",
                 base_url="https://api.zanity.xyz/v1",
                 api_key=ZANITY_API_KEY,
-                messages=messages
-            )
+                messages=messages,
+                timeout=15
+            ).choices[0].message.content
         except Exception as e:
             logger.error(f"Zanity API error: {e}")
 
@@ -133,8 +136,9 @@ class LLMSelector:
                 model="openai/gpt-oss-20b",
                 base_url="https://api.mapleai.de/v1",
                 api_key=MAPLE_AI_API_KEY,
-                messages=messages
-            )
+                messages=messages,
+                timeout=15
+            ).choices[0].message.content
         except Exception as e:
             logger.error(f"Maple AI API error: {e}")
 
@@ -145,18 +149,19 @@ class LLMSelector:
         ]
 
         selectors = [
-            self._megallm_llm_selector,
-            self._io_intelligence_llm_selector,
+            #self._megallm_llm_selector,
+            #self._io_intelligence_llm_selector,
             self._openrouter_llm_selector,
-            self._llm_gateway_llm_selector,
+            #self._llm_gateway_llm_selector,
             self._llm7_llm_selector,
-            self._zanity_llm_selector,
-            self._maple_ai_llm_selector
+            #self._zanity_llm_selector,
+            #self._maple_ai_llm_selector
         ]
         random.shuffle(selectors)
 
         for selector in selectors:
             try:
+                logger.info(f"Trying LLM selector: {selector.__name__}")
                 text = await selector(messages)
                 logger.debug(f"{selector.__name__} response: {text}")
                 model = self._parse_llm_selection(text)
