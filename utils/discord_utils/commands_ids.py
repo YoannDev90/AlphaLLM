@@ -2,6 +2,7 @@
 Utilitaire pour gérer les IDs des commandes slash Discord.
 Permet de récupérer automatiquement les IDs des commandes et de créer des mentions.
 """
+import asyncio
 import json
 import logging
 import os
@@ -57,13 +58,20 @@ class CommandIDManager:
             command_ids = {}
             
             # Fetch global commands
-            try:
-                commands = await self.bot.tree.fetch_commands()
-                for command in commands:
-                    command_ids[command.name] = command.id
-                    logger.debug(f"Commande globale trouvée: {command.name} (ID: {command.id})")
-            except Exception as e:
-                logger.error(f"Erreur lors de la récupération des commandes globales: {e}")
+            for attempt in range(3):
+                try:
+                    commands = await self.bot.tree.fetch_commands()
+                    for command in commands:
+                        command_ids[command.name] = command.id
+                        logger.debug(f"Commande globale trouvée: {command.name} (ID: {command.id})")
+                    break
+                except Exception as e:
+                    if "503" in str(e) and attempt < 2:
+                        logger.warning(f"503 error on attempt {attempt+1}, retrying in 5 seconds...")
+                        await asyncio.sleep(5)
+                    else:
+                        logger.error(f"Erreur lors de la récupération des commandes globales: {e}")
+                        break
             
             self.command_ids = command_ids
             self.save_command_ids()

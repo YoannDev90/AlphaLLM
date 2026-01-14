@@ -69,10 +69,11 @@ class MessageView(discord.ui.View):
     @discord.ui.button(emoji="📊", label="Details", style=discord.ButtonStyle.gray)
     async def show_details(self, interaction: discord.Interaction, button: discord.ui.Button):
         logger.debug(f"Affichage des détails demandé par {interaction.user.display_name}")
+        await interaction.response.defer()
         
         response_data = self.responses[self.current_index] if self.responses else None
         if not response_data:
-            await interaction.response.send_message("❌ No detailed information available.", ephemeral=True)
+            await interaction.followup.send("❌ No detailed information available.", ephemeral=True)
             return
         
         try:
