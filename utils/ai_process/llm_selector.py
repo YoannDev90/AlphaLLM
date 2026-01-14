@@ -1,12 +1,21 @@
 import asyncio
 import logging
 import os
+import random
 
 import requests
 from dotenv import load_dotenv
+import litellm
 
-from config import (AVAILABLE_MODELS, IO_INTELLIGENCE_API_KEY, LOGGER_NAME,
-                    MEGALLM_API_KEY, MODELS, OPENROUTER_API_KEY, read_file)
+from config import (AVAILABLE_MODELS, MODELS,LOGGER_NAME,read_file, 
+                    IO_INTELLIGENCE_API_KEY,
+                    MEGALLM_API_KEY, 
+                    OPENROUTER_API_KEY, 
+                    LLM7_API_KEY,
+                    LLM_GATEWAY_API_KEY,
+                    MAPLE_AI_API_KEY,
+                    ZANITY_API_KEY
+                    )
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -43,7 +52,7 @@ class LLMSelector:
         
         return await asyncio.to_thread(_sync_request)
 
-    async def _io_intelligence_llm(self, messages: list) -> str:
+    async def _io_intelligence_llm_selector(self, messages: list) -> str:
         def _sync_request():
             response = requests.post(
                 "https://api.intelligence.io.solutions/api/v1/chat/completions",
@@ -84,6 +93,50 @@ class LLMSelector:
                 logger.error(f"OpenRouter API error: {response.status_code} {response.text}")
         
         return await asyncio.to_thread(_sync_request)
+    
+    async def _llm_gateway_llm_selector(self, messages: list) -> str:
+        try:
+            return litellm.completion(
+                model="openai/gpt-oss-20b",
+                base_url="https://api.llmgateway.io/v1",
+                api_key=LLM_GATEWAY_API_KEY,
+                messages=messages
+            )
+        except Exception as e:
+            logger.error(f"LLM Gateway API error: {e}")
+
+    async def _llm7_llm_selector(self, messages: list) -> str:
+        try:
+            return litellm.completion(
+                model="openai/gemini-2.5-flash-lite",
+                base_url="https://api.llm7.io/v1",
+                api_key=LLM7_API_KEY,
+                messages=messages
+            )
+        except Exception as e:
+            logger.error(f"LLM7 API error: {e}")
+
+    async def _zanity_llm_selector(self, messages: list) -> str:
+        try:
+            return litellm.completion(
+                model="openai/llama-3.1-8b-instruct",
+                base_url="https://api.zanity.xyz/v1",
+                api_key=ZANITY_API_KEY,
+                messages=messages
+            )
+        except Exception as e:
+            logger.error(f"Zanity API error: {e}")
+
+    async def _maple_ai_llm_selector(self, messages: list) -> str:
+        try:
+            return litellm.completion(
+                model="openai/gpt-oss-20b",
+                base_url="https://api.mapleai.de/v1",
+                api_key=MAPLE_AI_API_KEY,
+                messages=messages
+            )
+        except Exception as e:
+            logger.error(f"Maple AI API error: {e}")
 
     async def select_model(self, input: str) -> str:
         messages = [
@@ -91,33 +144,30 @@ class LLMSelector:
             {"role": "user", "content": input}
         ]
 
-        try:
-            text = await self._megallm_llm_selector(messages)
-            logger.debug(f"Megallm LLM Selector response: {text}")
-            model = self._parse_llm_selection(text)
-            if model is None:
-                raise ValueError("Parsing failed: no valid model found in response")
-        except Exception as e:
-            logger.error(f"Megallm LLM Selector failed: {e}. Falling back to OpenRouter LLM Selector.")
+        selectors = [
+            self._megallm_llm_selector,
+            self._io_intelligence_llm_selector,
+            self._openrouter_llm_selector,
+            self._llm_gateway_llm_selector,
+            self._llm7_llm_selector,
+            self._zanity_llm_selector,
+            self._maple_ai_llm_selector
+        ]
+        random.shuffle(selectors)
+
+        for selector in selectors:
             try:
-                text = await self._openrouter_llm_selector(messages)
-                logger.debug(f"OpenRouter LLM Selector response: {text}")
+                text = await selector(messages)
+                logger.debug(f"{selector.__name__} response: {text}")
                 model = self._parse_llm_selection(text)
-                if model is None:
-                    raise ValueError("Parsing failed: no valid model found in response")
-            except Exception as e2:
-                logger.error(f"OpenRouter LLM Selector failed: {e2}. Falling back to IO Intelligence LLM Selector.")
-                try:
-                    text = await self._io_intelligence_llm(messages)
-                    logger.debug(f"IO Intelligence LLM Selector response: {text}")
-                    model = self._parse_llm_selection(text)
-                    if model is None:
-                        raise ValueError("Parsing failed: no valid model found in response")
-                except Exception as e3:
-                    logger.error(f"IO Intelligence LLM Selector also failed: {e3}. Using default model.")
-                    return "llama"
-        
-        return model
+                if model is not None:
+                    return model
+            except Exception as e:
+                logger.error(f"{selector.__name__} failed: {e}")
+                continue
+
+        logger.error("All LLM selectors failed. Using default model.")
+        return "llama"
 
     def _parse_llm_selection(self, text: str) -> str:
         if text is None:
