@@ -1,5 +1,13 @@
 [
     {
+        "model_name": "deepseek-v3.2",
+        "litellm_params": {
+            "model": "openai/deepseek-v3.2",
+            "api_base": "https://api.navy/v1",
+            "api_key": "NAVY_API_KEY"
+        }
+    },
+    {
         "model_name": "deepseek-r1",
         "litellm_params": {
             "model": "openai/deepseek-r1-0528:free",

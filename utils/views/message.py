@@ -28,7 +28,7 @@ class MessageView(discord.ui.View):
     @discord.ui.button(emoji="🔄", label="Regenerate", style=discord.ButtonStyle.gray)
     async def regenerate(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.regenerated:
-            await interaction.response.send_message("❌ Regeneration already done.", ephemeral=True)
+            await interaction.followup.send("❌ Regeneration already done.", ephemeral=True)
             return
         logger.info(f"Régénération de réponse demandée par {interaction.user.display_name}")
         await interaction.response.defer()
@@ -80,14 +80,14 @@ class MessageView(discord.ui.View):
             embed.add_field(name="🤖 Model", value=f"`{response_data.model}`", inline=False)
             embed.add_field(name="🔢 Tokens Used", value=f"`{response_data.usage}`", inline=False)
             embed.add_field(name="⏱️ Response Time", value=f"`{response_data.elapsed_time}`", inline=False)
-            await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=60)
+            await interaction.followup.send(embed=embed, ephemeral=True, delete_after=60)
         except Exception as e:
             logger.error(f"Erreur lors de la création de l'embed de détails pour {interaction.user.display_name}: {str(e)}")
 
     @discord.ui.button(label="Switch Response", emoji="🔄", style=discord.ButtonStyle.gray, disabled=True)
     async def switch_response(self, interaction: discord.Interaction, button: discord.ui.Button):
         if len(self.responses) < 2:
-            await interaction.response.send_message("❌ No alternative response available.", ephemeral=True)
+            await interaction.followup.send("❌ No alternative response available.", ephemeral=True)
             return
         self.current_index = 1 - self.current_index
         response_text = self.responses[self.current_index].response

@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 from config import AVAILABLE_MODELS, MODELS_OWNERS, LOGGER_NAME, read_file
+from utils.discord_utils.status import update_status_on_success, update_status_on_failure
 from utils.ai_process.ai_utils import summarize
 from utils.ai_process.llm_selector import LLMSelector
 from utils.discord_utils.permission_checker import PermissionChecker
@@ -47,6 +48,7 @@ class Origin:
 
 Origin.API = Origin("api")
 Origin.DISCORD = Origin("discord")
+Origin.STATUS_CHECK = Origin("status_check")
 
 class Text_Model(Enum):
     """Enum pour définir les modèles disponibles."""
@@ -137,6 +139,7 @@ async def unified_text_gen(
             mention_str = f"<@{bot_user.id}>"
             input = input.replace(mention_str, "").strip()
 
+    user = None
     if origin == Origin.DISCORD:
         parameters = RequestParameters()
         
@@ -202,9 +205,12 @@ async def unified_text_gen(
     if use_memory:
         memory_manager = await get_memory_manager()
         
-    relevant_memories = await memory_manager.get_hybrid_memories(
-        user_id, conv_id, input, recent_limit=4, similar_limit=5
-    )
+    if use_memory and memory_manager:
+        relevant_memories = await memory_manager.get_hybrid_memories(
+            user_id, conv_id, input, recent_limit=4, similar_limit=5
+        )
+    else:
+        relevant_memories = {'stm': [], 'ltm': []}
 
     logger.debug(f"Relevant memories fetched: "
                  f"STM: {len(relevant_memories.get('stm', []))}, "
@@ -237,6 +243,11 @@ async def unified_text_gen(
             system_prompt += read_file("configs/prompts/api_prompt.txt")
         except Exception as e:
             logger.error(f"Failed to read API prompt file: {e}")
+    elif origin == Origin.STATUS_CHECK:
+        try:
+            system_prompt += read_file("configs/prompts/status_prompt.txt")
+        except Exception as e:
+            logger.error(f"Failed to read status prompt file: {e}")
     else:
         try:
             system_prompt += read_file("configs/prompts/discord_prompt.txt")
@@ -251,7 +262,7 @@ async def unified_text_gen(
     logger.debug(f"Model owner: {owner}")
 
     try:
-        if origin == Origin.API:
+        if origin == Origin.API or origin == Origin.STATUS_CHECK:
             system_prompt = system_prompt.format(
                 date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
                 time=datetime.datetime.now().strftime('%H:%M:%S'),
@@ -273,7 +284,7 @@ async def unified_text_gen(
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
     chat_model = ChatModel(model)
-    chat_params = ChatParameters(messages=messages, temperature=0.7, stream=stream, raw=True, files=processed_files)
+    chat_params = ChatParameters(messages=messages, model=model, temperature=0.7, stream=stream, raw=True, files=processed_files)
     
     if stream:
         async for chunk in chat_model.chat(chat_params):
@@ -281,10 +292,13 @@ async def unified_text_gen(
     else:
         result = await chat_model.chat(chat_params)
         
+        # Update status
+        update_status_on_success(model, result.elapsed_time)
+        
         logger.info(f"Réponse générée - Modèle: {result.model}, Usage: {result.usage} tokens, Temps: {result.elapsed_time}")
         logger.debug(f"Contenu de la réponse: {result.response}...")
             
-        if use_memory:
+        if use_memory and memory_manager:
             await memory_manager.add_conversation_message(user_id, conv_id, input, "user")
             await memory_manager.add_conversation_message(user_id, conv_id, result.response, "assistant")
             

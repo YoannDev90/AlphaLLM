@@ -45,6 +45,19 @@ def load_logs_channel_config():
         logger.error(f"Error loading logs channel config: {e}")
 
 
+def save_logs_channel_config():
+    """Sauvegarder la configuration du salon de logs dans un fichier JSON"""
+    try:
+        import json
+        import os
+        os.makedirs("cache", exist_ok=True)
+        with open("cache/logs_channel_config.json", "w") as f:
+            json.dump(LOGS_CHANNEL_CONFIG, f, indent=4)
+        logger.info("Logs channel config saved to cache/logs_channel_config.json")
+    except Exception as e:
+        logger.error(f"Error saving logs channel config: {e}")
+
+
 load_logs_channel_config()
 
 
@@ -64,12 +77,16 @@ async def setup_logs_channel():
                     if channel.name == LOGS_CHANNEL_CONFIG["channel_name"]:
                         logs_channel = channel
                         logger.info(f"Logs channel found by name: {logs_channel.name}")
+                        LOGS_CHANNEL_CONFIG["channel_id"] = logs_channel.id
+                        save_logs_channel_config()
                         break
                 else:
                     # Create new channel
                     try:
                         logs_channel = await category.create_text_channel(LOGS_CHANNEL_CONFIG["channel_name"])
                         logger.info(f"Logs channel created: {logs_channel.name}")
+                        LOGS_CHANNEL_CONFIG["channel_id"] = logs_channel.id
+                        save_logs_channel_config()
                     except Exception as e:
                         logger.error(f"Failed to create logs channel: {e}")
             else:

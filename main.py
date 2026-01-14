@@ -14,8 +14,8 @@ from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.database.db_manager import DatabaseManager
 from utils.memory import initialize_memory_manager
-from utils.ressources import (get_default_monitor, start_monitoring,
-                              stop_monitoring)
+from utils.ressources import start_monitoring, stop_monitoring
+from utils.discord_utils.status import status_emulation
 
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
@@ -124,6 +124,7 @@ async def main() -> None:
                 run_with_shutdown(run_admin_bot(), "Admin Bot") if RUN_ADMIN_BOT else asyncio.sleep(0),
                 run_with_shutdown(start_api_async(), "API Server") if RUN_API else asyncio.sleep(0),
                 run_with_shutdown(check_stop_file(restart_pending), "Stop-File Checker"),
+                run_with_shutdown(status_emulation(shutdown_event), "Status Emulation"),
             ]
             
             await asyncio.gather(*tasks, return_exceptions=True)

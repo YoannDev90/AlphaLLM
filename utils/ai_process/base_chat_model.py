@@ -14,6 +14,7 @@ logger = logging.getLogger(LOGGER_NAME)
 class ChatParameters:
     """Paramètres typés pour les conversations"""
     messages: List[Dict[str, Any]]
+    model: str
     history: bool = True
     internet_access: bool = False
     files: Optional[List[str]] = None

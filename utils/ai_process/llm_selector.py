@@ -120,6 +120,8 @@ class LLMSelector:
         return model
 
     def _parse_llm_selection(self, text: str) -> str:
+        if text is None:
+            return None
         t = text.lower()
         for model_name in AVAILABLE_MODELS:
             if model_name.lower() in t:

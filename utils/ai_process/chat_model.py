@@ -251,3 +251,20 @@ class ChatModel(BaseChatModel):
             async def _get_result():
                 return await self._non_stream_chat(parameters, start_time)
             return _get_result()
+
+    async def generate(self, parameters: ChatParameters):
+        """
+        Génère une réponse du modèle
+
+        Args:
+            parameters: Paramètres de la conversation
+
+        Yields:
+            ChatResult ou StreamChunk selon le mode
+        """
+        if parameters.stream:
+            async for chunk in self.chat(parameters):
+                yield chunk
+        else:
+            result = await self.chat(parameters)
+            yield result
