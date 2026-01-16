@@ -32,6 +32,8 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    if message.author == bot.user:
+        return
     authorized, reason = await perms_checker.is_authorized_msg(message)
     if not authorized:
         if reason not in ["Bot non mentionné", "Mention @everyone, @here ou rôle"]:
@@ -68,24 +70,6 @@ async def on_guild_join(guild):
 @bot.event
 async def on_guild_remove(guild):
     logger.info(f"Removed from guild: {guild.name} (ID: {guild.id})")
-
-@bot.event
-async def on_error(event_method, *args, **kwargs):
-    logger.error(f"An error occurred in {event_method}", exc_info=True)
-
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandNotFound):
-        return
-    logger.error(f"An error occurred in command {ctx.command}: {error}", exc_info=True)
-
-@bot.event
-async def on_disconnect():
-    logger.debug("Bot disconnected from Discord")
-
-@bot.event
-async def on_resumed():
-    logger.debug("Bot resumed connection to Discord")
 
 async def run_bot():
     mode_label = "BetaLLM" if DEBUG else "AlphaLLM"
