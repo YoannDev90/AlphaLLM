@@ -1,4 +1,11 @@
-[
+[    {
+        "model_name": "kimi-k2",
+        "litellm_params": {
+            "model": "openai/kimi-k2-0905:free",
+            "api_base": "https://api.routeway.ai/v1",
+            "api_key": "ROUTEWAY_API_KEY"
+        }
+    },
     {
         "model_name": "kimi-k2-instruct",
         "litellm_params": {

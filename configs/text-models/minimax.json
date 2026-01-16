@@ -3,6 +3,14 @@
         "model_name": "minimax-m2",
         "litellm_params": {
             "model": "openai/minimax-m2:free",
+            "api_base": "https://api.routeway.ai/v1",
+            "api_key": "ROUTEWAY_API_KEY"
+        }
+    },
+    {
+        "model_name": "minimax-m2",
+        "litellm_params": {
+            "model": "openai/minimax-m2:free",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
         }

@@ -7,6 +7,14 @@
         }
     },
     {
+        "model_name": "mistral-nemo-instruct",
+        "litellm_params": {
+            "model": "openai/mistral-nemo-instruct:free",
+            "api_base": "https://api.routeway.ai/v1",
+            "api_key": "ROUTEWAY_API_KEY"
+        }
+    },
+    {
         "model_name": "mistral-medium-latest",
         "litellm_params": {
             "model": "openai/mistral-medium-latest",

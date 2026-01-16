@@ -1,5 +1,21 @@
 [
     {
+        "model_name": "nemotron-3-nano-30b",
+        "litellm_params": {
+            "model": "openai/nemotron-3-nano-30b-a3b:free",
+            "api_base": "https://api.routeway.ai/v1",
+            "api_key": "ROUTEWAY_API_KEY"
+        }
+    },
+    {
+        "model_name": "nemotron-nano-9b-v2",
+        "litellm_params": {
+            "model": "openai/nemotron-nano-9b-v2:free",
+            "api_base": "https://api.routeway.ai/v1",
+            "api_key": "ROUTEWAY_API_KEY"
+        }
+    },
+    {
         "model_name": "nemotron-nano-9b-v2",
         "litellm_params": {
             "model": "openrouter/nvidia/nemotron-nano-12b-v2-vl:free",

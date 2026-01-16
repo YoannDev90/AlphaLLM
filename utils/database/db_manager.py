@@ -39,7 +39,14 @@ class DatabaseManager:
             logger.debug("Connexion PostgreSQL établie avec succès")
         except psycopg2.Error as e:
             logger.error(f"Erreur lors de la connexion à PostgreSQL: {e}")
-            raise
+            # Try to reconnect once after a short delay
+            await asyncio.sleep(2)
+            try:
+                self.pg_conn = psycopg2.connect(SUPABASE_PG)
+                logger.debug("Reconnexion PostgreSQL réussie")
+            except psycopg2.Error as e2:
+                logger.error(f"Échec de la reconnexion à PostgreSQL: {e2}")
+                raise
 
     async def clone_tables(self):
         """Clone les tables spécifiées de Supabase vers SQLite"""
@@ -120,20 +127,28 @@ class DatabaseManager:
             return 0
     
     async def _sync_with_supabase(self, query: str, params: tuple):
-        """Convertit la requête SQLite en PostgreSQL et l'exécute sur Supabase"""
-        try:
-            if self.pg_conn.closed:
-                logger.debug("Connexion PostgreSQL fermée, reconnexion...")
-                self.pg_conn = psycopg2.connect(SUPABASE_PG)
-            
-            pg_query = self._convert_sqlite_to_postgres(query)
-            logger.debug(f"Executing PG query: {pg_query} with params: {params}")
-            with self.pg_conn.cursor() as cursor:
-                cursor.execute(pg_query, params)
-                self.pg_conn.commit()
-            logger.debug(f"Synchronisation réussie: {pg_query}")
-        except psycopg2.Error as e:
-            logger.warning(f"Échec de synchronisation PostgreSQL: {e}")
+        """Convertit la requête SQLite en PostgreSQL et l'exécute sur Supabase avec retry pour les erreurs SSL"""
+        for attempt in range(3):
+            try:
+                if self.pg_conn.closed:
+                    logger.debug("Connexion PostgreSQL fermée, reconnexion...")
+                    self.pg_conn = psycopg2.connect(SUPABASE_PG)
+                
+                pg_query = self._convert_sqlite_to_postgres(query)
+                logger.debug(f"Executing PG query (attempt {attempt+1}): {pg_query} with params: {params}")
+                with self.pg_conn.cursor() as cursor:
+                    cursor.execute(pg_query, params)
+                    self.pg_conn.commit()
+                logger.debug(f"Synchronisation réussie: {pg_query}")
+                return
+            except psycopg2.Error as e:
+                error_msg = str(e).lower()
+                if ("ssl" in error_msg or "eof" in error_msg) and attempt < 2:
+                    logger.warning(f"SSL/EOF error on attempt {attempt+1}, retrying in 5 seconds: {e}")
+                    await asyncio.sleep(5)
+                else:
+                    logger.warning(f"Échec de synchronisation PostgreSQL: {e}")
+                    break
     
     def _convert_sqlite_to_postgres(self, sqlite_query: str) -> str:
         """Convertit une requête SQLite en PostgreSQL (remplace ? par %s)"""

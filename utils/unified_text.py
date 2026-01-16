@@ -139,7 +139,6 @@ async def unified_text_gen(
             mention_str = f"<@{bot_user.id}>"
             input = input.replace(mention_str, "").strip()
 
-    user = None
     if origin == Origin.DISCORD:
         parameters = RequestParameters()
         
@@ -182,7 +181,8 @@ async def unified_text_gen(
 
         logger.info(f"Query: {query}")
         if not query or query.isspace():
-            logger.info(f"Empty message from {user.id}")
+            user_name = user.display_name if user else f"user_{user_id}"
+            logger.info(f"Empty message from {user_name}")
             query = "Hi! Please ask me a question."
             
         if parameters.model:

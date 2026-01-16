@@ -38,13 +38,13 @@ class PermissionChecker:
                 return False, "Mention @everyone, @here ou rôle"
             
         # Vérification des canaux autorisés (si configuré)
-        if channel.id not in await get_allowed_channels(guild.id):
-            return False, "Canal non autorisé"
+        # if channel.id not in await get_allowed_channels(guild.id):
+        #     return False, "Canal non autorisé"
                 
         # Vérification des rôles autorisés (si configuré)
-        user_roles_ids = [role.id for role in user.roles]
-        if not any(role_id in user_roles_ids for role_id in await get_allowed_roles(guild.id)):
-            return False, "Rôle non autorisé"
+        # user_roles_ids = [role.id for role in user.roles]
+        # if not any(role_id in user_roles_ids for role_id in await get_allowed_roles(guild.id)):
+        #     return False, "Rôle non autorisé"
         
         return True, "Autorisé"
     
@@ -68,12 +68,12 @@ class PermissionChecker:
             return True, "Autorisé en MP"
         
         # Vérification des canaux autorisés (si configuré)
-        if channel.id not in await get_allowed_channels(guild.id):
-            return False, "Canal non autorisé"
+        # if channel.id not in await get_allowed_channels(guild.id):
+        #     return False, "Canal non autorisé"
                 
         # Vérification des rôles autorisés (si configuré)
-        user_roles_ids = [role.id for role in user.roles]
-        if not any(role_id in user_roles_ids for role_id in await get_allowed_roles(guild.id)):
-            return False, "Rôle non autorisé"
+        # user_roles_ids = [role.id for role in user.roles]
+        # if not any(role_id in user_roles_ids for role_id in await get_allowed_roles(guild.id)):
+        #     return False, "Rôle non autorisé"
 
         return True, "Autorisé"
