@@ -28,7 +28,7 @@ class DatabaseManager:
     async def initialize(self):
         """Initialise les connexions aux bases de données"""
         try:
-            self.sqlite_conn = sqlite3.connect("local_db.db")
+            self.sqlite_conn = sqlite3.connect("data/local_db.db")
             logger.debug("Connexion SQLite établie avec succès")
         except sqlite3.Error as e:
             logger.error(f"Erreur lors de la connexion à la base de données SQLite: {e}")
@@ -39,7 +39,6 @@ class DatabaseManager:
             logger.debug("Connexion PostgreSQL établie avec succès")
         except psycopg2.Error as e:
             logger.error(f"Erreur lors de la connexion à PostgreSQL: {e}")
-            # Try to reconnect once after a short delay
             await asyncio.sleep(2)
             try:
                 self.pg_conn = psycopg2.connect(SUPABASE_PG)

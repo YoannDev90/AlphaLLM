@@ -107,7 +107,7 @@ async def main() -> None:
         try:
             ressources._monitor_instance = None
             
-            csv_file = "monitoring.csv"        
+            csv_file = "data/monitoring.csv"        
             logger.debug("Démarrage du monitoring des ressources...")
             monitor = start_monitoring(interval=1, csv_file=csv_file)
             

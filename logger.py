@@ -220,7 +220,7 @@ def setup_logging():
     console_handler.setFormatter(console_formatter)
     logger.addHandler(console_handler)
 
-    file_handler = logging.handlers.RotatingFileHandler('bot.log')
+    file_handler = logging.handlers.RotatingFileHandler('data/bot.log')
     file_handler.setLevel(logging.DEBUG)
     file_formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(filename)s - %(message)s')
     file_handler.setFormatter(file_formatter)

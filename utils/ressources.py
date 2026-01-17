@@ -286,7 +286,7 @@ class ResourceMonitor:
                     for snapshot in self.samples:
                         writer.writerow(snapshot.to_dict())
                 logger.info(f"Exported {len(self.samples)} resource snapshots to {path}")
-            except Exception as exc:  # pragma: no cover
+            except Exception as exc:
                 logger.error(f"Failed to export resource snapshots: {exc}")
 
     def print_summary(self) -> None:
