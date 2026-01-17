@@ -338,8 +338,13 @@ AlphaLLM/
 │       ├── deepseek.json
 │       └── ...
 ├── data/
-│   └── embedder/
-└── monitoring.csv
+│   ├── embedder/
+│   ├── bot.log
+│   ├── command_ids.json
+│   ├── local_db.db
+│   ├── logs_channel_config.json
+│   ├── monitoring.csv
+│   └── status.json
 ```
 
 ### Flux de données
