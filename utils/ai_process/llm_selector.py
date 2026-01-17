@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 import litellm
 
 from config import (AVAILABLE_MODELS, MODELS,LOGGER_NAME,read_file, 
-                    IO_INTELLIGENCE_API_KEY,
                     MEGALLM_API_KEY, 
                     OPENROUTER_API_KEY, 
                     LLM7_API_KEY,
