@@ -19,3 +19,6 @@ uvicorn
 cairosvg
 cloudinary
 aiohttp
+torch --index-url https://download.pytorch.org/whl/cpu
+transformers
+accelerate

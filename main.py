@@ -14,6 +14,7 @@ from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.database.db_manager import DatabaseManager
 from utils.memory import initialize_memory_manager
+from utils.function_calling import initialize_function_caller
 from utils.ressources import start_monitoring, stop_monitoring
 from utils.discord_utils.status import status_emulation
 
@@ -113,6 +114,7 @@ async def main() -> None:
             
             monitor.fill_gaps(datetime.datetime.now())
             await initialize_memory_manager()
+            await initialize_function_caller()
             
             logger.debug("Initialisation de la base de données...")
             await db_manager.initialize()

@@ -59,7 +59,23 @@ async def on_message(message):
     result = response[0] if response else None
     if result:
         async with message.channel.typing():
-            await smart_long_messages_with_view(message.channel, result.response, message.content, result.model, result, bot)
+            if result.response.startswith("generated_image"):
+                import base64
+                import io
+                parts = result.response.split(": ", 1)
+                if len(parts) == 2:
+                    base64_data = parts[1]
+                    try:
+                        image_bytes = base64.b64decode(base64_data)
+                        image_file = discord.File(io.BytesIO(image_bytes), filename="generated_image.png")
+                        await message.channel.send(file=image_file)
+                    except Exception as e:
+                        logger.error(f"Erreur lors de l'envoi de l'image: {e}")
+                        await smart_long_messages_with_view(message.channel, result.response, message.content, result.model, result, bot)
+                else:
+                    await smart_long_messages_with_view(message.channel, result.response, message.content, result.model, result, bot)
+            else:
+                await smart_long_messages_with_view(message.channel, result.response, message.content, result.model, result, bot)
     else:
         await message.channel.send("Sorry, an error occurred while processing your request.")
 

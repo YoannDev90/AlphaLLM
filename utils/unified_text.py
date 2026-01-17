@@ -12,6 +12,7 @@ from utils.ai_process.llm_selector import LLMSelector
 from utils.discord_utils.permission_checker import PermissionChecker
 from utils.handlers.files import FileHandler
 from utils.memory import get_memory_manager, initialize_memory_manager
+from utils.function_calling import get_function_caller
 
 logger = logging.getLogger(LOGGER_NAME)
 perms_checker = PermissionChecker()
@@ -189,6 +190,28 @@ async def unified_text_gen(
         if parameters.model:
             model = parameters.model
 
+    function_caller = await get_function_caller()
+    tool_calls = function_caller.check_for_tools(input)
+    print(tool_calls)
+    if tool_calls:
+        tool_responses = []
+        for call in tool_calls:
+            func_name = call['function']
+            params = call['parameters']
+            from utils.function_calling.tools import execute_tool
+            response = await execute_tool(func_name, params)
+            tool_responses.append(response)
+        tool_response = "\n".join(tool_responses)
+        logger.info(f"Tool response: {tool_response}")
+        if stream:
+            from utils.ai_process.base_chat_model import StreamChunk
+            yield StreamChunk(chunk=tool_response, done=True, response=tool_response, usage=0, model="function_calling", elapsed_time="0.0s")
+        else:
+            from utils.ai_process.base_chat_model import ChatResult
+            result = ChatResult(response=tool_response, usage=0, model="function_calling", elapsed_time="0.0s")
+            yield result
+        return
+
     if model == "auto":
         logger.info("Auto-selecting model...")
         selector = LLMSelector()
@@ -284,6 +307,7 @@ async def unified_text_gen(
     logger.debug(f"System prompt prepared for model: {system_prompt}...")
 
     messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
+    
     chat_model = ChatModel(model)
     chat_params = ChatParameters(messages=messages, model=model, temperature=0.7, stream=stream, raw=True, files=processed_files)
     

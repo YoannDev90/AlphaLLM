@@ -1,0 +1,22 @@
+{
+  "type": "function",
+  "function": {
+    "name": "generate_image",
+    "description": "Generate an image based on a text prompt",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "prompt": {
+          "type": "string",
+          "description": "The text prompt describing the image to generate"
+        },
+        "model": {
+          "type": "string",
+          "description": "The image generation model to use (optional, defaults to auto)",
+          "enum": ["flux", "gptimage", "kontext", "nanobanana", "seedream", "zimage"]
+        }
+      },
+      "required": ["prompt"]
+    }
+  }
+}

@@ -65,6 +65,10 @@ chroma_db_name = "AlphaLLM"
 embedder_model = "sentence-transformers/all-MiniLM-L6-v2"
 # Répertoire de cache pour les embeddings
 embedder_cache_dir = "./data/embedder"
+# Modèle pour le function calling
+function_calling_model = "google/functiongemma-270m-it"
+# Répertoire de cache pour le function calling
+function_calling_cache_dir = "./data/function_calling"
 # Collection pour les documents RAG
 chroma_rag_collection = "rag_documents"
 # Collection pour la mémoire à court terme

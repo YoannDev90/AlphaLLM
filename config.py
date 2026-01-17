@@ -77,6 +77,8 @@ CHROMA_STM_COLLECTION: str = MEMORY_SECTION.get("chroma_stm_collection")
 CHROMA_LTM_COLLECTION: str = MEMORY_SECTION.get("chroma_ltm_collection")
 EMBEDDER_MODEL: str = MEMORY_SECTION.get("embedder_model")
 EMBEDDER_CACHE_DIR: str = MEMORY_SECTION.get("embedder_cache_dir")
+FUNCTION_CALLING_MODEL: str = MEMORY_SECTION.get("function_calling_model")
+FUNCTION_CALLING_CACHE_DIR: str = MEMORY_SECTION.get("function_calling_cache_dir")
 STM_MAX_AGE = MEMORY_SECTION.get("stm_max_age")
 LTM_MIN_SIMILARITY = MEMORY_SECTION.get("ltm_min_similarity")
 
