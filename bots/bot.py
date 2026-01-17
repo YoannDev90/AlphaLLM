@@ -62,7 +62,7 @@ async def on_message(message):
             if result.response.startswith("generated_image"):
                 import base64
                 import io
-                parts = result.response.split(": ", 1)
+                parts = result.response.split(":", 1)
                 if len(parts) == 2:
                     base64_data = parts[1]
                     try:

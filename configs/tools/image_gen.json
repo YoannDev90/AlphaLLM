@@ -10,6 +10,10 @@
           "type": "string",
           "description": "The text prompt describing the image to generate"
         },
+        "prompt_enhance": {
+          "type": "boolean",
+          "description": "Whether to enhance the text prompt before generating the image (default: true )"
+        },
         "model": {
           "type": "string",
           "description": "The image generation model to use (optional, defaults to auto)",

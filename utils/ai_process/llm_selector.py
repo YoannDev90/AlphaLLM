@@ -149,19 +149,19 @@ class LLMSelector:
         ]
 
         selectors = [
-            #self._megallm_llm_selector,
-            #self._io_intelligence_llm_selector,
+            self._megallm_llm_selector,
+            self._io_intelligence_llm_selector,
             self._openrouter_llm_selector,
-            #self._llm_gateway_llm_selector,
+            self._llm_gateway_llm_selector,
             self._llm7_llm_selector,
-            #self._zanity_llm_selector,
-            #self._maple_ai_llm_selector
+            self._zanity_llm_selector,
+            self._maple_ai_llm_selector
         ]
         random.shuffle(selectors)
 
         for selector in selectors:
             try:
-                logger.info(f"Trying LLM selector: {selector.__name__}")
+                logger.debug(f"Trying LLM selector: {selector.__name__}")
                 text = await selector(messages)
                 logger.debug(f"{selector.__name__} response: {text}")
                 model = self._parse_llm_selection(text)

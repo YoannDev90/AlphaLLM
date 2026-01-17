@@ -8,17 +8,18 @@ async def execute_tool(func_name: str, params: Dict[str, str]) -> str:
         case "generate_image":
             from utils.unified_image import unified_image_gen, Format
             prompt = params.get('prompt')
-            model = params.get('model', 'flux')
+            model = params.get('model', 'zimage')
+            enhance = params.get('prompt_enhance', True)
             if not prompt:
-                return "Error: prompt is required"
+                return "error: Missing prompt parameter"
             try:
-                images = await unified_image_gen(prompt, model, num_images=1, format=Format.BASE64)
+                images = await unified_image_gen(prompt, model, num_images=1, enhance=enhance, format=Format.BASE64)
                 if images:
                     image_data, model_used = images[0]
                     return f"generated_image:{image_data}"
                 else:
-                    return "Failed to generate image"
+                    return "error: Failed to generate image"
             except Exception as e:
-                return f"Error generating image: {e}"
+                return f"error: Error generating image: {e}"
         case _:
             return f"Unknown function: {func_name}"
