@@ -14,7 +14,7 @@ from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
-COMMAND_IDS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "cache", "command_ids.json")
+COMMAND_IDS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "data", "command_ids.json")
 
 class CommandIDManager:
     def __init__(self):

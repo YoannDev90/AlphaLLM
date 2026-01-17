@@ -50,10 +50,10 @@ def save_logs_channel_config():
     try:
         import json
         import os
-        os.makedirs("cache", exist_ok=True)
-        with open("cache/logs_channel_config.json", "w") as f:
+        os.makedirs("data", exist_ok=True)
+        with open("data/logs_channel_config.json", "w") as f:
             json.dump(LOGS_CHANNEL_CONFIG, f, indent=4)
-        logger.info("Logs channel config saved to cache/logs_channel_config.json")
+        logger.info("Logs channel config saved to data/logs_channel_config.json")
     except Exception as e:
         logger.error(f"Error saving logs channel config: {e}")
 

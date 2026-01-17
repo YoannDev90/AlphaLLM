@@ -337,7 +337,7 @@ AlphaLLM/
 │       ├── cohere.json
 │       ├── deepseek.json
 │       └── ...
-├── cache/
+├── data/
 │   └── embedder/
 └── monitoring.csv
 ```

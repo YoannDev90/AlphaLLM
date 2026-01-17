@@ -64,7 +64,7 @@ chroma_db_name = "AlphaLLM"
 # Modèle d'embeddings pour la vectorisation
 embedder_model = "sentence-transformers/all-MiniLM-L6-v2"
 # Répertoire de cache pour les embeddings
-embedder_cache_dir = "./cache/embedder"
+embedder_cache_dir = "./data/embedder"
 # Collection pour les documents RAG
 chroma_rag_collection = "rag_documents"
 # Collection pour la mémoire à court terme

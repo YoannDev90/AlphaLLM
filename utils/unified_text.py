@@ -114,6 +114,7 @@ async def unified_text_gen(
     from utils.ai_process.base_chat_model import ChatParameters, ChatResult
     from utils.ai_process.chat_model import ChatModel
 
+    user = None
     if origin == Origin.DISCORD:
         user = message.author if hasattr(message, 'author') else message.user if message else None
         logger.debug(f"Utilisateur: {user.display_name if user else user_id}, "

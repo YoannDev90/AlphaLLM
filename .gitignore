@@ -4,7 +4,7 @@ __pycache__/
 monitoring.csv
 *.log
 config.toml
-cache/
+data/
 TODO.md
 local_db.db
 stop.json

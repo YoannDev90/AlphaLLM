@@ -12,7 +12,7 @@ from config import LOGGER_NAME, AVAILABLE_MODELS
 
 logger = logging.getLogger(LOGGER_NAME)
 
-STATUS_FILE = "cache/status.json"
+STATUS_FILE = "data/status.json"
 
 def load_status() -> Dict[str, Dict[str, Any]]:
     """Load status from JSON file."""
