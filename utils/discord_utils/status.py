@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import time
+import random
 from typing import Any, Dict, List, Optional, Tuple
 
 import discord
@@ -86,7 +87,7 @@ async def status_emulation(shutdown_event: asyncio.Event):
         for model in AVAILABLE_MODELS:
             try:
                 results = [r async for r in unified_text_gen(
-                    user_id=0, conv_id="status_check", input="test", model=model,
+                    user_id=0, conv_id=f"status_check_n{random.randint(0, 1000000)}", input="test", model=model,
                     origin=Origin.STATUS_CHECK, use_memory=False
                 )]
                 if results:
