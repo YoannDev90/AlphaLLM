@@ -52,27 +52,6 @@ class LLMSelector:
         
         return await asyncio.to_thread(_sync_request)
 
-    async def _io_intelligence_llm_selector(self, messages: list) -> str:
-        def _sync_request():
-            response = requests.post(
-                "https://api.intelligence.io.solutions/api/v1/chat/completions",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {IO_INTELLIGENCE_API_KEY}"
-                },
-                json={
-                    "model": "openai/gpt-oss-20b",
-                    "messages": messages
-                    },
-                timeout=10
-            )
-            if response.status_code == 200:
-                return response.json()["choices"][0]["message"]["content"]
-            else:
-                logger.error(f"IO Intelligence API error: {response.status_code} {response.text}")
-        
-        return await asyncio.to_thread(_sync_request)
-
     async def _openrouter_llm_selector(self, messages: list) -> str:
         def _sync_request():
             response = requests.post(
@@ -150,7 +129,6 @@ class LLMSelector:
 
         selectors = [
             self._megallm_llm_selector,
-            self._io_intelligence_llm_selector,
             self._openrouter_llm_selector,
             self._llm_gateway_llm_selector,
             self._llm7_llm_selector,
