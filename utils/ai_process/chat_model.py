@@ -208,7 +208,8 @@ class ChatModel(BaseChatModel):
             model = parameters.model
             response_text = response.choices[0].message.content
             if response_text is None or response_text.strip() == "":
-                logger.error("Model returned empty response")
+                logger.error("Model returned empty response, retrying ...")
+                await self._non_stream_chat(parameters, start_time)
             response_text = self._process_perplexity_citations(response_text, response)
 
             gen.update(
