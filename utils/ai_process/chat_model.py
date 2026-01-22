@@ -162,9 +162,13 @@ class ChatModel(BaseChatModel):
 
             logger.error("Tous les fallbacks ont échoué")
 
-    async def _non_stream_chat(self, parameters: ChatParameters, start_time: datetime) -> ChatResult:
+    async def _non_stream_chat(self, parameters: ChatParameters, start_time: datetime, retry_count: int = 0) -> ChatResult:
         """Chat non-streaming avec fallbacks natifs"""
         configs = self._load_configs()
+
+        # Rotate configs for retry to use different primary model
+        if retry_count > 0:
+            configs = configs[retry_count:] + configs[:retry_count]
 
         with get_client().start_as_current_observation(
             as_type="generation",
@@ -208,8 +212,12 @@ class ChatModel(BaseChatModel):
             model = parameters.model
             response_text = response.choices[0].message.content
             if response_text is None or response_text.strip() == "":
-                logger.error("Model returned empty response, retrying ...")
-                await self._non_stream_chat(parameters, start_time)
+                if retry_count < len(configs) - 1:
+                    logger.error("Model returned empty response, retrying ...")
+                    return await self._non_stream_chat(parameters, start_time, retry_count + 1)
+                else:
+                    logger.error("Model returned empty response, all retries exhausted")
+                    response_text = "I'm sorry, but I couldn't generate a response. Please try again."
             response_text = self._process_perplexity_citations(response_text, response)
 
             gen.update(
@@ -250,7 +258,7 @@ class ChatModel(BaseChatModel):
             return self._stream_with_fallbacks(parameters, start_time)
         else:
             async def _get_result():
-                return await self._non_stream_chat(parameters, start_time)
+                return await self._non_stream_chat(parameters, start_time, 0)
             return _get_result()
 
     async def generate(self, parameters: ChatParameters):
