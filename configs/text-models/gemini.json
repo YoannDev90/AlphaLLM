@@ -10,6 +10,14 @@
     {
         "model_name": "gemini-2.5-flash",
         "litellm_params": {
+            "model": "openai/gemini-2.5-flash-lite",
+            "api_base": "https://api.llm7.io/v1",
+            "api_key": "LLM7_API_KEY"
+        }
+    },
+    {
+        "model_name": "gemini-2.5-flash",
+        "litellm_params": {
             "model": "openai/gemini-2.5-flash",
             "api_base": "https://api.voidai.app/v1/",
             "api_key": "VOID_API_KEY"

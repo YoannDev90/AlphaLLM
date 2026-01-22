@@ -10,6 +10,14 @@
     {
         "model_name": "glm-4.6",
         "litellm_params": {
+            "model": "openai/GLM-4.6V-Flash",
+            "api_base": "https://api.llm7.io/v1",
+            "api_key": "LLM7_API_KEY"
+        }
+    },
+    {
+        "model_name": "glm-4.6",
+        "litellm_params": {
             "model": "openai/glm-4.6:free",
             "api_base": "https://api.voidai.app/v1/",
             "api_key": "VOID_API_KEY"
