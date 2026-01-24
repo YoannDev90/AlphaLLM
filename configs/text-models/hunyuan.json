@@ -5,6 +5,10 @@
             "model": "openai/hunyuan-lite",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
+            "vision_support": true
         }
     },
     {
@@ -13,6 +17,10 @@
             "model": "openai/hunyuan-a13b-instruct",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
+            "vision_support": true
         }
     }
 ]

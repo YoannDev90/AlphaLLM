@@ -5,6 +5,10 @@
             "model": "openai/phi-4",
             "api_base": "https://api.navy/v1",
             "api_key": "NAVY_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
+            "vision_support": true
         }
     },
     {
@@ -13,6 +17,10 @@
             "model": "openai/phi-4",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
+            "vision_support": true
         }
     },
     {
@@ -21,6 +29,10 @@
             "model": "openai/phi-3-medium-128k-instruct:free",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
+            "vision_support": true
         }
     },
     {
@@ -29,6 +41,10 @@
             "model": "openai/phi-3-medium-128k-instruct",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
+            "vision_support": true
         }
     }
 ]

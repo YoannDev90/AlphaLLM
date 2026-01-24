@@ -5,6 +5,10 @@
             "model": "openai/deepseek-v3.2",
             "api_base": "https://api.navy/v1",
             "api_key": "NAVY_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
     {
@@ -13,14 +17,22 @@
             "model": "openai/deepseek-r1-0528:free",
             "api_base": "https://api.routeway.ai/v1",
             "api_key": "ROUTEWAY_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
-        {
+    {
         "model_name": "deepseek-r1",
         "litellm_params": {
             "model": "openai/deepseek-r1:free",
             "api_base": "https://api.routeway.ai/v1",
             "api_key": "ROUTEWAY_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
     {
@@ -29,6 +41,10 @@
             "model": "openai/deepseek-r1-0528:free",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
     {
@@ -37,6 +53,10 @@
             "model": "openai/deepseek-v3.1:free",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
     {
@@ -45,6 +65,10 @@
             "model": "openai/deepseek-r1:free",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
     {
@@ -53,6 +77,10 @@
             "model": "openai/deepseek-v3:free",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
     {
@@ -61,6 +89,10 @@
             "model": "openai/deepseek-v3.1",
             "api_base": "https://api.voidai.app/v1/",
             "api_key": "VOID_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     },
     {
@@ -69,6 +101,10 @@
             "model": "openai/deepseek-v3",
             "api_base": "https://mnnai.ru/v1/",
             "api_key": "MNN_API_KEY"
+        },
+        "settings": {
+            "tools_support": false,
+            "vision_support": false
         }
     }
 ]
