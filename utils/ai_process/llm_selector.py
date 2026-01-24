@@ -129,10 +129,10 @@ class LLMSelector:
         selectors = [
             self._megallm_llm_selector,
             self._openrouter_llm_selector,
-            self._llm_gateway_llm_selector,
+            #self._llm_gateway_llm_selector, #Insufficient credits
             self._llm7_llm_selector,
-            self._zanity_llm_selector,
-            self._maple_ai_llm_selector
+            #self._zanity_llm_selector, #Regular timeouts
+            #self._maple_ai_llm_selector #URL issues
         ]
         random.shuffle(selectors)
 

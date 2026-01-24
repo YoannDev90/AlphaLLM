@@ -1,4 +1,12 @@
-[    {
+[   {
+        "model_name": "kimi-k2-instruct",
+        "litellm_params": {
+            "model": "openai/kimi-k2-instruct-0905:free",
+            "api_base": "https://api.electronhub.ai/v1/",
+            "api_key": "ELECTRONHUB_API_KEY"
+        }
+    },
+    {
         "model_name": "kimi-k2",
         "litellm_params": {
             "model": "openai/kimi-k2-0905:free",
@@ -10,14 +18,6 @@
         "model_name": "kimi-k2-instruct",
         "litellm_params": {
             "model": "openai/kimi-k2-instruct-0711:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        }
-    },
-    {
-        "model_name": "kimi-k2-instruct",
-        "litellm_params": {
-            "model": "openai/kimi-k2-instruct-0905:free",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
         }
