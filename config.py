@@ -30,6 +30,7 @@ LOGS_SECTION: Dict[str, Any] = CONFIG.get("logs")
 MEMORY_SECTION: Dict[str, Any] = CONFIG.get("memory")
 MODELS_SECTION: Dict[str, Any] = CONFIG.get("models")
 DATABASE_SECTION: Dict[str, Any] = CONFIG.get("database")
+UNIFIED_TEXT_SECTION: Dict[str, Any] = CONFIG.get("unified_text")
 
 LOGGING_LEVEL_STR = LOGS_SECTION.get("logging_level")
 level_mapping = {
@@ -122,3 +123,12 @@ SUPABASE_PORT: str = os.environ.get("SUPABASE_PORT")
 SUPABASE_DBNAME: str = os.environ.get("SUPABASE_DBNAME")
 SUPABASE_PG: str = f"postgresql://{SUPABASE_USER}:{SUPABASE_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DBNAME}"
 TABLES_TO_CLONE: Iterable[str] = DATABASE_SECTION.get("tables_to_clone")
+
+# Unified Text Configuration
+PROMPT_DIR: str = UNIFIED_TEXT_SECTION.get("prompt_dir")
+EVILGPT_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "evilgpt_prompt.txt")
+API_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "api_prompt.txt")
+STATUS_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "status_prompt.txt")
+DISCORD_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "discord_prompt.txt")
+MAX_FILE_SIZE: int = UNIFIED_TEXT_SECTION.get("max_file_size")
+ALLOWED_MIME_TYPES: list = UNIFIED_TEXT_SECTION.get("allowed_mime_types")

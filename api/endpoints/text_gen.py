@@ -1,5 +1,6 @@
 import logging
 from typing import Dict, List, Optional, Union
+import random
 
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Response,
                      UploadFile, status)
@@ -32,6 +33,11 @@ async def generate_text(
     
     if model not in AVAILABLE_MODELS and model != "auto":
         raise HTTPException(status_code=400, detail=f"Model '{model}' is not available for text generation")
+    
+    if conv_id <= 0:
+        conv_id = random.randint(1, 2**31 - 1)
+    if user_id <= 0:
+        user_id = random.randint(1, 2**31 - 1)
     
     logger.info(f"Text generation request: user_id={user_id}, conv_id={conv_id}, model={model}, stream={stream}, prompt={prompt[:50]}...")
     logger.info(f"Files received: {[file.filename for file in files] if isinstance(files, list) else files}")
