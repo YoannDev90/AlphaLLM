@@ -5,6 +5,7 @@ import logging
 import os
 import time
 import random
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import discord
@@ -13,11 +14,11 @@ from config import LOGGER_NAME, AVAILABLE_MODELS
 
 logger = logging.getLogger(LOGGER_NAME)
 
-STATUS_FILE = "data/status.json"
+STATUS_FILE = Path("data/status.json")
 
 def load_status() -> Dict[str, Dict[str, Any]]:
     """Load status from JSON file."""
-    if os.path.exists(STATUS_FILE):
+    if STATUS_FILE.exists():
         try:
             with open(STATUS_FILE, 'r') as f:
                 return json.load(f)

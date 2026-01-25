@@ -7,6 +7,7 @@ import json
 import logging
 import os
 from typing import Dict, Optional
+from pathlib import Path
 
 import discord
 
@@ -14,7 +15,7 @@ from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
-COMMAND_IDS_FILE = os.path.join(os.path.dirname(__file__), "..", "..", "data", "command_ids.json")
+COMMAND_IDS_FILE = Path("data/discord_command_ids.json")
 
 class CommandIDManager:
     def __init__(self):
@@ -24,7 +25,7 @@ class CommandIDManager:
     
     def load_command_ids(self):
         """Charge les IDs de commandes depuis le fichier"""
-        if os.path.exists(COMMAND_IDS_FILE):
+        if COMMAND_IDS_FILE.exists():
             try:
                 with open(COMMAND_IDS_FILE, "r") as f:
                     self.command_ids = json.load(f)
@@ -93,7 +94,7 @@ class CommandIDManager:
         Returns:
             Mention formatée pour Discord (ex: </ask:123456789>)
         """
-        if not self.command_ids and os.path.exists(COMMAND_IDS_FILE):
+        if not self.command_ids and COMMAND_IDS_FILE.exists():
             self.load_command_ids()
         
         command_id = self.command_ids.get(command_name)

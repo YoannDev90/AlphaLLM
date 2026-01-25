@@ -3,6 +3,7 @@ import datetime
 import logging
 import tomllib
 from collections import deque
+from pathlib import Path
 
 import discord
 from discord.ext import commands
@@ -32,7 +33,7 @@ is_rotating = False
 def load_logs_channel_config():
     """Charger la configuration du salon de logs depuis config.toml"""
     try:
-        with open("config.toml", "rb") as f:
+        with open(Path("config.toml"), "rb") as f:
             config = tomllib.load(f)
         logs_config = config.get("logs", {})
         LOGS_CHANNEL_CONFIG.update({
@@ -51,7 +52,7 @@ def save_logs_channel_config():
         import json
         import os
         os.makedirs("data", exist_ok=True)
-        with open("data/logs_channel_config.json", "w") as f:
+        with open(Path("data/logs_channel_config.json"), "w") as f:
             json.dump(LOGS_CHANNEL_CONFIG, f, indent=4)
         logger.info("Logs channel config saved to data/logs_channel_config.json")
     except Exception as e:
@@ -254,7 +255,7 @@ async def clear_logs_command(interaction: discord.Interaction):
                     logger.error(f"Error deleting old logs channel: {e}")
             
             try:
-                with open("config.toml", "r") as f:
+                with open(Path("config.toml"), "r") as f:
                     content = f.read()
                 
                 import re
@@ -264,7 +265,7 @@ async def clear_logs_command(interaction: discord.Interaction):
                     content
                 )
                 
-                with open("config.toml", "w") as f:
+                with open(Path("config.toml"), "w") as f:
                     f.write(content)
                 
                 LOGS_CHANNEL_CONFIG["channel_id"] = new_channel.id

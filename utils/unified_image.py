@@ -3,6 +3,7 @@ import json
 import logging
 from enum import Enum
 from io import BytesIO
+from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import aiohttp
@@ -99,7 +100,7 @@ async def convert_format(image_data: str, target_format: Format) -> Union[str, B
     
 def validate_image_size(model: str, size: str) -> bool:
     """Renvoie la taille d'origine si valide, et la taille la plus proche d'un point de vue du ratio sinon"""
-    models_info = json.loads(open("api/models/image_models.json", "r").read())
+    models_info = json.loads(open(Path("api/models/image_models.json"), "r").read())
     sizes = models_info[model.lower()].get("supported_sizes", [])
     if size in sizes:
         return size

@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import signal
+from pathlib import Path
 
 import utils.ressources as ressources
 from api.api import start_api_async
@@ -30,9 +31,9 @@ async def check_stop_file(restart_pending):
     """Vérifie périodiquement la présence du fichier stop.json"""
     logger = logging.getLogger(LOGGER_NAME)
     while not shutdown_event.is_set():
-        if os.path.exists("stop.json"):
+        if Path("stop.json").exists():
             try:
-                with open("stop.json", "r") as f:
+                with open(Path("stop.json"), "r") as f:
                     data = json.load(f)
                 command = data.get("COMMAND")
                 if command == "STOP":
@@ -42,7 +43,7 @@ async def check_stop_file(restart_pending):
                     logger.info("Commande RESTART détectée, redémarrage en cours...")
                     shutdown_event.set()
                     restart_pending[0] = True
-                os.remove("stop.json")
+                os.remove(Path("stop.json"))
                 break
             except Exception as e:
                 logger.error(f"Erreur lors de la lecture du fichier stop.json: {e}")
@@ -80,16 +81,16 @@ async def run_with_shutdown(coro, name="task"):
     return task.result() if task.done() and not task.cancelled() else None
 
 async def main() -> None:
-    if os.path.exists("stop.json"):
+    if Path("stop.json").exists():
         try:
-            with open("stop.json", "r") as f:
+            with open(Path("stop.json"), "r") as f:
                 data = json.load(f)
             command = data.get("COMMAND")
             if command == "STOP":
-                os.remove("stop.json")
+                os.remove(Path("stop.json"))
                 return
             elif command == "RESTART":
-                os.remove("stop.json")
+                os.remove(Path("stop.json"))
         except Exception as e:
             logger = logging.getLogger(LOGGER_NAME)
             logger.error(f"Erreur lors de la lecture du fichier stop.json au démarrage: {e}")

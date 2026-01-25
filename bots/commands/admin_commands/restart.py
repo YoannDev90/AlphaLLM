@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+from pathlib import Path
 
 import discord
 
@@ -17,7 +18,7 @@ async def setup(bot: discord.Client):
         await interaction.followup.send("🛑 Redémarrage complet du bot...", ephemeral=True)
         logger.info("Demande de redémarrage reçue")
 
-        with open("stop.json", "w") as f:
+        with open(Path("stop.json"), "w") as f:
             json.dump({"COMMAND": "RESTART", "timestamp": datetime.datetime.now().isoformat()}, f)
         
         logger.info("Fichier stop.json créé, le processus principal va redémarrer le bot.")

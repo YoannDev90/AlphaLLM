@@ -5,6 +5,7 @@ import json
 import asyncio
 from datetime import datetime, timedelta
 from collections import defaultdict
+from pathlib import Path
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
@@ -20,8 +21,8 @@ logger = logging.getLogger(LOGGER_NAME)
 
 def get_daily_data():
     """Aggregate resource data from CSV for the last 24 hours, one point per minute, with deltas for incremental metrics."""
-    csv_file = "monitoring.csv"
-    if not os.path.exists(csv_file):
+    csv_file = Path("monitoring.csv")
+    if not csv_file.exists():
         return []
     
     data = []

@@ -1,6 +1,7 @@
 import importlib
 import logging
 import os
+from pathlib import Path
 
 from config import LOGGER_NAME
 
@@ -8,10 +9,10 @@ logger = logging.getLogger(LOGGER_NAME)
 
 async def setup_commands(bot, is_admin_bot=False):
     commands_dir = ['admin_commands'] if is_admin_bot else ['commands']
-    current_dir = os.path.dirname(__file__)
+    current_dir = Path(__file__).parent
 
     for commands_directory in commands_dir:
-        directory_path = os.path.join(current_dir, commands_directory)
+        directory_path = current_dir / commands_directory
         for filename in os.listdir(directory_path):
             if filename.endswith('.py') and filename != '__init__.py':
                 module_name = f'bots.commands.{commands_directory}.{filename[:-3]}'

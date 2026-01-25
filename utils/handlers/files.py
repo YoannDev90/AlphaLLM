@@ -2,6 +2,7 @@ import logging
 import mimetypes
 import os
 import tempfile
+from pathlib import Path
 from typing import Dict, List, Optional, Union
 from urllib.parse import unquote, urlparse
 
@@ -46,7 +47,7 @@ class FileHandler:
                 - UploadFile: Objet UploadFile de Starlette
         """
         self.files = files
-        self.temp_dir = tempfile.mkdtemp(prefix="betallm_files_")
+        self.temp_dir = Path(tempfile.mkdtemp(prefix="betallm_files_"))
         self.converter = MarkdownConverter()
         self.vision_handler = VisionHandler()
         self.saved_files: Dict[str, List[str]] = {
@@ -294,7 +295,7 @@ class FileHandler:
         """Supprime les fichiers temporaires."""
         import shutil
         try:
-            if os.path.exists(self.temp_dir):
+            if self.temp_dir.exists():
                 shutil.rmtree(self.temp_dir)
                 logger.info("Fichiers temporaires supprimés")
             else:

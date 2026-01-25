@@ -2,7 +2,8 @@ import datetime
 import logging
 import os
 import tomllib
-from typing import Any, Dict, Iterable
+from pathlib import Path
+from typing import Any, Dict, Iterable, Union
 
 from dotenv import load_dotenv
 
@@ -15,7 +16,7 @@ def load_toml_config(file_path: str = "config.toml") -> Dict[str, Any]:
         return tomllib.load(f)
 
 
-def read_file(file_path: str) -> str:
+def read_file(file_path: Union[str, Path]) -> str:
     """Lit le contenu d'un fichier texte"""
     with open(file_path, "r", encoding="utf-8") as f:
         txt = f.read()
@@ -126,9 +127,9 @@ TABLES_TO_CLONE: Iterable[str] = DATABASE_SECTION.get("tables_to_clone")
 
 # Unified Text Configuration
 PROMPT_DIR: str = UNIFIED_TEXT_SECTION.get("prompt_dir")
-EVILGPT_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "evilgpt_prompt.txt")
-API_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "api_prompt.txt")
-STATUS_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "status_prompt.txt")
-DISCORD_PROMPT_PATH: str = os.path.join(PROMPT_DIR, "discord_prompt.txt")
+EVILGPT_PROMPT_PATH: Path = Path(PROMPT_DIR) / "evilgpt_prompt.txt"
+API_PROMPT_PATH: Path = Path(PROMPT_DIR) / "api_prompt.txt"
+STATUS_PROMPT_PATH: Path = Path(PROMPT_DIR) / "status_prompt.txt"
+DISCORD_PROMPT_PATH: Path = Path(PROMPT_DIR) / "discord_prompt.txt"
 MAX_FILE_SIZE: int = UNIFIED_TEXT_SECTION.get("max_file_size")
 ALLOWED_MIME_TYPES: list = UNIFIED_TEXT_SECTION.get("allowed_mime_types")
