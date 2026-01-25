@@ -208,9 +208,20 @@ class ChatModel(BaseChatModel):
 
             response = litellm.completion(**params)
 
-            usage = response.usage.total_tokens
+            if not response.choices:
+                raise ValueError("No choices in response")
+
+            # Handle different response formats
+            message = response.choices[0].message
+            if isinstance(message, str):
+                response_text = message
+            elif isinstance(message, dict):
+                response_text = message.get('content', '')
+            else:
+                response_text = str(message)
+
+            usage = response.usage.total_tokens if response.usage and hasattr(response.usage, 'total_tokens') else 0
             model = parameters.model
-            response_text = response.choices[0].message.content
             if response_text is None or response_text.strip() == "":
                 if retry_count < len(configs) - 1:
                     logger.error("Model returned empty response, retrying ...")

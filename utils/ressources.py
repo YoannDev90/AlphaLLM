@@ -11,8 +11,6 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-import psutil
-
 from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -23,35 +21,15 @@ class ResourceSnapshot:
 
     timestamp: datetime
     process_id: int
-    cpu_time: float
-    cpu_user_time: Optional[float] = None
-    cpu_sys_time: Optional[float] = None
     cpu_percent: Optional[float] = None
     memory_percent: Optional[float] = None
-    page_faults_minor: Optional[int] = None
-    page_faults_major: Optional[int] = None
-    io_reads: Optional[int] = None
-    io_writes: Optional[int] = None
-    context_switches_vol: Optional[int] = None
-    context_switches_invol: Optional[int] = None
-    swaps: Optional[int] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "timestamp": self.timestamp.isoformat(),
             "process_id": self.process_id,
-            "cpu_time_sec": f"{self.cpu_time:.5f}",
-            "cpu_user_time_sec": f"{self.cpu_user_time:.5f}" if self.cpu_user_time is not None else None,
-            "cpu_sys_time_sec": f"{self.cpu_sys_time:.5f}" if self.cpu_sys_time is not None else None,
             "cpu_percent": f"{self.cpu_percent:.5f}" if self.cpu_percent is not None else None,
             "memory_percent": f"{self.memory_percent:.5f}" if self.memory_percent is not None else None,
-            "page_faults_minor": self.page_faults_minor,
-            "page_faults_major": self.page_faults_major,
-            "io_reads": self.io_reads,
-            "io_writes": self.io_writes,
-            "context_switches_vol": self.context_switches_vol,
-            "context_switches_invol": self.context_switches_invol,
-            "swaps": self.swaps,
         }
 
 
@@ -69,8 +47,8 @@ class ResourceMonitor:
         self._previous_snapshot: Optional[ResourceSnapshot] = None
         self.csv_file = csv_file
         self._csv_initialized = False
-        self._previous_network_sent = 0
-        self._previous_network_recv = 0
+        self._previous_cpu_total: Optional[float] = None
+        self._previous_timestamp: Optional[float] = None
         if csv_file:
             self._init_csv()
 
@@ -86,18 +64,8 @@ class ResourceMonitor:
                 fieldnames = [
                     "timestamp",
                     "process_id",
-                    "cpu_time_sec",
-                    "cpu_user_time_sec",
-                    "cpu_sys_time_sec",
                     "cpu_percent",
                     "memory_percent",
-                    "page_faults_minor",
-                    "page_faults_major",
-                    "io_reads",
-                    "io_writes",
-                    "context_switches_vol",
-                    "context_switches_invol",
-                    "swaps",
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
@@ -112,18 +80,8 @@ class ResourceMonitor:
                 fieldnames = [
                     "timestamp",
                     "process_id",
-                    "cpu_time_sec",
-                    "cpu_user_time_sec",
-                    "cpu_sys_time_sec",
                     "cpu_percent",
                     "memory_percent",
-                    "page_faults_minor",
-                    "page_faults_major",
-                    "io_reads",
-                    "io_writes",
-                    "context_switches_vol",
-                    "context_switches_invol",
-                    "swaps",
                 ]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writerow(snapshot.to_dict())
@@ -133,20 +91,15 @@ class ResourceMonitor:
     def _collect_snapshot(self) -> Optional[ResourceSnapshot]:
         try:
             current_time = time.time()
-            cpu_time = time.process_time()
             rusage = resource.getrusage(resource.RUSAGE_SELF)
             cpu_user = rusage.ru_utime
             cpu_system = rusage.ru_stime
             total_cpu = cpu_user + cpu_system
 
             cpu_percent: Optional[float] = None
-            if self._previous_snapshot:
-                delta_time = current_time - self._previous_snapshot.timestamp.timestamp()
-                previous_cpu = (
-                    (self._previous_snapshot.cpu_user_time or 0) +
-                    (self._previous_snapshot.cpu_sys_time or 0)
-                )
-                delta_cpu = total_cpu - previous_cpu
+            if self._previous_cpu_total is not None and self._previous_timestamp is not None:
+                delta_time = current_time - self._previous_timestamp
+                delta_cpu = total_cpu - self._previous_cpu_total
                 if delta_time > 0:
                     cpu_percent = delta_cpu / delta_time * 100.0
                     max_cpu = (os.cpu_count() or 1) * 100.0
@@ -163,20 +116,11 @@ class ResourceMonitor:
             snapshot = ResourceSnapshot(
                 timestamp=datetime.now(),
                 process_id=self.process_id,
-                cpu_time=cpu_time,
-                cpu_user_time=cpu_user,
-                cpu_sys_time=cpu_system,
                 cpu_percent=cpu_percent,
                 memory_percent=memory_percent,
-                page_faults_minor=rusage.ru_minflt,
-                page_faults_major=rusage.ru_majflt,
-                io_reads=rusage.ru_inblock,
-                io_writes=rusage.ru_oublock,
-                context_switches_vol=rusage.ru_nvcsw,
-                context_switches_invol=rusage.ru_nivcsw,
-                swaps=rusage.ru_nswap,
             )
-            self._previous_snapshot = snapshot
+            self._previous_cpu_total = total_cpu
+            self._previous_timestamp = current_time
             return snapshot
         except Exception as exc:  # pragma: no cover - monitoring is best effort
             logger.error(f"Failed to collect resource snapshot: {exc}")
@@ -225,12 +169,8 @@ class ResourceMonitor:
         with self._lock:
             if not self.samples:
                 return {}
-            cpu_times = [snapshot.cpu_time for snapshot in self.samples]
             stats: Dict[str, float] = {
                 "samples_count": len(self.samples),
-                "cpu_time_min": min(cpu_times),
-                "cpu_time_max": max(cpu_times),
-                "cpu_time_avg": sum(cpu_times) / len(cpu_times),
             }
             cpu_percents = [snapshot.cpu_percent for snapshot in self.samples if snapshot.cpu_percent is not None]
             if cpu_percents:
@@ -266,18 +206,8 @@ class ResourceMonitor:
                 fieldnames = [
                     "timestamp",
                     "process_id",
-                    "cpu_time_sec",
-                    "cpu_user_time_sec",
-                    "cpu_sys_time_sec",
                     "cpu_percent",
                     "memory_percent",
-                    "page_faults_minor",
-                    "page_faults_major",
-                    "io_reads",
-                    "io_writes",
-                    "context_switches_vol",
-                    "context_switches_invol",
-                    "swaps",
                 ]
                 with open(path, "a", newline="") as csvfile:
                     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -298,8 +228,6 @@ class ResourceMonitor:
         
         logger.info("Resource Usage Summary:")
         logger.info(f"  Samples collected: {stats.get('samples_count', 0)}")
-        if 'cpu_time_avg' in stats:
-            logger.info(f"  CPU Time - Avg: {stats['cpu_time_avg']:.2f}s, Max: {stats['cpu_time_max']:.2f}s")
         if 'cpu_percent_avg' in stats:
             logger.info(f"  CPU Usage - Avg: {stats['cpu_percent_avg']:.2f}%, Max: {stats['cpu_percent_max']:.2f}%")
         if 'memory_avg' in stats:
@@ -358,18 +286,8 @@ class ResourceMonitor:
         fieldnames = [
             "timestamp",
             "process_id",
-            "cpu_time_sec",
-            "cpu_user_time_sec",
-            "cpu_sys_time_sec",
             "cpu_percent",
             "memory_percent",
-            "page_faults_minor",
-            "page_faults_major",
-            "io_reads",
-            "io_writes",
-            "context_switches_vol",
-            "context_switches_invol",
-            "swaps",
         ]
         try:
             with open(self.csv_file, "a", newline="") as csvfile:
@@ -381,18 +299,8 @@ class ResourceMonitor:
                         zero_snapshot = ResourceSnapshot(
                             timestamp=next_expected,
                             process_id=self.process_id,
-                            cpu_time=0.0,
-                            cpu_user_time=0.0,
-                            cpu_sys_time=0.0,
                             cpu_percent=0.0,
                             memory_percent=0.0,
-                            page_faults_minor=0,
-                            page_faults_major=0,
-                            io_reads=0,
-                            io_writes=0,
-                            context_switches_vol=0,
-                            context_switches_invol=0,
-                            swaps=0,
                         )
                         writer.writerow(zero_snapshot.to_dict())
                         next_expected += timedelta(seconds=1)

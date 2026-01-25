@@ -67,5 +67,4 @@ async def ping_https_server(url: str, interval_range: tuple = (30, 300)):
             logger.error(f"Ping vers {url} - Erreur: {str(e)}")
         
         next_interval = random.randint(min_interval, max_interval)
-        logger.debug(f"Prochain ping dans {next_interval}s")
         await asyncio.sleep(next_interval)

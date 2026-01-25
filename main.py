@@ -111,7 +111,7 @@ async def main() -> None:
             
             csv_file = "data/monitoring.csv"        
             logger.debug("Démarrage du monitoring des ressources...")
-            monitor = start_monitoring(interval=1, csv_file=csv_file)
+            monitor = start_monitoring(interval=0.1, csv_file=csv_file)
             
             monitor.fill_gaps(datetime.datetime.now())
             await initialize_memory_manager()
