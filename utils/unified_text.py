@@ -89,15 +89,15 @@ def validate_inputs(user_id: int, model: Union[str, Text_Model], files: Optional
     Validate input parameters for the unified_text_gen function.
 
     Args:
-        user_id: User ID, must be a positive integer.
+        user_id: User ID, must be a non-negative integer.
         model: Model name or Text_Model enum.
         files: List of files, optional.
 
     Raises:
         ValueError: If validation fails.
     """
-    if not isinstance(user_id, int) or user_id <= 0:
-        raise ValueError("user_id must be a positive integer.")
+    if not isinstance(user_id, int) or user_id < 0:
+        raise ValueError("user_id must be a non-negative integer.")
     
     if isinstance(model, Text_Model):
         model = model.value
