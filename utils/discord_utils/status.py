@@ -36,6 +36,8 @@ def save_status(status: Dict[str, Dict[str, Any]]):
 
 def update_status_on_success(model: str, elapsed_time: str):
     """Update status for a successful request."""
+    if model == "evilgpt":
+        model = "mistral"  # evilgpt uses mistral backend
     status = load_status()
     if model not in status:
         status[model] = {
@@ -60,6 +62,8 @@ def update_status_on_success(model: str, elapsed_time: str):
 
 def update_status_on_failure(model: str):
     """Update status for a failed request."""
+    if model == "evilgpt":
+        model = "mistral"  # evilgpt uses mistral backend
     status = load_status()
     if model not in status:
         status[model] = {
@@ -86,6 +90,8 @@ async def status_emulation(shutdown_event: asyncio.Event):
     start_time = time.time()
     while not shutdown_event.is_set():
         for model in AVAILABLE_MODELS:
+            if model == "evilgpt":
+                continue  # Skip evilgpt as its status is the same as mistral's
             try:
                 results = [r async for r in unified_text_gen(
                     user_id=0, conv_id=f"status_check_n{random.randint(0, 1000000)}", input="Say OK", model=model,
@@ -106,4 +112,7 @@ async def status_emulation(shutdown_event: asyncio.Event):
 
 def get_status() -> Dict[str, Dict[str, Any]]:
     """Return the latest status dictionary for all bots."""
-    return load_status()
+    status = load_status()
+    if "mistral" in status and "evilgpt" in status:
+        status["evilgpt"] = status["mistral"].copy()
+    return status
