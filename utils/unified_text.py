@@ -1,12 +1,11 @@
 import datetime
 import logging
-import os
 import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from config import AVAILABLE_MODELS, MODELS_OWNERS, LOGGER_NAME, read_file, PROMPT_DIR, EVILGPT_PROMPT_PATH, API_PROMPT_PATH, STATUS_PROMPT_PATH, DISCORD_PROMPT_PATH, MAX_FILE_SIZE, ALLOWED_MIME_TYPES
+from config import AVAILABLE_MODELS, MODELS_OWNERS, LOGGER_NAME, read_file
 from utils.discord_utils.status import update_status_on_success, update_status_on_failure
 from utils.ai_process.ai_utils import summarize
 from utils.ai_process.llm_selector import LLMSelector
@@ -14,12 +13,9 @@ from utils.discord_utils.permission_checker import PermissionChecker
 from utils.handlers.files import FileHandler
 from utils.memory import get_memory_manager, initialize_memory_manager
 from utils.function_calling import get_function_caller
-from utils.ai_process.base_chat_model import ChatParameters, ChatResult, StreamChunk
-from utils.ai_process.chat_model import ChatModel
 
 logger = logging.getLogger(LOGGER_NAME)
 perms_checker = PermissionChecker()
-
 
 @dataclass
 class RequestParameters:
@@ -32,7 +28,7 @@ class RequestParameters:
     model: Optional[str] = None
 
 class Origin:
-    """Class to define the origin of the request with additional attributes for DISCORD."""
+    """Classe pour définir l'origine de la requête avec des attributs supplémentaires pour DISCORD."""
     
     def __init__(self, name, message=None, bot=None):
         self.name = name
@@ -55,7 +51,7 @@ Origin.DISCORD = Origin("discord")
 Origin.STATUS_CHECK = Origin("status_check")
 
 class Text_Model(Enum):
-    """Enum to define available models."""
+    """Enum pour définir les modèles disponibles."""
     AUTO = "auto"
     CLAUDE = "claude"
     COHERE = "cohere"
@@ -83,154 +79,6 @@ class Text_Model(Enum):
     SONAR = "sonar"
     YI = "yi"
 
-
-def validate_inputs(user_id: int, model: Union[str, Text_Model], files: Optional[List[Any]] = None) -> None:
-    """
-    Validate input parameters for the unified_text_gen function.
-
-    Args:
-        user_id: User ID, must be a non-negative integer.
-        model: Model name or Text_Model enum.
-        files: List of files, optional.
-
-    Raises:
-        ValueError: If validation fails.
-    """
-    if not isinstance(user_id, int) or user_id < 0:
-        raise ValueError("user_id must be a non-negative integer.")
-    
-    if isinstance(model, Text_Model):
-        model = model.value
-    if model not in AVAILABLE_MODELS and model != "auto":
-        raise ValueError(f"Invalid model: {model}. Must be one of {list(AVAILABLE_MODELS)} or 'auto'.")
-    
-    if files:
-        for file in files:
-            if hasattr(file, 'size') and file.size > MAX_FILE_SIZE:
-                raise ValueError(f"File {file.filename if hasattr(file, 'filename') else 'unknown'} exceeds maximum size of {MAX_FILE_SIZE} bytes.")
-            if hasattr(file, 'content_type') and file.content_type not in ALLOWED_MIME_TYPES:
-                raise ValueError(f"File type {file.content_type} not allowed. Allowed types: {ALLOWED_MIME_TYPES}")
-
-
-def parse_discord_parameters(input: str) -> tuple[str, RequestParameters]:
-    """
-    Parse Discord-specific parameters from the input string.
-
-    Args:
-        input: The input string to parse.
-
-    Returns:
-        Tuple of (cleaned_query, parameters).
-    """
-    parameters = RequestParameters()
-    query = input
-    while True:
-        command_found = False
-        
-        model_match = re.search(r' -m\s+([^\s]+)$', query)
-        if model_match:
-            model_name = model_match.group(1)
-            if model_name.lower() in AVAILABLE_MODELS:
-                parameters.model = model_name
-                query = query[:model_match.start()].rstrip()
-                logger.info(f"Model specified: {model_name}")
-                command_found = True
-        
-        elif query.endswith(" -h"):
-            query = query[:-3].rstrip()
-            parameters.history = False
-            logger.info("History disabled")
-            command_found = True
-        elif query.endswith(" -t"):
-            query = query[:-3].rstrip()
-            parameters.tools = False
-            logger.info("Tools disabled")
-            command_found = True
-        elif query.endswith(" +i"):
-            query = query[:-3].rstrip()
-            parameters.internet = True
-            logger.info("Internet enabled")
-            command_found = True
-        elif query.endswith(" +a"):
-            query = query[:-3].rstrip()
-            parameters.audio = True
-            logger.info("Audio enabled")
-            command_found = True
-        
-        if not command_found:
-            break
-
-    logger.info(f"Query: {query}")
-    return query, parameters
-
-
-async def handle_file_processing(files: Optional[List[Any]] = None) -> tuple[Optional[FileHandler], List[str]]:
-    """
-    Process uploaded files.
-
-    Args:
-        files: List of files to process.
-
-    Returns:
-        Tuple of (file_handler, processed_files).
-    """
-    if not files:
-        return None, []
-    
-    logger.info(f"Files uploaded: {len(files)} file(s) - {[str(f) for f in files]}")
-    file_handler = FileHandler(files)
-    await file_handler.process_files()
-    processed_files = []
-    for file_list in file_handler.saved_files.values():
-        processed_files.extend(file_list)
-    logger.info(f"Files processed: {len(processed_files)} file(s) - {processed_files}")
-    if file_handler.text_contents:
-        input_with_text = "\n\n" + "\n\n".join(file_handler.text_contents)
-        logger.info(f"Text contents added to input: {len(file_handler.text_contents)} text(s)")
-    else:
-        input_with_text = ""
-    return file_handler, processed_files, input_with_text
-
-
-def prepare_messages_and_prompt(system_prompt: str, history: List[Dict[str, str]], input: str) -> List[Dict[str, str]]:
-    """
-    Prepare the messages list for the model call.
-
-    Args:
-        system_prompt: The system prompt.
-        history: Conversation history.
-        input: User input.
-
-    Returns:
-        List of messages.
-    """
-    messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
-    return messages
-
-
-async def execute_model_call(chat_model: ChatModel, chat_params: ChatParameters, stream: bool):
-    """
-    Execute the model call, handling streaming or non-streaming.
-
-    Args:
-        chat_model: The chat model instance.
-        chat_params: Parameters for the chat.
-        stream: Whether to stream the response.
-
-    Yields:
-        StreamChunk or ChatResult.
-    """
-    if stream:
-        async for chunk in chat_model.chat(chat_params):
-            yield chunk
-    else:
-        result = await chat_model.chat(chat_params)
-        update_status_on_success(chat_params.model, result.elapsed_time)
-        logger.info(f"Response generated - Model: {result.model}, Usage: {result.usage} tokens, Time: {result.elapsed_time}")
-        logger.debug(f"Response content: {result.response}...")
-        yield result
-
-
 async def unified_text_gen(
         user_id: int, 
         conv_id: str, 
@@ -244,80 +92,126 @@ async def unified_text_gen(
         use_memory: bool = True
     ):
     """
-    Unified function to handle text generation requests, with permissions, memory, pre/post-processing, and error handling.
+    Fonction pour gérer les requêtes vers les modèles, avec permissions, mémoire, pré/post-traitement et erreurs.
 
     Args:
-        user_id: User ID.
-        conv_id: Conversation ID.
-        input: User's input text.
-        model: Model to use (e.g., 'claude' or Text_Model.CLAUDE).
-        files: List of attached files (optional).
-        origin: Request origin (API or Discord, via Origin).
-        message: Additional message for Discord (optional).
-        bot: Additional bot for Discord (optional).
-        stream: If True, stream the response.
-        use_memory: If True, use memory (API only).
+        user_id: ID de l'utilisateur.
+        conv_id: ID de la conversation.
+        input: Texte d'entrée de l'utilisateur.
+        model: Modèle à utiliser (e.g., 'claude' or Text_Model.CLAUDE).
+        files: Liste des fichiers attachés (optionnel).
+        origin: Origine de la requête (API ou Discord, via Origin).
+        message: Message supplémentaire pour Discord (optionnel).
+        bot: Bot supplémentaire pour Discord (optionnel).
+        stream: Si True, streaming de la réponse.
+        use_memory: Si True, utilise la mémoire. (API seulement)
     """
-    # Validate inputs
-    validate_inputs(user_id, model, files)
-    
     origin = origin or Origin.API
     model = model or Text_Model.AUTO.value
     if isinstance(model, Text_Model):
         model = model.value
 
+    from utils.ai_process.base_chat_model import ChatParameters, ChatResult
+    from utils.ai_process.chat_model import ChatModel
+
     user = None
     if origin == Origin.DISCORD:
         user = message.author if hasattr(message, 'author') else message.user if message else None
-        logger.debug(f"User: {user.display_name if user else user_id}, "
-                    f"Model: {model}, Origin: {origin}, "
-                    f"Files: {len(files) if files else 0}")
+        logger.debug(f"Utilisateur: {user.display_name if user else user_id}, "
+                    f"Modèle: {model}, Origine: {origin}, "
+                    f"Fichiers: {len(files) if files else 0}")
 
-    # Handle file processing
-    file_handler, processed_files, input_text_addition = await handle_file_processing(files)
-    if input_text_addition:
-        input += input_text_addition
+    file_handler = None
+    processed_files = []
+    if files:
+        logger.info(f"Files uploaded: {len(files)} file(s) - {[str(f) for f in files]}")
+        file_handler = FileHandler(files)
+        await file_handler.process_files()
+        for file_list in file_handler.saved_files.values():
+            processed_files.extend(file_list)
+        logger.info(f"Files processed: {len(processed_files)} file(s) - {processed_files}")
+        if file_handler.text_contents:
+            input += "\n\n" + "\n\n".join(file_handler.text_contents)
+            logger.info(f"Text contents added to input: {len(file_handler.text_contents)} text(s)")
 
-    if origin == Origin.DISCORD:
+    if origin == Origin.DISCORD and message.guild:
         bot_user = bot.user if bot else None
         if bot_user:
             mention_str = f"<@{bot_user.id}>"
             input = input.replace(mention_str, "").strip()
 
-    # Parse Discord parameters
     if origin == Origin.DISCORD:
-        input, parameters = parse_discord_parameters(input)
-        if parameters.model:
-            model = parameters.model
-        if not input or input.isspace():
+        parameters = RequestParameters()
+        
+        query = input
+        while True:
+            command_found = False
+            
+            model_match = re.search(r' -m\s+([^\s]+)$', query)
+            if model_match:
+                model_name = model_match.group(1)
+                if model_name.lower() in AVAILABLE_MODELS:
+                    parameters.model = model_name
+                    query = query[:model_match.start()].rstrip()
+                    logger.info(f"Model specified: {model_name}")
+                    command_found = True
+            
+            elif query.endswith(" -h"):
+                query = query[:-3].rstrip()
+                parameters.history = False
+                logger.info("History disabled")
+                command_found = True
+            elif query.endswith(" -t"):
+                query = query[:-3].rstrip()
+                parameters.tools = False
+                logger.info("Tools disabled")
+                command_found = True
+            elif query.endswith(" +i"):
+                query = query[:-3].rstrip()
+                parameters.internet = True
+                logger.info("Internet enabled")
+                command_found = True
+            elif query.endswith(" +a"):
+                query = query[:-3].rstrip()
+                parameters.audio = True
+                logger.info("Audio enabled")
+                command_found = True
+            
+            if not command_found:
+                break
+
+        logger.info(f"Query: {query}")
+        if not query or query.isspace():
             user_name = user.display_name if user else f"user_{user_id}"
             logger.info(f"Empty message from {user_name}")
-            input = "Hi! Please ask me a question."
+            query = "Hi! Please ask me a question."
+            
+        if parameters.model:
+            model = parameters.model
 
-    # Handle function calling for Discord
-    if origin == Origin.DISCORD:
-        function_caller = await get_function_caller()
-        tool_calls = function_caller.check_for_tools(input)
-        if tool_calls:
-            logger.info(f"Tool calls detected: {tool_calls}")
-            tool_responses = []
-            for call in tool_calls:
-                func_name = call['function']
-                params = call['parameters']
-                from utils.function_calling.tools import execute_tool
-                response = await execute_tool(func_name, params)
-                if response is None or response.startswith("error"):
-                    break
-                tool_responses.append(response)
-            tool_response = "\n".join(tool_responses)
-            if stream:
-                yield StreamChunk(chunk=tool_response, done=True, response=tool_response, usage=0, model="function_calling", elapsed_time="0.0s")
-            else:
-                result = ChatResult(response=tool_response, usage=0, model="function_calling", elapsed_time="0.0s")
-                yield result
-            return
+    function_caller = await get_function_caller()
+    tool_calls = function_caller.check_for_tools(input)
+    if tool_calls:
+        logger.info(f"Tool calls detected: {tool_calls}")
+        tool_responses = []
+        for call in tool_calls:
+            func_name = call['function']
+            params = call['parameters']
+            from utils.function_calling.tools import execute_tool
+            response = await execute_tool(func_name, params)
+            if response is None or response.startswith("error"):
+                break
+            tool_responses.append(response)
+        tool_response = "\n".join(tool_responses)
+        if stream:
+            from utils.ai_process.base_chat_model import StreamChunk
+            yield StreamChunk(chunk=tool_response, done=True, response=tool_response, usage=0, model="function_calling", elapsed_time="0.0s")
+        else:
+            from utils.ai_process.base_chat_model import ChatResult
+            result = ChatResult(response=tool_response, usage=0, model="function_calling", elapsed_time="0.0s")
+            yield result
+        return
 
-    # Auto-select model if needed
     if model == "auto":
         logger.info("Auto-selecting model...")
         selector = LLMSelector()
@@ -330,76 +224,73 @@ async def unified_text_gen(
         model = Text_Model.LLAMA.value
         logger.debug(f"Model not available, defaulting to: {model}")
             
-    logger.debug(f"Final model to use: {model.capitalize()}")
-
-    # Handle memory
-    history = []
+    logger.debug(f"Final model to use: {model}")
     memory_manager = None
     if use_memory:
-        try:
-            memory_manager = await get_memory_manager()
-            if memory_manager:
-                relevant_memories = await memory_manager.get_hybrid_memories(
-                    user_id, conv_id, input, recent_limit=4, similar_limit=5
-                )
-            else:
-                relevant_memories = {'stm': [], 'ltm': []}
-        except Exception as e:
-            logger.error(f"Failed to retrieve memories: {e}")
-            relevant_memories = {'stm': [], 'ltm': []}  # Fallback to no memory
+        memory_manager = await get_memory_manager()
+        
+    if use_memory and memory_manager:
+        relevant_memories = await memory_manager.get_hybrid_memories(
+            user_id, conv_id, input, recent_limit=4, similar_limit=5
+        )
+    else:
+        relevant_memories = {'stm': [], 'ltm': []}
 
-        logger.debug(f"Relevant memories fetched: "
-                    f"STM: {len(relevant_memories.get('stm', []))}, "
-                    f"LTM: {len(relevant_memories.get('ltm', []))}")
+    logger.debug(f"Relevant memories fetched: "
+                 f"STM: {len(relevant_memories.get('stm', []))}, "
+                 f"LTM: {len(relevant_memories.get('ltm', []))}")
 
-        for mem_list in relevant_memories.values():
-            for mem in mem_list:
-                if 'content' not in mem or mem['content'] is None:
-                    mem['content'] = mem.get('text', '')
+    for mem_list in relevant_memories.values():
+        for mem in mem_list:
+            if 'content' not in mem or mem['content'] is None:
+                mem['content'] = mem.get('text', '')
 
-        logger.debug("Processed relevant memories to ensure 'content' field is populated")
+    logger.debug(f"Processed relevant memories to ensure 'content' field is populated")
 
-        if relevant_memories.get('stm'):
-            for mem in relevant_memories.get('stm', []):
-                role = "user" if mem['role'] == "user" else "assistant"
-                history.append({"role": role, "content": mem.get('content')})
+    history = []
+    if relevant_memories.get('stm'):
+        for mem in relevant_memories.get('stm', []):
+            role = "user" if mem['role'] == "user" else "assistant"
+            history.append({"role": role, "content": mem.get('content')})
 
-        logger.debug(f"Conversation history prepared with {len(history)} messages")
-        logger.debug(f"Input prepared for model: {input}")
+    logger.debug(f"Conversation history prepared with {len(history)} messages")
+    logger.debug(f"Input prepared for model: {input}")
 
-    # Prepare system prompt
     system_prompt = ""
     if model == Text_Model.EVILGPT.value:
         try:
-            system_prompt = read_file(EVILGPT_PROMPT_PATH)
+            system_prompt = read_file("configs/prompts/evilgpt_prompt.txt")
         except Exception as e:
             logger.error(f"Failed to read EvilGPT prompt file: {e}")
     if origin == Origin.API:
         try:
-            system_prompt += read_file(API_PROMPT_PATH)
+            system_prompt += read_file("configs/prompts/api_prompt.txt")
         except Exception as e:
             logger.error(f"Failed to read API prompt file: {e}")
     elif origin == Origin.STATUS_CHECK:
         try:
-            system_prompt += read_file(STATUS_PROMPT_PATH)
+            system_prompt += read_file("configs/prompts/status_prompt.txt")
         except Exception as e:
             logger.error(f"Failed to read status prompt file: {e}")
     else:
         try:
-            system_prompt += read_file(DISCORD_PROMPT_PATH)
+            system_prompt += read_file("configs/prompts/discord_prompt.txt")
         except Exception as e:
             logger.error(f"Failed to read Discord prompt file: {e}")
     
+    logger.debug(f"Base system prompt loaded {system_prompt}...")
+
     user_name = user.display_name if origin == Origin.DISCORD and user else f"User_{user_id}"
     owner = MODELS_OWNERS.get(model, "Unknown")
     logger.debug(f"User: {user_name}, ID: {user.id if user else user_id}")
+    logger.debug(f"Model owner: {owner}")
 
     try:
         if origin == Origin.API or origin == Origin.STATUS_CHECK:
             system_prompt = system_prompt.format(
                 date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
                 time=datetime.datetime.now().strftime('%H:%M:%S'),
-                model=model.capitalize(),
+                model=model,
                 owner=owner
             )
         else:
@@ -407,7 +298,7 @@ async def unified_text_gen(
                 date=datetime.datetime.now().strftime('%Y-%b-%d-%a'),
                 time=datetime.datetime.now().strftime('%H:%M:%S'),
                 user=user_name,
-                model=model.capitalize(),
+                model=model,
                 owner=owner
             )
     except Exception as e:
@@ -415,19 +306,23 @@ async def unified_text_gen(
 
     logger.debug(f"System prompt prepared for model: {system_prompt}...")
 
-    # Prepare messages
-    messages = prepare_messages_and_prompt(system_prompt, history, input)
+    messages = [{"role": "system", "content": system_prompt}] + history + [{"role": "user", "content": input}]
     
     chat_model = ChatModel(model)
     chat_params = ChatParameters(messages=messages, model=model, temperature=0.7, stream=stream, raw=True, files=processed_files)
     
-    # Execute model call
-    async for result in execute_model_call(chat_model, chat_params, stream):
-        yield result
+    if stream:
+        async for chunk in chat_model.chat(chat_params):
+            yield chunk
+    else:
+        result = await chat_model.chat(chat_params)
         
-    # Handle memory storage if not streaming
-    if not stream and use_memory and memory_manager:
-        try:
+        update_status_on_success(model, result.elapsed_time)
+        
+        logger.info(f"Réponse générée - Modèle: {result.model}, Usage: {result.usage} tokens, Temps: {result.elapsed_time}")
+        logger.debug(f"Contenu de la réponse: {result.response}...")
+            
+        if use_memory and memory_manager:
             await memory_manager.add_conversation_message(user_id, conv_id, input, "user")
             await memory_manager.add_conversation_message(user_id, conv_id, result.response, "assistant")
             
@@ -435,8 +330,18 @@ async def unified_text_gen(
             stm_list = stm_memories.get('stm', [])
             if len(stm_list) > 3:
                 older_messages = stm_list[:-3]
-                old_ids = [mem['id'] for mem in older_messages]
-                await memory_manager.delete_stm_memories(old_ids)
-                logger.info(f"Deleted {len(older_messages)} old messages from STM")
-        except Exception as e:
-            logger.error(f"Failed to store memories: {e}")
+                dialogue = ""
+                for mem in older_messages:
+                    role = mem.get('role', 'user')
+                    content = mem.get('content') or mem.get('text', '')
+                    dialogue += f"{role.capitalize()}: {content}\n"
+                try:
+                    summary = summarize(dialogue)
+                    await memory_manager.add_long_term_memory(user_id, conv_id, "Conversation Summary", summary, "conversation")
+                    old_ids = [mem['id'] for mem in older_messages]
+                    await memory_manager.delete_stm_memories(old_ids)
+                    logger.info(f"Summarized {len(older_messages)} old messages into LTM")
+                except Exception as e:
+                    logger.error(f"Failed to summarize and store in LTM: {e}")
+        
+        yield result

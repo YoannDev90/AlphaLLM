@@ -2,16 +2,22 @@ import logging
 import os
 import re
 from datetime import datetime
+import asyncio
 from typing import Any, AsyncGenerator, Dict, List, Union
 
 import litellm
 from langfuse import get_client
 
 from config import LOGGER_NAME
-from utils.ai_process.base_chat_model import (BaseChatModel, ChatParameters,
-                                              ChatResult, StreamChunk)
+from utils.ai_process.base_chat_model import (
+    BaseChatModel,
+    ChatParameters,
+    ChatResult,
+    StreamChunk,
+)
 
 logger = logging.getLogger(LOGGER_NAME)
+
 
 class ChatModel(BaseChatModel):
     """Classe globale pour gérer tous les modèles de chat avec streaming et fallbacks"""
@@ -41,7 +47,11 @@ class ChatModel(BaseChatModel):
         if self.model_name != "sonar":
             return response_text
 
-        sources = response.citations if hasattr(response, 'citations') and response.citations else []
+        sources = (
+            response.citations
+            if hasattr(response, "citations") and response.citations
+            else []
+        )
 
         if not sources:
             return response_text
@@ -52,11 +62,15 @@ class ChatModel(BaseChatModel):
                 return f" [[{citation_num}]](<{sources[citation_num - 1]}>)"
             return match.group(0)
 
-        processed_text = re.sub(r'\[(\d+)\]', replace_citation, response_text)
+        processed_text = re.sub(r"\[(\d+)\]", replace_citation, response_text)
         return processed_text
 
-    async def _try_stream_config(self, config: Dict[str, Any], messages: List[Dict[str, Any]],
-                               parameters: ChatParameters) -> AsyncGenerator[StreamChunk, None]:
+    async def _try_stream_config(
+        self,
+        config: Dict[str, Any],
+        messages: List[Dict[str, Any]],
+        parameters: ChatParameters,
+    ) -> AsyncGenerator[StreamChunk, None]:
         """Essaie de streamer avec une configuration spécifique"""
         litellm_params = config["litellm_params"]
         tokenizer_name = config.get("tokenizer", self.model_name)
@@ -67,8 +81,12 @@ class ChatModel(BaseChatModel):
             "messages": messages,
             "stream": True,
             "temperature": parameters.temperature,
-            "drop_params": True
+            "drop_params": True,
         }
+
+        if not current_params["api_key"]:
+            logger.error(f"Streaming API key for {litellm_params['model']} is not set (env var: {litellm_params['api_key']})")
+            raise Exception(f"Missing API key for {litellm_params['model']}")
 
         if parameters.max_tokens:
             current_params["max_tokens"] = parameters.max_tokens
@@ -76,33 +94,46 @@ class ChatModel(BaseChatModel):
         if "api_base" in litellm_params:
             current_params["api_base"] = litellm_params["api_base"]
 
-        response = litellm.completion(**current_params)
+        logger.debug(f"Starting streaming call to {current_params['model']} with API key set: {bool(current_params['api_key'])}")
+        response = await asyncio.wait_for(litellm.acompletion(**current_params), timeout=30.0)
+        logger.info(f"Streaming API call to {current_params['model']} initiated successfully")
 
         response_text = ""
         last_chunk = None
 
         async for chunk in response:
             last_chunk = chunk
-            if hasattr(chunk, 'choices') and chunk.choices:
+            if hasattr(chunk, "choices") and chunk.choices:
                 choice = chunk.choices[0]
-                if hasattr(choice, 'delta') and hasattr(choice.delta, 'content'):
+                if hasattr(choice, "delta") and hasattr(choice.delta, "content"):
                     content = choice.delta.content
                     if content:
                         response_text += content
                         yield StreamChunk(chunk=content, done=False)
 
-        model = last_chunk.model if (last_chunk and hasattr(last_chunk, 'model')) else litellm_params["model"]
+        model = (
+            last_chunk.model
+            if (last_chunk and hasattr(last_chunk, "model"))
+            else litellm_params["model"]
+        )
 
-        if last_chunk and hasattr(last_chunk, 'usage') and last_chunk.usage:
+        if last_chunk and hasattr(last_chunk, "usage") and last_chunk.usage:
             usage = last_chunk.usage.total_tokens
 
-        if self.model_name == "sonar" and (not hasattr(last_chunk, 'citations') or not last_chunk.citations):
+        if self.model_name == "sonar" and (
+            not hasattr(last_chunk, "citations") or not last_chunk.citations
+        ):
+            logger.debug("Fetching citations for sonar model with non-streaming call")
             non_stream_params = current_params.copy()
             non_stream_params["stream"] = False
-            non_stream_response = litellm.completion(**non_stream_params)
-            response_text = self._process_perplexity_citations(response_text, non_stream_response)
+            non_stream_response = await asyncio.wait_for(litellm.acompletion(**non_stream_params), timeout=30.0)
+            response_text = self._process_perplexity_citations(
+                response_text, non_stream_response
+            )
         else:
-            response_text = self._process_perplexity_citations(response_text, last_chunk)
+            response_text = self._process_perplexity_citations(
+                response_text, last_chunk
+            )
 
         yield StreamChunk(
             chunk=response_text,
@@ -110,23 +141,27 @@ class ChatModel(BaseChatModel):
             response=response_text,
             usage=usage,
             model=model,
-            elapsed_time=None
+            elapsed_time=None,
         )
 
-    async def _stream_with_fallbacks(self, parameters: ChatParameters,
-                                   start_time: datetime) -> AsyncGenerator[StreamChunk, None]:
+    async def _stream_with_fallbacks(
+        self, parameters: ChatParameters, start_time: datetime
+    ) -> AsyncGenerator[StreamChunk, None]:
         """Streaming avec fallbacks personnalisés"""
         configs = self._load_configs()
+        logger.info(f"Starting streaming with {len(configs)} fallback configs for model {self.model_name}")
 
         with get_client().start_as_current_observation(
-            as_type="generation",
-            name=f"user-completion-{datetime.now().isoformat()}"
+            as_type="generation", name=f"user-completion-{datetime.now().isoformat()}"
         ) as gen:
             gen.update(input=parameters.messages)
 
             for config in configs:
                 try:
-                    async for chunk in self._try_stream_config(config, parameters.messages, parameters):
+                    logger.debug(f"Trying streaming config: {config['litellm_params']['model']}")
+                    async for chunk in self._try_stream_config(
+                        config, parameters.messages, parameters
+                    ):
                         if chunk.done:
                             elapsed_time = self._format_elapsed_time(start_time)
 
@@ -136,12 +171,12 @@ class ChatModel(BaseChatModel):
                                 usage_details={
                                     "input_tokens": 0,
                                     "output_tokens": chunk.usage,
-                                    "total_tokens": chunk.usage
+                                    "total_tokens": chunk.usage,
                                 },
                                 model_parameters={
                                     "temperature": parameters.temperature,
-                                    "stream": True
-                                }
+                                    "stream": True,
+                                },
                             )
 
                             yield StreamChunk(
@@ -150,29 +185,33 @@ class ChatModel(BaseChatModel):
                                 response=chunk.response,
                                 usage=chunk.usage,
                                 model=parameters.model,
-                                elapsed_time=elapsed_time
+                                elapsed_time=elapsed_time,
                             )
                             return
                         else:
                             yield chunk
 
                 except Exception as e:
-                    logger.warning(f"Erreur avec {config['litellm_params']['model']}: {str(e)}")
+                    logger.warning(
+                        f"Streaming failed for {config['litellm_params']['model']}: {type(e).__name__}: {str(e)}"
+                    )
                     continue
 
-            logger.error("Tous les fallbacks ont échoué")
+            logger.error("All streaming fallbacks exhausted")
 
-    async def _non_stream_chat(self, parameters: ChatParameters, start_time: datetime, retry_count: int = 0) -> ChatResult:
+    async def _non_stream_chat(
+        self, parameters: ChatParameters, start_time: datetime, retry_count: int = 0
+    ) -> ChatResult:
         """Chat non-streaming avec fallbacks natifs"""
         configs = self._load_configs()
+        logger.debug(f"Starting non-stream chat with {len(configs)} configs, retry_count={retry_count}")
 
         # Rotate configs for retry to use different primary model
         if retry_count > 0:
             configs = configs[retry_count:] + configs[:retry_count]
 
         with get_client().start_as_current_observation(
-            as_type="generation",
-            name=f"user-completion-{datetime.now().isoformat()}"
+            as_type="generation", name=f"user-completion-{datetime.now().isoformat()}"
         ) as gen:
             gen.update(input=parameters.messages)
 
@@ -183,21 +222,40 @@ class ChatModel(BaseChatModel):
                 "model": primary_config["model"],
                 "api_key": os.getenv(primary_config["api_key"]),
                 "messages": parameters.messages,
-                "temperature": parameters.temperature,
-                "drop_params": True
+                "drop_params": True,
+                "timeout": 30.0,
             }
 
-            if parameters.max_tokens:
-                params["max_tokens"] = parameters.max_tokens
+            if not params["api_key"]:
+                logger.error(f"API key for {primary_config['model']} is not set (env var: {primary_config['api_key']})")
+                if retry_count < len(configs) - 1:
+                    logger.info("Retrying with next config due to missing API key...")
+                    return await self._non_stream_chat(
+                        parameters, start_time, retry_count + 1
+                    )
+                else:
+                    logger.error("All retries exhausted due to missing API keys")
+                    return ChatResult(
+                        response="API configuration error. Please check your API keys.",
+                        usage=0,
+                        model=parameters.model,
+                        elapsed_time=self._format_elapsed_time(start_time),
+                    )
+
+            logger.info(f"Making API call to {params['model']} with API key set: {bool(params['api_key'])}")
 
             if "api_base" in primary_config:
                 params["api_base"] = primary_config["api_base"]
 
             fallbacks = []
             for fb_config in fallback_configs:
+                api_key = os.getenv(fb_config["api_key"])
+                if not api_key:
+                    logger.warning(f"Fallback API key for {fb_config['model']} is not set (env var: {fb_config['api_key']})")
+                    continue
                 fb_params = {
                     "model": fb_config["model"],
-                    "api_key": os.getenv(fb_config["api_key"])
+                    "api_key": api_key,
                 }
                 if "api_base" in fb_config:
                     fb_params["api_base"] = fb_config["api_base"]
@@ -205,27 +263,45 @@ class ChatModel(BaseChatModel):
 
             if fallbacks:
                 params["fallbacks"] = fallbacks
+                logger.info(f"Using {len(fallbacks)} fallback configs")
 
-            response = litellm.completion(**params)
-
-            if not response.choices:
-                raise ValueError("No choices in response")
-
-            # Handle different response formats
-            message = response.choices[0].message
-            if isinstance(message, str):
-                response_text = message
-            elif isinstance(message, dict):
-                response_text = message.get('content', '')
-            else:
-                response_text = str(message)
-
-            usage = response.usage.total_tokens if response.usage and hasattr(response.usage, 'total_tokens') else 0
+            try:
+                logger.debug(f"Calling litellm.acompletion with params: model={params['model']}, api_key_set={bool(params['api_key'])}, messages_count={len(params['messages'])}, fallbacks={len(fallbacks) if 'fallbacks' in params else 0}")
+                response = await asyncio.wait_for(litellm.acompletion(**params), timeout=30.0)
+                logger.info("API call successful")
+            except asyncio.TimeoutError:
+                logger.error(f"Request to {params['model']} timed out after 30s")
+                return ChatResult(
+                    response="Request timed out. Try again.",
+                    usage=0,
+                    model=parameters.model,
+                    elapsed_time="30.0s",
+                )
+            except Exception as e:
+                logger.error(f"API call to {params['model']} failed with exception: {type(e).__name__}: {e}")
+                if retry_count < len(configs) - 1:
+                    logger.info("Retrying with next config...")
+                    return await self._non_stream_chat(
+                        parameters, start_time, retry_count + 1
+                    )
+                else:
+                    logger.error("All retries exhausted")
+                    return ChatResult(
+                        response="I'm sorry, but I couldn't generate a response due to an API error. Please try again.",
+                        usage=0,
+                        model=parameters.model,
+                        elapsed_time=self._format_elapsed_time(start_time),
+                    )
+            
+            usage = response.usage.total_tokens
             model = parameters.model
+            response_text = response.choices[0].message.content
             if response_text is None or response_text.strip() == "":
                 if retry_count < len(configs) - 1:
                     logger.error("Model returned empty response, retrying ...")
-                    return await self._non_stream_chat(parameters, start_time, retry_count + 1)
+                    return await self._non_stream_chat(
+                        parameters, start_time, retry_count + 1
+                    )
                 else:
                     logger.error("Model returned empty response, all retries exhausted")
                     response_text = "I'm sorry, but I couldn't generate a response. Please try again."
@@ -237,22 +313,24 @@ class ChatModel(BaseChatModel):
                 usage_details={
                     "input_tokens": response.usage.prompt_tokens,
                     "output_tokens": response.usage.completion_tokens,
-                    "total_tokens": usage
+                    "total_tokens": usage,
                 },
                 model_parameters={
                     "temperature": parameters.temperature,
-                    "stream": False
-                }
+                    "stream": False,
+                },
             )
 
             return ChatResult(
                 response=response_text,
                 usage=usage,
                 model=model,
-                elapsed_time=self._format_elapsed_time(start_time)
+                elapsed_time=self._format_elapsed_time(start_time),
             )
 
-    def chat(self, parameters: ChatParameters) -> Union[ChatResult, AsyncGenerator[StreamChunk, None]]:
+    def chat(
+        self, parameters: ChatParameters
+    ) -> Union[ChatResult, AsyncGenerator[StreamChunk, None]]:
         """
         Méthode principale pour converser avec le modèle
 
@@ -270,6 +348,7 @@ class ChatModel(BaseChatModel):
         else:
             async def _get_result():
                 return await self._non_stream_chat(parameters, start_time, 0)
+
             return _get_result()
 
     async def generate(self, parameters: ChatParameters):

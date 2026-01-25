@@ -23,7 +23,8 @@ logging.getLogger('discord.ext.commands').setLevel(logging.CRITICAL)
 @bot.event
 async def on_ready():
     logger.info(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    activity = discord.CustomActivity(name="🤖 Try @AlphaLLM or /commands")
+    #activity = discord.CustomActivity(name="🤖 Try @AlphaLLM or /commands")
+    activity = discord.CustomActivity(name="🤖 Sorry for the recent downtime")
     await bot.change_presence(activity=activity, status=discord.Status.idle)
     await bot.tree.sync()
     command_id_manager.set_bot(bot)

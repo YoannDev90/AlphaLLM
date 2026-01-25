@@ -10,9 +10,11 @@ from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 @dataclass(frozen=True)
 class ChatParameters:
     """Paramètres typés pour les conversations"""
+
     messages: List[Dict[str, Any]]
     model: str
     history: bool = True
@@ -23,23 +25,28 @@ class ChatParameters:
     stream: bool = False
     raw: bool = True
 
+
 @dataclass(frozen=True)
 class ChatResult:
     """Résultat d'une conversation"""
+
     response: str
     usage: int
     model: str
     elapsed_time: str
 
+
 @dataclass(frozen=True)
 class StreamChunk:
     """Chunk de streaming"""
+
     chunk: str
     done: bool
     response: Optional[str] = None
     usage: Optional[int] = None
     model: Optional[str] = None
     elapsed_time: Optional[str] = None
+
 
 class BaseChatModel(ABC):
     """Classe de base abstraite pour tous les modèles de chat"""
@@ -49,7 +56,9 @@ class BaseChatModel(ABC):
         self._configs_cache: Optional[List[Dict[str, Any]]] = None
 
     @abstractmethod
-    async def chat(self, parameters: ChatParameters) -> Union[ChatResult, AsyncGenerator[StreamChunk, None]]:
+    async def chat(
+        self, parameters: ChatParameters
+    ) -> Union[ChatResult, AsyncGenerator[StreamChunk, None]]:
         """Méthode principale pour converser avec le modèle"""
         pass
 
@@ -60,20 +69,23 @@ class BaseChatModel(ABC):
 
         try:
             import json
+
             with open(self.config_path, "r") as f:
                 raw_configs = json.load(f)
-            
+
             for config in raw_configs:
                 litellm_params = config.get("litellm_params", {})
                 if "api_base" in litellm_params:
                     api_base = litellm_params["api_base"]
                     api_base = re.sub(r'<(\w+)>', lambda m: os.environ.get(m.group(1), ""), api_base)
                     litellm_params["api_base"] = api_base
-            
+
             self._configs_cache = raw_configs
             return raw_configs
         except Exception as e:
-            logger.error(f"Erreur lors du chargement des configs {self.config_path}: {e}")
+            logger.error(
+                f"Erreur lors du chargement des configs {self.config_path}: {e}"
+            )
             raise
 
     def _format_elapsed_time(self, start_time: datetime) -> str:
