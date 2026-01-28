@@ -1,20 +1,19 @@
-
-
 async def send_code_block_with_return(channel, code_block: str, max_length: int = 2000):
     """
     Sends a code block, splitting into multiple code blocks if needed but never breaking a line of code.
     Returns the last message sent.
     """
-    first_line_end = code_block.find('\n')
+    first_line_end = code_block.find("\n")
     if first_line_end == -1:
         language = ""
         code = code_block[3:-3]
     else:
         language = code_block[3:first_line_end].strip()
-        code = code_block[first_line_end+1:-3]
+        code = code_block[first_line_end + 1 : -3]
 
-    if language.lower() in ['latex', 'tex']:
+    if language.lower() in ["latex", "tex"]:
         from utils.handlers.messages import send_latex_image_with_return
+
         return await send_latex_image_with_return(channel, code_block)
 
     code_lines = code.splitlines(keepends=True)
@@ -22,18 +21,18 @@ async def send_code_block_with_return(channel, code_block: str, max_length: int 
     code_suffix = "```"
     current_code = code_prefix
     last_message = None
-    
+
     for line in code_lines:
         if len(current_code) + len(line) + len(code_suffix) > max_length:
             current_code += code_suffix
             last_message = await channel.send(current_code)
             current_code = code_prefix
         current_code += line
-    
+
     if len(current_code) > len(code_prefix):
         current_code += code_suffix
         last_message = await channel.send(current_code)
-    
+
     return last_message
 
 
@@ -41,17 +40,18 @@ async def send_code_block(channel, code_block: str, max_length: int = 2000):
     """
     Sends a code block, splitting into multiple code blocks if needed but never breaking a line of code.
     """
-    first_line_end = code_block.find('\n')
+    first_line_end = code_block.find("\n")
     if first_line_end == -1:
         language = ""
         code = code_block[3:-3]
     else:
         language = code_block[3:first_line_end].strip()
-        code = code_block[first_line_end+1:-3]
+        code = code_block[first_line_end + 1 : -3]
 
-    if language.lower() in ['latex', 'tex']:
+    if language.lower() in ["latex", "tex"]:
         # Treat as LaTeX
         from utils.handlers.messages import send_latex_image
+
         await send_latex_image(channel, code_block)
         return
 

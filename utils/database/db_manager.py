@@ -7,9 +7,10 @@ from datetime import datetime
 
 import psycopg2
 
-from config import (LOGGER_NAME, SUPABASE_PG, TABLES_TO_CLONE, SUPABASE_PASSWORD)
+from config import LOGGER_NAME, SUPABASE_PASSWORD, SUPABASE_PG, TABLES_TO_CLONE
 
 logger = logging.getLogger(LOGGER_NAME)
+
 
 class DatabaseManager:
     _instance = None
@@ -20,7 +21,7 @@ class DatabaseManager:
         return cls._instance
 
     def __init__(self):
-        if not hasattr(self, 'initialized'):
+        if not hasattr(self, "initialized"):
             self.sqlite_conn = None
             self.pg_conn = None
             self.initialized = True
@@ -31,7 +32,9 @@ class DatabaseManager:
             self.sqlite_conn = sqlite3.connect("data/local_db.db")
             logger.debug("Connexion SQLite établie avec succès")
         except sqlite3.Error as e:
-            logger.error(f"Erreur lors de la connexion à la base de données SQLite: {e}")
+            logger.error(
+                f"Erreur lors de la connexion à la base de données SQLite: {e}"
+            )
             raise
 
         try:
@@ -55,43 +58,59 @@ class DatabaseManager:
         for table_name in TABLES_TO_CLONE:
             try:
                 logger.debug(f"Clonage de la table {table_name}")
-                
+
                 with self.pg_conn.cursor() as cursor:
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         SELECT column_name 
                         FROM information_schema.columns 
                         WHERE table_schema = 'public' AND table_name = %s 
                         ORDER BY ordinal_position
-                    """, (table_name,))
+                    """,
+                        (table_name,),
+                    )
                     columns = [row[0] for row in cursor.fetchall()]
-                
+
                 if not columns:
                     logger.warning(f"Aucune colonne trouvée pour la table {table_name}")
                     continue
-                
+
                 with self.pg_conn.cursor() as cursor:
                     cursor.execute(f"SELECT * FROM {table_name}")
                     rows = cursor.fetchall()
-                
+
                 data = [dict(zip(columns, row)) for row in rows]
-                
+
                 if data:
                     column_defs = ", ".join([f"{col} TEXT" for col in columns])
 
                     self.sqlite_conn.execute(f"DROP TABLE IF EXISTS {table_name}")
-                    self.sqlite_conn.execute(f"CREATE TABLE {table_name} ({column_defs})")
+                    self.sqlite_conn.execute(
+                        f"CREATE TABLE {table_name} ({column_defs})"
+                    )
                     placeholders = ", ".join(["?" for _ in columns])
                     insert_sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
                     for row in data:
-                        values = [json.dumps(row[col]) if isinstance(row[col], (list, dict)) else row[col] for col in columns]
+                        values = [
+                            (
+                                json.dumps(row[col])
+                                if isinstance(row[col], (list, dict))
+                                else row[col]
+                            )
+                            for col in columns
+                        ]
                         self.sqlite_conn.execute(insert_sql, values)
                     self.sqlite_conn.commit()
-                    logger.debug(f"Table {table_name} clonée avec succès ({len(data)} lignes)")
+                    logger.debug(
+                        f"Table {table_name} clonée avec succès ({len(data)} lignes)"
+                    )
                 else:
                     logger.debug(f"Table {table_name} vide, création de table vide")
                     column_defs = ", ".join([f"{col} TEXT" for col in columns])
                     self.sqlite_conn.execute(f"DROP TABLE IF EXISTS {table_name}")
-                    self.sqlite_conn.execute(f"CREATE TABLE {table_name} ({column_defs})")
+                    self.sqlite_conn.execute(
+                        f"CREATE TABLE {table_name} ({column_defs})"
+                    )
                     self.sqlite_conn.commit()
             except Exception as e:
                 logger.error(f"Erreur lors du clonage de {table_name}: {e}")
@@ -108,7 +127,7 @@ class DatabaseManager:
         except sqlite3.Error as e:
             logger.error(f"Erreur lors de l'exécution de la requête: {e}")
             return []
-        
+
     async def exc_modify_query(self, query: str, params: tuple = ()):
         """Exécute une requête INSERT/UPDATE/DELETE dans SQLite et synchronise avec Supabase"""
         try:
@@ -117,14 +136,14 @@ class DatabaseManager:
                 return 0
             cursor = self.sqlite_conn.execute(query, params)
             self.sqlite_conn.commit()
-            
+
             await self._sync_with_supabase(query, params)
-            
+
             return cursor.rowcount
         except sqlite3.Error as e:
             logger.error(f"Erreur lors de l'exécution de la requête SQLite: {e}")
             return 0
-    
+
     async def _sync_with_supabase(self, query: str, params: tuple):
         """Convertit la requête SQLite en PostgreSQL et l'exécute sur Supabase avec retry pour les erreurs SSL"""
         for attempt in range(3):
@@ -132,9 +151,11 @@ class DatabaseManager:
                 if self.pg_conn.closed:
                     logger.debug("Connexion PostgreSQL fermée, reconnexion...")
                     self.pg_conn = psycopg2.connect(SUPABASE_PG)
-                
+
                 pg_query = self._convert_sqlite_to_postgres(query)
-                logger.debug(f"Executing PG query (attempt {attempt+1}): {pg_query} with params: {params}")
+                logger.debug(
+                    f"Executing PG query (attempt {attempt+1}): {pg_query} with params: {params}"
+                )
                 with self.pg_conn.cursor() as cursor:
                     cursor.execute(pg_query, params)
                     self.pg_conn.commit()
@@ -143,14 +164,16 @@ class DatabaseManager:
             except psycopg2.Error as e:
                 error_msg = str(e).lower()
                 if ("ssl" in error_msg or "eof" in error_msg) and attempt < 2:
-                    logger.warning(f"SSL/EOF error on attempt {attempt+1}, retrying in 5 seconds: {e}")
+                    logger.warning(
+                        f"SSL/EOF error on attempt {attempt+1}, retrying in 5 seconds: {e}"
+                    )
                     await asyncio.sleep(5)
                 else:
                     logger.warning(f"Échec de synchronisation PostgreSQL: {e}")
                     break
-    
+
     def _convert_sqlite_to_postgres(self, sqlite_query: str) -> str:
         """Convertit une requête SQLite en PostgreSQL (remplace ? par %s)"""
-        pg_query = sqlite_query.replace('?', '%s')
+        pg_query = sqlite_query.replace("?", "%s")
         logger.debug(f"Converted query: {sqlite_query} -> {pg_query}")
         return pg_query

@@ -1,10 +1,10 @@
 import asyncio
 import base64
-import os
-from pathlib import Path
 import logging
+import os
 import random
 import urllib
+from pathlib import Path
 
 import aiohttp
 from dotenv import load_dotenv
@@ -16,6 +16,7 @@ logger = logging.getLogger(LOGGER_NAME)
 load_dotenv()
 POLLINATIONS_API_KEY = os.getenv("POLLINATIONS_API_KEY")
 
+
 async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
     """
     Génère une image avec le modèle Flux via Pollinations
@@ -23,12 +24,12 @@ async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
     Args:
         prompt: Le prompt pour générer l'image
         size: La taille de l'image (par défaut "1024x1024")
-        
+
     Returns:
         L'image encodée en base64
     """
     width, height = map(int, size.split("x"))
-    
+
     params = {
         "model": "flux",
         "width": width,
@@ -38,47 +39,51 @@ async def generate_flux(prompt: str, size: str = "1024x1024") -> str:
         "private": "true",
         "nofeed": "true",
         "enhance": "false",
-        "safe": "false"
+        "safe": "false",
     }
 
     url = f"https://gen.pollinations.ai/image/{urllib.parse.quote(prompt)}"
     url += "?" + urllib.parse.urlencode(params)
 
-    headers = {
-        "Authorization": f"Bearer {POLLINATIONS_API_KEY}"
-    }
+    headers = {"Authorization": f"Bearer {POLLINATIONS_API_KEY}"}
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
             if response.status == 200:
                 image_data = await response.read()
-                return base64.b64encode(image_data).decode('utf-8')
+                return base64.b64encode(image_data).decode("utf-8")
             else:
                 error_message = await response.text()
-                logger.error(f"Erreur lors de la génération de l'image. Status: {response.status} - {error_message}")
+                logger.error(
+                    f"Erreur lors de la génération de l'image. Status: {response.status} - {error_message}"
+                )
                 return None
 
+
 if __name__ == "__main__":
-    prompt = input("Enter prompt (default: 'A serene lake with mountains'): ").strip() or "A serene lake with mountains"
+    prompt = (
+        input("Enter prompt (default: 'A serene lake with mountains'): ").strip()
+        or "A serene lake with mountains"
+    )
     size = input("Enter size (default: '1024x1024'): ").strip() or "1024x1024"
-    
+
     print(f"Generating image with prompt: '{prompt}'")
     print(f"Size: {size}")
-    
+
     try:
         result = asyncio.run(generate_flux(prompt, size))
         print(f"✓ Image generated successfully!")
         print(f"Base64 length: {len(result)} characters")
-        
+
         # Save the image
         output_dir = Path(__file__).parent.parent.parent / "generated_images"
         output_dir.mkdir(exist_ok=True)
-        
+
         image_bytes = base64.b64decode(result)
         image_filename = output_dir / "flux_output.png"
         with open(image_filename, "wb") as f:
             f.write(image_bytes)
-        
+
         print(f"✓ Image saved to: {image_filename}")
     except Exception as e:
         print(f"✗ Error: {e}")

@@ -7,6 +7,7 @@ from config import LOGGER_NAME, SUPPORT_SERVER
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 async def setup(bot: discord.Client):
     @bot.tree.command(name="status", description="Show the status of the bot")
     async def status(interaction: discord.Interaction):
@@ -16,13 +17,16 @@ async def setup(bot: discord.Client):
             title="Models Status",
             description="Here is the current status of the AI models:",
             color=discord.Color.default(),
-            timestamp=discord.utils.utcnow()
+            timestamp=discord.utils.utcnow(),
         )
         embed.add_field(
             name="🤖 AI Models",
             value="Everything is running smoothly! All models are operational.",
-            inline=False
+            inline=False,
         )
-        embed.set_footer(text=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
+        embed.set_footer(
+            text=interaction.user.display_name,
+            icon_url=interaction.user.display_avatar.url,
+        )
 
         await interaction.response.send_message(embed=embed)

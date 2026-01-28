@@ -7,6 +7,7 @@ from config import GEMINI_API_KEY, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 class VisionHandler:
     """
     Classe pour gérer la description d'images en utilisant litellm avec Gemini 2.0 Flash Lite.
@@ -27,18 +28,20 @@ class VisionHandler:
         """
         try:
             with open(image_path, "rb") as image_file:
-                base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+                base64_image = base64.b64encode(image_file.read()).decode("utf-8")
 
-            if image_path.lower().endswith('.png'):
-                mime_type = 'image/png'
-            elif image_path.lower().endswith('.jpg') or image_path.lower().endswith('.jpeg'):
-                mime_type = 'image/jpeg'
-            elif image_path.lower().endswith('.gif'):
-                mime_type = 'image/gif'
-            elif image_path.lower().endswith('.webp'):
-                mime_type = 'image/webp'
+            if image_path.lower().endswith(".png"):
+                mime_type = "image/png"
+            elif image_path.lower().endswith(".jpg") or image_path.lower().endswith(
+                ".jpeg"
+            ):
+                mime_type = "image/jpeg"
+            elif image_path.lower().endswith(".gif"):
+                mime_type = "image/gif"
+            elif image_path.lower().endswith(".webp"):
+                mime_type = "image/webp"
             else:
-                mime_type = 'image/jpeg'
+                mime_type = "image/jpeg"
 
             messages = [
                 {
@@ -46,15 +49,15 @@ class VisionHandler:
                     "content": [
                         {
                             "type": "text",
-                            "text": "You are an AI assistant specialized in describing images with maximum precision and detail. Provide comprehensive descriptions including colors, objects, people, actions, settings, and any text visible in the image.\n\nDescribe this image in great detail, including all visible elements, colors, composition, and any text or writing present."
+                            "text": "You are an AI assistant specialized in describing images with maximum precision and detail. Provide comprehensive descriptions including colors, objects, people, actions, settings, and any text visible in the image.\n\nDescribe this image in great detail, including all visible elements, colors, composition, and any text or writing present.",
                         },
                         {
                             "type": "image_url",
                             "image_url": {
                                 "url": f"data:{mime_type};base64,{base64_image}"
-                            }
-                        }
-                    ]
+                            },
+                        },
+                    ],
                 }
             ]
 
@@ -63,7 +66,7 @@ class VisionHandler:
                 messages=messages,
                 max_tokens=1024,
                 temperature=0.2,
-                api_key=GEMINI_API_KEY
+                api_key=GEMINI_API_KEY,
             )
 
             description = response.choices[0].message.content

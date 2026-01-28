@@ -13,6 +13,7 @@ from config import CLOUDINARY_URL, IMGBB_API_KEY, LOGGER_NAME
 logger = logging.getLogger(LOGGER_NAME)
 cloudinary.config(cloud_url=CLOUDINARY_URL)
 
+
 async def upload_images(images: List[Union[str, bytes]]) -> List[str]:
     """
     Upload des images sur imgbb avec une expiration de 24 heures.
@@ -30,13 +31,15 @@ async def upload_images(images: List[Union[str, bytes]]) -> List[str]:
                 if isinstance(img, bytes):
                     img_data = img
                 elif isinstance(img, str):
-                    if img.startswith(('http://', 'https://')):
+                    if img.startswith(("http://", "https://")):
                         # URL
                         async with session.get(img) as resp:
                             if resp.status == 200:
                                 img_data = await resp.read()
                             else:
-                                logger.error(f"Failed to download image from {img}: {resp.status}")
+                                logger.error(
+                                    f"Failed to download image from {img}: {resp.status}"
+                                )
                                 urls.append(None)
                                 continue
                     else:
@@ -45,24 +48,24 @@ async def upload_images(images: List[Union[str, bytes]]) -> List[str]:
                             img_data = base64.b64decode(img)
                         except Exception:
                             # Assume file path
-                            with open(img, 'rb') as f:
+                            with open(img, "rb") as f:
                                 img_data = f.read()
                 else:
                     img_data = img  # bytes
 
-                img_b64 = base64.b64encode(img_data).decode('utf-8')
+                img_b64 = base64.b64encode(img_data).decode("utf-8")
 
                 data = {
-                    'key': IMGBB_API_KEY,
-                    'image': img_b64,
-                    'expiration': expiration_seconds
+                    "key": IMGBB_API_KEY,
+                    "image": img_b64,
+                    "expiration": expiration_seconds,
                 }
 
-                response = requests.post('https://api.imgbb.com/1/upload', data=data)
+                response = requests.post("https://api.imgbb.com/1/upload", data=data)
                 if response.status_code == 200:
                     result = response.json()
-                    if result.get('success'):
-                        urls.append(result['data']['url'])
+                    if result.get("success"):
+                        urls.append(result["data"]["url"])
                     else:
                         urls.append(None)
                 else:
@@ -73,6 +76,7 @@ async def upload_images(images: List[Union[str, bytes]]) -> List[str]:
                 urls.append(None)
 
     return urls
+
 
 def remove_background(image_url: str) -> str:
     """
@@ -86,16 +90,16 @@ def remove_background(image_url: str) -> str:
     """
     try:
         upload_result = cloudinary.uploader.upload(image_url)
-        public_id = upload_result['public_id']
+        public_id = upload_result["public_id"]
         transformed_url, options = cloudinary.utils.cloudinary_url(
-            public_id,
-            transformation=[{'effect': 'bgremoval'}]
+            public_id, transformation=[{"effect": "bgremoval"}]
         )
         return transformed_url
     except Exception as e:
         logger.error(f"Error during remove_background: {e}")
         return image_url
-    
+
+
 def upscale_image(image_url: str) -> str:
     """
     Améliore la résolution de l'image en utilisant la super résolution de Cloudinary.
@@ -108,15 +112,15 @@ def upscale_image(image_url: str) -> str:
     """
     try:
         upload_result = cloudinary.uploader.upload(image_url)
-        public_id = upload_result['public_id']
+        public_id = upload_result["public_id"]
         transformed_url, options = cloudinary.utils.cloudinary_url(
-            public_id,
-            transformation=[{'effect': 'upscale'}]
+            public_id, transformation=[{"effect": "upscale"}]
         )
         return transformed_url
     except Exception as e:
         logger.error(f"Error during upscale_image: {e}")
         return image_url
+
 
 def enhance_image(image_url: str) -> str:
     """
@@ -130,15 +134,15 @@ def enhance_image(image_url: str) -> str:
     """
     try:
         upload_result = cloudinary.uploader.upload(image_url)
-        public_id = upload_result['public_id']
+        public_id = upload_result["public_id"]
         transformed_url, options = cloudinary.utils.cloudinary_url(
-            public_id,
-            transformation=[{'effect': 'enhance'}]
+            public_id, transformation=[{"effect": "enhance"}]
         )
         return transformed_url
     except Exception as e:
         logger.error(f"Error during enhance_image: {e}")
         return image_url
+
 
 def generative_restore(image_url: str) -> str:
     """
@@ -152,15 +156,15 @@ def generative_restore(image_url: str) -> str:
     """
     try:
         upload_result = cloudinary.uploader.upload(image_url)
-        public_id = upload_result['public_id']
+        public_id = upload_result["public_id"]
         transformed_url, options = cloudinary.utils.cloudinary_url(
-            public_id,
-            transformation=[{'effect': 'gen_restore'}]
+            public_id, transformation=[{"effect": "gen_restore"}]
         )
         return transformed_url
     except Exception as e:
         logger.error(f"Error during generative_restore: {e}")
         return image_url
+
 
 def improve_image(image_url: str) -> str:
     """
@@ -174,15 +178,15 @@ def improve_image(image_url: str) -> str:
     """
     try:
         upload_result = cloudinary.uploader.upload(image_url)
-        public_id = upload_result['public_id']
+        public_id = upload_result["public_id"]
         transformed_url, options = cloudinary.utils.cloudinary_url(
-            public_id,
-            transformation=[{'effect': 'improve'}]
+            public_id, transformation=[{"effect": "improve"}]
         )
         return transformed_url
     except Exception as e:
         logger.error(f"Error during improve_image: {e}")
         return image_url
+
 
 def auto_enhance_image(image_url: str) -> str:
     """
@@ -196,13 +200,11 @@ def auto_enhance_image(image_url: str) -> str:
     """
     try:
         upload_result = cloudinary.uploader.upload(image_url)
-        public_id = upload_result['public_id']
+        public_id = upload_result["public_id"]
         transformed_url, options = cloudinary.utils.cloudinary_url(
-            public_id,
-            transformation=[{'effect': 'auto_enhance'}]
+            public_id, transformation=[{"effect": "auto_enhance"}]
         )
         return transformed_url
     except Exception as e:
         logger.error(f"Error during auto_enhance_image: {e}")
         return image_url
-

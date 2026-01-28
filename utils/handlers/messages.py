@@ -2,22 +2,29 @@ import re
 
 import discord
 
-from utils.handlers.codeblock import (send_code_block,
-                                      send_code_block_with_return)
-from utils.handlers.latex import convert_latex_to_png, detect_latex, LATEX_TO_EMOJI
+from utils.handlers.codeblock import send_code_block, send_code_block_with_return
+from utils.handlers.latex import LATEX_TO_EMOJI, convert_latex_to_png, detect_latex
 from utils.handlers.table import detect_and_convert_tables
 from utils.views.message import MessageView
 
 
-async def smart_long_messages_with_view(channel, response, original_question, model, response_data, bot, max_length: int = 2000):
+async def smart_long_messages_with_view(
+    channel,
+    response,
+    original_question,
+    model,
+    response_data,
+    bot,
+    max_length: int = 2000,
+):
     """
     Sends a long message to Discord with MessageView buttons, preserving code blocks and never splitting inside a code block.
-    """    
+    """
     response = detect_and_convert_tables(response)
     pattern = re.compile(r"(```[\s\S]*?```)")
     parts = pattern.split(response)
     last_message = None
-    
+
     for part in parts:
         if part.startswith("```") and part.endswith("```"):
             result = await send_code_block_with_return(channel, part, max_length)
@@ -27,7 +34,7 @@ async def smart_long_messages_with_view(channel, response, original_question, mo
             result = await send_text_with_latex_with_return(channel, part, max_length)
             if result:
                 last_message = result
-    
+
     # Ajouter la vue au dernier message envoyé
     if last_message:
         view = MessageView(original_question, model, response_data, bot)
@@ -72,21 +79,21 @@ async def send_text_in_chunks_with_return(channel, text: str, max_length: int = 
     """
     if not text.strip():
         return None
-        
+
     lines = text.splitlines(keepends=True)
     current_message = ""
     last_message = None
-    
+
     for line in lines:
         if len(current_message) + len(line) > max_length:
             if current_message:
                 last_message = await channel.send(current_message.rstrip())
             current_message = ""
         current_message += line
-    
+
     if current_message.strip():
         last_message = await channel.send(current_message.rstrip())
-    
+
     return last_message
 
 
@@ -98,7 +105,7 @@ async def send_text_with_latex(channel, text: str, max_length: int = 2000):
     if not matches:
         await send_text_in_chunks(channel, text, max_length)
         return
-    
+
     current_text = ""
     last_end = 0
     for match in matches:
@@ -110,15 +117,15 @@ async def send_text_with_latex(channel, text: str, max_length: int = 2000):
         current_text += before
         # Process LaTeX
         latex = match.strip()
-        if latex.startswith('```') and latex.endswith('```'):
-            lines = latex.split('\n')
-            if len(lines) >= 3 and lines[-1] == '```':
-                latex = '\n'.join(lines[1:-1])
-        if latex.startswith('$') and latex.endswith('$'):
+        if latex.startswith("```") and latex.endswith("```"):
+            lines = latex.split("\n")
+            if len(lines) >= 3 and lines[-1] == "```":
+                latex = "\n".join(lines[1:-1])
+        if latex.startswith("$") and latex.endswith("$"):
             latex = latex[1:-1]
-        if latex.startswith(r'\[') and latex.endswith(r'\]'):
+        if latex.startswith(r"\[") and latex.endswith(r"\]"):
             latex = latex[2:-2]
-        
+
         if latex in LATEX_TO_EMOJI:
             current_text += LATEX_TO_EMOJI[latex]
         else:
@@ -144,7 +151,7 @@ async def send_text_with_latex_with_return(channel, text: str, max_length: int =
     matches = detect_latex(text)
     if not matches:
         return await send_text_in_chunks_with_return(channel, text, max_length)
-    
+
     current_text = ""
     last_end = 0
     last_message = None
@@ -157,21 +164,23 @@ async def send_text_with_latex_with_return(channel, text: str, max_length: int =
         current_text += before
         # Process LaTeX
         latex = match.strip()
-        if latex.startswith('```') and latex.endswith('```'):
-            lines = latex.split('\n')
-            if len(lines) >= 3 and lines[-1] == '```':
-                latex = '\n'.join(lines[1:-1])
-        if latex.startswith('$') and latex.endswith('$'):
+        if latex.startswith("```") and latex.endswith("```"):
+            lines = latex.split("\n")
+            if len(lines) >= 3 and lines[-1] == "```":
+                latex = "\n".join(lines[1:-1])
+        if latex.startswith("$") and latex.endswith("$"):
             latex = latex[1:-1]
-        if latex.startswith(r'\[') and latex.endswith(r'\]'):
+        if latex.startswith(r"\[") and latex.endswith(r"\]"):
             latex = latex[2:-2]
-        
+
         if latex in LATEX_TO_EMOJI:
             current_text += LATEX_TO_EMOJI[latex]
         else:
             # Send current text
             if current_text:
-                result = await send_text_in_chunks_with_return(channel, current_text, max_length)
+                result = await send_text_in_chunks_with_return(
+                    channel, current_text, max_length
+                )
                 if result:
                     last_message = result
                 current_text = ""
@@ -184,7 +193,9 @@ async def send_text_with_latex_with_return(channel, text: str, max_length: int =
     remaining = text[last_end:]
     current_text += remaining
     if current_text:
-        result = await send_text_in_chunks_with_return(channel, current_text, max_length)
+        result = await send_text_in_chunks_with_return(
+            channel, current_text, max_length
+        )
         if result:
             last_message = result
     return last_message
@@ -196,15 +207,15 @@ async def send_latex_image(channel, latex_match: str):
     """
     # Extract the LaTeX formula from the match
     latex = latex_match.strip()
-    if latex.startswith('```') and latex.endswith('```'):
-        lines = latex.split('\n')
-        if len(lines) >= 3 and lines[-1] == '```':
-            latex = '\n'.join(lines[1:-1])
-    if latex.startswith('$') and latex.endswith('$'):
+    if latex.startswith("```") and latex.endswith("```"):
+        lines = latex.split("\n")
+        if len(lines) >= 3 and lines[-1] == "```":
+            latex = "\n".join(lines[1:-1])
+    if latex.startswith("$") and latex.endswith("$"):
         latex = latex[1:-1]
-    if latex.startswith(r'\[') and latex.endswith(r'\]'):
+    if latex.startswith(r"\[") and latex.endswith(r"\]"):
         latex = latex[2:-2]
-    
+
     result, success = convert_latex_to_png(latex)
     if success:
         if isinstance(result, str):
@@ -223,15 +234,15 @@ async def send_latex_image_with_return(channel, latex_match: str):
     """
     # Extract the LaTeX formula from the match
     latex = latex_match.strip()
-    if latex.startswith('```') and latex.endswith('```'):
-        lines = latex.split('\n')
-        if len(lines) >= 3 and lines[-1] == '```':
-            latex = '\n'.join(lines[1:-1])
-    if latex.startswith('$') and latex.endswith('$'):
+    if latex.startswith("```") and latex.endswith("```"):
+        lines = latex.split("\n")
+        if len(lines) >= 3 and lines[-1] == "```":
+            latex = "\n".join(lines[1:-1])
+    if latex.startswith("$") and latex.endswith("$"):
         latex = latex[1:-1]
-    if latex.startswith(r'\[') and latex.endswith(r'\]'):
+    if latex.startswith(r"\[") and latex.endswith(r"\]"):
         latex = latex[2:-2]
-    
+
     result, success = convert_latex_to_png(latex)
     if success:
         if isinstance(result, str):

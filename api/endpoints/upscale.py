@@ -11,6 +11,7 @@ from utils.unified_image import Format, Transformation_Type, unified_image_trans
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)
 
+
 @router.post("/image/upscale", tags=["image"], summary="Upscale image resolution")
 async def upscale_image_endpoint(
     image: UploadFile = File(...),
@@ -19,23 +20,23 @@ async def upscale_image_endpoint(
 ):
     if user_id is None:
         raise HTTPException(status_code=400, detail="user_id is required")
-    
+
     logger.info(f"Image upscale request: user_id={user_id}")
-    
+
     try:
         image_data = await image.read()
         urls = await upload_images([image_data])
         image_url = urls[0]
         if not image_url:
             raise HTTPException(status_code=400, detail="Failed to upload image")
-        
+
         result = await unified_image_transform(
             transformations=[Transformation_Type.UPSCALE.value],
             format=Format.BASE64,
             image_url=image_url,
             user_id=user_id,
         )
-        
+
         if result:
             return {"image": result}
         else:

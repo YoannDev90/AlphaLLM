@@ -11,9 +11,7 @@ from config import API_KEY_REQUIRED, API_KEYS, API_KEYS_MAPPING, LOGGER_NAME
 logger = logging.getLogger(LOGGER_NAME)
 
 bearer_scheme = HTTPBearer(
-    scheme_name="API Key",
-    description="Entrez votre clé API",
-    bearerFormat="API Key"
+    scheme_name="API Key", description="Entrez votre clé API", bearerFormat="API Key"
 )
 
 
@@ -35,13 +33,12 @@ def get_api_key(request: Request) -> Optional[str]:
     if not api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Clé API requise. Fournissez X-API-Key, Authorization: Bearer <clé>, ou ?api_key=<clé>"
+            detail="Clé API requise. Fournissez X-API-Key, Authorization: Bearer <clé>, ou ?api_key=<clé>",
         )
 
     if not verify_api_access(api_key):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Clé API invalide"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Clé API invalide"
         )
 
     return api_key
@@ -58,7 +55,10 @@ def verify_api_access(api_key: str) -> bool:
 
     is_valid = api_key in API_KEYS
     if is_valid:
-        user = next((name for name, key in API_KEYS_MAPPING.items() if key == api_key), "utilisateur inconnu")
+        user = next(
+            (name for name, key in API_KEYS_MAPPING.items() if key == api_key),
+            "utilisateur inconnu",
+        )
         logger.info(f"Authentification API réussie pour {user}")
     else:
         logger.warning(f"Clé API invalide utilisée : {api_key[:8]}***")

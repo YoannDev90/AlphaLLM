@@ -21,12 +21,46 @@ from utils.handlers.vision import VisionHandler
 
 # Formats de fichiers supportés
 SUPPORTED_FORMATS = {
-    'images': ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff'],
-    'documents': ['docx', 'pdf', 'txt', 'html', 'htm', 'rtf', 'xml', 
-                  'json', 'csv', 'xlsx', 'pptx', 'odp', 'ods', 'odt', 
-                  'md', 'tex', 'epub', 'ipynb', 'py', 'js', 'ts', 
-                  'java', 'cpp', 'c', 'cs', 'php', 'rb', 'go', 'rs', 
-                  'sh', 'yml', 'yaml', 'toml', 'ini', 'cfg', 'conf', 'log']   
+    "images": ["png", "jpg", "jpeg", "gif", "webp", "bmp", "tiff"],
+    "documents": [
+        "docx",
+        "pdf",
+        "txt",
+        "html",
+        "htm",
+        "rtf",
+        "xml",
+        "json",
+        "csv",
+        "xlsx",
+        "pptx",
+        "odp",
+        "ods",
+        "odt",
+        "md",
+        "tex",
+        "epub",
+        "ipynb",
+        "py",
+        "js",
+        "ts",
+        "java",
+        "cpp",
+        "c",
+        "cs",
+        "php",
+        "rb",
+        "go",
+        "rs",
+        "sh",
+        "yml",
+        "yaml",
+        "toml",
+        "ini",
+        "cfg",
+        "conf",
+        "log",
+    ],
 }
 
 
@@ -51,21 +85,23 @@ class FileHandler:
         self.converter = MarkdownConverter()
         self.vision_handler = VisionHandler()
         self.saved_files: Dict[str, List[str]] = {
-            'image': [],
-            'text': [],
-            'audio': [],
-            'video': [],
-            'other': []
+            "image": [],
+            "text": [],
+            "audio": [],
+            "video": [],
+            "other": [],
         }
         self.text_contents: List[str] = []
         # process_files will be called asynchronously
 
     def _check_supported_format(self, path: str):
         """Vérifie si le format du fichier est supporté et log un warning sinon."""
-        ext = path.lower().split('.')[-1] if '.' in path else ''
-        all_supported = SUPPORTED_FORMATS['images'] + SUPPORTED_FORMATS['documents']
+        ext = path.lower().split(".")[-1] if "." in path else ""
+        all_supported = SUPPORTED_FORMATS["images"] + SUPPORTED_FORMATS["documents"]
         if ext and ext not in all_supported:
-            logger.warning(f"Format de fichier non supporté : .{ext} (fichier : {path}). Le traitement peut échouer.")
+            logger.warning(
+                f"Format de fichier non supporté : .{ext} (fichier : {path}). Le traitement peut échouer."
+            )
 
     def _convert_image_to_supported_format(self, path: str) -> str:
         """Convertit les images non supportées (e.g., GIF, WebP) en PNG."""
@@ -73,11 +109,13 @@ class FileHandler:
             logger.debug(f"Ouverture image avec Pillow: {path}")
             with Image.open(path) as img:
                 logger.debug(f"Format détecté: {img.format}")
-                if img.format in ['GIF', 'WEBP', 'BMP', 'TIFF']:
+                if img.format in ["GIF", "WEBP", "BMP", "TIFF"]:
                     # Convertir en PNG
-                    new_path = path.rsplit('.', 1)[0] + '.png'
-                    img.convert('RGB').save(new_path, 'PNG')
-                    logger.info(f"Image convertie de {img.format} à PNG: {path} -> {new_path}")
+                    new_path = path.rsplit(".", 1)[0] + ".png"
+                    img.convert("RGB").save(new_path, "PNG")
+                    logger.info(
+                        f"Image convertie de {img.format} à PNG: {path} -> {new_path}"
+                    )
                     # Supprimer l'ancien fichier
                     os.remove(path)
                     return new_path
@@ -100,9 +138,9 @@ class FileHandler:
                 elif isinstance(file, UploadFile):
                     content = await file.read()
                     file_dict = {
-                        'content': content,
-                        'filename': file.filename,
-                        'content_type': file.content_type
+                        "content": content,
+                        "filename": file.filename,
+                        "content_type": file.content_type,
                     }
                     await self._save_direct_file(file_dict)
                 elif isinstance(file, discord.message.Attachment):
@@ -126,20 +164,22 @@ class FileHandler:
 
         # Déterminer le suffixe depuis le filename
         suffix = ""
-        if '.' in filename:
-            suffix = '.' + filename.split('.')[-1]
+        if "." in filename:
+            suffix = "." + filename.split(".")[-1]
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix, dir=self.temp_dir) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=suffix, dir=self.temp_dir
+        ) as temp_file:
             temp_file.write(response.content)
             path = temp_file.name
 
         logger.debug(f"Fichier téléchargé vers {path}")
 
         self._check_supported_format(path)
-        file_type = self._detect_type(path, response.headers.get('content-type'))
+        file_type = self._detect_type(path, response.headers.get("content-type"))
         logger.debug(f"file_type détecté pour {filename}: {file_type}")
         try:
-            if file_type == 'image':
+            if file_type == "image":
                 logger.debug(f"Conversion image pour {filename}")
                 path = self._convert_image_to_supported_format(path)
                 logger.debug(f"Description image pour {filename} avec path: {path}")
@@ -156,14 +196,16 @@ class FileHandler:
                     self.saved_files[file_type].append(path)
                     logger.info(f"Fichier sauvegardé: {filename} (type: {file_type})")
         except Exception as e:
-            logger.error(f"Erreur lors du traitement du fichier {filename} (type: {file_type}): {e}")
-            self.saved_files['other'].append(path)
+            logger.error(
+                f"Erreur lors du traitement du fichier {filename} (type: {file_type}): {e}"
+            )
+            self.saved_files["other"].append(path)
 
     async def _save_direct_file(self, file_dict: Dict):
         """Sauvegarde un fichier direct."""
-        content = file_dict.get('content')
-        filename = file_dict.get('filename', 'direct_file')
-        content_type = file_dict.get('content_type')
+        content = file_dict.get("content")
+        filename = file_dict.get("filename", "direct_file")
+        content_type = file_dict.get("content_type")
 
         if not content:
             logger.warning("Contenu manquant pour fichier direct")
@@ -171,10 +213,12 @@ class FileHandler:
 
         # Déterminer le suffixe depuis le filename
         suffix = ""
-        if '.' in filename:
-            suffix = '.' + filename.split('.')[-1]
+        if "." in filename:
+            suffix = "." + filename.split(".")[-1]
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix, dir=self.temp_dir) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=suffix, dir=self.temp_dir
+        ) as temp_file:
             temp_file.write(content)
             path = temp_file.name
 
@@ -182,7 +226,7 @@ class FileHandler:
         file_type = self._detect_type(path, content_type)
         logger.debug(f"file_type détecté pour {filename}: {file_type}")
         try:
-            if file_type == 'image':
+            if file_type == "image":
                 logger.debug(f"Conversion image pour {filename}")
                 path = self._convert_image_to_supported_format(path)
                 logger.debug(f"Description image pour {filename} avec path: {path}")
@@ -197,27 +241,34 @@ class FileHandler:
                     logger.info(f"Fichier direct converti en markdown: {filename}")
                 else:
                     self.saved_files[file_type].append(path)
-                    logger.info(f"Fichier direct sauvegardé: {filename} (type: {file_type})")
+                    logger.info(
+                        f"Fichier direct sauvegardé: {filename} (type: {file_type})"
+                    )
         except Exception as e:
-            logger.error(f"Erreur lors du traitement du fichier direct {filename} (type: {file_type}): {e}")
-            self.saved_files['other'].append(path)
+            logger.error(
+                f"Erreur lors du traitement du fichier direct {filename} (type: {file_type}): {e}"
+            )
+            self.saved_files["other"].append(path)
 
     def _extract_filename(self, url: str, response) -> Optional[str]:
         """Extrait le nom du fichier depuis l'URL ou les headers."""
         # Essai depuis Content-Disposition
-        content_disposition = response.headers.get('content-disposition')
+        content_disposition = response.headers.get("content-disposition")
         if content_disposition:
             import re
-            match = re.search(r'filename[^;=\n]*=(([\'"]).*?\2|[^;\n]*)', content_disposition)
+
+            match = re.search(
+                r'filename[^;=\n]*=(([\'"]).*?\2|[^;\n]*)', content_disposition
+            )
             if match:
-                filename = match.group(1).strip('\'"')
+                filename = match.group(1).strip("'\"")
                 return unquote(filename)
 
         # Essai depuis l'URL
         parsed = urlparse(url)
         path = unquote(parsed.path)
-        if '/' in path:
-            filename = path.split('/')[-1]
+        if "/" in path:
+            filename = path.split("/")[-1]
             if filename:
                 return filename
 
@@ -230,42 +281,54 @@ class FileHandler:
 
         # Utilise le content-type si fourni
         if content_type:
-            main_type = content_type.split('/')[0]
-            subtype = content_type.split('/')[1] if '/' in content_type else ''
-            if main_type in ['image', 'audio', 'video']:
+            main_type = content_type.split("/")[0]
+            subtype = content_type.split("/")[1] if "/" in content_type else ""
+            if main_type in ["image", "audio", "video"]:
                 logger.debug(f"Type détecté via content-type: {main_type}")
                 return main_type
-            elif main_type == 'text' or (main_type == 'application' and subtype in ['json', 'xml', 'javascript', 'x-javascript']):
-                logger.debug(f"Type détecté comme texte via content-type: {content_type}")
-                return 'text'
+            elif main_type == "text" or (
+                main_type == "application"
+                and subtype in ["json", "xml", "javascript", "x-javascript"]
+            ):
+                logger.debug(
+                    f"Type détecté comme texte via content-type: {content_type}"
+                )
+                return "text"
 
         # Utilise mimetypes basé sur l'extension
         mime_type, _ = mimetypes.guess_type(path)
         if mime_type:
-            main_type = mime_type.split('/')[0]
-            subtype = mime_type.split('/')[1] if '/' in mime_type else ''
-            if main_type in ['image', 'audio', 'video']:
+            main_type = mime_type.split("/")[0]
+            subtype = mime_type.split("/")[1] if "/" in mime_type else ""
+            if main_type in ["image", "audio", "video"]:
                 logger.debug(f"Type détecté via mimetypes: {main_type}")
                 return main_type
-            elif main_type == 'text' or (main_type == 'application' and subtype in ['json', 'xml', 'javascript', 'x-javascript']):
+            elif main_type == "text" or (
+                main_type == "application"
+                and subtype in ["json", "xml", "javascript", "x-javascript"]
+            ):
                 logger.debug(f"Type détecté comme texte via mimetypes: {mime_type}")
-                return 'text'
+                return "text"
         else:
             logger.debug("Aucune extension détectée via mimetypes")
 
         # Essai avec magic si disponible (détection binaire)
         try:
             import magic
+
             mime_type = magic.from_file(path, mime=True)
             if mime_type:
-                main_type = mime_type.split('/')[0]
-                subtype = mime_type.split('/')[1] if '/' in mime_type else ''
-                if main_type in ['image', 'audio', 'video']:
+                main_type = mime_type.split("/")[0]
+                subtype = mime_type.split("/")[1] if "/" in mime_type else ""
+                if main_type in ["image", "audio", "video"]:
                     logger.debug(f"Type détecté via magic: {main_type}")
                     return main_type
-                elif main_type == 'text' or (main_type == 'application' and subtype in ['json', 'xml', 'javascript', 'x-javascript']):
+                elif main_type == "text" or (
+                    main_type == "application"
+                    and subtype in ["json", "xml", "javascript", "x-javascript"]
+                ):
                     logger.debug(f"Type détecté comme texte via magic: {mime_type}")
-                    return 'text'
+                    return "text"
                 else:
                     logger.debug(f"Type magic détecté mais non supporté: {mime_type}")
             else:
@@ -276,16 +339,16 @@ class FileHandler:
             logger.debug(f"Erreur avec magic: {e}")
 
         # Fallback basé sur extension
-        ext = path.lower().split('.')[-1] if '.' in path else ''
-        if ext in SUPPORTED_FORMATS['images']:
+        ext = path.lower().split(".")[-1] if "." in path else ""
+        if ext in SUPPORTED_FORMATS["images"]:
             logger.debug(f"Type détecté via extension: image ({ext})")
-            return 'image'
-        elif ext in SUPPORTED_FORMATS['documents']:
+            return "image"
+        elif ext in SUPPORTED_FORMATS["documents"]:
             logger.debug(f"Type détecté via extension: text ({ext})")
-            return 'text'
+            return "text"
         else:
             logger.debug("Type par défaut: other")
-            return 'other'
+            return "other"
 
     def get_files_by_type(self, file_type: str) -> List[str]:
         """Retourne la liste des chemins des fichiers d'un type donné."""
@@ -294,6 +357,7 @@ class FileHandler:
     def cleanup(self):
         """Supprime les fichiers temporaires."""
         import shutil
+
         try:
             if self.temp_dir.exists():
                 shutil.rmtree(self.temp_dir)

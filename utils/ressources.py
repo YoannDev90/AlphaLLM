@@ -15,6 +15,7 @@ from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 @dataclass
 class ResourceSnapshot:
     """Represents a single resource snapshot."""
@@ -28,15 +29,26 @@ class ResourceSnapshot:
         return {
             "timestamp": self.timestamp.isoformat(),
             "process_id": self.process_id,
-            "cpu_percent": f"{self.cpu_percent:.5f}" if self.cpu_percent is not None else None,
-            "memory_percent": f"{self.memory_percent:.5f}" if self.memory_percent is not None else None,
+            "cpu_percent": (
+                f"{self.cpu_percent:.5f}" if self.cpu_percent is not None else None
+            ),
+            "memory_percent": (
+                f"{self.memory_percent:.5f}"
+                if self.memory_percent is not None
+                else None
+            ),
         }
 
 
 class ResourceMonitor:
     """Low level monitor that collects metrics on a background thread."""
 
-    def __init__(self, interval: float = 1.0, max_samples: int = 10000, csv_file: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        interval: float = 1.0,
+        max_samples: int = 10000,
+        csv_file: Optional[str] = None,
+    ) -> None:
         self.interval = interval
         self.max_samples = max_samples
         self.process_id = os.getpid()
@@ -97,7 +109,10 @@ class ResourceMonitor:
             total_cpu = cpu_user + cpu_system
 
             cpu_percent: Optional[float] = None
-            if self._previous_cpu_total is not None and self._previous_timestamp is not None:
+            if (
+                self._previous_cpu_total is not None
+                and self._previous_timestamp is not None
+            ):
                 delta_time = current_time - self._previous_timestamp
                 delta_cpu = total_cpu - self._previous_cpu_total
                 if delta_time > 0:
@@ -144,7 +159,9 @@ class ResourceMonitor:
             logger.debug("Resource monitoring already running")
             return
         self.is_monitoring = True
-        self._thread = threading.Thread(target=self._monitor_loop, daemon=True, name="ResourceMonitor")
+        self._thread = threading.Thread(
+            target=self._monitor_loop, daemon=True, name="ResourceMonitor"
+        )
         self._thread.start()
         logger.debug("Resource monitoring started")
 
@@ -172,20 +189,32 @@ class ResourceMonitor:
             stats: Dict[str, float] = {
                 "samples_count": len(self.samples),
             }
-            cpu_percents = [snapshot.cpu_percent for snapshot in self.samples if snapshot.cpu_percent is not None]
+            cpu_percents = [
+                snapshot.cpu_percent
+                for snapshot in self.samples
+                if snapshot.cpu_percent is not None
+            ]
             if cpu_percents:
-                stats.update({
-                    "cpu_percent_min": min(cpu_percents),
-                    "cpu_percent_max": max(cpu_percents),
-                    "cpu_percent_avg": sum(cpu_percents) / len(cpu_percents),
-                })
-            memory_values = [snapshot.memory_percent for snapshot in self.samples if snapshot.memory_percent is not None]
+                stats.update(
+                    {
+                        "cpu_percent_min": min(cpu_percents),
+                        "cpu_percent_max": max(cpu_percents),
+                        "cpu_percent_avg": sum(cpu_percents) / len(cpu_percents),
+                    }
+                )
+            memory_values = [
+                snapshot.memory_percent
+                for snapshot in self.samples
+                if snapshot.memory_percent is not None
+            ]
             if memory_values:
-                stats.update({
-                    "memory_min": min(memory_values),
-                    "memory_max": max(memory_values),
-                    "memory_avg": sum(memory_values) / len(memory_values),
-                })
+                stats.update(
+                    {
+                        "memory_min": min(memory_values),
+                        "memory_max": max(memory_values),
+                        "memory_avg": sum(memory_values) / len(memory_values),
+                    }
+                )
             return stats
 
     def get_current_usage(self) -> Dict[str, Any]:
@@ -215,7 +244,9 @@ class ResourceMonitor:
                         writer.writeheader()
                     for snapshot in self.samples:
                         writer.writerow(snapshot.to_dict())
-                logger.info(f"Exported {len(self.samples)} resource snapshots to {path}")
+                logger.info(
+                    f"Exported {len(self.samples)} resource snapshots to {path}"
+                )
             except Exception as exc:
                 logger.error(f"Failed to export resource snapshots: {exc}")
 
@@ -225,13 +256,17 @@ class ResourceMonitor:
         if not stats:
             logger.info("No resource statistics available")
             return
-        
+
         logger.info("Resource Usage Summary:")
         logger.info(f"  Samples collected: {stats.get('samples_count', 0)}")
-        if 'cpu_percent_avg' in stats:
-            logger.info(f"  CPU Usage - Avg: {stats['cpu_percent_avg']:.2f}%, Max: {stats['cpu_percent_max']:.2f}%")
-        if 'memory_avg' in stats:
-            logger.info(f"  Memory - Min: {stats['memory_min']:.1f}MB, Avg: {stats['memory_avg']:.1f}MB, Max: {stats['memory_max']:.1f}MB")
+        if "cpu_percent_avg" in stats:
+            logger.info(
+                f"  CPU Usage - Avg: {stats['cpu_percent_avg']:.2f}%, Max: {stats['cpu_percent_max']:.2f}%"
+            )
+        if "memory_avg" in stats:
+            logger.info(
+                f"  Memory - Min: {stats['memory_min']:.1f}MB, Avg: {stats['memory_avg']:.1f}MB, Max: {stats['memory_max']:.1f}MB"
+            )
 
     def get_last_timestamp(self) -> Optional[datetime]:
         """Get the last timestamp from the CSV file."""
@@ -275,13 +310,13 @@ class ResourceMonitor:
             except Exception as e:
                 logger.error(f"Failed to read timestamps from CSV: {e}")
                 return
-        
+
         if not timestamps:
             logger.debug("No timestamps in CSV, skipping fill_gaps")
             return
-        
+
         timestamps.sort()
-        
+
         filled_count = 0
         fieldnames = [
             "timestamp",
@@ -295,7 +330,7 @@ class ResourceMonitor:
                 for i in range(len(timestamps) - 1):
                     current_ts = timestamps[i]
                     next_expected = current_ts + timedelta(seconds=1)
-                    while next_expected < timestamps[i+1]:
+                    while next_expected < timestamps[i + 1]:
                         zero_snapshot = ResourceSnapshot(
                             timestamp=next_expected,
                             process_id=self.process_id,
@@ -305,7 +340,7 @@ class ResourceMonitor:
                         writer.writerow(zero_snapshot.to_dict())
                         next_expected += timedelta(seconds=1)
                         filled_count += 1
-                
+
                 last_ts = timestamps[-1]
                 next_ts = last_ts + timedelta(seconds=1)
                 while next_ts <= current_time:
@@ -330,12 +365,16 @@ class ResourceMonitor:
                     filled_count += 1
         except Exception as e:
             logger.error(f"Failed to write gap fills to CSV: {e}")
-        
+
         logger.debug(f"Filled {filled_count} gap entries")
+
 
 _monitor_instance: Optional[ResourceMonitor] = None
 
-def get_default_monitor(interval: float = 1.0, csv_file: Optional[str] = None) -> ResourceMonitor:
+
+def get_default_monitor(
+    interval: float = 1.0, csv_file: Optional[str] = None
+) -> ResourceMonitor:
     """Return the shared resource monitor."""
 
     global _monitor_instance
@@ -344,7 +383,9 @@ def get_default_monitor(interval: float = 1.0, csv_file: Optional[str] = None) -
     return _monitor_instance
 
 
-def start_monitoring(interval: float = 1.0, csv_file: Optional[str] = None) -> ResourceMonitor:
+def start_monitoring(
+    interval: float = 1.0, csv_file: Optional[str] = None
+) -> ResourceMonitor:
     """Start the shared monitor if not already running."""
 
     monitor = get_default_monitor(interval=interval, csv_file=csv_file)

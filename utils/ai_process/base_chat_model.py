@@ -77,7 +77,9 @@ class BaseChatModel(ABC):
                 litellm_params = config.get("litellm_params", {})
                 if "api_base" in litellm_params:
                     api_base = litellm_params["api_base"]
-                    api_base = re.sub(r'<(\w+)>', lambda m: os.environ.get(m.group(1), ""), api_base)
+                    api_base = re.sub(
+                        r"<(\w+)>", lambda m: os.environ.get(m.group(1), ""), api_base
+                    )
                     litellm_params["api_base"] = api_base
 
             self._configs_cache = raw_configs

@@ -1,8 +1,8 @@
+import asyncio
 import logging
 import os
 import re
 from datetime import datetime
-import asyncio
 from typing import Any, AsyncGenerator, Dict, List, Union
 
 import litellm
@@ -85,7 +85,9 @@ class ChatModel(BaseChatModel):
         }
 
         if not current_params["api_key"]:
-            logger.error(f"Streaming API key for {litellm_params['model']} is not set (env var: {litellm_params['api_key']})")
+            logger.error(
+                f"Streaming API key for {litellm_params['model']} is not set (env var: {litellm_params['api_key']})"
+            )
             raise Exception(f"Missing API key for {litellm_params['model']}")
 
         if parameters.max_tokens:
@@ -94,9 +96,15 @@ class ChatModel(BaseChatModel):
         if "api_base" in litellm_params:
             current_params["api_base"] = litellm_params["api_base"]
 
-        logger.debug(f"Starting streaming call to {current_params['model']} with API key set: {bool(current_params['api_key'])}")
-        response = await asyncio.wait_for(litellm.acompletion(**current_params), timeout=30.0)
-        logger.info(f"Streaming API call to {current_params['model']} initiated successfully")
+        logger.debug(
+            f"Starting streaming call to {current_params['model']} with API key set: {bool(current_params['api_key'])}"
+        )
+        response = await asyncio.wait_for(
+            litellm.acompletion(**current_params), timeout=30.0
+        )
+        logger.info(
+            f"Streaming API call to {current_params['model']} initiated successfully"
+        )
 
         response_text = ""
         last_chunk = None
@@ -126,7 +134,9 @@ class ChatModel(BaseChatModel):
             logger.debug("Fetching citations for sonar model with non-streaming call")
             non_stream_params = current_params.copy()
             non_stream_params["stream"] = False
-            non_stream_response = await asyncio.wait_for(litellm.acompletion(**non_stream_params), timeout=30.0)
+            non_stream_response = await asyncio.wait_for(
+                litellm.acompletion(**non_stream_params), timeout=30.0
+            )
             response_text = self._process_perplexity_citations(
                 response_text, non_stream_response
             )
@@ -149,7 +159,9 @@ class ChatModel(BaseChatModel):
     ) -> AsyncGenerator[StreamChunk, None]:
         """Streaming avec fallbacks personnalisés"""
         configs = self._load_configs()
-        logger.info(f"Starting streaming with {len(configs)} fallback configs for model {self.model_name}")
+        logger.info(
+            f"Starting streaming with {len(configs)} fallback configs for model {self.model_name}"
+        )
 
         with get_client().start_as_current_observation(
             as_type="generation", name=f"user-completion-{datetime.now().isoformat()}"
@@ -158,7 +170,9 @@ class ChatModel(BaseChatModel):
 
             for config in configs:
                 try:
-                    logger.debug(f"Trying streaming config: {config['litellm_params']['model']}")
+                    logger.debug(
+                        f"Trying streaming config: {config['litellm_params']['model']}"
+                    )
                     async for chunk in self._try_stream_config(
                         config, parameters.messages, parameters
                     ):
@@ -204,7 +218,9 @@ class ChatModel(BaseChatModel):
     ) -> ChatResult:
         """Chat non-streaming avec fallbacks natifs"""
         configs = self._load_configs()
-        logger.debug(f"Starting non-stream chat with {len(configs)} configs, retry_count={retry_count}")
+        logger.debug(
+            f"Starting non-stream chat with {len(configs)} configs, retry_count={retry_count}"
+        )
 
         # Rotate configs for retry to use different primary model
         if retry_count > 0:
@@ -227,7 +243,9 @@ class ChatModel(BaseChatModel):
             }
 
             if not params["api_key"]:
-                logger.error(f"API key for {primary_config['model']} is not set (env var: {primary_config['api_key']})")
+                logger.error(
+                    f"API key for {primary_config['model']} is not set (env var: {primary_config['api_key']})"
+                )
                 if retry_count < len(configs) - 1:
                     logger.info("Retrying with next config due to missing API key...")
                     return await self._non_stream_chat(
@@ -242,7 +260,9 @@ class ChatModel(BaseChatModel):
                         elapsed_time=self._format_elapsed_time(start_time),
                     )
 
-            logger.info(f"Making API call to {params['model']} with API key set: {bool(params['api_key'])}")
+            logger.info(
+                f"Making API call to {params['model']} with API key set: {bool(params['api_key'])}"
+            )
 
             if "api_base" in primary_config:
                 params["api_base"] = primary_config["api_base"]
@@ -251,7 +271,9 @@ class ChatModel(BaseChatModel):
             for fb_config in fallback_configs:
                 api_key = os.getenv(fb_config["api_key"])
                 if not api_key:
-                    logger.warning(f"Fallback API key for {fb_config['model']} is not set (env var: {fb_config['api_key']})")
+                    logger.warning(
+                        f"Fallback API key for {fb_config['model']} is not set (env var: {fb_config['api_key']})"
+                    )
                     continue
                 fb_params = {
                     "model": fb_config["model"],
@@ -266,8 +288,12 @@ class ChatModel(BaseChatModel):
                 logger.info(f"Using {len(fallbacks)} fallback configs")
 
             try:
-                logger.debug(f"Calling litellm.acompletion with params: model={params['model']}, api_key_set={bool(params['api_key'])}, messages_count={len(params['messages'])}, fallbacks={len(fallbacks) if 'fallbacks' in params else 0}")
-                response = await asyncio.wait_for(litellm.acompletion(**params), timeout=30.0)
+                logger.debug(
+                    f"Calling litellm.acompletion with params: model={params['model']}, api_key_set={bool(params['api_key'])}, messages_count={len(params['messages'])}, fallbacks={len(fallbacks) if 'fallbacks' in params else 0}"
+                )
+                response = await asyncio.wait_for(
+                    litellm.acompletion(**params), timeout=30.0
+                )
                 logger.info("API call successful")
             except asyncio.TimeoutError:
                 logger.error(f"Request to {params['model']} timed out after 30s")
@@ -278,7 +304,9 @@ class ChatModel(BaseChatModel):
                     elapsed_time="30.0s",
                 )
             except Exception as e:
-                logger.error(f"API call to {params['model']} failed with exception: {type(e).__name__}: {e}")
+                logger.error(
+                    f"API call to {params['model']} failed with exception: {type(e).__name__}: {e}"
+                )
                 if retry_count < len(configs) - 1:
                     logger.info("Retrying with next config...")
                     return await self._non_stream_chat(
@@ -292,7 +320,7 @@ class ChatModel(BaseChatModel):
                         model=parameters.model,
                         elapsed_time=self._format_elapsed_time(start_time),
                     )
-            
+
             usage = response.usage.total_tokens
             model = parameters.model
             response_text = response.choices[0].message.content
@@ -346,6 +374,7 @@ class ChatModel(BaseChatModel):
         if parameters.stream:
             return self._stream_with_fallbacks(parameters, start_time)
         else:
+
             async def _get_result():
                 return await self._non_stream_chat(parameters, start_time, 0)
 

@@ -7,9 +7,12 @@ import discord
 from discord import app_commands
 
 from config import LOGGER_NAME
-from utils.database.server_conf import (set_allowed_channels,
-                                        set_allowed_roles,
-                                        set_announcement_channel, set_language)
+from utils.database.server_conf import (
+    set_allowed_channels,
+    set_allowed_roles,
+    set_announcement_channel,
+    set_language,
+)
 from utils.views.channels import ChannelSelectView
 from utils.views.roles import RoleSelectView
 
@@ -32,6 +35,7 @@ ALLOWED_ROLES = [
     app_commands.Choice(name="Allow specific roles", value="specific"),
 ]
 
+
 async def setup(bot: discord.Client):
     @bot.tree.command(name="guild-config", description="Configure server settings")
     @app_commands.describe(
@@ -49,9 +53,11 @@ async def setup(bot: discord.Client):
         langue: Optional[app_commands.Choice[str]] = None,
         announce_channel: Optional[discord.TextChannel] = None,
         allowed_channels: Optional[app_commands.Choice[str]] = None,
-        allowed_roles: Optional[app_commands.Choice[str]] = None
+        allowed_roles: Optional[app_commands.Choice[str]] = None,
     ):
-        logger.info(f"Commande /guild-config executed by {interaction.user.display_name}")
+        logger.info(
+            f"Commande /guild-config executed by {interaction.user.display_name}"
+        )
         await interaction.response.defer()
 
         if langue is not None:
@@ -62,13 +68,23 @@ async def setup(bot: discord.Client):
 
         if allowed_channels is not None:
             if allowed_channels.value == "every":
-                allowed = [c.id for c in interaction.guild.channels if c.type == discord.ChannelType.text]
+                allowed = [
+                    c.id
+                    for c in interaction.guild.channels
+                    if c.type == discord.ChannelType.text
+                ]
             else:
                 view = ChannelSelectView(interaction.guild)
-                await interaction.followup.send("Sélectionnez les salons autorisés :", view=view, ephemeral=True)
+                await interaction.followup.send(
+                    "Sélectionnez les salons autorisés :", view=view, ephemeral=True
+                )
                 await view.wait()
                 selected_channels = view.selected_channels
-                allowed = [c.id for c in interaction.guild.channels if c.type == discord.ChannelType.text and c in selected_channels]
+                allowed = [
+                    c.id
+                    for c in interaction.guild.channels
+                    if c.type == discord.ChannelType.text and c in selected_channels
+                ]
             await set_allowed_channels(interaction.guild.id, allowed)
 
         if allowed_roles is not None:
@@ -76,7 +92,9 @@ async def setup(bot: discord.Client):
                 allowed = [r.id for r in interaction.guild.roles]
             else:
                 view = RoleSelectView(interaction.guild)
-                await interaction.followup.send("Sélectionnez les rôles autorisés :", view=view, ephemeral=True)
+                await interaction.followup.send(
+                    "Sélectionnez les rôles autorisés :", view=view, ephemeral=True
+                )
                 await view.wait()
                 selected_roles = view.selected_roles
                 allowed = [r.id for r in interaction.guild.roles if r in selected_roles]

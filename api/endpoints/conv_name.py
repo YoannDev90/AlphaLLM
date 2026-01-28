@@ -11,16 +11,18 @@ from utils.ai_process.ai_utils import conv_name
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)
 
-@router.post("/text/conv_name", tags=["text"], summary="Generate conversation title")
 
-async def generate_conversation_name(messages: List[Dict[str, str]], api_key: Optional[str] = Depends(get_api_key)):
-    
+@router.post("/text/conv_name", tags=["text"], summary="Generate conversation title")
+async def generate_conversation_name(
+    messages: List[Dict[str, str]], api_key: Optional[str] = Depends(get_api_key)
+):
+
     if not messages or len(messages) == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Messages list cannot be empty",
         )
-    
+
     start_time = time.time()
 
     valid_messages = []
@@ -28,11 +30,17 @@ async def generate_conversation_name(messages: List[Dict[str, str]], api_key: Op
     for msg in messages:
         role = msg.get("role")
         content = msg.get("content")
-        if role in {"system", "user", "assistant"} and content and role not in roles_seen:
+        if (
+            role in {"system", "user", "assistant"}
+            and content
+            and role not in roles_seen
+        ):
             valid_messages.append({"role": role, "content": content})
             roles_seen.add(role)
 
-    messages_text = "\n".join(f"{entry['role']}: {entry['content']}" for entry in valid_messages)
+    messages_text = "\n".join(
+        f"{entry['role']}: {entry['content']}" for entry in valid_messages
+    )
     total_chars = sum(len(entry["content"]) for entry in valid_messages)
 
     try:

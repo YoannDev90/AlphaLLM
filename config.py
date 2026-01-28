@@ -47,7 +47,9 @@ DEBUG: bool = bool(CONFIG_SECTION.get("debug"))
 AVAILABLE_MODELS: Iterable[str] = MODELS_SECTION.get("available_models")
 _MODELS_LIST = MODELS_SECTION.get("models", [])
 MODELS: Dict[str, str] = {model["name"]: model["description"] for model in _MODELS_LIST}
-MODELS_OWNERS: Dict[str, str] = {model["name"]: model.get("owner", "") for model in _MODELS_LIST}
+MODELS_OWNERS: Dict[str, str] = {
+    model["name"]: model.get("owner", "") for model in _MODELS_LIST
+}
 
 LOGGING_LEVEL: int = level_mapping.get(LOGGING_LEVEL_STR.upper())
 LOGGER_NAME: str = LOGS_SECTION.get("logger_name")
@@ -71,12 +73,6 @@ API_KEYS_MAPPING: Dict[str, str] = {}
 SUPPORT_SERVER: str = str(CONFIG_SECTION.get("support_server"))
 DEV_IDS: Iterable[int] = CONFIG_SECTION.get("dev_id")
 
-CHROMA_DB_NAME: str = MEMORY_SECTION.get("chroma_db_name")
-CHROMA_TENANT_ID: str = os.environ.get("CHROMA_TENANT_ID")
-CHROMA_API_KEY: str = os.environ.get("CHROMA_API_KEY")
-CHROMA_RAG_COLLECTION: str = MEMORY_SECTION.get("chroma_rag_collection")
-CHROMA_STM_COLLECTION: str = MEMORY_SECTION.get("chroma_stm_collection")
-CHROMA_LTM_COLLECTION: str = MEMORY_SECTION.get("chroma_ltm_collection")
 EMBEDDER_MODEL: str = MEMORY_SECTION.get("embedder_model")
 EMBEDDER_CACHE_DIR: str = MEMORY_SECTION.get("embedder_cache_dir")
 FUNCTION_CALLING_MODEL: str = MEMORY_SECTION.get("function_calling_model")
@@ -122,7 +118,9 @@ SUPABASE_PASSWORD: str = os.environ.get("SUPABASE_PASSWORD")
 SUPABASE_HOST: str = os.environ.get("SUPABASE_HOST")
 SUPABASE_PORT: str = os.environ.get("SUPABASE_PORT")
 SUPABASE_DBNAME: str = os.environ.get("SUPABASE_DBNAME")
-SUPABASE_PG: str = f"postgresql://{SUPABASE_USER}:{SUPABASE_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DBNAME}"
+SUPABASE_PG: str = (
+    f"postgresql://{SUPABASE_USER}:{SUPABASE_PASSWORD}@{SUPABASE_HOST}:{SUPABASE_PORT}/{SUPABASE_DBNAME}"
+)
 TABLES_TO_CLONE: Iterable[str] = DATABASE_SECTION.get("tables_to_clone")
 
 # Unified Text Configuration
@@ -131,5 +129,6 @@ EVILGPT_PROMPT_PATH: Path = Path(PROMPT_DIR) / "evilgpt_prompt.txt"
 API_PROMPT_PATH: Path = Path(PROMPT_DIR) / "api_prompt.txt"
 STATUS_PROMPT_PATH: Path = Path(PROMPT_DIR) / "status_prompt.txt"
 DISCORD_PROMPT_PATH: Path = Path(PROMPT_DIR) / "discord_prompt.txt"
-MAX_FILE_SIZE: int = UNIFIED_TEXT_SECTION.get("max_file_size")
-ALLOWED_MIME_TYPES: list = UNIFIED_TEXT_SECTION.get("allowed_mime_types")
+
+# Faiss and Reranker Config
+RERANKER_MODEL: str = MEMORY_SECTION.get("reranker_model")

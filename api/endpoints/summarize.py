@@ -11,22 +11,26 @@ from utils.ai_process.ai_utils import summarize
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)
 
-@router.post("/text/summarize", tags=["text"], summary="Summarize text")
 
-async def summarize_text(input_text: str, max_length: int = 150, api_key: Optional[str] = Depends(get_api_key)):
+@router.post("/text/summarize", tags=["text"], summary="Summarize text")
+async def summarize_text(
+    input_text: str,
+    max_length: int = 150,
+    api_key: Optional[str] = Depends(get_api_key),
+):
 
     if max_length <= 0 or max_length > 1000:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Value of max_length must be between 1 and 1000",
         )
-    
+
     if not input_text or not input_text.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Input text cannot be empty",
         )
-    
+
     start_time = time.time()
 
     try:
@@ -49,10 +53,10 @@ async def summarize_text(input_text: str, max_length: int = 150, api_key: Option
             "summary_length": summary_length,
             "max_length": max_length,
             "processing_time": round(elapsed_time, 2),
-            "compression_ratio": round(
-                (len(input_text) - summary_length) / len(input_text) * 100, 2
-            )
-            if len(input_text) > 0
-            else 0,
+            "compression_ratio": (
+                round((len(input_text) - summary_length) / len(input_text) * 100, 2)
+                if len(input_text) > 0
+                else 0
+            ),
         },
     }
