@@ -1,4 +1,5 @@
 """Micro LLM handler for RAG synthesis."""
+
 import json
 import logging
 from typing import List, Optional
@@ -20,17 +21,21 @@ class MicroLLMHandler:
     def _load_config(self, config_path: str):
         """Load micro LLM configuration."""
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, "r") as f:
                 configs = json.load(f)
                 if configs and len(configs) > 0:
                     self._model_config = configs[0]  # Take first config
-                    self._logger.info(f"Loaded micro LLM config: {self._model_config['model_name']}")
+                    self._logger.info(
+                        f"Loaded micro LLM config: {self._model_config['model_name']}"
+                    )
                 else:
                     self._logger.warning("No micro LLM configs found")
         except Exception as e:
             self._logger.error(f"Failed to load micro LLM config: {e}")
 
-    async def synthesize_memories(self, query: str, memories: List[str], max_tokens: int = 200) -> str:
+    async def synthesize_memories(
+        self, query: str, memories: List[str], max_tokens: int = 200
+    ) -> str:
         """Synthesize memories into a concise response using micro LLM."""
         if not self._model_config or not memories:
             return "\n".join(memories[:5])  # Fallback to raw memories
@@ -45,10 +50,10 @@ class MicroLLMHandler:
             response = await litellm.acompletion(
                 model=self._model_config["litellm_params"]["model"],
                 api_base=self._model_config["litellm_params"]["api_base"],
-                api_key=POLLICATIONS_API_KEY,
+                api_key=POLLINATIONS_API_KEY,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=max_tokens,
-                temperature=0.1  # Low temperature for factual responses
+                temperature=0.1,  # Low temperature for factual responses
             )
 
             synthesized = response.choices[0].message.content.strip()

@@ -129,10 +129,8 @@ async def run_bot():
     try:
         logger.info("Logging in...")
         await bot.start(BOT_TOKEN)
-    except discord.LoginFailure as exc:
-        logger.error(f"Login failure {exc}")
     except Exception as exc:
-        logger.error(f"Bot runtime failure {exc}")
+        logger.error(f"Bot failed: {type(exc).__name__}: {exc}")
     finally:
         if not bot.is_closed():
             await bot.close()

@@ -20,7 +20,7 @@ class MemoryManager:
         self._logger = logging.getLogger(__name__)
         self._faiss_manager = faiss_manager or FaissMemoryManager()
         self._rag_handler = rag_handler or RAGDocumentHandler(
-            embedder=self._faiss_manager.embedder
+            embedder=self._faiss_manager.embedder, faiss_manager=self._faiss_manager
         )
         self._micro_llm = micro_llm or MicroLLMHandler()
         self._logger.debug("MemoryManager configured with Faiss and micro LLM")

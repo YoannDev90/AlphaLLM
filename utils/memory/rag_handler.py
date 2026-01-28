@@ -89,11 +89,14 @@ class RAGDocumentHandler:
         self,
         embedder: Optional[TextEmbedder] = None,
         chunker: Optional[DocumentChunker] = None,
+        faiss_manager: Optional[FaissMemoryManager] = None,
     ) -> None:
         self._logger = logging.getLogger(__name__)
         self._embedder = embedder or TextEmbedder()
         self._chunker = chunker or DocumentChunker()
-        self._faiss_manager = FaissMemoryManager(embedder=self._embedder)
+        self._faiss_manager = faiss_manager or FaissMemoryManager(
+            embedder=self._embedder
+        )
         self._logger.debug("RAGDocumentHandler constructed")
 
     @property

@@ -312,10 +312,8 @@ async def clear_logs_command(interaction: discord.Interaction):
 async def run_logger_bot():
     try:
         await bot.start(LOGGER_BOT_TOKEN)
-    except discord.LoginFailure as e:
-        logger.error(f"Connection error: {e}")
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        logger.error(f"Logger bot failed: {type(e).__name__}: {e}")
     finally:
         if purge_task and not purge_task.done():
             purge_task.cancel()

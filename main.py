@@ -22,10 +22,10 @@ from utils.ressources import start_monitoring, stop_monitoring
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
 
-RUN_API = True
-RUN_LOGGER_BOT = True
+RUN_API = False
+RUN_LOGGER_BOT = False
 RUN_MAIN_BOT = True
-RUN_ADMIN_BOT = True
+RUN_ADMIN_BOT = False
 
 
 async def check_stop_file(restart_pending):
@@ -68,6 +68,13 @@ async def run_with_shutdown(coro, name="task"):
         [task, asyncio.create_task(shutdown_event.wait())],
         return_when=asyncio.FIRST_COMPLETED,
     )
+
+    if task in done:
+        logger.info(f"Tâche {name} terminée")
+        if task.exception():
+            logger.error(f"Tâche {name} a levé une exception: {task.exception()}")
+        else:
+            logger.info(f"Tâche {name} terminée normalement")
 
     if shutdown_event.is_set():
         logger.debug(f"Arrêt de la tâche: {name}")
@@ -128,21 +135,21 @@ async def main() -> None:
             await db_manager.clone_tables()
 
             tasks = [
-                (
-                    run_with_shutdown(run_logger_bot(), "Logger Bot")
-                    if RUN_LOGGER_BOT
-                    else asyncio.sleep(0)
-                ),
-                (
-                    run_with_shutdown(run_bot(), "Main Bot")
-                    if RUN_MAIN_BOT
-                    else asyncio.sleep(0)
-                ),
-                (
-                    run_with_shutdown(run_admin_bot(), "Admin Bot")
-                    if RUN_ADMIN_BOT
-                    else asyncio.sleep(0)
-                ),
+                # (
+                #     run_with_shutdown(run_logger_bot(), "Logger Bot")
+                #     if RUN_LOGGER_BOT
+                #     else asyncio.sleep(0)
+                # ),
+                # (
+                #     run_with_shutdown(run_bot(), "Main Bot")
+                #     if RUN_MAIN_BOT
+                #     else asyncio.sleep(0)
+                # ),
+                # (
+                #     run_with_shutdown(run_admin_bot(), "Admin Bot")
+                #     if RUN_ADMIN_BOT
+                #     else asyncio.sleep(0)
+                # ),
                 (
                     run_with_shutdown(start_api_async(), "API Server")
                     if RUN_API

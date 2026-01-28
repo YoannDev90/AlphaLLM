@@ -116,10 +116,8 @@ async def run_admin_bot():
     try:
         logger.info("Starting Admin Bot")
         await bot.start(ADMIN_BOT_TOKEN)
-    except discord.LoginFailure as e:
-        logger.error(f"Erreur de connexion : {e}")
     except Exception as e:
-        logger.error(f"Erreur inattendue : {e}")
+        logger.error(f"Admin bot failed: {type(e).__name__}: {e}")
     finally:
         await close_bot(bot)
         logger.info("Admin Bot stopped.")
