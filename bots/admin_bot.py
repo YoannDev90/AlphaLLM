@@ -33,19 +33,31 @@ async def purge_loop():
         pass
 
 async def auto_purge():
-    try:
-        dev_user = await bot.fetch_user(DEV_IDS[0]) if DEV_IDS else None
-        if not dev_user:
-            return
-        dm_channel = await dev_user.create_dm()
-        cutoff_time = discord.utils.utcnow() - datetime.timedelta(days=2.0)
-        async for message in dm_channel.history(limit=None, before=cutoff_time):
-            try:
-                await message.delete()
-            except (discord.NotFound, discord.HTTPException):
-                continue
-    except Exception as e:
-        logger.error(f"Erreur inattendue lors de l'auto-purge : {e}")
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            dev_user = await bot.fetch_user(DEV_IDS[0]) if DEV_IDS else None
+            if not dev_user:
+                return
+            dm_channel = await dev_user.create_dm()
+            cutoff_time = discord.utils.utcnow() - datetime.timedelta(days=2.0)
+            async for message in dm_channel.history(limit=None, before=cutoff_time):
+                try:
+                    await message.delete()
+                except (discord.NotFound, discord.HTTPException):
+                    continue
+            break  # Success, exit retry loop
+        except discord.HTTPException as e:
+            if e.status == 503 and attempt < max_retries - 1:
+                wait_time = 2 ** attempt  # Exponential backoff
+                logger.warning(f"503 error during auto-purge, retrying in {wait_time}s (attempt {attempt+1}/{max_retries})")
+                await asyncio.sleep(wait_time)
+            else:
+                logger.error(f"HTTP error during auto-purge: {e}")
+                break
+        except Exception as e:
+            logger.error(f"Erreur inattendue lors de l'auto-purge : {e}")
+            break
 
 @bot.tree.command(name="clear", description="Purge tous les messages DM sans limite de temps")
 async def clear_command(interaction: discord.Interaction):
