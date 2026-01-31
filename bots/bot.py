@@ -47,7 +47,9 @@ async def on_message(message):
         for attachment in message.attachments:
             files.append(attachment.url)
 
-    logger.debug(f"About to call unified_text_gen for user {message.author.id}, input: {message.content}")
+    logger.debug(
+        f"About to call unified_text_gen for user {message.author.id}, input: {message.content}"
+    )
     response = [
         result
         async for result in unified_text_gen(
@@ -60,7 +62,7 @@ async def on_message(message):
             message=message,
             bot=bot,
             stream=False,
-            use_memory=False,
+            use_memory=True,
         )
     ]
     logger.debug(f"unified_text_gen returned {len(response)} results")

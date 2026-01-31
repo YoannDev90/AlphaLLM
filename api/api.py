@@ -5,32 +5,12 @@ import uvicorn
 
 from api.api_utils.app_config import create_app
 from api.api_utils.server_utils import get_public_ip, ping_https_server
-from api.endpoints import (
-    auto_enhance,
-    conv_name,
-    enhance,
-    gen_restore,
-    image_edit,
-    image_gen,
-    image_models,
-    improve,
-    main,
-    remove_bg,
-    resources,
-    status,
-    summarize,
-    text_gen,
-    text_models,
-    upscale,
-)
-from config import (
-    API_HOST,
-    API_PORT,
-    API_SSL_CERTFILE,
-    API_SSL_KEYFILE,
-    API_URL,
-    LOGGER_NAME,
-)
+from api.endpoints import (auto_enhance, conv_name, enhance, gen_restore,
+                           image_edit, image_gen, image_models, improve, main,
+                           remove_bg, resources, status, summarize, text_gen,
+                           text_models, upscale)
+from config import (API_HOST, API_PORT, API_SSL_CERTFILE, API_SSL_KEYFILE,
+                    API_URL, LOGGER_NAME)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -66,7 +46,11 @@ async def start_api_async():
         #     ssl_keyfile=API_SSL_KEYFILE,
         # )
         config = uvicorn.Config(
-            app=app, host=API_HOST, port=API_PORT, log_level="critical", access_log=False
+            app=app,
+            host=API_HOST,
+            port=API_PORT,
+            log_level="critical",
+            access_log=False,
         )
         server = uvicorn.Server(config)
         public_ip = await get_public_ip()

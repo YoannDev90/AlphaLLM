@@ -34,6 +34,7 @@ async def purge_loop():
     except asyncio.CancelledError:
         pass
 
+
 async def auto_purge():
     max_retries = 3
     for attempt in range(max_retries):
@@ -51,8 +52,10 @@ async def auto_purge():
             break  # Success, exit retry loop
         except discord.HTTPException as e:
             if e.status == 503 and attempt < max_retries - 1:
-                wait_time = 2 ** attempt  # Exponential backoff
-                logger.warning(f"503 error during auto-purge, retrying in {wait_time}s (attempt {attempt+1}/{max_retries})")
+                wait_time = 2**attempt  # Exponential backoff
+                logger.warning(
+                    f"503 error during auto-purge, retrying in {wait_time}s (attempt {attempt+1}/{max_retries})"
+                )
                 await asyncio.sleep(wait_time)
             else:
                 logger.error(f"HTTP error during auto-purge: {e}")
@@ -60,6 +63,7 @@ async def auto_purge():
         except Exception as e:
             logger.error(f"Erreur inattendue lors de l'auto-purge : {e}")
             break
+
 
 @bot.tree.command(
     name="clear", description="Purge tous les messages DM sans limite de temps"

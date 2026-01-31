@@ -32,6 +32,7 @@ MEMORY_SECTION: Dict[str, Any] = CONFIG.get("memory")
 MODELS_SECTION: Dict[str, Any] = CONFIG.get("models")
 DATABASE_SECTION: Dict[str, Any] = CONFIG.get("database")
 UNIFIED_TEXT_SECTION: Dict[str, Any] = CONFIG.get("unified_text")
+LIMITS_SECTION: Dict[str, Any] = CONFIG.get("limits")
 
 LOGGING_LEVEL_STR = LOGS_SECTION.get("logging_level")
 level_mapping = {
@@ -129,6 +130,13 @@ EVILGPT_PROMPT_PATH: Path = Path(PROMPT_DIR) / "evilgpt_prompt.txt"
 API_PROMPT_PATH: Path = Path(PROMPT_DIR) / "api_prompt.txt"
 STATUS_PROMPT_PATH: Path = Path(PROMPT_DIR) / "status_prompt.txt"
 DISCORD_PROMPT_PATH: Path = Path(PROMPT_DIR) / "discord_prompt.txt"
+
+# Limits Configuration
+MAX_STM_MESSAGES: int = LIMITS_SECTION.get("max_stm_messages", 50)
+MAX_LTM_RESULTS: int = LIMITS_SECTION.get("max_ltm_results", 5)
+MAX_CONVERSATION_HISTORY: int = LIMITS_SECTION.get("max_conversation_history", 10)
+API_RATE_LIMIT: int = LIMITS_SECTION.get("api_rate_limit", 100)
+DISCORD_RATE_LIMIT: int = LIMITS_SECTION.get("discord_rate_limit", 30)
 
 # Faiss and Reranker Config
 RERANKER_MODEL: str = MEMORY_SECTION.get("reranker_model")

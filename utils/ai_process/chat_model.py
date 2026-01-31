@@ -9,12 +9,8 @@ import litellm
 from langfuse import get_client
 
 from config import LOGGER_NAME
-from utils.ai_process.base_chat_model import (
-    BaseChatModel,
-    ChatParameters,
-    ChatResult,
-    StreamChunk,
-)
+from utils.ai_process.base_chat_model import (BaseChatModel, ChatParameters,
+                                              ChatResult, StreamChunk)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -217,7 +213,9 @@ class ChatModel(BaseChatModel):
         self, parameters: ChatParameters, start_time: datetime, retry_count: int = 0
     ) -> ChatResult:
         """Chat non-streaming avec fallbacks natifs"""
-        logger.debug(f"Entered _non_stream_chat for model {self.model_name}, stream={parameters.stream}")
+        logger.debug(
+            f"Entered _non_stream_chat for model {self.model_name}, stream={parameters.stream}"
+        )
         configs = self._load_configs()
         logger.debug(
             f"Starting non-stream chat with {len(configs)} configs, retry_count={retry_count}"

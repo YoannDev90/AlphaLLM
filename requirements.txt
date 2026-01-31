@@ -16,6 +16,7 @@ python-magic
 python-multipart
 requests
 tiktoken
+tinydb
 uvicorn
 cairosvg
 cloudinary

@@ -10,7 +10,8 @@ from typing import Any, Dict, List, Optional
 
 from transformers import AutoModelForCausalLM, AutoProcessor
 
-from config import FUNCTION_CALLING_CACHE_DIR, FUNCTION_CALLING_MODEL, LOGGER_NAME
+from config import (FUNCTION_CALLING_CACHE_DIR, FUNCTION_CALLING_MODEL,
+                    LOGGER_NAME)
 
 logger = logging.getLogger(LOGGER_NAME)
 CACHE_DIR = Path(FUNCTION_CALLING_CACHE_DIR)

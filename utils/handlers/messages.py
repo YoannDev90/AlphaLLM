@@ -2,8 +2,10 @@ import re
 
 import discord
 
-from utils.handlers.codeblock import send_code_block, send_code_block_with_return
-from utils.handlers.latex import LATEX_TO_EMOJI, convert_latex_to_png, detect_latex
+from utils.handlers.codeblock import (send_code_block,
+                                      send_code_block_with_return)
+from utils.handlers.latex import (LATEX_TO_EMOJI, convert_latex_to_png,
+                                  detect_latex)
 from utils.handlers.table import detect_and_convert_tables
 from utils.views.message import MessageView
 

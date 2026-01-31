@@ -11,16 +11,9 @@ from colorama import Back, Fore, Style, init
 from discord import ui
 
 from bots.logger_bot import bot
-from config import (
-    CONFIG,
-    DEV_IDS,
-    GRAFANA_API_KEY,
-    GRAFANA_URL,
-    GRAFANA_USER_ID,
-    LOGGER_NAME,
-    LOGGING_LEVEL,
-    LOGS_CHANNEL_ID,
-)
+from config import (CONFIG, DEV_IDS, GRAFANA_API_KEY, GRAFANA_URL,
+                    GRAFANA_USER_ID, LOGGER_NAME, LOGGING_LEVEL,
+                    LOGS_CHANNEL_ID)
 
 init(autoreset=True)
 logging_components = {}

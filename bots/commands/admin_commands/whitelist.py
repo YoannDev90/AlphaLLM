@@ -4,7 +4,8 @@ import discord
 
 from bots.bot import bot as main_bot
 from config import LOGGER_NAME
-from utils.database.server_conf import add_to_allowed_channels, add_to_allowed_roles
+from utils.database.server_conf import (add_to_allowed_channels,
+                                        add_to_allowed_roles)
 
 logger = logging.getLogger(LOGGER_NAME)
 

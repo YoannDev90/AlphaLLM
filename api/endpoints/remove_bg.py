@@ -6,7 +6,8 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from api.api_utils.security_utils import get_api_key
 from config import LOGGER_NAME
 from utils.handlers.images import upload_images
-from utils.unified_image import Format, Transformation_Type, unified_image_transform
+from utils.unified_image import (Format, Transformation_Type,
+                                 unified_image_transform)
 
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)

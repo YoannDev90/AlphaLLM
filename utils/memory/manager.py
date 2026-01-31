@@ -1,8 +1,12 @@
 """Coordinator for conversational memory features."""
 
 import logging
+from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from tinydb import Query, TinyDB
+
+from config import MAX_STM_MESSAGES
 from utils.memory.faiss_manager import FaissMemoryManager
 from utils.memory.micro_llm import MicroLLMHandler
 from utils.memory.rag_handler import RAGDocumentHandler
@@ -23,7 +27,11 @@ class MemoryManager:
             embedder=self._faiss_manager.embedder, faiss_manager=self._faiss_manager
         )
         self._micro_llm = micro_llm or MicroLLMHandler()
-        self._logger.debug("MemoryManager configured with Faiss and micro LLM")
+        self._db_path = Path("data/conversation_memory.json")
+        self._db_path.parent.mkdir(exist_ok=True)
+        self._db = TinyDB(self._db_path)
+        self._query = Query()
+        self._logger.debug("MemoryManager configured with Faiss, TinyDB and micro LLM")
 
     @property
     def faiss_manager(self) -> FaissMemoryManager:
@@ -40,6 +48,43 @@ class MemoryManager:
     async def initialize(self) -> None:
         await self._rag_handler.initialize()
         self._logger.debug("MemoryManager initialized")
+
+    async def store_conversation_message(
+        self, user_id: int, conv_id: str, content: str, role: str
+    ):
+        """Store a conversation message in TinyDB."""
+        import time
+
+        self._db.insert(
+            {
+                "user_id": user_id,
+                "conv_id": conv_id,
+                "content": content,
+                "role": role,
+                "timestamp": time.time(),
+            }
+        )
+        # Keep only last MAX_STM_MESSAGES messages per conversation
+        messages = self._db.search(
+            (self._query.user_id == user_id) & (self._query.conv_id == conv_id)
+        )
+        if len(messages) > MAX_STM_MESSAGES:
+            # Sort by timestamp and remove oldest
+            messages.sort(key=lambda x: x["timestamp"])
+            to_remove = messages[:-MAX_STM_MESSAGES]
+            for msg in to_remove:
+                self._db.remove(doc_ids=[msg.doc_id])
+        self._logger.debug(f"Stored message for user {user_id}, conv {conv_id}")
+
+    async def get_conversation_messages(
+        self, user_id: int, conv_id: str, limit: int = 10
+    ) -> List[Dict]:
+        """Get recent conversation messages from TinyDB."""
+        messages = self._db.search(
+            (self._query.user_id == user_id) & (self._query.conv_id == conv_id)
+        )
+        messages.sort(key=lambda x: x["timestamp"])
+        return messages[-limit:] if messages else []
 
     # Faiss methods
     async def add_memory(self, id: str, text: str, metadata: Optional[Dict] = None):
@@ -77,12 +122,3 @@ class MemoryManager:
         return await self._rag_handler.search_documents(
             user_id, server_id, query, limit
         )
-
-    async def get_hybrid_memories(
-        self, user_id: int, conv_id: str, input: str, recent_limit: int = 4, similar_limit: int = 5
-    ) -> Dict[str, List]:
-        """Get hybrid memories: STM from database (not implemented), LTM from Faiss search."""
-        # For now, return empty lists since STM is not implemented in this manager
-        # LTM could be searched in Faiss, but for conversation, it's not stored there
-        # TODO: Implement proper STM from database and LTM from vector search
-        return {"stm": [], "ltm": []}

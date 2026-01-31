@@ -57,7 +57,7 @@ class MessageView(discord.ui.View):
                     message=interaction,
                     bot=self.bot,
                     stream=False,
-                    use_memory=False,
+                    use_memory=True,
                 )
             ]
             if not results:

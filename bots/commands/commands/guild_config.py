@@ -7,12 +7,9 @@ import discord
 from discord import app_commands
 
 from config import LOGGER_NAME
-from utils.database.server_conf import (
-    set_allowed_channels,
-    set_allowed_roles,
-    set_announcement_channel,
-    set_language,
-)
+from utils.database.server_conf import (set_allowed_channels,
+                                        set_allowed_roles,
+                                        set_announcement_channel, set_language)
 from utils.views.channels import ChannelSelectView
 from utils.views.roles import RoleSelectView
 

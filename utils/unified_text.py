@@ -5,14 +5,13 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-from config import AVAILABLE_MODELS, LOGGER_NAME, MODELS_OWNERS, read_file
+from config import (AVAILABLE_MODELS, LOGGER_NAME, MAX_CONVERSATION_HISTORY,
+                    MAX_LTM_RESULTS, MODELS_OWNERS, read_file)
 from utils.ai_process.ai_utils import summarize
 from utils.ai_process.llm_selector import LLMSelector
 from utils.discord_utils.permission_checker import PermissionChecker
-from utils.discord_utils.status import (
-    update_status_on_failure,
-    update_status_on_success,
-)
+from utils.discord_utils.status import (update_status_on_failure,
+                                        update_status_on_success)
 from utils.function_calling import get_function_caller
 from utils.handlers.files import FileHandler
 from utils.memory import get_memory_manager, initialize_memory_manager
@@ -115,7 +114,9 @@ async def unified_text_gen(
         stream: Si True, streaming de la réponse.
         use_memory: Si True, utilise la mémoire. (API seulement)
     """
-    logger.debug(f"Entered unified_text_gen with user_id={user_id}, conv_id={conv_id}, input='{input}', model={model}, stream={stream}")
+    logger.debug(
+        f"Entered unified_text_gen with user_id={user_id}, conv_id={conv_id}, input='{input}', model={model}, stream={stream}"
+    )
     origin = origin or Origin.API
     model = model or Text_Model.AUTO.value
     if isinstance(model, Text_Model):
@@ -267,13 +268,19 @@ async def unified_text_gen(
         memory_manager = await get_memory_manager()
         logger.debug("Memory manager initialized")
 
-    logger.debug("About to fetch relevant memories")
+    relevant_memories = {"stm": [], "ltm": []}
     if use_memory and memory_manager:
-        relevant_memories = await memory_manager.get_hybrid_memories(
-            user_id, conv_id, input, recent_limit=4, similar_limit=5
+        logger.debug("About to fetch STM memories using get_conversation_messages")
+        stm_messages = await memory_manager.get_conversation_messages(
+            user_id, conv_id, limit=MAX_CONVERSATION_HISTORY
         )
-    else:
-        relevant_memories = {"stm": [], "ltm": []}
+        relevant_memories["stm"] = stm_messages
+        logger.debug(f"Fetched {len(stm_messages)} STM memories")
+
+        logger.debug("About to fetch LTM memories using search_memories")
+        ltm_texts = await memory_manager.search_memories(input, top_k=MAX_LTM_RESULTS)
+        relevant_memories["ltm"] = [{"content": text} for text in ltm_texts]
+        logger.debug(f"Fetched {len(ltm_texts)} LTM memories")
     logger.debug("Relevant memories fetched")
 
     logger.debug("About to process relevant memories")
@@ -381,10 +388,10 @@ async def unified_text_gen(
         logger.debug(f"Contenu de la réponse: {result.response}...")
 
         if use_memory and memory_manager:
-            await memory_manager.add_conversation_message(
+            await memory_manager.store_conversation_message(
                 user_id, conv_id, input, "user"
             )
-            await memory_manager.add_conversation_message(
+            await memory_manager.store_conversation_message(
                 user_id, conv_id, result.response, "assistant"
             )
 

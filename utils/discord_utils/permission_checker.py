@@ -1,11 +1,8 @@
 import logging
 
 from config import LOGGER_NAME
-from utils.database.perms_conf import (
-    get_allowed_channels,
-    get_allowed_roles,
-    get_blacklist,
-)
+from utils.database.perms_conf import (get_allowed_channels, get_allowed_roles,
+                                       get_blacklist)
 
 logger = logging.getLogger(LOGGER_NAME)
 
