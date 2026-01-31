@@ -7,7 +7,7 @@
             "api_key": "NAVY_API_KEY"
         },
         "settings": {
-            "tools_support": false,
+            "tools_support": true,
             "vision_support": false
         }
     },
@@ -19,7 +19,7 @@
             "api_key": "NAVY_API_KEY"
         },
         "settings": {
-            "tools_support": false,
+            "tools_support": true,
             "vision_support": false
         }
     },
@@ -31,7 +31,7 @@
             "api_key": "VOID_API_KEY"
         },
         "settings": {
-            "tools_support": false,
+            "tools_support": true,
             "vision_support": false
         }
     },
@@ -43,7 +43,7 @@
             "api_key": "MNN_API_KEY"
         },
         "settings": {
-            "tools_support": false,
+            "tools_support": true,
             "vision_support": false
         }
     },
@@ -55,7 +55,7 @@
             "api_key": "ELECTRONHUB_API_KEY"
         },
         "settings": {
-            "tools_support": false,
+            "tools_support": true,
             "vision_support": false
         }
     },
@@ -67,7 +67,31 @@
             "api_key": "AIRFORCE_API_KEY"
         },
         "settings": {
-            "tools_support": false,
+            "tools_support": true,
+            "vision_support": false
+        }
+    },
+    {
+        "model_name": "grok-4-fast",
+        "litellm_params": {
+            "model": "openai/grok-4-fas:free",
+            "api_base": "https://api.apertis.ai/v1",
+            "api_key": "APERTIS_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
+            "vision_support": false
+        }
+    },
+    {
+        "model_name": "grok-4.1-fast",
+        "litellm_params": {
+            "model": "openai/grok-4.1-fast:free",
+            "api_base": "https://api.apertis.ai/v1",
+            "api_key": "APERTIS_API_KEY"
+        },
+        "settings": {
+            "tools_support": true,
             "vision_support": false
         }
     }
