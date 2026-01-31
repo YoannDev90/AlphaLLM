@@ -17,7 +17,9 @@ class LightReranker:
     """ONNX-based cross-encoder reranker for refining search results."""
 
     def __init__(self, model_name: str = None):
-        self.model_name = model_name or RERANKER_MODEL or "cross-encoder/ms-marco-MiniLM-L-6-v2"
+        self.model_name = (
+            model_name or RERANKER_MODEL or "cross-encoder/ms-marco-MiniLM-L-6-v2"
+        )
         self.cache_dir = RERANKER_CACHE_DIR
         self.model = None
         self.tokenizer = None
@@ -31,13 +33,17 @@ class LightReranker:
             load_start = time.time()
             self.model = await asyncio.to_thread(
                 ORTModelForSequenceClassification.from_pretrained,
-                self.model_name, export=False, cache_dir=self.cache_dir
+                self.model_name,
+                export=False,
+                cache_dir=self.cache_dir,
             )
             self.tokenizer = await asyncio.to_thread(
                 AutoTokenizer.from_pretrained, self.model_name, cache_dir=self.cache_dir
             )
             load_time = time.time() - load_start
-            logger.info(f"LightReranker loaded model: {self.model_name} in {load_time:.4f}s")
+            logger.info(
+                f"LightReranker loaded model: {self.model_name} in {load_time:.4f}s"
+            )
         except Exception as e:
             logger.error(f"Failed to load reranker model: {e}")
             raise

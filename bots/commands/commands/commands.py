@@ -13,7 +13,7 @@ async def setup(bot: discord.Client):
         name="commands", description="Show all available commands with their mentions"
     )
     async def commands(interaction: discord.Interaction):
-        logger.info(f"Commande /commands exécutée par {interaction.user.display_name}")
+        logger.info(f"Command /commands executed by {interaction.user.display_name}")
 
         try:
             # Créer l'embed principal
@@ -94,5 +94,5 @@ async def setup(bot: discord.Client):
                 await interaction.response.send_message(
                     embed=fallback_embed, ephemeral=True
                 )
-            except:
+            except Exception:
                 await interaction.followup.send(embed=fallback_embed, ephemeral=True)

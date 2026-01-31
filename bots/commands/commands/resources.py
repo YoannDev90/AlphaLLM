@@ -78,7 +78,7 @@ def _generate_memory_graph(snapshots) -> BytesIO:
         ax.set_ylabel("Memory %", color="white")
         ax.grid(True, alpha=0.3, color="gray")
         ax.tick_params(colors="white")
-        ax.set_xticklabels([])  # Hide X-axis timestamps
+        ax.set_xticklabels([])
 
         buf = BytesIO()
         plt.savefig(buf, format="png", dpi=160)
@@ -114,9 +114,7 @@ async def setup(bot: discord.Client):
             recent_snapshots = [s for s in all_snapshots if s.timestamp >= ten_min_ago]
 
             # Get current usage
-            current = monitor.get_current_usage()
             latest_snapshot = monitor.get_latest_snapshot()
-            stats = monitor.get_statistics()
 
             if mode == "text":
                 # Text mode only

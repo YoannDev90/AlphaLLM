@@ -105,7 +105,6 @@ async def setup_logs_channel():
 
 async def auto_purge():
     """Supprimer les messages du salon de logs qui ont plus de 2 jours"""
-    global logs_channel
     try:
         if not logs_channel:
             return
@@ -154,7 +153,6 @@ async def purge_loop():
 
 async def flush_logs_queue():
     """Vider la queue de logs dans le nouveau salon"""
-    global logs_channel
     try:
         if not logs_queue or not logs_channel:
             return
@@ -179,7 +177,6 @@ async def flush_logs_queue():
 
 @bot.event
 async def on_ready():
-    global logs_channel, purge_task
     activity = discord.CustomActivity(name="🎛️ Monitoring AlphaLLM")
     await bot.change_presence(activity=activity)
     await bot.tree.sync()
@@ -188,6 +185,7 @@ async def on_ready():
 
     bot._logs_channel = logs_channel
 
+    global purge_task
     if purge_task is None or purge_task.done():
         purge_task = asyncio.create_task(purge_loop())
 

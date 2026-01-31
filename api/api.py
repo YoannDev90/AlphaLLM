@@ -9,8 +9,7 @@ from api.endpoints import (auto_enhance, conv_name, enhance, gen_restore,
                            image_edit, image_gen, image_models, improve, main,
                            remove_bg, resources, status, summarize, text_gen,
                            text_models, upscale)
-from config import (API_HOST, API_PORT, API_SSL_CERTFILE, API_SSL_KEYFILE,
-                    API_URL, LOGGER_NAME)
+from config import API_HOST, API_PORT, API_URL, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 

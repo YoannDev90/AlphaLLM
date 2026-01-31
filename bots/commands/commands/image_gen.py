@@ -1,15 +1,12 @@
-import asyncio
 import logging
 import random
 import string
 from datetime import datetime
-from io import BytesIO
 
 import discord
 from discord import app_commands
 
 from config import LOGGER_NAME
-from utils.ai_process.ai_utils import enhance_image_prompt
 from utils.discord_utils.permission_checker import PermissionChecker
 from utils.unified_image import Format, unified_image_gen
 
@@ -29,9 +26,9 @@ async def setup(bot: discord.Client):
         model=[
             app_commands.Choice(name="Flux", value="flux"),
             app_commands.Choice(name="Seedream", value="seedream"),
-            app_commands.Choice(name="NanoBanana", value="nanobanana"),
+            app_commands.Choice(name="Nano banana", value="nanobanana"),
             app_commands.Choice(name="GPT Image", value="gptimage"),
-            app_commands.Choice(name="Z-Image", value="zimage"),
+            app_commands.Choice(name="Z image", value="zimage"),
         ]
     )
     @app_commands.choices(
@@ -48,7 +45,7 @@ async def setup(bot: discord.Client):
     async def image_gen(
         interaction: discord.Interaction,
         prompt: str,
-        model: str = "flux",
+        model: str = "Flux",
         size: str = "1024x1024",
         number: int = 1,
         enhance: bool = True,
@@ -61,9 +58,9 @@ async def setup(bot: discord.Client):
             return
 
         logger.info(
-            f"Commande /image-gen exécutée par {interaction.user.display_name} ({interaction.user.id})"
+            f"Command /image-gen executed by {interaction.user.display_name} ({interaction.user.id})"
         )
-        logger.info(f"Prompt: {prompt}, model: {model}, size: {size}, number: {number}")
+        logger.info(f"prompt: {prompt}, model: {model}, size: {size}, number: {number}")
 
         original_number = number
         warning_message = ""
@@ -76,7 +73,7 @@ async def setup(bot: discord.Client):
             warning_message = (
                 f"⚠️ Number adjusted from {original_number} to 4 (maximum allowed).\n"
             )
-        model = "flux" if not model else model
+        model = "Flux" if not model else model
         size = "1024x1024" if not size else size
 
         try:
@@ -93,12 +90,12 @@ async def setup(bot: discord.Client):
             if results:
                 logger.info(f"Images generated for {interaction.user.display_name}")
             else:
-                logger.error(f"Failed to generate images")
+                logger.error("Failed to generate images")
         except Exception as e:
             logger.error(f"Error generating images: {str(e)}")
 
         logger.debug(
-            f"Début de l'envoi de {len(results)} image(s) pour {interaction.user.display_name}"
+            f"Start sending {len(results)} image(s) for {interaction.user.display_name}"
         )
 
         if warning_message:
@@ -106,24 +103,24 @@ async def setup(bot: discord.Client):
 
         for idx, (image_data, current_prompt) in enumerate(results, start=1):
             logger.debug(
-                f"Traitement de l'image {idx}/{number} - Données présentes: {image_data is not None}"
+                f"Image processing {idx}/{number} -Data present: {image_data is not None}"
             )
             if image_data:
                 try:
-                    filename = f"{datetime.now().strftime('%m-%d_%H%-M-%S-%f')}_{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.png"
+                    filename = f"{datetime.now().strftime('%m%d%H%M%S%f')}_{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.png"
                     file = discord.File(image_data, filename=filename)
                     # view = ImageView(current_prompt, model, size, enhance)
 
-                    logger.debug(f"Tentative d'envoi de l'image {idx}/{number}")
+                    logger.debug(f"Attempting to send the image {idx}/{number}")
 
                     if not warning_message:
-                        message = await interaction.followup.send(
+                        await interaction.followup.send(
                             # f"🎨 Image {idx}/{number}:\n```{current_prompt}```",
                             file=file,
                             # view=view
                         )
                     else:
-                        message = await interaction.followup.send(
+                        await interaction.followup.send(
                             # f"🎨 Image {idx}/{number}:\n```{current_prompt}```",
                             file=file,
                             # view=view
@@ -131,10 +128,8 @@ async def setup(bot: discord.Client):
 
                     # view.message = message
                 except Exception as e:
-                    logger.error(
-                        f"Erreur lors de l'envoi de l'image {idx}/{number}: {str(e)}"
-                    )
+                    logger.error(f"Error sending image {idx}/{number}: {str(e)}")
             else:
                 logger.error(
-                    f"Échec de l'image {idx}/{number} pour {interaction.user.display_name}"
+                    f"Failed to generate image {idx}/{number} For {interaction.user.display_name}"
                 )

@@ -15,9 +15,7 @@ async def setup(bot: discord.Client):
     @bot.tree.command(name="contact-dev", description="Contact the developer")
     @app_commands.describe(message="Your message to the developer")
     async def contact(interaction: discord.Interaction, message: str):
-        logger.info(
-            f"Commande /contact-dev exécutée par {interaction.user.display_name}"
-        )
+        logger.info(f"Command /contact-dev executed by {interaction.user.display_name}")
 
         try:
             bot = admin_bot
@@ -34,7 +32,7 @@ async def setup(bot: discord.Client):
             await interaction.response.send_message(
                 "Message sent successfully to the developer.", ephemeral=True
             )
-        except discord.HTTPException as e:
+        except discord.HTTPException:
             await interaction.response.send_message(
                 "Failed to send message to the developer.", ephemeral=True
             )

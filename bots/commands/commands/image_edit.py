@@ -1,9 +1,7 @@
-import asyncio
 import logging
 import random
 import string
 from datetime import datetime
-from io import BytesIO
 
 import discord
 from discord import app_commands
@@ -56,7 +54,7 @@ async def setup(bot: discord.Client):
             return
 
         logger.info(
-            f"Commande /image-edit exécutée par {interaction.user.display_name} ({interaction.user.id})"
+            f"Command /image-edit executed by {interaction.user.display_name} ({interaction.user.id})"
         )
         logger.info(f"Prompt: {prompt}, model: {model}, number: {number}")
 
@@ -115,17 +113,15 @@ async def setup(bot: discord.Client):
 
                     logger.debug(f"Tentative d'envoi de l'image {idx}/{number}")
 
-                    message = await interaction.followup.send(file=file)
+                    await interaction.followup.send(file=file)
 
                 except Exception as e:
-                    logger.error(
-                        f"Erreur lors de l'envoi de l'image {idx}/{number}: {str(e)}"
-                    )
+                    logger.error(f"Error sending image {idx}/{number}: {str(e)}")
                     await interaction.followup.send(
                         f"❌ Error sending image {idx}: {str(e)}"
                     )
             else:
                 logger.error(
-                    f"Échec de l'image {idx}/{number} pour {interaction.user.display_name}"
+                    f"Failed to generate image {idx}/{number} for {interaction.user.display_name}"
                 )
                 await interaction.followup.send(f"❌ Failed to process image {idx}.")

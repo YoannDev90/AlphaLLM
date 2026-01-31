@@ -11,14 +11,14 @@ from config import API_KEY_REQUIRED, API_KEYS, API_KEYS_MAPPING, LOGGER_NAME
 logger = logging.getLogger(LOGGER_NAME)
 
 bearer_scheme = HTTPBearer(
-    scheme_name="API Key", description="Entrez votre clé API", bearerFormat="API Key"
+    scheme_name="API Key", description="Enter your API key", bearerFormat="API Key"
 )
 
 
 def get_api_key(request: Request) -> Optional[str]:
     """Extract the API key from headers or query parameters."""
     if not API_KEY_REQUIRED:
-        logger.debug("Authentification API désactivée")
+        logger.debug("API authentication disabled")
         return None
 
     api_key = request.headers.get("X-API-Key")
@@ -33,12 +33,15 @@ def get_api_key(request: Request) -> Optional[str]:
     if not api_key:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Clé API requise. Fournissez X-API-Key, Authorization: Bearer <clé>, ou ?api_key=<clé>",
+            detail=(
+                "API key required. Provide X-API-Key, Authorization: Bearer <key>, "
+                "or ?api_key=<key>"
+            ),
         )
 
     if not verify_api_access(api_key):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Clé API invalide"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid API key"
         )
 
     return api_key
@@ -50,17 +53,17 @@ def verify_api_access(api_key: str) -> bool:
         return True
 
     if not api_key:
-        logger.warning("Tentative d'authentification avec une clé vide")
+        logger.warning("Attempt to authenticate with empty key")
         return False
 
     is_valid = api_key in API_KEYS
     if is_valid:
         user = next(
             (name for name, key in API_KEYS_MAPPING.items() if key == api_key),
-            "utilisateur inconnu",
+            "unknown user",
         )
-        logger.info(f"Authentification API réussie pour {user}")
+        logger.info(f"API authentication successful for {user}")
     else:
-        logger.warning(f"Clé API invalide utilisée : {api_key[:8]}***")
+        logger.warning(f"Invalid API key used: {api_key[:8]}***")
 
     return is_valid

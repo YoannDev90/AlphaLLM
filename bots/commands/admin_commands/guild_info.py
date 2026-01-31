@@ -3,39 +3,43 @@ import logging
 import discord
 
 from bots.bot import bot as main_bot
-from config import LOGGER_NAME
+from config import DEV_IDS, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(
-        name="guild-info", description="Affiche les informations d'un serveur"
-    )
+    @bot.tree.command(name="guild-info", description="Display server information")
     async def guild_info(interaction: discord.Interaction, guild_id: str = None):
+        if interaction.user.id not in DEV_IDS:
+            await interaction.response.send_message(
+                "❌ You are not authorized to use this command.", ephemeral=True
+            )
+            return
+
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(
-            f"Commande /guild-info exécutée par {interaction.user.display_name} pour le serveur {guild_id or 'courant'}"
+            f"Command /guild-info executed by {interaction.user.display_name} for server {guild_id or 'current'}"
         )
 
         if guild_id is None or guild_id.strip() == "":
             guild = interaction.guild
             if guild is None:
                 await interaction.followup.send(
-                    "Impossible de récupérer les informations du serveur courant.",
+                    "Unable to retrieve current server information.",
                     ephemeral=True,
                 )
                 return
         else:
             if not guild_id.isdigit() or int(guild_id) <= 0:
                 await interaction.followup.send(
-                    "L'ID du serveur fourni est invalide.", ephemeral=True
+                    "The provided server ID is invalid.", ephemeral=True
                 )
                 return
             guild = main_bot.get_guild(int(guild_id))
             if guild is None:
                 await interaction.followup.send(
-                    "Le bot n'est pas présent dans ce serveur ou l'ID est incorrect.",
+                    "The bot is not present in this server or the ID is incorrect.",
                     ephemeral=True,
                 )
                 return
@@ -114,16 +118,16 @@ async def setup(bot: discord.Client):
             await interaction.followup.send(embed=embed)
         except discord.HTTPException as e:
             logger.error(
-                f"Erreur HTTP lors de l'exécution de la commande guild-info pour {guild.id}: {e}"
+                f"HTTP error when executing guild-info command for {guild.id}: {e}"
             )
             await interaction.followup.send(
-                "Erreur lors de la récupération des données. Veuillez réessayer plus tard.",
+                "Error retrieving data. Please try again later.",
                 ephemeral=True,
             )
         except Exception as e:
             logger.error(
-                f"Erreur inattendue lors de l'exécution de la commande guild-info pour {guild.id}: {e}"
+                f"Unexpected error when executing guild-info command for {guild.id}: {e}"
             )
             await interaction.followup.send(
-                "Erreur inattendue. Veuillez réessayer plus tard.", ephemeral=True
+                "Unexpected error. Please try again later.", ephemeral=True
             )

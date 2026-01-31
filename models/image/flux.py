@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
     try:
         result = asyncio.run(generate_flux(prompt, size))
-        print(f"✓ Image generated successfully!")
+        print("✓ Image generated successfully!")
         print(f"Base64 length: {len(result)} characters")
 
         # Save the image

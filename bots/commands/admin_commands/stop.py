@@ -5,23 +5,29 @@ from pathlib import Path
 
 import discord
 
-from config import LOGGER_NAME
+from config import DEV_IDS, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="stop", description="Arrête le bot")
+    @bot.tree.command(name="stop", description="Stop the bot")
     async def stop(interaction: discord.Interaction):
-        await interaction.response.defer(thinking=True, ephemeral=True)
-        logger.info(f"Commande /stop exécutée par {interaction.user.display_name}")
+        if interaction.user.id not in DEV_IDS:
+            await interaction.response.send_message(
+                "❌ You are not authorized to use this command.", ephemeral=True
+            )
+            return
 
-        await interaction.followup.send("🛑 Arrêt complet du bot...", ephemeral=True)
-        logger.info("Demande d'arrêt reçue")
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        logger.info(f"Command /stop executed by {interaction.user.display_name}")
+
+        await interaction.followup.send("🛑 Complete bot shutdown...", ephemeral=True)
+        logger.info("Stop request received")
 
         with open(Path("stop.json"), "w") as f:
             json.dump(
                 {"COMMAND": "STOP", "timestamp": datetime.datetime.now().isoformat()}, f
             )
 
-        logger.info("Fichier stop.json créé, le processus principal va arrêter le bot.")
+        logger.info("stop.json file created, main process will stop the bot.")

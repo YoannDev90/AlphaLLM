@@ -238,8 +238,6 @@ async def unified_text_gen(
                     elapsed_time="0.0s",
                 )
             else:
-                from utils.ai_process.base_chat_model import ChatResult
-
                 result = ChatResult(
                     response=tool_response,
                     usage=0,
@@ -385,9 +383,11 @@ async def unified_text_gen(
             "Request timed out",
             "I'm sorry, but I couldn't generate a response",
             "API configuration error",
-            "Request timed out after trying all available models"
+            "Request timed out after trying all available models",
         ]
-        is_error_response = any(error_msg in result.response for error_msg in error_messages)
+        is_error_response = any(
+            error_msg in result.response for error_msg in error_messages
+        )
 
         if not is_error_response:
             update_status_on_success(model, result.elapsed_time)

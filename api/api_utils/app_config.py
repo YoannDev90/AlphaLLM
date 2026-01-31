@@ -12,9 +12,10 @@ from typing import Dict
 from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from config import API_BAN_THRESHOLD, API_KEY_REQUIRED, API_KEYS, API_RATE_LIMIT, LOGGER_NAME
+from config import (API_BAN_THRESHOLD, API_KEY_REQUIRED, API_KEYS,
+                    API_RATE_LIMIT, LOGGER_NAME)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -57,9 +58,11 @@ def save_ban_data():
     except Exception as e:
         logger.error(f"Failed to save ban data: {e}")
 
+
 def save_api_keys():
     """Save API keys to file."""
-    from config import API_KEYS_FILE, API_KEYS
+    from config import API_KEYS, API_KEYS_FILE
+
     try:
         Path(API_KEYS_FILE).parent.mkdir(exist_ok=True)
         with open(API_KEYS_FILE, "w") as f:
@@ -69,36 +72,40 @@ def save_api_keys():
         logger.error(f"Failed to save API keys: {e}")
 
 
-async def verify_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)):
+async def verify_api_key(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+):
     """Verify API key if required."""
     if not API_KEY_REQUIRED:
         return None
     if not credentials:
         raise HTTPException(status_code=401, detail="API key required")
-    
+
     key_data = API_KEYS.get(credentials.credentials)
     if not key_data:
         raise HTTPException(status_code=401, detail="Invalid API key")
-    
+
     # Check expiration
     expires = key_data.get("expires")
     if expires:
         from datetime import datetime
+
         if datetime.now() > datetime.fromisoformat(expires):
             raise HTTPException(status_code=401, detail="API key expired")
-    
+
     # Check rate limit (per key)
-    rate_limit = key_data.get("rate_limit", float('inf'))
+    rate_limit = key_data.get("rate_limit", float("inf"))
     requests_used = key_data.get("requests_used", 0)
     if requests_used >= rate_limit:
         raise HTTPException(status_code=429, detail="API key rate limit exceeded")
-    
+
     # Increment usage
     key_data["requests_used"] = requests_used + 1
     # Save updated keys
     save_api_keys()
-    
+
     return credentials.credentials
+
 
 def create_app() -> FastAPI:
     logger.info("Initialisation de l'application FastAPI")
@@ -143,7 +150,9 @@ def create_app() -> FastAPI:
         current_time = time.time()
 
         # Clean old requests (older than 1 minute)
-        request_counts[client_ip] = [t for t in request_counts[client_ip] if current_time - t < 60]
+        request_counts[client_ip] = [
+            t for t in request_counts[client_ip] if current_time - t < 60
+        ]
 
         # Check rate limit
         if len(request_counts[client_ip]) >= API_RATE_LIMIT:

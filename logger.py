@@ -2,18 +2,14 @@ import asyncio
 import logging
 import logging.handlers
 import queue
-from typing import Optional
 
-import aiohttp
 import discord
 import requests
 from colorama import Back, Fore, Style, init
-from discord import ui
 
 from bots.logger_bot import bot
-from config import (CONFIG, DEV_IDS, GRAFANA_API_KEY, GRAFANA_URL,
-                    GRAFANA_USER_ID, LOGGER_NAME, LOGGING_LEVEL,
-                    LOGS_CHANNEL_ID)
+from config import (CONFIG, GRAFANA_API_KEY, GRAFANA_URL, GRAFANA_USER_ID,
+                    LOGGER_NAME, LOGGING_LEVEL, LOGS_CHANNEL_ID)
 
 init(autoreset=True)
 logging_components = {}
@@ -159,7 +155,7 @@ class DiscordLogHandler(logging.Handler):
                 await channel.send(embed=embed, view=view)
             else:
                 await channel.send(embed=embed)
-        except Exception as e:
+        except Exception:
             pass
 
     def emit(self, record):
@@ -171,7 +167,6 @@ class DiscordLogHandler(logging.Handler):
             new_record.msg = "Log entry too long, see on Grafana: "
             message = self.format(new_record)
         try:
-            loop = asyncio.get_running_loop()
             if not self.bot.is_ready() or self.bot.is_closed():
                 return
             asyncio.create_task(self.log_queue.put((message, record)))
@@ -184,7 +179,6 @@ class DiscordLogHandler(logging.Handler):
     def stop(self):
         self.running = False
         try:
-            loop = asyncio.get_running_loop()
             asyncio.create_task(self.log_queue.put(None))
         except RuntimeError:
             pass

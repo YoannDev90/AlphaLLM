@@ -73,7 +73,7 @@ class CommandIDManager:
                 except Exception as e:
                     if "503" in str(e) and attempt < 2:
                         logger.warning(
-                            f"503 error on attempt {attempt+1}, retrying in 5 seconds..."
+                            f"503 error on attempt {attempt + 1}, retrying in 5 seconds..."
                         )
                         await asyncio.sleep(5)
                     else:

@@ -3,7 +3,7 @@ import logging
 import discord
 
 from bots.bot import bot as main_bot
-from config import LOGGER_NAME
+from config import DEV_IDS, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -16,22 +16,28 @@ CHOICES = [
 
 async def setup(bot: discord.Client):
     @bot.tree.command(
-        name="guilds", description="Affiche la liste des serveurs où le bot est présent"
+        name="guilds", description="Show the list of servers where the bot is present"
     )
     @discord.app_commands.choices(data=CHOICES)
     async def guilds(
         interaction: discord.Interaction, data: discord.app_commands.Choice[int]
     ):
+        if interaction.user.id not in DEV_IDS:
+            await interaction.response.send_message(
+                "❌ You are not authorized to use this command.", ephemeral=True
+            )
+            return
+
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(
-            f"Commande /guilds [{data.name}] exécutée par {interaction.user.display_name}"
+            f"Command /guilds [{data.name}] executed by {interaction.user.display_name}"
         )
 
         bot = main_bot
 
         if bot.guilds is None:
             await interaction.followup.send(
-                "Le bot n'est pas présent dans d'autres serveurs.", ephemeral=True
+                "The bot is not present in any other servers.", ephemeral=True
             )
             return
 

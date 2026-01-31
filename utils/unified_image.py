@@ -11,7 +11,6 @@ import aiohttp
 from config import LOGGER_NAME
 from models.image.flux import generate_flux
 from models.image.gptimage import generate_gptimage
-from models.image.kontext import generate_kontext
 from models.image.nanobanana import generate_nanobanana
 from models.image.seedream import generate_seedream
 from models.image.zimage import generate_zimage
@@ -29,7 +28,6 @@ class Image_Model(Enum):
 
     FLUX = "flux"
     GPT_IMAGE = "gptimage"
-    KONTEXT = "kontext"
     NANOBANANA = "nanobanana"
     SEEDREAM = "seedream"
     ZIMAGE = "zimage"
@@ -60,12 +58,10 @@ FALLBACK_ORDER = [
     Image_Model.GPT_IMAGE.value,
     Image_Model.SEEDREAM.value,
     Image_Model.NANOBANANA.value,
-    Image_Model.KONTEXT.value,
 ]
 
 EDIT_FALLBACK_ORDER = [
     Image_Model.GPT_IMAGE.value,
-    Image_Model.KONTEXT.value,
     Image_Model.SEEDREAM.value,
     Image_Model.NANOBANANA.value,
 ]
@@ -73,7 +69,6 @@ EDIT_FALLBACK_ORDER = [
 IMAGE_GEN_FUNCTIONS = {
     Image_Model.FLUX.value: generate_flux,
     Image_Model.GPT_IMAGE.value: generate_gptimage,
-    Image_Model.KONTEXT.value: generate_kontext,
     Image_Model.NANOBANANA.value: generate_nanobanana,
     Image_Model.SEEDREAM.value: generate_seedream,
     Image_Model.ZIMAGE.value: generate_zimage,
@@ -81,7 +76,6 @@ IMAGE_GEN_FUNCTIONS = {
 
 IMAGE_EDIT_FUNCTIONS = {
     Image_Model.GPT_IMAGE.value: generate_gptimage,
-    Image_Model.KONTEXT.value: generate_kontext,
     Image_Model.NANOBANANA.value: generate_nanobanana,
     Image_Model.SEEDREAM.value: generate_seedream,
 }

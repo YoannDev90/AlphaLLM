@@ -10,7 +10,7 @@
 
 AlphaLLM is an advanced Discord bot that integrates multiple AI models for text and image generation. It provides a REST API, RAG memory system, and administrative features.
 
-## � Documentation
+## 📚 Documentation
 
 Detailed documentation is available in the [`docs/`](docs/) folder:
 
@@ -20,7 +20,7 @@ Detailed documentation is available in the [`docs/`](docs/) folder:
 - [Configuration](docs/configuration.md)
 - [Deployment](docs/deployment.md)
 
-## �🚀 Features
+## 🚀 Features
 
 - 🤖 Discord bot with text and image generation
 - 🌐 REST API for programmatic access
@@ -62,18 +62,18 @@ Edit `config.toml` for:
 
 Edit `.env` for API keys.
 
-## �️ Code Quality
+## 🛟 Code Quality
 
 Run the following command to format and lint the codebase:
 
 ```bash
-black . && isort . && flake8 .
+black --exclude=.venv . && isort --skip=.venv . && flake8 --exclude=.venv .
 ```
 
 - **Black**: Code formatting
 - **isort**: Import sorting
 - **flake8**: Linting and style checking
 
-## �📄 License
+## 📄 License
 
 MIT

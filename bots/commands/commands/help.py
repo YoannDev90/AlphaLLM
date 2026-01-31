@@ -11,7 +11,7 @@ logger = logging.getLogger(LOGGER_NAME)
 async def setup(bot: discord.Client):
     @bot.tree.command(name="help-bot", description="Show help informations")
     async def help(interaction: discord.Interaction):
-        logger.info(f"Commande /help-bot exécutée par {interaction.user.display_name}")
+        logger.info(f"Command /help-bot executed by {interaction.user.display_name}")
 
         desc = f"Here's how to use the bot:\n💬 - To chat, debate, play, ... with me, simply mention me in your messages ( <@{bot.user.id}> ).\n🖼️ - To generate images, use the {command_id_manager.get_command_mention('image-gen')} command.\n📜 - To see the list of available commands, use {command_id_manager.get_command_mention('commands')}.\n🔗 - To chat with my developer or request help with the bot, use {command_id_manager.get_command_mention('support')}."
 

@@ -1,7 +1,6 @@
 import logging
 
 import discord
-from discord import app_commands
 
 from config import LOGGER_NAME, SUPPORT_SERVER
 
@@ -11,7 +10,7 @@ logger = logging.getLogger(LOGGER_NAME)
 async def setup(bot: discord.Client):
     @bot.tree.command(name="support", description="Show the support server link")
     async def support(interaction: discord.Interaction):
-        logger.info(f"Commande /support exécutée par {interaction.user.display_name}")
+        logger.info(f"Command /support executed by {interaction.user.display_name}")
 
         embed = discord.Embed(
             title="Support Server Link",

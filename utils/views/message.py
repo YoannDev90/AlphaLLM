@@ -21,7 +21,7 @@ class MessageView(discord.ui.View):
         self.regenerated = False
 
     async def on_timeout(self):
-        """Supprime les boutons lorsque la vue expire après 30 secondes"""
+        """Remove buttons when the view expires after 30 seconds"""
         if self.message:
             try:
                 await self.message.edit(view=None)
@@ -38,7 +38,7 @@ class MessageView(discord.ui.View):
             )
             return
         logger.info(
-            f"Régénération de réponse demandée par {interaction.user.display_name}"
+            f"Response regeneration requested by {interaction.user.display_name}"
         )
         await interaction.response.defer()
         button.disabled = True
@@ -77,7 +77,7 @@ class MessageView(discord.ui.View):
 
         except Exception as e:
             logger.error(
-                f"Erreur lors de la régénération de réponse pour {interaction.user.display_name}: {str(e)}"
+                f"Error during response regeneration for {interaction.user.display_name}: {str(e)}"
             )
             await interaction.followup.send(
                 "❌ Unexpected error during response regeneration."
@@ -87,9 +87,7 @@ class MessageView(discord.ui.View):
     async def show_details(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
-        logger.debug(
-            f"Affichage des détails demandé par {interaction.user.display_name}"
-        )
+        logger.debug(f"Details display requested by {interaction.user.display_name}")
         await interaction.response.defer()
 
         response_data = self.responses[self.current_index] if self.responses else None
@@ -115,7 +113,7 @@ class MessageView(discord.ui.View):
             await interaction.followup.send(embed=embed, ephemeral=True)
         except Exception as e:
             logger.error(
-                f"Erreur lors de la création de l'embed de détails pour {interaction.user.display_name}: {str(e)}"
+                f"Error creating details embed for {interaction.user.display_name}: {str(e)}"
             )
 
     @discord.ui.button(
@@ -144,9 +142,7 @@ class MessageView(discord.ui.View):
 
     @discord.ui.button(emoji="🗑️", label="Delete", style=discord.ButtonStyle.gray)
     async def delete(self, interaction: discord.Interaction, button: discord.ui.Button):
-        logger.debug(
-            f"Suppression de message demandée par {interaction.user.display_name}"
-        )
+        logger.debug(f"Message deletion requested by {interaction.user.display_name}")
 
         await interaction.message.edit(view=None)
         await interaction.message.delete()

@@ -1,10 +1,8 @@
 import logging
-import time
 
 import discord
-from discord import app_commands
 
-from config import LOGGER_NAME, SUPPORT_SERVER
+from config import LOGGER_NAME
 from utils.discord_utils.status import get_status
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -13,7 +11,7 @@ logger = logging.getLogger(LOGGER_NAME)
 async def setup(bot: discord.Client):
     @bot.tree.command(name="status", description="Show the status of the bot")
     async def status(interaction: discord.Interaction):
-        logger.info(f"Commande /status exécutée par {interaction.user.display_name}")
+        logger.info(f"Command /status executed by {interaction.user.display_name}")
 
         status_data = get_status()
 
@@ -36,7 +34,7 @@ async def setup(bot: discord.Client):
                     "online": "🟢",
                     "degraded": "🟡",
                     "offline": "🔴",
-                    "unknown": "⚪"
+                    "unknown": "⚪",
                 }.get(data.get("status", "unknown"), "⚪")
 
                 success_rate = data.get("success_rate", 0)

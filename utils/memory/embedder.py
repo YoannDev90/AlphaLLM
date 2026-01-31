@@ -56,11 +56,12 @@ class TextEmbedder:
         load_start = time.time()
         # Initialize embedder
         self._embedder = await asyncio.to_thread(
-            TextEmbedding,
-            model_name=self.model_name, cache_dir=str(self._cache_dir)
+            TextEmbedding, model_name=self.model_name, cache_dir=str(self._cache_dir)
         )
         load_time = time.time() - load_start
-        self._logger.info(f"FastEmbed model {self.model_name} loaded in {load_time:.4f}s")
+        self._logger.info(
+            f"FastEmbed model {self.model_name} loaded in {load_time:.4f}s"
+        )
 
         # Load persistent cache index
         if self.enable_cache:
@@ -284,7 +285,7 @@ class TextEmbedder:
                 if self._cache_data_dir.exists()
                 else 0
             )
-        except:
+        except Exception:
             disk_files = 0
 
         return {

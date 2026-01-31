@@ -9,15 +9,13 @@ from urllib.parse import unquote, urlparse
 import discord
 import requests
 from PIL import Image
-
-from config import LOGGER_NAME
-
-logger = logging.getLogger(LOGGER_NAME)
-
 from starlette.datastructures import UploadFile
 
+from config import LOGGER_NAME
 from utils.handlers.markdown import MarkdownConverter
 from utils.handlers.vision import VisionHandler
+
+logger = logging.getLogger(LOGGER_NAME)
 
 # Formats de fichiers supportés
 SUPPORTED_FORMATS = {

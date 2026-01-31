@@ -3,7 +3,7 @@ import logging
 import discord
 
 from bots.bot import bot as main_bot
-from config import LOGGER_NAME
+from config import DEV_IDS, LOGGER_NAME
 from utils.database.server_conf import (add_to_allowed_channels,
                                         add_to_allowed_roles)
 
@@ -13,12 +13,18 @@ logger = logging.getLogger(LOGGER_NAME)
 async def setup(bot: discord.Client):
     @bot.tree.command(
         name="whitelist_all",
-        description="Whitelist tous les salons et rôles de tous les serveurs",
+        description="Whitelist all channels and roles of all servers",
     )
     async def whitelist_all(interaction: discord.Interaction):
+        if interaction.user.id not in DEV_IDS:
+            await interaction.response.send_message(
+                "❌ You are not authorized to use this command.", ephemeral=True
+            )
+            return
+
         await interaction.response.defer(thinking=True, ephemeral=True)
         logger.info(
-            f"Commande /whitelist_all exécutée par {interaction.user.display_name}"
+            f"Command /whitelist_all executed by {interaction.user.display_name}"
         )
 
         if not main_bot.guilds:
@@ -46,11 +52,9 @@ async def setup(bot: discord.Client):
                 )
 
             except Exception as e:
-                logger.error(
-                    f"Erreur lors de la mise à jour du serveur {guild.name}: {e}"
-                )
+                logger.error(f"Error updating server {guild.name}: {e}")
 
         await interaction.followup.send(
-            f"Whitelist mis à jour pour {updated_guilds}/{total_guilds} serveurs.",
+            f"Whitelist updated for {updated_guilds}/{total_guilds} servers.",
             ephemeral=True,
         )

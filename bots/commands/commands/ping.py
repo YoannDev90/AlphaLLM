@@ -10,7 +10,7 @@ logger = logging.getLogger(LOGGER_NAME)
 async def setup(bot: discord.Client):
     @bot.tree.command(name="ping", description="Show the bot's latency")
     async def ping(interaction: discord.Interaction):
-        logger.info(f"Commande /ping exécutée par {interaction.user.display_name}")
+        logger.info(f"Command /ping executed by {interaction.user.display_name}")
         await interaction.response.defer()
 
         latency = round(bot.latency * 1000)

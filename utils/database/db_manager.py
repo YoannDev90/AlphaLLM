@@ -53,9 +53,9 @@ class DatabaseManager:
                     with pg_conn.cursor() as cursor:
                         cursor.execute(
                             """
-                            SELECT column_name 
-                            FROM information_schema.columns 
-                            WHERE table_schema = 'public' AND table_name = %s 
+                            SELECT column_name
+                            FROM information_schema.columns
+                            WHERE table_schema = 'public' AND table_name = %s
                             ORDER BY ordinal_position
                         """,
                             (table_name,),
@@ -63,7 +63,9 @@ class DatabaseManager:
                         columns = [row[0] for row in cursor.fetchall()]
 
                     if not columns:
-                        logger.warning(f"Aucune colonne trouvée pour la table {table_name}")
+                        logger.warning(
+                            f"Aucune colonne trouvée pour la table {table_name}"
+                        )
                         continue
 
                     with pg_conn.cursor() as cursor:
@@ -148,11 +150,11 @@ class DatabaseManager:
 
             pg_query = self._convert_sqlite_to_postgres(query)
             logger.debug(f"Executing PG query: {pg_query} with params: {params}")
-            
+
             with pg_conn.cursor() as cursor:
                 cursor.execute(pg_query, params)
                 pg_conn.commit()
-            
+
             logger.debug(f"Synchronisation réussie: {pg_query}")
         except psycopg2.Error as e:
             logger.error(f"Erreur lors de la synchronisation PostgreSQL: {e}")

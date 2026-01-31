@@ -128,8 +128,7 @@ async def main() -> None:
 
             monitor.fill_gaps(datetime.datetime.now())
             await asyncio.gather(
-                initialize_memory_manager(),
-                initialize_function_caller()
+                initialize_memory_manager(), initialize_function_caller()
             )
 
             logger.debug("Initialisation de la base de données...")

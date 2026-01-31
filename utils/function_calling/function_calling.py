@@ -37,11 +37,16 @@ class FunctionCaller:
         load_start = time.time()
         self._processor = await asyncio.to_thread(
             AutoProcessor.from_pretrained,
-            self.model_name, cache_dir=str(CACHE_DIR), device_map="auto"
+            self.model_name,
+            cache_dir=str(CACHE_DIR),
+            device_map="auto",
         )
         self._model = await asyncio.to_thread(
             AutoModelForCausalLM.from_pretrained,
-            self.model_name, cache_dir=str(CACHE_DIR), dtype="auto", device_map="auto"
+            self.model_name,
+            cache_dir=str(CACHE_DIR),
+            dtype="auto",
+            device_map="auto",
         )
         load_time = time.time() - load_start
         self._logger.info(

@@ -5,20 +5,24 @@ from pathlib import Path
 
 import discord
 
-from config import LOGGER_NAME
+from config import DEV_IDS, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="restart", description="Redémarre le bot")
+    @bot.tree.command(name="restart", description="Restart the bot")
     async def restart(interaction: discord.Interaction):
-        await interaction.response.defer(thinking=True, ephemeral=True)
-        logger.info(f"Commande /restart exécutée par {interaction.user.display_name}")
+        if interaction.user.id not in DEV_IDS:
+            await interaction.response.send_message(
+                "❌ You are not authorized to use this command.", ephemeral=True
+            )
+            return
 
-        await interaction.followup.send(
-            "🛑 Redémarrage complet du bot...", ephemeral=True
-        )
+        await interaction.response.defer(thinking=True, ephemeral=True)
+        logger.info(f"Command /restart executed by {interaction.user.display_name}")
+
+        await interaction.followup.send("🛑 Complete bot restart...", ephemeral=True)
         logger.info("Demande de redémarrage reçue")
 
         with open(Path("stop.json"), "w") as f:

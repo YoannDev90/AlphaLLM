@@ -22,17 +22,17 @@ class ChannelSelect(Select):
         selected = [interaction.guild.get_channel(int(cid)) for cid in self.values]
         self.view.selected_channels.extend(selected)
         await interaction.response.send_message(
-            f"Salons sélectionnés : {', '.join([c.name for c in selected])}",
+            f"Selected channels: {', '.join([c.name for c in selected])}",
             ephemeral=True,
         )
 
 
 class DoneButton(Button):
     def __init__(self):
-        super().__init__(label="Terminé", style=discord.ButtonStyle.primary)
+        super().__init__(label="Done", style=discord.ButtonStyle.primary)
 
     async def callback(self, interaction: Interaction):
-        await interaction.response.send_message("Sélection terminée.", ephemeral=True)
+        await interaction.response.send_message("Selection completed.", ephemeral=True)
         self.view.stop()
 
 

@@ -14,7 +14,7 @@ async def setup(bot: discord.Client):
     )
     async def clear_history(interaction: discord.Interaction):
         logger.info(
-            f"Commande /clear-history exécutée par {interaction.user.display_name}"
+            f"Command /clear-history executed by {interaction.user.display_name}"
         )
         await interaction.response.defer(ephemeral=True)
 
@@ -36,7 +36,7 @@ async def setup(bot: discord.Client):
             await interaction.followup.send(embed=embed, ephemeral=True)
 
         except Exception as e:
-            logger.error(f"Erreur lors de la suppression de l'historique: {str(e)}")
+            logger.error(f"Error clearing history: {str(e)}")
             embed = discord.Embed(
                 title="❌ Error",
                 description="An error occurred while trying to clear your history. Please try again later.",

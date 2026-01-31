@@ -7,7 +7,6 @@ from config import LOGGER_NAME
 from utils.discord_utils.permission_checker import PermissionChecker
 from utils.handlers.messages import smart_long_messages
 from utils.unified_text import Origin, unified_text_gen
-from utils.views import message
 
 logger = logging.getLogger(LOGGER_NAME)
 perms_checker = PermissionChecker()
@@ -53,14 +52,12 @@ async def setup(bot: discord.Client):
         model: str = "auto",
         attachment: discord.Attachment = None,
     ):
-        logger.info(f"Commande /ask exécutée par {interaction.user.display_name}")
+        logger.info(f"Command /ask executed by {interaction.user.display_name}")
 
         # Check permissions
         authorized, reason = await perms_checker.is_authorized_int(interaction)
         if not authorized:
-            await interaction.response.send_message(
-                f"Erreur : {reason}", ephemeral=True
-            )
+            await interaction.response.send_message(f"Error: {reason}", ephemeral=True)
             return
 
         await interaction.response.defer()

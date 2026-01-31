@@ -1,9 +1,9 @@
 import logging
 import random
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from fastapi import (APIRouter, Depends, File, Form, HTTPException, Response,
-                     UploadFile, status)
+                     UploadFile)
 from fastapi.responses import StreamingResponse
 
 from api.api_utils.security_utils import get_api_key

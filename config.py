@@ -1,4 +1,3 @@
-import datetime
 import json
 import logging
 import os
@@ -10,6 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 logger = logging.getLogger(__name__)
+
 
 def load_toml_config(file_path: str = "config.toml") -> Dict[str, Any]:
     """Charge la configuration depuis un fichier TOML"""
@@ -45,6 +45,7 @@ level_mapping = {
 }
 
 DEBUG: bool = bool(CONFIG_SECTION.get("debug"))
+DEV_IDS: list[int] = CONFIG_SECTION.get("dev_ids", [])
 
 AVAILABLE_MODELS: Iterable[str] = MODELS_SECTION.get("available_models")
 _MODELS_LIST = MODELS_SECTION.get("models", [])
@@ -83,7 +84,6 @@ if Path(API_KEYS_FILE).exists():
         API_KEYS = {}
 
 SUPPORT_SERVER: str = str(CONFIG_SECTION.get("support_server"))
-DEV_IDS: Iterable[int] = CONFIG_SECTION.get("dev_id")
 
 EMBEDDER_MODEL: str = MEMORY_SECTION.get("embedder_model")
 EMBEDDER_CACHE_DIR: str = MEMORY_SECTION.get("embedder_cache_dir")

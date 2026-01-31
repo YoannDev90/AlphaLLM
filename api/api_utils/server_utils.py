@@ -19,31 +19,32 @@ async def get_public_ip():
             async with session.get(url) as response:
                 if response.status == 200:
                     ip = await response.text()
-                    logger.debug(f"Adresse IP publique récupérée: {ip}")
+                    logger.debug(f"Public IP address retrieved: {ip}")
                     return ip.strip()
                 else:
                     logger.warning(
-                        f"Échec de la récupération de l'IP publique, status: {response.status}"
+                        f"Failed to retrieve public IP, " f"status: {response.status}"
                     )
     except Exception as e:
-        logger.warning(f"Erreur lors de la récupération de l'IP publique: {str(e)}")
+        logger.warning(f"Error retrieving public IP: {str(e)}")
     return None
 
 
 async def is_https_api_running():
     url = f"{API_URL}/status"
     try:
-        logger.debug(f"Vérification de l'état de l'API HTTPS: {url}")
+        logger.debug(f"Checking HTTPS API status: {url}")
         timeout = aiohttp.ClientTimeout(total=10)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.get(url) as response:
                 is_running = response.status == 200
                 logger.debug(
-                    f"API HTTPS {'en fonctionnement' if is_running else 'arrêtée'} (status: {response.status})"
+                    f"HTTPS API {'running' if is_running else 'stopped'} "
+                    f"(status: {response.status})"
                 )
                 return is_running
     except Exception as e:
-        logger.warning(f"Erreur lors de la vérification de l'API HTTPS: {str(e)}")
+        logger.warning(f"Error checking HTTPS API: {str(e)}")
         return False
 
 
@@ -52,7 +53,7 @@ async def ping_https_server(url: str, interval_range: tuple = (30, 300)):
 
     if min_interval < 30 or max_interval > 300 or min_interval >= max_interval:
         logger.error(
-            f"Paramètres d'intervalle invalides: {interval_range}. Min=30s, Max=300s"
+            f"Invalid interval parameters: {interval_range}. " f"Min=30s, Max=300s"
         )
         return
 
@@ -66,16 +67,16 @@ async def ping_https_server(url: str, interval_range: tuple = (30, 300)):
                     ping_time = (end_time - start_time) * 1000
 
                     if response.status == 200:
-                        logger.debug(f"Ping vers {url} - OK - {ping_time:.2f}ms")
+                        logger.debug(f"Ping to {url} - OK - {ping_time:.2f}ms")
                     else:
                         logger.warning(
-                            f"Ping vers {url} - Status: {response.status} - {ping_time:.2f}ms"
+                            f"Ping to {url} - Status: {response.status} - {ping_time:.2f}ms"
                         )
 
         except asyncio.TimeoutError:
-            logger.error(f"Ping vers {url} - Timeout après {API_REQUEST_TIMEOUT}s")
+            logger.error(f"Ping to {url} - Timeout after {API_REQUEST_TIMEOUT}s")
         except Exception as e:
-            logger.error(f"Ping vers {url} - Erreur: {str(e)}")
+            logger.error(f"Ping to {url} - Error: {str(e)}")
 
         next_interval = random.randint(min_interval, max_interval)
         await asyncio.sleep(next_interval)

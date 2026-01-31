@@ -1,7 +1,5 @@
-import json
 import logging
-from datetime import datetime
-from typing import Dict, Optional
+from typing import Optional
 
 import discord
 from discord import app_commands
@@ -73,7 +71,7 @@ async def setup(bot: discord.Client):
             else:
                 view = ChannelSelectView(interaction.guild)
                 await interaction.followup.send(
-                    "Sélectionnez les salons autorisés :", view=view, ephemeral=True
+                    "Select allowed channels:", view=view, ephemeral=True
                 )
                 await view.wait()
                 selected_channels = view.selected_channels
@@ -90,11 +88,11 @@ async def setup(bot: discord.Client):
             else:
                 view = RoleSelectView(interaction.guild)
                 await interaction.followup.send(
-                    "Sélectionnez les rôles autorisés :", view=view, ephemeral=True
+                    "Select allowed roles:", view=view, ephemeral=True
                 )
                 await view.wait()
                 selected_roles = view.selected_roles
                 allowed = [r.id for r in interaction.guild.roles if r in selected_roles]
             await set_allowed_roles(interaction.guild.id, allowed)
 
-        await interaction.followup.send("Configuration mise à jour.", ephemeral=True)
+        await interaction.followup.send("Configuration updated.", ephemeral=True)

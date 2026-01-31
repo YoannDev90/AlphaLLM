@@ -69,7 +69,6 @@ class ChatModel(BaseChatModel):
     ) -> AsyncGenerator[StreamChunk, None]:
         """Essaie de streamer avec une configuration spécifique"""
         litellm_params = config["litellm_params"]
-        tokenizer_name = config.get("tokenizer", self.model_name)
 
         current_params = {
             "model": litellm_params["model"],
@@ -299,7 +298,9 @@ class ChatModel(BaseChatModel):
                 )
                 logger.info("API call successful")
             except asyncio.TimeoutError:
-                logger.error(f"Request to {params['model']} with {len(fallbacks)} fallbacks timed out after {timeout_seconds}s")
+                logger.error(
+                    f"Request to {params['model']} with {len(fallbacks)} fallbacks timed out after {timeout_seconds}s"
+                )
                 # Instead of returning error, retry with next config if available
                 if retry_count < len(configs) - 1:
                     logger.info("Timeout occurred, retrying with next config...")

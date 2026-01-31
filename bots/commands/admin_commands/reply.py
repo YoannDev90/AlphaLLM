@@ -8,30 +8,32 @@ logger = logging.getLogger(LOGGER_NAME)
 
 
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="reply", description="Répond à un utilisateur via DM")
+    @bot.tree.command(name="reply", description="Reply to a user via DM")
     async def reply(interaction: discord.Interaction, user_id: str, message: str):
+        if interaction.user.id not in DEV_IDS:
+            await interaction.response.send_message(
+                "❌ You are not authorized to use this command.", ephemeral=True
+            )
+            return
+
         await interaction.response.defer(thinking=True, ephemeral=True)
-        logger.info(f"Commande /reply exécutée par {interaction.user.display_name}")
+        logger.info(f"Command /reply executed by {interaction.user.display_name}")
 
         try:
             user_id = int(user_id)
             asker = await bot.fetch_user(user_id)
             if not DEV_IDS:
-                raise ValueError(
-                    "Les IDs des développeurs ne sont pas définis dans la configuration."
-                )
+                raise ValueError("Developer IDs are not defined in the configuration.")
             await asker.send(
-                f"Développeur (<@{interaction.user.id}>): {message}\nUse `/contact-dev` to reply"
+                f"Developer (<@{interaction.user.id}>): {message}\nUse `/contact-dev` to reply"
             )
         except discord.HTTPException as e:
-            logger.error(f"Erreur lors de l'envoi du message : {e}")
-            await interaction.followup.send(
-                "Erreur lors de l'envoi du message.", ephemeral=True
-            )
+            logger.error(f"Error sending message: {e}")
+            await interaction.followup.send("Error sending message.", ephemeral=True)
             return
         except Exception as e:
-            logger.error(f"Erreur inattendue : {e}")
-            await interaction.followup.send("Erreur inattendue.", ephemeral=True)
+            logger.error(f"Unexpected error: {e}")
+            await interaction.followup.send("Unexpected error.", ephemeral=True)
             return
 
-        await interaction.followup.send("Message envoyé avec succès.", ephemeral=True)
+        await interaction.followup.send("Message sent successfully.", ephemeral=True)

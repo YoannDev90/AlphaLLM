@@ -54,7 +54,7 @@ async def auto_purge():
             if e.status == 503 and attempt < max_retries - 1:
                 wait_time = 2**attempt  # Exponential backoff
                 logger.warning(
-                    f"503 error during auto-purge, retrying in {wait_time}s (attempt {attempt+1}/{max_retries})"
+                    f"503 error during auto-purge, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})"
                 )
                 await asyncio.sleep(wait_time)
             else:
@@ -101,7 +101,6 @@ async def clear_command(interaction: discord.Interaction):
 
 
 async def close_bot(bot):
-    global purge_task
     if purge_task and not purge_task.done():
         purge_task.cancel()
         try:

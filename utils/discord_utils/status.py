@@ -62,7 +62,7 @@ def update_status_on_success(model: str, elapsed_time: str):
     try:
         elapsed = float(elapsed_time.split()[0])
         entry["status"] = "online" if elapsed < 30 else "degraded"
-    except:
+    except Exception:
         entry["status"] = "online"
     save_status(status)
 
@@ -118,19 +118,27 @@ async def status_emulation(shutdown_event: asyncio.Event):
                     )
                 ]
                 if results and len(results) > 0:
-                    response_text = results[0].response if hasattr(results[0], 'response') else str(results[0])
+                    response_text = (
+                        results[0].response
+                        if hasattr(results[0], "response")
+                        else str(results[0])
+                    )
                     # Check if it's an error response
                     error_messages = [
                         "Request timed out",
                         "I'm sorry, but I couldn't generate a response",
                         "API configuration error",
-                        "Request timed out after trying all available models"
+                        "Request timed out after trying all available models",
                     ]
-                    is_error = any(error_msg in response_text for error_msg in error_messages)
+                    is_error = any(
+                        error_msg in response_text for error_msg in error_messages
+                    )
                     if not is_error:
                         logger.debug(f"Status check for {model}: success")
                     else:
-                        logger.debug(f"Status check for {model}: error response - {response_text[:50]}...")
+                        logger.debug(
+                            f"Status check for {model}: error response - {response_text[:50]}..."
+                        )
                 else:
                     logger.debug(f"Status check for {model}: no response")
             except Exception as e:
