@@ -65,18 +65,6 @@
     "icon-color": "https://alphallm.tech/assets/images/models/hermes.webp",
     "icon-bw": "https://alphallm.tech/assets/images/models/hermes.webp"
   },
-  "hunyuan": {
-    "name": "Hunyuan",
-    "author": "Tencent",
-    "icon-color": "https://alphallm.tech/assets/images/models/tencent.webp",
-    "icon-bw": "https://alphallm.tech/assets/images/models/tencent.webp"
-  },
-  "jamba": {
-    "name": "Jamba",
-    "author": "AI21 Labs",
-    "icon-color": "https://alphallm.tech/assets/images/models/jamba.webp",
-    "icon-bw": "https://alphallm.tech/assets/images/models/jamba.webp"
-  },
   "kimi": {
     "name": "Kimi",
     "author": "Moonshot AI",
@@ -94,12 +82,6 @@
     "author": "Meituan",
     "icon-color": "https://alphallm.tech/assets/images/models/longcat.webp",
     "icon-bw": "https://alphallm.tech/assets/images/models/longcat.webp"
-  },
-  "mercury": {
-    "name": "Mercury",
-    "author": "Inception",
-    "icon-color": "https://alphallm.tech/assets/images/models/mercury.webp",
-    "icon-bw": "https://alphallm.tech/assets/images/models/mercury.webp"
   },
   "minimax": {
     "name": "MiniMax",
@@ -130,18 +112,6 @@
     "author": "Alibaba",
     "icon-color": "https://alphallm.tech/assets/images/models/qwen.webp",
     "icon-bw": "https://alphallm.tech/assets/images/models/qwen.webp"
-  },
-  "rocinante": {
-    "name": "Rocinante",
-    "author": "Hugging Face",
-    "icon-color": "https://alphallm.tech/assets/images/models/huggingface.webp",
-    "icon-bw": "https://alphallm.tech/assets/images/models/huggingface.webp"
-  },
-  "seed": {
-    "name": "Seed",
-    "author": "Bytedance",
-    "icon-color": "https://alphallm.tech/assets/images/models/seed.webp",
-    "icon-bw": "https://alphallm.tech/assets/images/models/seed.webp"
   },
   "perplexity": {
     "name": "Sonar",
