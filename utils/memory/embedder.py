@@ -1,5 +1,6 @@
 """Embedder implementation using FastEmbed with advanced caching."""
 
+import asyncio
 import hashlib
 import json
 import logging
@@ -42,10 +43,11 @@ class TextEmbedder:
         self._cache_index_file = self._cache_dir / "cache_index.json"
         self._cache_data_dir = self._cache_dir / "embeddings"
 
-        self._ensure_initialized()
+        # Defer initialization to async method
+        # self._ensure_initialized()
 
-    def _ensure_initialized(self) -> None:
-        """Initialize embedder and load persistent cache."""
+    async def initialize(self) -> None:
+        """Async initialize embedder and load persistent cache."""
         if self._embedder is not None:
             return
 
@@ -53,7 +55,8 @@ class TextEmbedder:
         self._cache_data_dir.mkdir(parents=True, exist_ok=True)
         load_start = time.time()
         # Initialize embedder
-        self._embedder = TextEmbedding(
+        self._embedder = await asyncio.to_thread(
+            TextEmbedding,
             model_name=self.model_name, cache_dir=str(self._cache_dir)
         )
         load_time = time.time() - load_start

@@ -1,5 +1,6 @@
 """Function calling implementation using transformers."""
 
+import asyncio
 import json
 import logging
 import os
@@ -26,17 +27,20 @@ class FunctionCaller:
         self._processor: Optional[AutoProcessor] = None
         self._model: Optional[AutoModelForCausalLM] = None
         self._tools: List[Dict[str, Any]] = []
-        self._ensure_initialized()
+        # Defer initialization to async method
 
-    def _ensure_initialized(self) -> None:
+    async def initialize(self) -> None:
+        """Async initialize processor and model."""
         if self._processor is not None and self._model is not None:
             return
         os.makedirs(CACHE_DIR, exist_ok=True)
         load_start = time.time()
-        self._processor = AutoProcessor.from_pretrained(
+        self._processor = await asyncio.to_thread(
+            AutoProcessor.from_pretrained,
             self.model_name, cache_dir=str(CACHE_DIR), device_map="auto"
         )
-        self._model = AutoModelForCausalLM.from_pretrained(
+        self._model = await asyncio.to_thread(
+            AutoModelForCausalLM.from_pretrained,
             self.model_name, cache_dir=str(CACHE_DIR), dtype="auto", device_map="auto"
         )
         load_time = time.time() - load_start

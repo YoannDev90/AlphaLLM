@@ -1,5 +1,6 @@
 """Light reranker using ONNX for local cross-encoder reranking."""
 
+import asyncio
 import logging
 import time
 from typing import List
@@ -20,16 +21,21 @@ class LightReranker:
         self.cache_dir = RERANKER_CACHE_DIR
         self.model = None
         self.tokenizer = None
-        self._load_model()
+        # Defer loading to async initialize
 
-    def _load_model(self):
-        """Load the ONNX model and tokenizer."""
+    async def initialize(self):
+        """Async load the ONNX model and tokenizer."""
+        if self.model is not None:
+            return
         try:
             load_start = time.time()
-            self.model = ORTModelForSequenceClassification.from_pretrained(
+            self.model = await asyncio.to_thread(
+                ORTModelForSequenceClassification.from_pretrained,
                 self.model_name, export=False, cache_dir=self.cache_dir
             )
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, cache_dir=self.cache_dir)
+            self.tokenizer = await asyncio.to_thread(
+                AutoTokenizer.from_pretrained, self.model_name, cache_dir=self.cache_dir
+            )
             load_time = time.time() - load_start
             logger.info(f"LightReranker loaded model: {self.model_name} in {load_time:.4f}s")
         except Exception as e:

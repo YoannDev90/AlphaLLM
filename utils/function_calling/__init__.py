@@ -20,6 +20,7 @@ async def initialize_function_caller() -> FunctionCaller:
     if _function_caller is None:
         _logger.debug("Creating shared FunctionCaller instance")
         _function_caller = FunctionCaller()
+        await _function_caller.initialize()
         tools_dir = Path("configs/tools")
         tools = []
         if tools_dir.exists():

@@ -46,6 +46,7 @@ class MemoryManager:
         return self._micro_llm
 
     async def initialize(self) -> None:
+        await self._faiss_manager.initialize()
         await self._rag_handler.initialize()
         self._logger.debug("MemoryManager initialized")
 

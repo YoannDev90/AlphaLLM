@@ -28,6 +28,11 @@ class FaissMemoryManager:
 
         logger.info(f"FaissMemoryManager initialized with dimension {dimension}")
 
+    async def initialize(self) -> None:
+        """Async initialize embedder and reranker."""
+        await self.embedder.initialize()
+        await self.reranker.initialize()
+
     async def add_memory(self, id: str, text: str, metadata: Optional[Dict] = None):
         """Add a memory to Faiss."""
         try:
