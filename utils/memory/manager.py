@@ -77,3 +77,12 @@ class MemoryManager:
         return await self._rag_handler.search_documents(
             user_id, server_id, query, limit
         )
+
+    async def get_hybrid_memories(
+        self, user_id: int, conv_id: str, input: str, recent_limit: int = 4, similar_limit: int = 5
+    ) -> Dict[str, List]:
+        """Get hybrid memories: STM from database (not implemented), LTM from Faiss search."""
+        # For now, return empty lists since STM is not implemented in this manager
+        # LTM could be searched in Faiss, but for conversation, it's not stored there
+        # TODO: Implement proper STM from database and LTM from vector search
+        return {"stm": [], "ltm": []}

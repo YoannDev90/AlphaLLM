@@ -217,6 +217,7 @@ class ChatModel(BaseChatModel):
         self, parameters: ChatParameters, start_time: datetime, retry_count: int = 0
     ) -> ChatResult:
         """Chat non-streaming avec fallbacks natifs"""
+        logger.debug(f"Entered _non_stream_chat for model {self.model_name}, stream={parameters.stream}")
         configs = self._load_configs()
         logger.debug(
             f"Starting non-stream chat with {len(configs)} configs, retry_count={retry_count}"
@@ -287,6 +288,7 @@ class ChatModel(BaseChatModel):
                 params["fallbacks"] = fallbacks
                 logger.info(f"Using {len(fallbacks)} fallback configs")
 
+            logger.debug("About to call litellm.acompletion")
             try:
                 logger.debug(
                     f"Calling litellm.acompletion with params: model={params['model']}, api_key_set={bool(params['api_key'])}, messages_count={len(params['messages'])}, fallbacks={len(fallbacks) if 'fallbacks' in params else 0}"

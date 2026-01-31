@@ -22,10 +22,10 @@ from utils.ressources import start_monitoring, stop_monitoring
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
 
-RUN_API = False
-RUN_LOGGER_BOT = False
+RUN_API = True
+RUN_LOGGER_BOT = True
 RUN_MAIN_BOT = True
-RUN_ADMIN_BOT = False
+RUN_ADMIN_BOT = True
 
 
 async def check_stop_file(restart_pending):
@@ -135,21 +135,21 @@ async def main() -> None:
             await db_manager.clone_tables()
 
             tasks = [
-                # (
-                #     run_with_shutdown(run_logger_bot(), "Logger Bot")
-                #     if RUN_LOGGER_BOT
-                #     else asyncio.sleep(0)
-                # ),
-                # (
-                #     run_with_shutdown(run_bot(), "Main Bot")
-                #     if RUN_MAIN_BOT
-                #     else asyncio.sleep(0)
-                # ),
-                # (
-                #     run_with_shutdown(run_admin_bot(), "Admin Bot")
-                #     if RUN_ADMIN_BOT
-                #     else asyncio.sleep(0)
-                # ),
+                (
+                    run_with_shutdown(run_logger_bot(), "Logger Bot")
+                    if RUN_LOGGER_BOT
+                    else asyncio.sleep(0)
+                ),
+                (
+                    run_with_shutdown(run_bot(), "Main Bot")
+                    if RUN_MAIN_BOT
+                    else asyncio.sleep(0)
+                ),
+                (
+                    run_with_shutdown(run_admin_bot(), "Admin Bot")
+                    if RUN_ADMIN_BOT
+                    else asyncio.sleep(0)
+                ),
                 (
                     run_with_shutdown(start_api_async(), "API Server")
                     if RUN_API

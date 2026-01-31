@@ -115,6 +115,7 @@ async def unified_text_gen(
         stream: Si True, streaming de la réponse.
         use_memory: Si True, utilise la mémoire. (API seulement)
     """
+    logger.debug(f"Entered unified_text_gen with user_id={user_id}, conv_id={conv_id}, input='{input}', model={model}, stream={stream}")
     origin = origin or Origin.API
     model = model or Text_Model.AUTO.value
     if isinstance(model, Text_Model):
@@ -260,29 +261,28 @@ async def unified_text_gen(
         logger.debug(f"Model not available, defaulting to: {model}")
 
     logger.debug(f"Final model to use: {model}")
+    logger.debug("About to initialize memory manager")
     memory_manager = None
     if use_memory:
         memory_manager = await get_memory_manager()
+        logger.debug("Memory manager initialized")
 
+    logger.debug("About to fetch relevant memories")
     if use_memory and memory_manager:
         relevant_memories = await memory_manager.get_hybrid_memories(
             user_id, conv_id, input, recent_limit=4, similar_limit=5
         )
     else:
         relevant_memories = {"stm": [], "ltm": []}
+    logger.debug("Relevant memories fetched")
 
-    logger.debug(
-        f"Relevant memories fetched: "
-        f"STM: {len(relevant_memories.get('stm', []))}, "
-        f"LTM: {len(relevant_memories.get('ltm', []))}"
-    )
-
+    logger.debug("About to process relevant memories")
     for mem_list in relevant_memories.values():
         for mem in mem_list:
             if "content" not in mem or mem["content"] is None:
                 mem["content"] = mem.get("text", "")
 
-    logger.debug(f"Processed relevant memories to ensure 'content' field is populated")
+    logger.debug("Processed relevant memories to ensure 'content' field is populated")
 
     history = []
     if relevant_memories.get("stm"):
@@ -351,7 +351,9 @@ async def unified_text_gen(
         + [{"role": "user", "content": input}]
     )
 
+    logger.debug("Messages prepared for chat")
     chat_model = ChatModel(model)
+    logger.debug("ChatModel instance created")
     chat_params = ChatParameters(
         messages=messages,
         model=model,
@@ -360,12 +362,16 @@ async def unified_text_gen(
         raw=True,
         files=processed_files,
     )
+    logger.debug("ChatParameters created")
 
+    logger.debug("About to call chat_model.chat")
     if stream:
         async for chunk in chat_model.chat(chat_params):
             yield chunk
     else:
+        logger.debug("Calling await chat_model.chat for non-stream")
         result = await chat_model.chat(chat_params)
+        logger.debug("Chat result received")
 
         update_status_on_success(model, result.elapsed_time)
 
