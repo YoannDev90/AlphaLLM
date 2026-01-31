@@ -32,10 +32,9 @@ async def setup(bot: discord.Client):
     )
     @app_commands.choices(
         model=[
-            app_commands.Choice(name="Flux Kontext", value="kontext"),
-            app_commands.Choice(name="Seedream 4", value="seedream"),
+            app_commands.Choice(name="Seedream", value="seedream"),
             app_commands.Choice(name="NanoBanana", value="nanobanana"),
-            app_commands.Choice(name="GPT Image 1", value="gptimage"),
+            app_commands.Choice(name="GPT Image", value="gptimage"),
         ]
     )
     async def image_edit(
@@ -72,7 +71,7 @@ async def setup(bot: discord.Client):
             warning_message = (
                 f"⚠️ Number adjusted from {original_number} to 4 (maximum allowed).\n"
             )
-        model = "kontext" if not model else model
+        model = "gptimage" if not model else model
 
         images_url = [image_1.url]
         if image_2:

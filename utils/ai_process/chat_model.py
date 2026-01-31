@@ -292,18 +292,28 @@ class ChatModel(BaseChatModel):
                 logger.debug(
                     f"Calling litellm.acompletion with params: model={params['model']}, api_key_set={bool(params['api_key'])}, messages_count={len(params['messages'])}, fallbacks={len(fallbacks) if 'fallbacks' in params else 0}"
                 )
+                # Increase timeout to allow fallbacks to work (30s per attempt * number of fallbacks)
+                timeout_seconds = 30.0 * (len(fallbacks) + 1) if fallbacks else 30.0
                 response = await asyncio.wait_for(
-                    litellm.acompletion(**params), timeout=30.0
+                    litellm.acompletion(**params), timeout=timeout_seconds
                 )
                 logger.info("API call successful")
             except asyncio.TimeoutError:
-                logger.error(f"Request to {params['model']} timed out after 30s")
-                return ChatResult(
-                    response="Request timed out. Try again.",
-                    usage=0,
-                    model=parameters.model,
-                    elapsed_time="30.0s",
-                )
+                logger.error(f"Request to {params['model']} with {len(fallbacks)} fallbacks timed out after {timeout_seconds}s")
+                # Instead of returning error, retry with next config if available
+                if retry_count < len(configs) - 1:
+                    logger.info("Timeout occurred, retrying with next config...")
+                    return await self._non_stream_chat(
+                        parameters, start_time, retry_count + 1
+                    )
+                else:
+                    logger.error("All retries exhausted due to timeout")
+                    return ChatResult(
+                        response="Request timed out after trying all available models. Please try again later.",
+                        usage=0,
+                        model=parameters.model,
+                        elapsed_time=self._format_elapsed_time(start_time),
+                    )
             except Exception as e:
                 logger.error(
                     f"API call to {params['model']} failed with exception: {type(e).__name__}: {e}"

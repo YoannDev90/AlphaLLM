@@ -27,11 +27,10 @@ async def setup(bot: discord.Client):
     )
     @app_commands.choices(
         model=[
-            app_commands.Choice(name="Flux 2", value="flux"),
-            app_commands.Choice(name="Flux Kontext", value="kontext"),
-            app_commands.Choice(name="Seedream 4", value="seedream"),
+            app_commands.Choice(name="Flux", value="flux"),
+            app_commands.Choice(name="Seedream", value="seedream"),
             app_commands.Choice(name="NanoBanana", value="nanobanana"),
-            app_commands.Choice(name="GPT Image 1", value="gptimage"),
+            app_commands.Choice(name="GPT Image", value="gptimage"),
             app_commands.Choice(name="Z-Image", value="zimage"),
         ]
     )

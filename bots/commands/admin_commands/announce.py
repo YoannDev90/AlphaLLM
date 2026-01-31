@@ -1,193 +1,210 @@
-# import json
-# import os
-# from datetime import datetime
-# import logging
+import logging
+import os
+from datetime import datetime
 
-# import discord
-# from embeds.admin import (AnnounceConfirmView,
-#                           create_announcement_confirmation_embed)
-# from embeds.announce import (AnnouncementTranslationView,
-#                              create_announcement_embed)
+import discord
+from discord import app_commands
 
-# from config import LOGGER_NAME
-# from utils.database.server_settings import get_announce_channel
-# from utils.discord.cmd_register import command_id_manager
-# from utils.translations import (SUPPORTED_LANGUAGES, TranslationManager,
-#                                 load_translations)
+from config import LOGGER_NAME
+from utils.database.server_conf import get_server_setting
+from utils.discord_utils.commands_ids import command_id_manager
 
-# logger = logging.getLogger(LOGGER_NAME)
+logger = logging.getLogger(LOGGER_NAME)
 
-# class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
-#     """Modal Discord pour saisir l'annonce - Classe nécessaire pour Discord.py"""
 
-#     def __init__(self, bot):
-#         super().__init__()
-#         self.bot = bot
+class AnnounceModal(discord.ui.Modal, title="Send Announcement"):
+    """Modal for entering announcement message"""
 
-#         self.message = discord.ui.TextInput(
-#             label="Message d'annonce",
-#             style=discord.TextStyle.paragraph,
-#             placeholder="Tapez ici votre annonce en anglais (multi-ligne possible)",
-#             required=True,
-#             max_length=2000
-#         )
-#         self.add_item(self.message)
+    def __init__(self, bot):
+        super().__init__()
+        self.bot = bot
 
-#     async def on_submit(self, interaction: discord.Interaction):
-#         logger.info(f"Modal soumis par {interaction.user} (ID: {interaction.user.id})")
-#         message = self.message.value
+        self.message = discord.ui.TextInput(
+            label="Announcement Message",
+            style=discord.TextStyle.paragraph,
+            placeholder="Type your announcement here (English, multi-line possible)",
+            required=True,
+            max_length=2000
+        )
+        self.add_item(self.message)
 
-#         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-#         file_path = f"translations/announce_{timestamp}.json"
+    async def on_submit(self, interaction: discord.Interaction):
+        logger.info(f"Announcement modal submitted by {interaction.user} (ID: {interaction.user.id})")
+        message = self.message.value
 
-#         os.makedirs("translations", exist_ok=True)
+        # Create confirmation embed
+        embed = discord.Embed(
+            title="📢 Announcement Confirmation",
+            description=f"**Message:**\n{message[:1000]}{'...' if len(message) > 1000 else ''}",
+            color=discord.Color.orange(),
+            timestamp=datetime.now()
+        )
+        embed.add_field(
+            name="📊 Statistics",
+            value=f"• **Target Servers:** {len(self.bot.guilds)}\n"
+                  f"• **Message Length:** {len(message)} characters",
+            inline=False
+        )
+        embed.set_footer(text="⚠️ Please confirm sending this announcement")
 
-#         await interaction.response.send_message("🔄 Génération des traductions en cours...", ephemeral=True)
+        # Create confirmation view
+        view = AnnounceConfirmView(message, self.bot)
+        await interaction.response.send_message(embed=embed, view=view, ephemeral=True)
 
-#         translation_manager = TranslationManager(message, file_path)
 
-#         await translation_manager.generate_all_translations(interaction)
+class AnnounceConfirmView(discord.ui.View):
+    """View for confirming announcement sending"""
 
-#         confirmation_view = AnnounceConfirmView(message, file_path, translation_manager, len(self.bot.guilds))
+    def __init__(self, message: str, bot):
+        super().__init__(timeout=300)  # 5 minutes timeout
+        self.message = message
+        self.bot = bot
 
-#         # Créer l'embed de confirmation avec aperçu
-#         embed = discord.Embed(
-#             title="🔍 Traductions générées - Confirmation requise",
-#             description=f"**Message original :**\n{message[:1000]}{'...' if len(message) > 1000 else ''}",
-#             color=discord.Color.orange(),
-#             timestamp=datetime.now()
-#         )
-#         embed.add_field(
-#             name="� Statistiques",
-#             value=f"• **{len(translation_manager.translations)}** langues traduites\n"
-#                   f"• **Fichier :** `{file_path}`\n"
-#                   f"• **Serveurs cibles :** {len(self.bot.guilds)}",
-#             inline=False
-#         )
-#         embed.add_field(
-#             name="🔗 Actions disponibles",
-#             value="• **Confirmer l'envoi** : Envoie l'annonce sur tous les serveurs\n"
-#                   f"• **Aperçu traductions** : Voir quelques exemples de traductions",
-#             inline=False
-#         )
-#         embed.set_footer(text="⚠️ Vérifiez les traductions avant d'envoyer l'annonce")
+    @discord.ui.button(label="✅ Send Announcement", style=discord.ButtonStyle.green)
+    async def confirm_send(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
 
-#         await interaction.edit_original_response(
-#             content=None,
-#             embed=embed,
-#             view=confirmation_view
-#         )
+        # Disable buttons
+        for item in self.children:
+            item.disabled = True
+        await interaction.edit_original_response(view=self)
 
-# async def find_announcement_channel(guild):
-#     announce_channel_id = get_announce_channel(guild.id)
-#     target_channel = None
-#     ask_define = False
+        # Send announcement
+        announced_guilds, failed_guilds = await send_announcement_to_guilds(self.bot, self.message)
 
-#     if announce_channel_id:
-#         target_channel = guild.get_channel(announce_channel_id)
-#         logger.info(f"Canal d'annonce configuré trouvé : {target_channel} (ID: {announce_channel_id})")
-#         ask_define = False
+        # Send final report
+        embed = discord.Embed(
+            title="✅ Announcement Complete",
+            description="The announcement has been sent to all servers.",
+            color=discord.Color.green(),
+            timestamp=datetime.now()
+        )
+        embed.add_field(
+            name="📊 Results",
+            value=f"• **Successful:** {announced_guilds} servers\n"
+                  f"• **Failed:** {failed_guilds} servers\n"
+                  f"• **Total:** {len(self.bot.guilds)} servers",
+            inline=False
+        )
 
-#     if not target_channel and guild.system_channel:
-#         perms = guild.system_channel.permissions_for(guild.me)
-#         if perms.read_messages and perms.send_messages:
-#             target_channel = guild.system_channel
-#             logger.info(f"Utilisation du canal système : {target_channel}")
-#             ask_define = True
+        await interaction.followup.send(embed=embed, ephemeral=True)
 
-#     if not target_channel:
-#         for channel in guild.text_channels:
-#             perms = channel.permissions_for(guild.me)
-#             if perms.read_messages and perms.send_messages:
-#                 target_channel = channel
-#                 logger.info(f"Utilisation du premier canal accessible : {target_channel}")
-#                 ask_define = True
-#                 break
+    @discord.ui.button(label="❌ Cancel", style=discord.ButtonStyle.red)
+    async def cancel_send(self, interaction: discord.Interaction, button: discord.ui.Button):
+        embed = discord.Embed(
+            title="❌ Announcement Cancelled",
+            description="The announcement has been cancelled.",
+            color=discord.Color.red(),
+            timestamp=datetime.now()
+        )
+        await interaction.response.edit_message(embed=embed, view=None)
 
-#     return target_channel, ask_define
 
-# async def send_announcement_to_guilds(bot, message: str, translation_view: AnnouncementTranslationView) -> tuple[int, int]:
-#     embed = create_announcement_embed(message, 'en')
+async def get_announce_channel(guild_id: int) -> int:
+    """Get the configured announcement channel for a guild"""
+    try:
+        setting = await get_server_setting(guild_id, "announce_channel")
+        if setting and isinstance(setting, int):
+            return setting
+    except Exception as e:
+        logger.warning(f"Could not get announce channel for guild {guild_id}: {e}")
+    return None
 
-#     announced_guilds = 0
-#     failed_guilds = 0
 
-#     logger.info(f"Début de l'envoi de l'annonce sur tous les serveurs")
+async def find_announcement_channel(guild):
+    """Find the appropriate channel for announcements"""
+    announce_channel_id = await get_announce_channel(guild.id)
+    target_channel = None
+    ask_define = False
 
-#     for guild in bot.guilds:
-#         logger.info(f"Traitement du serveur : {guild.name} (ID: {guild.id})")
+    if announce_channel_id:
+        target_channel = guild.get_channel(announce_channel_id)
+        logger.info(f"Configured announcement channel found: {target_channel} (ID: {announce_channel_id})")
+        ask_define = False
 
-#         try:
-#             target_channel, ask_define = await find_announcement_channel(guild)
+    if not target_channel and guild.system_channel:
+        perms = guild.system_channel.permissions_for(guild.me)
+        if perms.read_messages and perms.send_messages:
+            target_channel = guild.system_channel
+            logger.info(f"Using system channel: {target_channel}")
+            ask_define = True
 
-#             if not target_channel:
-#                 logger.warning(f"Aucun canal d'annonce trouvé sur le serveur {guild.name} (ID: {guild.id})")
-#                 failed_guilds += 1
-#                 continue
+    if not target_channel:
+        for channel in guild.text_channels:
+            perms = channel.permissions_for(guild.me)
+            if perms.read_messages and perms.send_messages:
+                target_channel = channel
+                logger.info(f"Using first accessible channel: {target_channel}")
+                ask_define = True
+                break
 
-#             await target_channel.send(embed=embed, view=translation_view)
-#             logger.info(f"Annonce envoyée sur {guild.name} dans {target_channel.name}")
-#             announced_guilds += 1
+    return target_channel, ask_define
 
-#             if ask_define:
-#                 await send_channel_config_suggestion(target_channel, guild)
 
-#         except discord.Forbidden:
-#             logger.error(f"Permissions insuffisantes pour envoyer un message sur le serveur {guild.name} (ID: {guild.id})")
-#             failed_guilds += 1
-#         except Exception as e:
-#             logger.error(f"Erreur lors de l'envoi sur {guild.name} (ID: {guild.id}) : {e}")
-#             failed_guilds += 1
+async def send_announcement_to_guilds(bot, message: str) -> tuple[int, int]:
+    """Send announcement to all guilds"""
+    embed = discord.Embed(
+        title="📢 Announcement",
+        description=message,
+        color=discord.Color.blue(),
+        timestamp=datetime.now()
+    )
+    embed.set_footer(text="AlphaLLM Announcement")
 
-#     logger.info(f"Annonce terminée : {announced_guilds} serveurs réussis, {failed_guilds} échecs")
+    announced_guilds = 0
+    failed_guilds = 0
 
-#     return announced_guilds, failed_guilds
+    logger.info("Starting announcement to all servers")
 
-# async def send_channel_config_suggestion(target_channel, guild):
-#     logger.info(f"Demande de configuration du canal d'annonce sur {guild.name} (ID: {guild.id})")
-#     await target_channel.send(
-#         f"<@{guild.owner_id}> Veuillez configurer ce canal comme canal d'annonces avec la commande "
-#         f"{command_id_manager.get_command_mention('guild-config')} ou utilisez {target_channel.mention} par défaut."
-#     )
+    for guild in bot.guilds:
+        logger.info(f"Processing server: {guild.name} (ID: {guild.id})")
 
-# async def send_final_report(interaction, announced_guilds: int, failed_guilds: int,
-#                            translation_view: AnnouncementTranslationView, file_path: str):
-#     await interaction.followup.send(
-#         f"✅ **Annonce terminée avec succès !**\n"
-#         f"• **{announced_guilds} serveurs** : annonce envoyée\n"
-#         f"• **{failed_guilds} serveurs** : échecs\n"
-#         f"• **Traductions** : {len(translation_view.original_message)} caractères générés\n"
-#         f"• **Fichier** : `{file_path}`",
-#         ephemeral=True
-#     )
+        try:
+            target_channel, ask_define = await find_announcement_channel(guild)
 
-# async def setup_persistent_views(bot):
-#     if not os.path.exists("translations"):
-#         return
+            if not target_channel:
+                logger.warning(f"No announcement channel found for server {guild.name} (ID: {guild.id})")
+                failed_guilds += 1
+                continue
 
-#     files = os.listdir("translations")
+            await target_channel.send(embed=embed)
+            logger.info(f"Announcement sent to {guild.name} in {target_channel.name}")
+            announced_guilds += 1
 
-#     for filename in files:
-#         if not (filename.startswith("announce_") and filename.endswith(".json")):
-#             continue
+            if ask_define:
+                await send_channel_config_suggestion(target_channel, guild)
 
-#         file_path = os.path.join("translations", filename)
+        except discord.Forbidden:
+            logger.error(f"Insufficient permissions to send message to server {guild.name} (ID: {guild.id})")
+            failed_guilds += 1
+        except Exception as e:
+            logger.error(f"Error sending to {guild.name} (ID: {guild.id}): {e}")
+            failed_guilds += 1
 
-#         try:
-#             original_message, translations = await load_translations(file_path)
-#             if not original_message:
-#                 continue
+    logger.info(f"Announcement complete: {announced_guilds} successful, {failed_guilds} failed")
 
-#             view = AnnouncementTranslationView(original_message, file_path)
-#             bot.add_view(view)
-#             logger.info(f"Vue persistante restaurée pour {filename}")
-#         except Exception as e:
-#             logger.error(f"Erreur lors de la restauration de la vue pour {filename}: {e}")
+    return announced_guilds, failed_guilds
 
-# async def setup(bot: discord.Client):
-#     await setup_persistent_views(bot)
 
-#     @bot.tree.command(name="announce", description="Annonce un message sur tous les serveurs")
-#     async def announce(interaction: discord.Interaction):
-#         modal = AnnounceModal(bot)
-#         await interaction.response.send_modal(modal)
+async def send_channel_config_suggestion(target_channel, guild):
+    """Send suggestion to configure announcement channel"""
+    logger.info(f"Requesting announcement channel configuration for {guild.name} (ID: {guild.id})")
+    try:
+        mention = command_id_manager.get_command_mention('guild-config')
+        await target_channel.send(
+            f"<@{guild.owner_id}> Please configure this channel as the announcement channel using {mention} or use {target_channel.mention} by default."
+        )
+    except Exception as e:
+        logger.error(f"Could not send config suggestion: {e}")
+
+
+async def setup(bot: discord.Client):
+    @bot.tree.command(name="announce", description="Send an announcement to all servers")
+    async def announce(interaction: discord.Interaction):
+        # Check if user is admin/owner
+        if not interaction.user.guild_permissions.administrator and interaction.user.id != interaction.guild.owner_id:
+            await interaction.response.send_message("❌ You need administrator permissions to use this command.", ephemeral=True)
+            return
+
+        modal = AnnounceModal(bot)
+        await interaction.response.send_modal(modal)

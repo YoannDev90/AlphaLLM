@@ -110,6 +110,18 @@ async def set_language(server_id: int, language_code: str):
     except Exception as e:
         logger.error(f"Erreur lors de la définition de la langue: {e}")
 
+async def get_language(server_id: int) -> str | None:
+    try:
+        rows = await db_manager.exc_get_query(
+            "SELECT lang FROM server_settings_new WHERE server_id = ?",
+            (server_id,),
+        )
+        if rows and rows[0][0]:
+            return str(rows[0][0])
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération de la langue: {e}")
+    return None
+
 
 async def set_announcement_channel(server_id: int, channel_id: int):
     try:
@@ -129,6 +141,18 @@ async def set_announcement_channel(server_id: int, channel_id: int):
             )
     except Exception as e:
         logger.error(f"Erreur lors de la définition du canal d'annonces: {e}")
+
+async def get_announcement_channel(server_id: int) -> int | None:
+    try:
+        rows = await db_manager.exc_get_query(
+            "SELECT announce_channel FROM server_settings_new WHERE server_id = ?",
+            (server_id,),
+        )
+        if rows and rows[0][0]:
+            return int(rows[0][0])
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération du canal d'annonces: {e}")
+    return None
 
 
 async def set_allowed_channels(server_id: int, channel_ids: list[int]):

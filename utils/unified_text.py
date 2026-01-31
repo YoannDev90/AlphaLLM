@@ -380,7 +380,19 @@ async def unified_text_gen(
         result = await chat_model.chat(chat_params)
         logger.debug("Chat result received")
 
-        update_status_on_success(model, result.elapsed_time)
+        # Only update status on success if we got a real response (not an error message)
+        error_messages = [
+            "Request timed out",
+            "I'm sorry, but I couldn't generate a response",
+            "API configuration error",
+            "Request timed out after trying all available models"
+        ]
+        is_error_response = any(error_msg in result.response for error_msg in error_messages)
+
+        if not is_error_response:
+            update_status_on_success(model, result.elapsed_time)
+        else:
+            update_status_on_failure(model)
 
         logger.info(
             f"Réponse générée - Modèle: {result.model}, Usage: {result.usage} tokens, Temps: {result.elapsed_time}"
