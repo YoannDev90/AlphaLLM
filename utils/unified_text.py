@@ -395,10 +395,9 @@ async def unified_text_gen(
                 user_id, conv_id, result.response, "assistant"
             )
 
-            stm_memories = await memory_manager.get_memories(
-                user_id, conv_id, limit_stm=300, limit_ltm=0
+            stm_list = await memory_manager.get_conversation_messages(
+                user_id, conv_id, limit=300
             )
-            stm_list = stm_memories.get("stm", [])
             if len(stm_list) > 3:
                 older_messages = stm_list[:-3]
                 dialogue = ""
@@ -408,15 +407,18 @@ async def unified_text_gen(
                     dialogue += f"{role.capitalize()}: {content}\n"
                 try:
                     summary = summarize(dialogue)
-                    await memory_manager.add_long_term_memory(
-                        user_id,
-                        conv_id,
-                        "Conversation Summary",
+                    await memory_manager.add_memory(
+                        f"{user_id}_{conv_id}_summary_{len(stm_list)}",
                         summary,
-                        "conversation",
+                        {
+                            "type": "conversation",
+                            "user_id": user_id,
+                            "conv_id": conv_id,
+                        },
                     )
-                    old_ids = [mem["id"] for mem in older_messages]
-                    await memory_manager.delete_stm_memories(old_ids)
+                    await memory_manager.delete_stm_messages(
+                        [msg.doc_id for msg in older_messages]
+                    )
                     logger.info(
                         f"Summarized {len(older_messages)} old messages into LTM"
                     )

@@ -116,9 +116,8 @@ class MemoryManager:
             user_id, server_id, document_text, document_id, metadata
         )
 
-    async def search_documents(
-        self, user_id: int, server_id: int, query: str, limit: int = 10
-    ) -> Dict[str, List]:
-        return await self._rag_handler.search_documents(
-            user_id, server_id, query, limit
-        )
+    async def delete_stm_messages(self, doc_ids: List[int]):
+        """Delete STM messages by doc_ids."""
+        for doc_id in doc_ids:
+            self._db.remove(doc_ids=[doc_id])
+        self._logger.debug(f"Deleted {len(doc_ids)} STM messages")

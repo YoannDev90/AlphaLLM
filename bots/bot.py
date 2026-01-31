@@ -50,40 +50,53 @@ async def on_message(message):
     logger.debug(
         f"About to call unified_text_gen for user {message.author.id}, input: {message.content}"
     )
-    response = [
-        result
-        async for result in unified_text_gen(
-            user_id=message.author.id,
-            conv_id=message.channel.id,
-            input=message.content,
-            model=Text_Model.AUTO,
-            files=files if files else None,
-            origin=Origin.DISCORD,
-            message=message,
-            bot=bot,
-            stream=False,
-            use_memory=True,
-        )
-    ]
-    logger.debug(f"unified_text_gen returned {len(response)} results")
-    result = response[0] if response else None
-    if result:
-        async with message.channel.typing():
-            if result.response.startswith("generated_image"):
-                import base64
-                import io
+    try:
+        response = [
+            result
+            async for result in unified_text_gen(
+                user_id=message.author.id,
+                conv_id=message.channel.id,
+                input=message.content,
+                model=Text_Model.AUTO,
+                files=files if files else None,
+                origin=Origin.DISCORD,
+                message=message,
+                bot=bot,
+                stream=False,
+                use_memory=True,
+            )
+        ]
+        logger.debug(f"unified_text_gen returned {len(response)} results")
+        result = response[0] if response else None
+        if result:
+            logger.debug(
+                f"Result model: {result.model}, response length: {len(result.response)}"
+            )
+            async with message.channel.typing():
+                if result.response.startswith("generated_image"):
+                    import base64
+                    import io
 
-                parts = result.response.split(":", 1)
-                if len(parts) == 2:
-                    base64_data = parts[1]
-                    try:
-                        image_bytes = base64.b64decode(base64_data)
-                        image_file = discord.File(
-                            io.BytesIO(image_bytes), filename="generated_image.png"
-                        )
-                        await message.channel.send(file=image_file)
-                    except Exception as e:
-                        logger.error(f"Erreur lors de l'envoi de l'image: {e}")
+                    parts = result.response.split(":", 1)
+                    if len(parts) == 2:
+                        base64_data = parts[1]
+                        try:
+                            image_bytes = base64.b64decode(base64_data)
+                            image_file = discord.File(
+                                io.BytesIO(image_bytes), filename="generated_image.png"
+                            )
+                            await message.channel.send(file=image_file)
+                        except Exception as e:
+                            logger.error(f"Erreur lors de l'envoi de l'image: {e}")
+                            await smart_long_messages_with_view(
+                                message.channel,
+                                result.response,
+                                message.content,
+                                result.model,
+                                result,
+                                bot,
+                            )
+                    else:
                         await smart_long_messages_with_view(
                             message.channel,
                             result.response,
@@ -93,27 +106,31 @@ async def on_message(message):
                             bot,
                         )
                 else:
-                    await smart_long_messages_with_view(
-                        message.channel,
-                        result.response,
-                        message.content,
-                        result.model,
-                        result,
-                        bot,
-                    )
-            else:
-                await smart_long_messages_with_view(
-                    message.channel,
-                    result.response,
-                    message.content,
-                    result.model,
-                    result,
-                    bot,
-                )
-    else:
-        await message.channel.send(
-            "Sorry, an error occurred while processing your request."
-        )
+                    logger.debug("About to call smart_long_messages_with_view")
+                    try:
+                        await smart_long_messages_with_view(
+                            message.channel,
+                            result.response,
+                            message.content,
+                            result.model,
+                            result,
+                            bot,
+                        )
+                        logger.debug(
+                            "smart_long_messages_with_view completed successfully"
+                        )
+                    except Exception as e:
+                        logger.error(f"Error sending response: {e}")
+                        await message.channel.send(
+                            "Sorry, an error occurred while sending the response."
+                        )
+        else:
+            logger.debug("No result from unified_text_gen")
+            await message.channel.send(
+                "Sorry, an error occurred while processing your request."
+            )
+    except Exception as e:
+        logger.error(f"Error in on_message: {e}")
 
 
 @bot.event

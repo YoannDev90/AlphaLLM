@@ -40,8 +40,12 @@ async def smart_long_messages_with_view(
     # Ajouter la vue au dernier message envoyé
     if last_message:
         view = MessageView(original_question, model, response_data, bot)
-        await last_message.edit(view=view)
-        view.message = last_message
+        try:
+            await last_message.edit(view=view)
+            view.message = last_message
+        except Exception as e:
+            logger.error(f"Failed to edit message with view: {e}")
+            # The message is sent, but without the view
 
 
 async def smart_long_messages(channel, response, max_length: int = 2000):
