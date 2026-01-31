@@ -1,8 +1,8 @@
 [
     {
-        "model_name": "grok-4-fast",
+        "model_name": "grok-4.1-fast",
         "litellm_params": {
-            "model": "openai/grok-4-fast-non-reasoning",
+            "model": "openai/grok-4.1-fast-non-reasoning",
             "api_base": "https://api.navy/v1",
             "api_key": "NAVY_API_KEY"
         },
@@ -24,9 +24,9 @@
         }
     },
     {
-        "model_name": "grok-3-latest",
+        "model_name": "grok-4.1-fast",
         "litellm_params": {
-            "model": "openai/grok-3-latest",
+            "model": "openai/grok-4-1-fast-non-reasoning",
             "api_base": "https://api.voidai.app/v1/",
             "api_key": "VOID_API_KEY"
         },
@@ -36,9 +36,9 @@
         }
     },
     {
-        "model_name": "grok-4-fast",
+        "model_name": "grok-4.1-fast",
         "litellm_params": {
-            "model": "openai/grok-4-fast",
+            "model": "openai/grok-4.1-fast",
             "api_base": "https://mnnai.ru/v1/",
             "api_key": "MNN_API_KEY"
         },
@@ -48,9 +48,9 @@
         }
     },
     {
-        "model_name": "grok-3-mini",
+        "model_name": "grok-4.1-fast",
         "litellm_params": {
-            "model": "openai/grok-3-mini",
+            "model": "openai/grok-4.1-fast",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
         },
@@ -60,9 +60,9 @@
         }
     },
     {
-        "model_name": "grok-4",
+        "model_name": "grok-4.1-fast",
         "litellm_params": {
-            "model": "openai/grok-4",
+            "model": "openai/grok-4.1-fast-non-reasoning",
             "api_base": "https://api.airforce/v1/",
             "api_key": "AIRFORCE_API_KEY"
         },
