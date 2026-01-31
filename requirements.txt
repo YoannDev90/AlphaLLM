@@ -1,12 +1,13 @@
-chromadb
 colorama
 discord.py
+faiss-cpu
 fastapi
 fastembed
 langfuse
 litellm
 markitdown[all]
 matplotlib
+optimum[onnxruntime]
 Pillow
 psutil
 psycopg2-binary

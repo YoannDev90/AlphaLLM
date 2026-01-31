@@ -11,6 +11,7 @@ from utils.unified_image import Format, unified_image_gen
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)
 
+
 @router.post("/image/generation", tags=["image"], summary="Generate images from prompt")
 async def generate_image(
     prompt: str = Form(...),
@@ -23,13 +24,18 @@ async def generate_image(
 ):
     if user_id is None:
         raise HTTPException(status_code=400, detail="user_id is required")
-    
+
     image_models = load_models_data("image")
     if model not in image_models:
-        raise HTTPException(status_code=400, detail=f"Model '{model}' is not available for image generation")
-    
-    logger.info(f"Image generation request: user_id={user_id}, model={model}, num_images={num_images}, size={size}, enhance={enhance}, prompt={prompt[:50]}...")
-    
+        raise HTTPException(
+            status_code=400,
+            detail=f"Model '{model}' is not available for image generation",
+        )
+
+    logger.info(
+        f"Image generation request: user_id={user_id}, model={model}, num_images={num_images}, size={size}, enhance={enhance}, prompt={prompt[:50]}..."
+    )
+
     try:
         results = await unified_image_gen(
             prompt=prompt,
@@ -40,14 +46,11 @@ async def generate_image(
             format=Format.BASE64,
             user_id=user_id,
         )
-        
+
         images = [img for img, _ in results]
         models_used = [model for _, model in results]
-        
-        return {
-            "images": images,
-            "models": models_used
-        }
+
+        return {"images": images, "models": models_used}
     except Exception as e:
         logger.error(f"Error in image generation: {e}")
         raise HTTPException(status_code=500, detail="Image generation failed")

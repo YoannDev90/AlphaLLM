@@ -22,6 +22,7 @@ class MarkdownConverter:
 
             # Essai de détecter si c'est du JSON
             import json
+
             try:
                 json.loads(content)
                 # Si c'est du JSON valide, formater en Markdown

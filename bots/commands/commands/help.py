@@ -7,6 +7,7 @@ from utils.discord_utils.commands_ids import command_id_manager
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 async def setup(bot: discord.Client):
     @bot.tree.command(name="help-bot", description="Show help informations")
     async def help(interaction: discord.Interaction):
@@ -19,13 +20,18 @@ async def setup(bot: discord.Client):
                 title="Help - AlphaLLM",
                 description=desc,
                 color=discord.Color.default(),
-                timestamp=discord.utils.utcnow()
+                timestamp=discord.utils.utcnow(),
             )
 
-            embed.set_footer(text=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
+            embed.set_footer(
+                text=interaction.user.display_name,
+                icon_url=interaction.user.display_avatar.url,
+            )
 
             await interaction.response.send_message(embed=embed)
 
         except Exception as e:
             logger.error(f"Error sending help message: {str(e)}")
-            await interaction.followup.send("❌ An error occurred while sending the help message.", ephemeral=True)
+            await interaction.followup.send(
+                "❌ An error occurred while sending the help message.", ephemeral=True
+            )

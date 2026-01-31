@@ -6,6 +6,7 @@ from config import DEV_IDS, LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 async def setup(bot: discord.Client):
     @bot.tree.command(name="reply", description="Répond à un utilisateur via DM")
     async def reply(interaction: discord.Interaction, user_id: str, message: str):
@@ -16,13 +17,17 @@ async def setup(bot: discord.Client):
             user_id = int(user_id)
             asker = await bot.fetch_user(user_id)
             if not DEV_IDS:
-                raise ValueError("Les IDs des développeurs ne sont pas définis dans la configuration.")
+                raise ValueError(
+                    "Les IDs des développeurs ne sont pas définis dans la configuration."
+                )
             await asker.send(
                 f"Développeur (<@{interaction.user.id}>): {message}\nUse `/contact-dev` to reply"
             )
         except discord.HTTPException as e:
             logger.error(f"Erreur lors de l'envoi du message : {e}")
-            await interaction.followup.send("Erreur lors de l'envoi du message.", ephemeral=True)
+            await interaction.followup.send(
+                "Erreur lors de l'envoi du message.", ephemeral=True
+            )
             return
         except Exception as e:
             logger.error(f"Erreur inattendue : {e}")

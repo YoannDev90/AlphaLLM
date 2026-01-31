@@ -7,10 +7,15 @@ from utils.memory import get_memory_manager
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 async def setup(bot: discord.Client):
-    @bot.tree.command(name="clear-history", description="Reset your conversation history with the bot")
+    @bot.tree.command(
+        name="clear-history", description="Reset your conversation history with the bot"
+    )
     async def clear_history(interaction: discord.Interaction):
-        logger.info(f"Commande /clear-history exécutée par {interaction.user.display_name}")
+        logger.info(
+            f"Commande /clear-history exécutée par {interaction.user.display_name}"
+        )
         await interaction.response.defer(ephemeral=True)
 
         try:
@@ -21,9 +26,12 @@ async def setup(bot: discord.Client):
                 title="🗑️ History cleaned",
                 description="Your conversation history has been deleted.",
                 color=discord.Color.green(),
-                timestamp=discord.utils.utcnow()
+                timestamp=discord.utils.utcnow(),
             )
-            embed.set_footer(text=interaction.user.display_name, icon_url=interaction.user.display_avatar.url)
+            embed.set_footer(
+                text=interaction.user.display_name,
+                icon_url=interaction.user.display_avatar.url,
+            )
 
             await interaction.followup.send(embed=embed, ephemeral=True)
 
@@ -33,6 +41,6 @@ async def setup(bot: discord.Client):
                 title="❌ Error",
                 description="An error occurred while trying to clear your history. Please try again later.",
                 color=discord.Color.red(),
-                timestamp=discord.utils.utcnow()
+                timestamp=discord.utils.utcnow(),
             )
             await interaction.followup.send(embed=embed, ephemeral=True)

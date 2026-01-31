@@ -1,0 +1,10 @@
+[
+    {
+        "model_name": "nova-micro",
+        "litellm_params": {
+            "model": "openai/nova-fast",
+            "api_base": "https://gen.pollinations.ai/v1/",
+            "api_key": "POLLINATIONS_API_KEY"
+        }
+    }
+]

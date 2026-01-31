@@ -9,6 +9,7 @@ from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+
 async def setup(bot: discord.Client):
     @bot.tree.command(name="stop", description="Arrête le bot")
     async def stop(interaction: discord.Interaction):
@@ -19,6 +20,8 @@ async def setup(bot: discord.Client):
         logger.info("Demande d'arrêt reçue")
 
         with open(Path("stop.json"), "w") as f:
-            json.dump({"COMMAND": "STOP", "timestamp": datetime.datetime.now().isoformat()}, f)
-        
+            json.dump(
+                {"COMMAND": "STOP", "timestamp": datetime.datetime.now().isoformat()}, f
+            )
+
         logger.info("Fichier stop.json créé, le processus principal va arrêter le bot.")

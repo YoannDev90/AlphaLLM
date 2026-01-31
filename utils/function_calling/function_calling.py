@@ -1,4 +1,5 @@
 """Function calling implementation using transformers."""
+
 import json
 import logging
 import os
@@ -38,7 +39,9 @@ class FunctionCaller:
             self.model_name, cache_dir=str(CACHE_DIR), dtype="auto", device_map="auto"
         )
         load_time = time.time() - load_start
-        self._logger.info(f"Function calling model {self.model_name} loaded in {load_time:.4f}s")
+        self._logger.info(
+            f"Function calling model {self.model_name} loaded in {load_time:.4f}s"
+        )
 
     def set_tools(self, tools: List[Dict[str, Any]]) -> None:
         """Set the available tools."""
@@ -47,26 +50,28 @@ class FunctionCaller:
     def parse_function_calls(self, output: str) -> List[Dict[str, Any]]:
         """Parse function calls from model output."""
         calls = []
-        pattern = r'<start_function_call>(.*?)<end_function_call>'
+        pattern = r"<start_function_call>(.*?)<end_function_call>"
         matches = re.findall(pattern, output, re.DOTALL)
         for match in matches:
-            if match.startswith('call:'):
+            if match.startswith("call:"):
                 func_part = match[5:]
-                brace_start = func_part.find('{')
+                brace_start = func_part.find("{")
                 if brace_start != -1:
                     func_name = func_part[:brace_start]
                     params_str = func_part[brace_start:]
-                    params_str = params_str.replace('<escape>', '').replace('</escape>', '')
+                    params_str = params_str.replace("<escape>", "").replace(
+                        "</escape>", ""
+                    )
                     try:
                         params = {}
-                        if params_str.startswith('{') and params_str.endswith('}'):
+                        if params_str.startswith("{") and params_str.endswith("}"):
                             inner = params_str[1:-1]
-                            pairs = [p.strip() for p in inner.split(',')]
+                            pairs = [p.strip() for p in inner.split(",")]
                             for pair in pairs:
-                                if ':' in pair:
-                                    key, value = pair.split(':', 1)
+                                if ":" in pair:
+                                    key, value = pair.split(":", 1)
                                     params[key.strip()] = value.strip().strip('"')
-                        calls.append({'function': func_name, 'parameters': params})
+                        calls.append({"function": func_name, "parameters": params})
                     except Exception as e:
                         self._logger.warning(f"Failed to parse function call: {e}")
         return calls
@@ -77,27 +82,32 @@ class FunctionCaller:
         message = [
             {
                 "role": "developer",
-                "content": "You are a model that can do function calling with the following functions"
+                "content": "You are a model that can do function calling with the following functions",
             },
-            {
-                "role": "user",
-                "content": user_content
-            }
+            {"role": "user", "content": user_content},
         ]
         template_start = time.time()
         inputs = self._processor.apply_chat_template(
-            message, tools=self._tools, add_generation_prompt=True, return_dict=True, return_tensors="pt"
+            message,
+            tools=self._tools,
+            add_generation_prompt=True,
+            return_dict=True,
+            return_tensors="pt",
         )
         template_time = time.time() - template_start
 
         generate_start = time.time()
         out = self._model.generate(
-            **inputs.to(self._model.device), pad_token_id=self._processor.eos_token_id, max_new_tokens=256
+            **inputs.to(self._model.device),
+            pad_token_id=self._processor.eos_token_id,
+            max_new_tokens=256,
         )
         generate_time = time.time() - generate_start
 
         decode_start = time.time()
-        output = self._processor.decode(out[0][len(inputs["input_ids"][0]):], skip_special_tokens=True)
+        output = self._processor.decode(
+            out[0][len(inputs["input_ids"][0]) :], skip_special_tokens=True
+        )
         decode_time = time.time() - decode_start
 
         total_time = time.time() - start_time

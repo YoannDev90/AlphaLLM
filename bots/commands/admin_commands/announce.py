@@ -19,11 +19,11 @@
 
 # class AnnounceModal(discord.ui.Modal, title="Envoyer une annonce"):
 #     """Modal Discord pour saisir l'annonce - Classe nécessaire pour Discord.py"""
-    
+
 #     def __init__(self, bot):
 #         super().__init__()
 #         self.bot = bot
-        
+
 #         self.message = discord.ui.TextInput(
 #             label="Message d'annonce",
 #             style=discord.TextStyle.paragraph,
@@ -36,10 +36,10 @@
 #     async def on_submit(self, interaction: discord.Interaction):
 #         logger.info(f"Modal soumis par {interaction.user} (ID: {interaction.user.id})")
 #         message = self.message.value
-        
+
 #         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 #         file_path = f"translations/announce_{timestamp}.json"
-        
+
 #         os.makedirs("translations", exist_ok=True)
 
 #         await interaction.response.send_message("🔄 Génération des traductions en cours...", ephemeral=True)
@@ -71,7 +71,7 @@
 #             inline=False
 #         )
 #         embed.set_footer(text="⚠️ Vérifiez les traductions avant d'envoyer l'annonce")
-        
+
 #         await interaction.edit_original_response(
 #             content=None,
 #             embed=embed,
@@ -113,10 +113,10 @@
 #     failed_guilds = 0
 
 #     logger.info(f"Début de l'envoi de l'annonce sur tous les serveurs")
-    
+
 #     for guild in bot.guilds:
 #         logger.info(f"Traitement du serveur : {guild.name} (ID: {guild.id})")
-        
+
 #         try:
 #             target_channel, ask_define = await find_announcement_channel(guild)
 
@@ -140,7 +140,7 @@
 #             failed_guilds += 1
 
 #     logger.info(f"Annonce terminée : {announced_guilds} serveurs réussis, {failed_guilds} échecs")
-    
+
 #     return announced_guilds, failed_guilds
 
 # async def send_channel_config_suggestion(target_channel, guild):
@@ -150,7 +150,7 @@
 #         f"{command_id_manager.get_command_mention('guild-config')} ou utilisez {target_channel.mention} par défaut."
 #     )
 
-# async def send_final_report(interaction, announced_guilds: int, failed_guilds: int, 
+# async def send_final_report(interaction, announced_guilds: int, failed_guilds: int,
 #                            translation_view: AnnouncementTranslationView, file_path: str):
 #     await interaction.followup.send(
 #         f"✅ **Annonce terminée avec succès !**\n"
@@ -164,20 +164,20 @@
 # async def setup_persistent_views(bot):
 #     if not os.path.exists("translations"):
 #         return
-    
+
 #     files = os.listdir("translations")
-    
+
 #     for filename in files:
 #         if not (filename.startswith("announce_") and filename.endswith(".json")):
 #             continue
-            
+
 #         file_path = os.path.join("translations", filename)
-        
+
 #         try:
 #             original_message, translations = await load_translations(file_path)
 #             if not original_message:
 #                 continue
-            
+
 #             view = AnnouncementTranslationView(original_message, file_path)
 #             bot.add_view(view)
 #             logger.info(f"Vue persistante restaurée pour {filename}")
@@ -186,7 +186,7 @@
 
 # async def setup(bot: discord.Client):
 #     await setup_persistent_views(bot)
-    
+
 #     @bot.tree.command(name="announce", description="Annonce un message sur tous les serveurs")
 #     async def announce(interaction: discord.Interaction):
 #         modal = AnnounceModal(bot)

@@ -8,6 +8,7 @@ from utils.discord_utils.status import get_status
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)
 
+
 @router.get("/status", tags=["general"])
 async def status_check():
     """API status check endpoint"""
