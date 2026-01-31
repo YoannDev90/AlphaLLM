@@ -1,143 +1,90 @@
-# ===== Configuration générale =====
+# ===== General Configuration =====
 [config]
-# Mode debug (true pour développement, false pour production)
 debug = true
-# IDs des développeurs (liste d'IDs Discord)
 dev_id = [123456789012345678, 123456789012345678]
-# ID du serveur administrateur
 admin_server = 123456789012345678
-# Lien du serveur de support Discord
 support_server = "https://discord.com/invite/your_invite_link"
 
-# ===== Configuration du lanceur =====
-[launcher]
-# Activer/désactiver les différents composants
-run_api = true
-run_main_bot = true
-run_secondary_bots = false
-run_admin_bot = true
-run_logger_bot = true
-
-# ===== Configuration de l'API =====
+# ===== API Configuration =====
 [api]
-# Adresse d'écoute de l'API
 host = "0.0.0.0"
-# Port d'écoute
 port = 25692
-# Certificats SSL (laisser vide pour HTTP)
 ssl_certfile = "certfile.pem"
 ssl_keyfile = "keyfile.pem"
-# URL publique de l'API
-api_url = "https://your-api-domain.com"
-# Timeout des requêtes en secondes
-request_timeout = 300
-# Clé API requise pour accéder à l'API
 api_key_required = false
-# Hôtes autorisés (liste d'origines)
+api_url = "https://your-api-domain.com"
+request_timeout = 300
 allowed_hosts = ["*"]
-# Origines CORS autorisées
 cors_origins = ["*"]
 
-# ===== Configuration des logs =====
+# ===== Logs Configuration =====
 [logs]
-# Niveau de logging (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 logging_level = "INFO"
-# Nom du logger
 logger_name = "AlphaLLM"
-# ID du canal de logs Discord
 channel_id = 123456789012345678
-# ID du rôle de log
 log_role_id = 123456789012345678
-# Nom du canal de logs
 channel_name = "📄-logs"
-# ID de la catégorie des logs
 category_id = 123456789012345678
-# URL Loki pour Grafana
-loki_url = "https://logs-prod-012.grafana.net/loki/api/v1/push"
-# ID utilisateur Grafana
+loki_url = "https://your-loki-url/loki/api/v1/push"
+grafana_url = "https://your-grafana-url"
 user_id = 123456
 
-# ===== Configuration de la mémoire =====
+# ===== Memory Configuration =====
 [memory]
-# Nom de la base de données ChromaDB
-chroma_db_name = "AlphaLLM"
-# Modèle d'embeddings pour la vectorisation
 embedder_model = "sentence-transformers/all-MiniLM-L6-v2"
-# Répertoire de cache pour les embeddings
 embedder_cache_dir = "./data/embedder"
-# Modèle pour le function calling
 function_calling_model = "google/functiongemma-270m-it"
-# Répertoire de cache pour le function calling
 function_calling_cache_dir = "./data/function_calling"
-# Collection pour les documents RAG
-chroma_rag_collection = "rag_documents"
-# Collection pour la mémoire à court terme
-chroma_stm_collection = "stm_memories"
-# Collection pour la mémoire à long terme
-chroma_ltm_collection = "ltm_memories"
-# Âge maximum de la mémoire à court terme (en secondes, 4h = 14400s)
+reranker_model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+reranker_cache_dir = "./data/reranker"
 stm_max_age = 14400
-# Similarité minimale pour la mémoire à long terme (0.0 à 1.0)
 ltm_min_similarity = 0.3
 
-# ===== Configuration des modèles =====
+# ===== Models Configuration =====
 [models]
-# Liste des modèles disponibles (doit correspondre aux fichiers dans configs/text-models/)
 available_models = [
-    "claude",
-    "cohere",
-    "deepseek",
-    "evilgpt",
-    "gemini",
-    "glm",
-    "granite",
-    "grok",
-    "hermes",
-    "hunyuan",
-    "jamba",
-    "kimi",
     "llama",
-    "longcat",
-    "mercury",
-    "minimax",
-    "mistral",
-    "nemotron",
     "openai",
-    "phi",
+    "mistral",
     "qwen",
-    "rocinante",
-    "seed",
+    "gemini",
     "sonar",
-    "yi"
+    "evilgpt",
+    "grok",
+    "claude",
+    "kimi",
+    "deepseek",
+    "glm",
+    "phi",
+    "cohere",
+    "minimax",
+    "nemotron",
+    "yi",
+    "hermes",
+    "longcat",
+    "granite"
 ]
-
-# Configuration détaillée des modèles avec descriptions
 models = [
-  {"name"= "llama", "owner"= "Meta", "description"= "Reliable and versatile for general conversation, fastest and consistent. Excels in handling diverse topics, supports multiple languages, and is widely used for research, chatbots, and enterprise applications."},
-  {"name"= "openai", "owner"= "OpenAI", "description"= "Most advanced GPT model, ideal for complex tasks, deep reasoning, and long-form text. Excels in creative writing, code generation, logical analysis, and multi-step problem solving."},
-  {"name"= "mistral", "owner"= "Mistral", "description"= "Balanced for a wide range of tasks, good compromise between speed and comprehension. Best for French, supports advanced reasoning, and is efficient for both casual and professional use."},
-  {"name"= "qwen", "owner"= "Alibaba", "description"= "Optimized for logical reasoning and programming. Excellent for technical and coding tasks, supports multi-modal inputs, and is highly effective for complex problem solving."},
-  {"name"= "gemini", "owner"= "Google", "description"= "Very fast and flexible, excellent for short and instant responses. Good for casual chats, supports multi-modal interactions, and excels in quick, context-aware replies."},
-  {"name"= "sonar", "owner"= "Perplexity", "description"= "Specialized in information retrieval and factual responses. Best for Q&A and research. Can access the web and gives sources, making it ideal for fact-checking and knowledge-intensive queries."},
-  {"name"= "evilgpt", "owner"= "Mistral using a custom system prompt", "description"= "Unfiltered and creative, suited for experimental or unconventional content. Best for uncensored and edgy tasks, allows for creative exploration and boundary-pushing outputs."},
-  {"name"= "grok", "owner"= "xAI", "description"= "Humorous and casual, well-suited for lighthearted conversations. Great for jokes and entertainment, excels in generating witty and engaging content."},
-  {"name"= "claude", "owner"= "Anthropic", "description"= "Poetic and creative, excellent for literary and reflective writing. Great for stories and poems, supports long-context reasoning and nuanced expression."},
-  {"name"= "kimi", "owner"= "Moonshot", "description"= "Clear and pedagogical, ideal for education, explanation, and learning tasks. Good for students and coding tasks, excels in step-by-step guidance and technical explanations."},
-  {"name"= "deepseek", "owner"= "DeepSeek", "description"= "Strong for generating long and structured content. Ideal for essays and detailed reports. Best for Chinese, excels in handling large documents and complex reasoning."},
-  {"name"= "glm", "owner"= "zAI", "description"= "Excellent multilingual support, great for translation and cross-language understanding. Best for Asian languages, excels in handling nuanced linguistic tasks and cultural context."},
-  {"name"= "phi", "owner"= "Microsoft", "description"= "Lightweight and efficient, best for simple and quick requests. Good for mobile and low-resource environments, supports rapid deployment and real-time interactions."},
-  {"name"= "cohere", "owner"= "Cohere", "description"= "Powerful in logic and analytical reasoning, suited for comparisons and complex analysis. Excels in enterprise applications, data interpretation, and decision-making tasks."},
-  {"name"= "minimax", "owner"= "Minimax", "description"= "Advanced multi-modal model with strong reasoning, coding, and vision capabilities. Ideal for agents, long-context tasks, and visual processing, supports both text and image inputs."},
-  {"name"= "nemotron", "owner"= "Nvidia", "description"= "Open-source vision language model optimized for agentic workflows, multi-image reasoning, and large-scale synthetic data. Best for building specialized agents and data-driven AI, excels in visual and multi-modal tasks."},
-  {"name"= "mercury", "owner"= "Inception", "description"= "Ultra-fast diffusion-based language model, 5-10x faster than traditional LLMs. Ideal for real-time, high-throughput tasks and code generation, excels in low-latency environments."},
-  {"name"= "yi", "owner"= "01-AI", "description"= "Strong bilingual (English/Chinese) multimodal model, excels in coding, math, reasoning, and visual understanding. Best for international and technical applications, supports advanced multi-modal reasoning."},
-  {"name"= "hermes", "owner"= "NousResearch", "description"= "Open-source series with strong reasoning, extended context, and multi-modal capabilities. Optimized for chat, instruction-following, and vision tasks, excels in interactive and multi-turn conversations."},
-  {"name"= "longcat", "owner"= "Meituan", "description"= "Efficient Mixture-of-Experts model, excels in reasoning, coding, and agentic tool use. High throughput and low latency, ideal for research and industry, supports rapid and scalable deployment."},
-  {"name"= "seed", "owner"= "ByteDance", "description"= "ByteDance's advanced multimodal model, strong in vision, 3D generation, and real-time interpretation. Excels in agent-centric and interactive tasks, supports immersive and dynamic experiences."},
-  {"name"= "granite", "owner"= "IBM", "description"= "Efficient open model from IBM, optimized for instruction-following and agentic workflows. Delivers high-quality outputs with low infrastructure costs, excels in enterprise-grade applications."},
-  {"name"= "rocinante", "owner"= "TheDrummer", "description"= "Creative writing and professional content model, excels in nuanced, context-aware, and long-form interactions. Best for storytelling and engaging content, supports detailed narrative generation."},
-  {"name"= "hunyuan", "owner"= "Tencent", "description"= "Tencent's open-source text generation model, excels in producing high-quality, realistic videos from text prompts. Best for video creation and media, supports advanced multi-modal content generation."},
-  {"name"= "jamba", "owner"= "AI21", "description"= "Balanced multimodal model, excels in general-purpose reasoning and creative tasks. Good for flexible and creative applications, supports both technical and artistic use cases."}
+  {"name"= "llama", "owner"= "Meta", "description"= "Reliable and versatile for general conversation."},
+  {"name"= "openai", "owner"= "OpenAI", "description"= "Most advanced GPT model, ideal for complex tasks."},
+  {"name"= "mistral", "owner"= "Mistral", "description"= "Balanced for a wide range of tasks."},
+  {"name"= "qwen", "owner"= "Alibaba", "description"= "Optimized for logical reasoning and programming."},
+  {"name"= "gemini", "owner"= "Google", "description"= "Very fast and flexible, excellent for short responses."},
+  {"name"= "sonar", "owner"= "Perplexity", "description"= "Specialized in information retrieval."},
+  {"name"= "evilgpt", "owner"= "Mistral using a custom system prompt", "description"= "Unfiltered and creative."},
+  {"name"= "grok", "owner"= "xAI", "description"= "Humorous and casual."},
+  {"name"= "claude", "owner"= "Anthropic", "description"= "Poetic and creative."},
+  {"name"= "kimi", "owner"= "Moonshot", "description"= "Clear and pedagogical."},
+  {"name"= "deepseek", "owner"= "DeepSeek", "description"= "Strong for generating long content."},
+  {"name"= "glm", "owner"= "zAI", "description"= "Excellent multilingual support."},
+  {"name"= "phi", "owner"= "Microsoft", "description"= "Lightweight and efficient."},
+  {"name"= "cohere", "owner"= "Cohere", "description"= "Powerful in logic and analytical reasoning."},
+  {"name"= "minimax", "owner"= "Minimax", "description"= "Advanced multi-modal model."},
+  {"name"= "nemotron", "owner"= "Nvidia", "description"= "Open-source vision language model."},
+  {"name"= "yi", "owner"= "01-AI", "description"= "Strong bilingual multimodal model."},
+  {"name"= "hermes", "owner"= "NousResearch", "description"= "Open-source series with strong reasoning."},
+  {"name"= "longcat", "owner"= "Meituan", "description"= "Efficient Mixture-of-Experts model."},
+  {"name"= "granite", "owner"= "IBM", "description"= "Efficient open model from IBM."}
 ]
 
 # ===== Database Configuration =====
@@ -149,3 +96,18 @@ tables_to_clone = ["blacklist", "server_settings_new", "users_settings", "users"
 main_bot_activity = "🤖 Try @AlphaLLM or /commands"
 logger_bot_activity = "🎛️ Monitoring AlphaLLM"
 admin_bot_activity = "⚙️ Administrate AlphaLLM"
+
+# ===== Unified Text Configuration =====
+[unified_text]
+prompt_dir = "configs/prompts"
+max_file_size = 10485760  # 10 MB in bytes
+allowed_mime_types = ["text/plain", "application/pdf", "image/jpeg", "image/png"]
+
+# ===== Limits Configuration =====
+[limits]
+max_stm_messages = 50  # Maximum short-term memory messages per conversation
+max_ltm_results = 5    # Maximum long-term memory results to fetch
+max_conversation_history = 10  # Maximum messages to include in prompt history
+api_rate_limit = 100   # Requests per minute for API
+api_ban_threshold = 10  # Number of failed requests before banning IP
+discord_rate_limit = 30  # Messages per minute for Discord

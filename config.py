@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os
 import tomllib
@@ -8,7 +9,7 @@ from typing import Any, Dict, Iterable, Union
 from dotenv import load_dotenv
 
 load_dotenv()
-
+logger = logging.getLogger(__name__)
 
 def load_toml_config(file_path: str = "config.toml") -> Dict[str, Any]:
     """Charge la configuration depuis un fichier TOML"""
@@ -68,8 +69,18 @@ API_SSL_KEYFILE: str = API_SECTION.get("ssl_keyfile")
 API_URL: str = API_SECTION.get("api_url")
 API_REQUEST_TIMEOUT: int = API_SECTION.get("request_timeout")
 API_KEY_REQUIRED: bool = bool(API_SECTION.get("api_key_required"))
-API_KEYS: Iterable[str] = []
+API_KEYS_FILE: str = "data/api_keys.json"
+API_KEYS: Dict[str, Dict[str, Any]] = {}
 API_KEYS_MAPPING: Dict[str, str] = {}
+
+# Load API keys from file
+if Path(API_KEYS_FILE).exists():
+    try:
+        with open(API_KEYS_FILE, "r") as f:
+            API_KEYS = json.load(f)
+    except Exception as e:
+        logger.error(f"Failed to load API keys: {e}")
+        API_KEYS = {}
 
 SUPPORT_SERVER: str = str(CONFIG_SECTION.get("support_server"))
 DEV_IDS: Iterable[int] = CONFIG_SECTION.get("dev_id")
@@ -78,6 +89,8 @@ EMBEDDER_MODEL: str = MEMORY_SECTION.get("embedder_model")
 EMBEDDER_CACHE_DIR: str = MEMORY_SECTION.get("embedder_cache_dir")
 FUNCTION_CALLING_MODEL: str = MEMORY_SECTION.get("function_calling_model")
 FUNCTION_CALLING_CACHE_DIR: str = MEMORY_SECTION.get("function_calling_cache_dir")
+RERANKER_MODEL: str = MEMORY_SECTION.get("reranker_model")
+RERANKER_CACHE_DIR: str = MEMORY_SECTION.get("reranker_cache_dir")
 STM_MAX_AGE = MEMORY_SECTION.get("stm_max_age")
 LTM_MIN_SIMILARITY = MEMORY_SECTION.get("ltm_min_similarity")
 
@@ -136,7 +149,5 @@ MAX_STM_MESSAGES: int = LIMITS_SECTION.get("max_stm_messages", 50)
 MAX_LTM_RESULTS: int = LIMITS_SECTION.get("max_ltm_results", 5)
 MAX_CONVERSATION_HISTORY: int = LIMITS_SECTION.get("max_conversation_history", 10)
 API_RATE_LIMIT: int = LIMITS_SECTION.get("api_rate_limit", 100)
+API_BAN_THRESHOLD: int = LIMITS_SECTION.get("api_ban_threshold", 10)
 DISCORD_RATE_LIMIT: int = LIMITS_SECTION.get("discord_rate_limit", 30)
-
-# Faiss and Reranker Config
-RERANKER_MODEL: str = MEMORY_SECTION.get("reranker_model")

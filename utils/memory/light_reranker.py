@@ -1,12 +1,13 @@
 """Light reranker using ONNX for local cross-encoder reranking."""
 
 import logging
+import time
 from typing import List
 
 from optimum.onnxruntime import ORTModelForSequenceClassification
 from transformers import AutoTokenizer
 
-from config import LOGGER_NAME
+from config import LOGGER_NAME, RERANKER_CACHE_DIR, RERANKER_MODEL
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -14,8 +15,9 @@ logger = logging.getLogger(LOGGER_NAME)
 class LightReranker:
     """ONNX-based cross-encoder reranker for refining search results."""
 
-    def __init__(self, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"):
-        self.model_name = model_name
+    def __init__(self, model_name: str = None):
+        self.model_name = model_name or RERANKER_MODEL or "cross-encoder/ms-marco-MiniLM-L-6-v2"
+        self.cache_dir = RERANKER_CACHE_DIR
         self.model = None
         self.tokenizer = None
         self._load_model()
@@ -23,11 +25,13 @@ class LightReranker:
     def _load_model(self):
         """Load the ONNX model and tokenizer."""
         try:
+            load_start = time.time()
             self.model = ORTModelForSequenceClassification.from_pretrained(
-                self.model_name, export=False  # Already ONNX
+                self.model_name, export=False, cache_dir=self.cache_dir
             )
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            logger.info(f"LightReranker loaded model: {self.model_name}")
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name, cache_dir=self.cache_dir)
+            load_time = time.time() - load_start
+            logger.info(f"LightReranker loaded model: {self.model_name} in {load_time:.4f}s")
         except Exception as e:
             logger.error(f"Failed to load reranker model: {e}")
             raise

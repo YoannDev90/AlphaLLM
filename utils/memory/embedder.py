@@ -51,12 +51,13 @@ class TextEmbedder:
 
         # Create cache directories
         self._cache_data_dir.mkdir(parents=True, exist_ok=True)
-
+        load_start = time.time()
         # Initialize embedder
         self._embedder = TextEmbedding(
             model_name=self.model_name, cache_dir=str(self._cache_dir)
         )
-        self._logger.debug(f"FastEmbed model {self.model_name} loaded")
+        load_time = time.time() - load_start
+        self._logger.info(f"FastEmbed model {self.model_name} loaded in {load_time:.4f}s")
 
         # Load persistent cache index
         if self.enable_cache:
