@@ -101,3 +101,10 @@ class BaseChatModel(ABC):
             return f"{minutes} minutes, {seconds}.{milliseconds:03d} seconds"
         else:
             return f"{seconds}.{milliseconds:03d} seconds"
+        
+    @staticmethod
+    def clean_think_tags(response: str) -> str:
+        """Remove <think> tags and their content from the response."""
+        cleaned = re.sub(r'<think>.*?</think>', '', response, flags=re.DOTALL)
+        cleaned = re.sub(r'</?think>', '', cleaned)
+        return cleaned.strip()

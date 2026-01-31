@@ -140,6 +140,7 @@ class ChatModel(BaseChatModel):
             response_text = self._process_perplexity_citations(
                 response_text, last_chunk
             )
+        response_text = self.clean_think_tags(response_text)
 
         yield StreamChunk(
             chunk=response_text,
@@ -334,6 +335,7 @@ class ChatModel(BaseChatModel):
                     logger.error("Model returned empty response, all retries exhausted")
                     response_text = "I'm sorry, but I couldn't generate a response. Please try again."
             response_text = self._process_perplexity_citations(response_text, response)
+            response_text = self.clean_think_tags(response_text)
 
             gen.update(
                 output=response_text,
