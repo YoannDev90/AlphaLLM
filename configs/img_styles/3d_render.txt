@@ -1,0 +1,16 @@
+Create a 3D rendered image with these characteristics:
+
+- Photorealistic 3D computer graphics
+- Physically based rendering (PBR)
+- Ray-traced lighting and reflections
+- High polygon count and detail
+- Realistic materials and textures
+- Professional CGI quality
+- Cinematic camera work
+- Depth of field and bokeh
+- HDRI lighting environment
+- Sub-surface scattering effects
+- Motion blur and particle effects
+- Hollywood VFX quality
+
+Style elements: 3D rendering, photorealistic CGI, ray-traced lighting, PBR materials, cinematic quality, professional VFX

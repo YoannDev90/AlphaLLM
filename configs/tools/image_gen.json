@@ -18,6 +18,11 @@
           "type": "string",
           "description": "The image generation model to use (optional, defaults to auto)",
           "enum": ["flux", "gptimage", "kontext", "nanobanana", "seedream", "zimage"]
+        },
+        "style": {
+          "type": "string",
+          "description": "The artistic style to apply to the image (optional)",
+          "enum": ["3d_render", "abstract", "animated", "art_deco", "comic_book", "concept_art", "drawing", "fantasy", "film_noir", "gothic", "graffiti", "illustration", "kawaii", "landscape", "logo", "minimalist", "oil_painting", "pixel_art", "pop_art", "portrait", "sci_fi", "steampunk", "surreal", "vintage_retro", "watercolor"]
         }
       },
       "required": ["prompt"]

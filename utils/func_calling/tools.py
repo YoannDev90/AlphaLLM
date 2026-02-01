@@ -13,11 +13,12 @@ async def execute_tool(func_name: str, params: Dict[str, str]) -> str:
             prompt = params.get("prompt")
             model = params.get("model", "zimage")
             enhance = params.get("prompt_enhance", True)
+            style = params.get("style")
             if not prompt:
                 return "error: Missing prompt parameter"
             try:
                 images = await unified_image_gen(
-                    prompt, model, num_images=1, enhance=enhance, format=Format.BASE64
+                    prompt, model, num_images=1, enhance=enhance, style=style, format=Format.BASE64
                 )
                 if images:
                     image_data, model_used = images[0]

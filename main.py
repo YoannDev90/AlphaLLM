@@ -16,7 +16,7 @@ from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.database.db_manager import DatabaseManager
 from utils.discord_utils.status import status_emulation
-from utils.function_calling import initialize_function_caller
+from utils.func_calling import initialize_function_caller
 from utils.memory import initialize_memory_manager
 from utils.ressources import start_monitoring, stop_monitoring
 

@@ -12,7 +12,7 @@ from utils.ai_process.llm_selector import LLMSelector
 from utils.discord_utils.permission_checker import PermissionChecker
 from utils.discord_utils.status import (update_status_on_failure,
                                         update_status_on_success)
-from utils.function_calling import get_function_caller
+from utils.func_calling import get_function_caller
 from utils.handlers.files import FileHandler
 from utils.memory import get_memory_manager, initialize_memory_manager
 

@@ -18,6 +18,7 @@ async def generate_image(
     model: Optional[str] = Form("flux"),
     num_images: int = Form(1),
     size: str = Form("1024x1024"),
+    style: Optional[str] = Form(None),
     enhance: bool = Form(True),
     user_id: Optional[int] = Form(None),
     _api_key: Optional[str] = Depends(get_api_key),
@@ -33,7 +34,7 @@ async def generate_image(
         )
 
     logger.info(
-        f"Image generation request: user_id={user_id}, model={model}, num_images={num_images}, size={size}, enhance={enhance}, prompt={prompt[:50]}..."
+        f"Image generation request: user_id={user_id}, model={model}, num_images={num_images}, size={size}, style={style}, enhance={enhance}, prompt={prompt[:50]}..."
     )
 
     try:
@@ -42,6 +43,7 @@ async def generate_image(
             model=model,
             num_images=num_images,
             size=size,
+            style=style,
             enhance=enhance,
             format=Format.BASE64,
             user_id=user_id,

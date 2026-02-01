@@ -38,7 +38,7 @@ def load_configs(config_path: str) -> List[Dict[str, Any]]:
 
 
 async def enhance_image_prompt(
-    original_prompt: str, number: int = 2, is_edit: bool = False
+    original_prompt: str, number: int = 2, is_edit: bool = False, style: str = None
 ) -> dict:
     """Enhance image generation prompt with multiple models."""
     enhancement_models = load_configs("configs/misc/img_enhancer.json")
@@ -50,6 +50,14 @@ async def enhance_image_prompt(
         else:
             system_prompt = IMG_EDIT_ENHANCER_PREPROMPT
             number = 1
+
+        # Add style instructions if provided
+        if style:
+            try:
+                style_instructions = read_file(f"configs/img_styles/{style}.txt")
+                system_prompt += f"\n\n**Style Instructions:**\n{style_instructions}\n\nIncorporate these style characteristics into your enhanced prompt."
+            except Exception as e:
+                logger.warning(f"Could not load style instructions for {style}: {e}")
 
         for i in range(min(number, 4)):
             model_config = enhancement_models[i % len(enhancement_models)][

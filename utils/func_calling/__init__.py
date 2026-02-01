@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 from typing import List, Optional
 
-from utils.function_calling.function_calling import FunctionCaller
+from utils.func_calling.function_calling import FunctionCaller
 
 _logger = logging.getLogger(__name__)
 _function_caller: Optional[FunctionCaller] = None

@@ -21,6 +21,7 @@ async def setup(bot: discord.Client):
         size="The size of the image (default: 1024x1024)",
         number="Number of images to generate (1-4, default: 2)",
         enhance="Whether to enhance the image (default: Yes)",
+        style="Artistic style to apply (optional)",
     )
     @app_commands.choices(
         model=[
@@ -42,13 +43,49 @@ async def setup(bot: discord.Client):
             app_commands.Choice(name="Large square (2048x2048)", value="2048x2048"),
         ]
     )
+    @app_commands.choices(
+        style=[
+            app_commands.Choice(name="3D Render", value="3d_render"),
+            app_commands.Choice(name="Abstract", value="abstract"),
+            app_commands.Choice(name="Animated", value="animated"),
+            app_commands.Choice(name="Art Deco", value="art_deco"),
+            app_commands.Choice(name="Comic Book", value="comic_book"),
+            app_commands.Choice(name="Concept Art", value="concept_art"),
+            app_commands.Choice(name="Drawing", value="drawing"),
+            app_commands.Choice(name="Fantasy", value="fantasy"),
+            app_commands.Choice(name="Film Noir", value="film_noir"),
+            app_commands.Choice(name="Gothic", value="gothic"),
+            app_commands.Choice(name="Graffiti", value="graffiti"),
+            app_commands.Choice(name="Illustration", value="illustration"),
+            app_commands.Choice(name="Kawaii", value="kawaii"),
+            app_commands.Choice(name="Landscape", value="landscape"),
+            app_commands.Choice(name="Logo", value="logo"),
+            app_commands.Choice(name="Minimalist", value="minimalist"),
+            app_commands.Choice(name="Oil Painting", value="oil_painting"),
+            app_commands.Choice(name="Pixel Art", value="pixel_art"),
+            app_commands.Choice(name="Pop Art", value="pop_art"),
+            app_commands.Choice(name="Portrait", value="portrait"),
+            app_commands.Choice(name="Sci-Fi", value="sci_fi"),
+            app_commands.Choice(name="Steampunk", value="steampunk"),
+            app_commands.Choice(name="Surreal", value="surreal"),
+            app_commands.Choice(name="Vintage Retro", value="vintage_retro"),
+            app_commands.Choice(name="Watercolor", value="watercolor"),
+        ]
+    )
+    @app_commands.choices(
+        enhance=[
+            app_commands.Choice(name="Yes", value="true"),
+            app_commands.Choice(name="No", value="false"),
+        ]
+    )
     async def image_gen(
         interaction: discord.Interaction,
         prompt: str,
         model: str = "Flux",
         size: str = "1024x1024",
+        style: str = None,
         number: int = 1,
-        enhance: bool = True,
+        enhance: str = "true",
     ):
         await interaction.response.defer()
         perms_checker = PermissionChecker()
@@ -60,7 +97,7 @@ async def setup(bot: discord.Client):
         logger.info(
             f"Command /image-gen executed by {interaction.user.display_name} ({interaction.user.id})"
         )
-        logger.info(f"prompt: {prompt}, model: {model}, size: {size}, number: {number}")
+        logger.info(f"prompt: {prompt}, model: {model}, size: {size}, style: {style}, number: {number}")
 
         original_number = number
         warning_message = ""
@@ -75,6 +112,7 @@ async def setup(bot: discord.Client):
             )
         model = "Flux" if not model else model
         size = "1024x1024" if not size else size
+        enhance_bool = enhance.lower() == "true"
 
         try:
             logger.debug(f"Generating images with prompt: {prompt}")
@@ -83,7 +121,8 @@ async def setup(bot: discord.Client):
                 model,
                 number,
                 size=size,
-                enhance=enhance,
+                style=style,
+                enhance=enhance_bool,
                 format=Format.BYTES,
                 user_id=interaction.user.id,
             )

@@ -134,6 +134,7 @@ async def unified_image_gen(
     model: Union[str, Image_Model],
     num_images: int = 1,
     size: str = "1024x1024",
+    style: str = None,
     enhance: bool = True,
     format: Union[str, Format] = Format.BASE64,
     user_id: int = None,
@@ -144,9 +145,22 @@ async def unified_image_gen(
     num_images = min(max(1, num_images), 4)
 
     if enhance:
-        enhanced_dict = await enhance_image_prompt(prompt, num_images, is_edit=False)
+        enhanced_dict = await enhance_image_prompt(prompt, num_images, is_edit=False, style=style)
         prompts = list(enhanced_dict.values())
     else:
+        # Even without enhancement, apply style if specified
+        if style:
+            try:
+                style_file = Path(__file__).parent.parent / "configs" / "img_styles" / f"{style}.txt"
+                if style_file.exists():
+                    with open(style_file, "r", encoding="utf-8") as f:
+                        style_prompt = f.read().strip()
+                    prompt = f"{style_prompt}, {prompt}"
+                    logger.debug(f"Applied style '{style}' to prompt")
+                else:
+                    logger.warning(f"Style file not found: {style_file}")
+            except Exception as e:
+                logger.error(f"Error loading style '{style}': {e}")
         prompts = [prompt] * num_images
 
     size = validate_image_size(model.lower(), size)
