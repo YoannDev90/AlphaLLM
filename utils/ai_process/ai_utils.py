@@ -13,6 +13,7 @@ from config import LOGGER_NAME, read_file
 logger = logging.getLogger(LOGGER_NAME)
 
 IMG_GEN_ENHANCER_PREPROMPT = read_file("configs/prompts/img_gen_enhancer.txt")
+IMG_GEN_ENHANCER_WITH_STYLE_PREPROMPT = read_file("configs/prompts/style_prompt.txt")
 IMG_EDIT_ENHANCER_PREPROMPT = read_file("configs/prompts/img_edit_enhancer.txt")
 CONV_NAME_PREPROMPT = read_file("configs/prompts/conv_name.txt")
 
@@ -46,18 +47,18 @@ async def enhance_image_prompt(
         tasks = []
 
         if not is_edit:
-            system_prompt = IMG_GEN_ENHANCER_PREPROMPT
+            if style:
+                try:
+                    style_instructions = read_file(f"configs/img_styles/{style}.txt")
+                    system_prompt = IMG_GEN_ENHANCER_WITH_STYLE_PREPROMPT.replace("{STYLE_INSTRUCTIONS}", style_instructions)
+                except Exception as e:
+                    logger.warning(f"Could not load style instructions for {style}: {e}")
+                    system_prompt = IMG_GEN_ENHANCER_PREPROMPT
+            else:
+                system_prompt = IMG_GEN_ENHANCER_PREPROMPT
         else:
             system_prompt = IMG_EDIT_ENHANCER_PREPROMPT
             number = 1
-
-        # Add style instructions if provided
-        if style:
-            try:
-                style_instructions = read_file(f"configs/img_styles/{style}.txt")
-                system_prompt += f"\n\n**Style Instructions:**\n{style_instructions}\n\nIncorporate these style characteristics into your enhanced prompt."
-            except Exception as e:
-                logger.warning(f"Could not load style instructions for {style}: {e}")
 
         for i in range(min(number, 4)):
             model_config = enhancement_models[i % len(enhancement_models)][
