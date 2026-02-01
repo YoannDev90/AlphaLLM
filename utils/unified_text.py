@@ -122,7 +122,7 @@ async def unified_text_gen(
     if isinstance(model, Text_Model):
         model = model.value
 
-    from utils.ai_process.base_chat_model import ChatParameters, ChatResult
+    from utils.ai_process.base_chat_model import ChatParameters
     from utils.ai_process.chat_model import ChatModel
 
     user = None
@@ -210,42 +210,42 @@ async def unified_text_gen(
         if parameters.model:
             model = parameters.model
 
-    if not origin == Origin.STATUS_CHECK:
-        function_caller = await get_function_caller()
-        tool_calls = function_caller.check_for_tools(input)
-        if tool_calls:
-            logger.info(f"Tool calls detected: {tool_calls}")
-            tool_responses = []
-            for call in tool_calls:
-                func_name = call["function"]
-                params = call["parameters"]
-                from utils.function_calling.tools import execute_tool
+    # if not origin == Origin.STATUS_CHECK:
+    #     function_caller = await get_function_caller()
+    #     tool_calls = function_caller.check_for_tools(input)
+    #     if tool_calls:
+    #         logger.info(f"Tool calls detected: {tool_calls}")
+    #         tool_responses = []
+    #         for call in tool_calls:
+    #             func_name = call["function"]
+    #             params = call["parameters"]
+    #             from utils.function_calling.tools import execute_tool
 
-                response = await execute_tool(func_name, params)
-                if response is None or response.startswith("error"):
-                    break
-                tool_responses.append(response)
-            tool_response = "\n".join(tool_responses)
-            if stream:
-                from utils.ai_process.base_chat_model import StreamChunk
+    #             response = await execute_tool(func_name, params)
+    #             if response is None or response.startswith("error"):
+    #                 break
+    #             tool_responses.append(response)
+    #         tool_response = "\n".join(tool_responses)
+    #         if stream:
+    #             from utils.ai_process.base_chat_model import StreamChunk
 
-                yield StreamChunk(
-                    chunk=tool_response,
-                    done=True,
-                    response=tool_response,
-                    usage=0,
-                    model="function_calling",
-                    elapsed_time="0.0s",
-                )
-            else:
-                result = ChatResult(
-                    response=tool_response,
-                    usage=0,
-                    model="function_calling",
-                    elapsed_time="0.0s",
-                )
-                yield result
-            return
+    #             yield StreamChunk(
+    #                 chunk=tool_response,
+    #                 done=True,
+    #                 response=tool_response,
+    #                 usage=0,
+    #                 model="function_calling",
+    #                 elapsed_time="0.0s",
+    #             )
+    #         else:
+    #             result = ChatResult(
+    #                 response=tool_response,
+    #                 usage=0,
+    #                 model="function_calling",
+    #                 elapsed_time="0.0s",
+    #             )
+    #             yield result
+    #         return
 
     if model == "auto":
         logger.info("Auto-selecting model...")

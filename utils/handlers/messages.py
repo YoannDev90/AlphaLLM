@@ -73,11 +73,21 @@ async def send_text_in_chunks(channel, text: str, max_length: int = 2000):
     lines = text.splitlines(keepends=True)
     current_message = ""
     for line in lines:
-        if len(current_message) + len(line) > max_length:
+        if len(line) > max_length:
+            # Send current_message if any
             if current_message:
                 await channel.send(current_message.rstrip())
-            current_message = ""
-        current_message += line
+                current_message = ""
+            # Split the long line into chunks
+            for i in range(0, len(line), max_length):
+                chunk = line[i:i + max_length]
+                await channel.send(chunk.rstrip())
+        elif len(current_message) + len(line) > max_length:
+            if current_message:
+                await channel.send(current_message.rstrip())
+            current_message = line
+        else:
+            current_message += line
     if current_message.strip():
         await channel.send(current_message.rstrip())
 
@@ -236,12 +246,13 @@ async def send_latex_image(channel, latex_match: str):
     if success:
         if isinstance(result, str):
             # Complex LaTeX that couldn't be rendered, send as code block
-            await channel.send(result)
+            await send_code_block(channel, result)
         else:
             file = discord.File(result, filename="formula.png")
             await channel.send(file=file)
     else:
-        await channel.send(f"Failed to render LaTeX: {latex}")
+        latex_display = latex[:100] + "..." if len(latex) > 100 else latex
+        await channel.send(f"Failed to render LaTeX: {latex_display}")
 
 
 async def send_latex_image_with_return(channel, latex_match: str, bot=None):

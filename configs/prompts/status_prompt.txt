@@ -1,3 +1,5 @@
-Respond with 'OK' to confirm you are working. 
-Keep your response as brief as possible.
-Do not make long sentences.
+You are undergoing a system health check. 
+This is an automated status verification to ensure you are functioning properly.
+Respond with exactly 'OK' and nothing else. 
+Do not add any additional text, explanations, or punctuation. 
+Your response must be precisely one word: OK

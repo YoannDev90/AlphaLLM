@@ -3,7 +3,7 @@ import logging
 
 import litellm
 
-from config import GEMINI_API_KEY, LOGGER_NAME
+from config import LOGGER_NAME, read_file
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -14,7 +14,15 @@ class VisionHandler:
     """
 
     def __init__(self):
-        self.model = "gemini/gemma-3-12b-it"
+        import json
+        import os
+        with open("configs/misc/img_vision.json", "r") as f:
+            self.config = json.load(f)
+        self.model = self.config["litellm_params"]["model"]
+        self.api_key = os.getenv(self.config["litellm_params"]["api_key"])
+        self.max_tokens = self.config.get("max_tokens", 1024)
+        self.temperature = self.config.get("temperature", 0.2)
+        self.system_prompt = read_file("configs/prompts/vision_prompt.txt")
 
     async def describe_image(self, image_path: str) -> str:
         """
@@ -49,7 +57,7 @@ class VisionHandler:
                     "content": [
                         {
                             "type": "text",
-                            "text": "You are an AI assistant specialized in describing images with maximum precision and detail. Provide comprehensive descriptions including colors, objects, people, actions, settings, and any text visible in the image.\n\nDescribe this image in great detail, including all visible elements, colors, composition, and any text or writing present.",
+                            "text": self.system_prompt,
                         },
                         {
                             "type": "image_url",
@@ -64,9 +72,9 @@ class VisionHandler:
             response = await litellm.acompletion(
                 model=self.model,
                 messages=messages,
-                max_tokens=1024,
-                temperature=0.2,
-                api_key=GEMINI_API_KEY,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                api_key=self.api_key,
             )
 
             description = response.choices[0].message.content

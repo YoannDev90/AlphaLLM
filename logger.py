@@ -61,7 +61,7 @@ def generate_grafana_log_url(
 
     params = {"orgId": 1, "left": json.dumps(left_panel)}
 
-    url = f"{GRAFANA_URL}/explore?{urlencode(params)}"
+    url = f"{config.GRAFANA_URL}/explore?{urlencode(params)}"
     return url
 
 
@@ -114,7 +114,7 @@ class GrafanaLokiHandler(logging.Handler):
             }
             requests.post(
                 self.loki_url,
-                auth=(GRAFANA_USER_ID, GRAFANA_API_KEY),
+                auth=(config.GRAFANA_USER_ID, config.GRAFANA_API_KEY),
                 json=log_entry,
                 headers={"Content-Type": "application/json"},
             )
@@ -204,7 +204,7 @@ class DiscordFormatter(logging.Formatter):
 
 def setup_logging():
     """Setup logging with console, file, and custom handlers."""
-    logs_config = CONFIG.get("logs", {})
+    logs_config = config.CONFIG.get("logs", {})
     loki_url = logs_config.get("loki_url")
 
     logger = logging.getLogger()
@@ -214,7 +214,7 @@ def setup_logging():
         logger.removeHandler(handler)
 
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(LOGGING_LEVEL)
+    console_handler.setLevel(config.LOGGING_LEVEL)
     console_formatter = ColoredFormatter(
         "%(asctime)s - %(levelname)s - %(filename)s : %(lineno)d - %(message)s"
     )
@@ -264,8 +264,8 @@ def setup_logging():
     ]
     logging_components["listener"] = listener
 
-    bot_logger = logging.getLogger(LOGGER_NAME)
-    bot_logger.setLevel(LOGGING_LEVEL)
+    bot_logger = logging.getLogger(config.LOGGER_NAME)
+    bot_logger.setLevel(config.LOGGING_LEVEL)
 
 
 def close_logging():

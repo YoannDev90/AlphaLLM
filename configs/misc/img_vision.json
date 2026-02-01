@@ -1,0 +1,8 @@
+{
+    "litellm_params": {
+        "model": "gemini/gemma-3-12b-it",
+        "api_key": "GEMINI_API_KEY"
+    },
+    "max_tokens": 1024,
+    "temperature": 0.2
+}
