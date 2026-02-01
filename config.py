@@ -103,6 +103,7 @@ ADMIN_BOT_TOKEN: str = (
     else os.environ.get("DEV_ADMIN_BOT_TOKEN")
 )
 LOGGER_BOT_TOKEN: str = os.environ.get("LOGGER_BOT_TOKEN")
+ADDON_1_BOT_TOKEN: str = os.environ.get("ADDON_1_BOT_TOKEN")
 
 OPENROUTER_API_KEY: str = os.environ.get("OPENROUTER_API_KEY")
 GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY")
@@ -122,6 +123,11 @@ LLM7_API_KEY: str = os.environ.get("LLM7_API_KEY")
 LLM_GATEWAY_API_KEY: str = os.environ.get("LLM_GATEWAY_API_KEY")
 ZANITY_API_KEY: str = os.environ.get("ZANITY_API_KEY")
 ROUTEWAY_API_KEY: str = os.environ.get("ROUTEWAY_API_KEY")
+
+GITHUB_TOKEN: str = os.environ.get("GITHUB_TOKEN")
+GITHUB_OWNER: str = CONFIG_SECTION.get("github_owner")
+GITHUB_REPO: str = CONFIG_SECTION.get("github_repo")
+BUG_REPORT_CHANNEL_ID: int = CONFIG_SECTION.get("bug_report_channel_id")
 
 IMGBB_API_KEY: str = os.environ.get("IMGBB_API_KEY")
 CLOUDINARY_URL: str = os.environ.get("CLOUDINARY_URL")

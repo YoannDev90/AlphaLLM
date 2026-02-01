@@ -1,12 +1,10 @@
 .env
 __pycache__/
 .venv/
-monitoring.csv
 *.log
 config.toml
 data/
 TODO.md
-local_db.db
 stop.json
 /generated_images/
-*_todo.md
+/bots/bots/

@@ -7,8 +7,8 @@ import requests
 from dotenv import load_dotenv
 
 from config import (AVAILABLE_MODELS, LLM7_API_KEY, LLM_GATEWAY_API_KEY,
-                    LOGGER_NAME, MEGALLM_API_KEY, MODELS,
-                    OPENROUTER_API_KEY, ZANITY_API_KEY, read_file)
+                    LOGGER_NAME, MEGALLM_API_KEY, MODELS, OPENROUTER_API_KEY,
+                    ZANITY_API_KEY, read_file)
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -34,6 +34,7 @@ class LLMSelector:
                     api_key=MEGALLM_API_KEY,
                     messages=messages,
                     timeout=15,
+                    max_retries=1,
                 )
                 .choices[0]
                 .message.content
@@ -69,6 +70,7 @@ class LLMSelector:
                     api_key=OPENROUTER_API_KEY,
                     messages=messages,
                     timeout=15,
+                    max_retries=1,
                 )
                 .choices[0]
                 .message.content
@@ -104,6 +106,7 @@ class LLMSelector:
                     api_key=LLM_GATEWAY_API_KEY,
                     messages=messages,
                     timeout=15,
+                    max_retries=1,
                 )
                 .choices[0]
                 .message.content
@@ -120,6 +123,7 @@ class LLMSelector:
                     api_key=LLM7_API_KEY,
                     messages=messages,
                     timeout=15,
+                    max_retries=1,
                 )
                 .choices[0]
                 .message.content
@@ -136,6 +140,8 @@ class LLMSelector:
                     api_key=ZANITY_API_KEY,
                     messages=messages,
                     timeout=15,
+                    fallbacks=["openai/llama-3-8b-instruct"],
+                    max_retries=1,
                 )
                 .choices[0]
                 .message.content
