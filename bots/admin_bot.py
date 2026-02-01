@@ -49,13 +49,11 @@ async def auto_purge():
                     await message.delete()
                 except (discord.NotFound, discord.HTTPException):
                     continue
-            break  # Success, exit retry loop
+            break
         except discord.HTTPException as e:
             if e.status == 503 and attempt < max_retries - 1:
-                wait_time = 2**attempt  # Exponential backoff
-                logger.warning(
-                    f"503 error during auto-purge, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})"
-                )
+                wait_time = 2**attempt
+                logger.warning(f"503 error during auto-purge, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
                 await asyncio.sleep(wait_time)
             else:
                 logger.error(f"HTTP error during auto-purge: {e}")
@@ -63,41 +61,6 @@ async def auto_purge():
         except Exception as e:
             logger.error(f"Erreur inattendue lors de l'auto-purge : {e}")
             break
-
-
-@bot.tree.command(
-    name="clear", description="Purge tous les messages DM sans limite de temps"
-)
-async def clear_command(interaction: discord.Interaction):
-    try:
-        if False:
-            await interaction.response.send_message(
-                "❌ Vous n'avez pas la permission d'utiliser cette commande.",
-                ephemeral=True,
-            )
-            return
-        await interaction.response.defer(ephemeral=True)
-        dev_user = await bot.fetch_user(DEV_IDS[0]) if DEV_IDS else None
-        if not dev_user:
-            await interaction.followup.send(
-                "❌ Aucun développeur configuré.", ephemeral=True
-            )
-            return
-        dm_channel = await dev_user.create_dm()
-        deleted_count = 0
-        async for message in dm_channel.history(limit=None):
-            try:
-                await message.delete()
-                deleted_count += 1
-            except (discord.NotFound, discord.HTTPException):
-                continue
-        await interaction.followup.send(
-            f"{deleted_count} messages supprimés avec succès.", ephemeral=True
-        )
-        logger.info(f"Commande /clear exécutée : {deleted_count} messages supprimés")
-    except Exception as e:
-        logger.error(f"Erreur inattendue lors de la commande /clear : {e}")
-        await interaction.followup.send(f"Erreur inattendue : {e}", ephemeral=True)
 
 
 async def close_bot(bot):

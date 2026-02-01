@@ -74,7 +74,6 @@ API_KEYS_FILE: str = "data/api_keys.json"
 API_KEYS: Dict[str, Dict[str, Any]] = {}
 API_KEYS_MAPPING: Dict[str, str] = {}
 
-# Load API keys from file
 if Path(API_KEYS_FILE).exists():
     try:
         with open(API_KEYS_FILE, "r") as f:
@@ -103,7 +102,12 @@ ADMIN_BOT_TOKEN: str = (
     else os.environ.get("DEV_ADMIN_BOT_TOKEN")
 )
 LOGGER_BOT_TOKEN: str = os.environ.get("LOGGER_BOT_TOKEN")
-ADDON_1_BOT_TOKEN: str = os.environ.get("ADDON_1_BOT_TOKEN")
+ADDONS_BOTS_TOKENS_ENV_NAMES: list[str] = [
+    "ADDON_1_BOT_TOKEN"
+    ]
+ADDONS_BOTS_TOKENS: list[str] = [
+    os.environ.get(env_name) for env_name in ADDONS_BOTS_TOKENS_ENV_NAMES
+]
 
 OPENROUTER_API_KEY: str = os.environ.get("OPENROUTER_API_KEY")
 GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY")
@@ -142,14 +146,12 @@ SUPABASE_PG: str = (
 )
 TABLES_TO_CLONE: Iterable[str] = DATABASE_SECTION.get("tables_to_clone")
 
-# Unified Text Configuration
 PROMPT_DIR: str = UNIFIED_TEXT_SECTION.get("prompt_dir")
 EVILGPT_PROMPT_PATH: Path = Path(PROMPT_DIR) / "evilgpt_prompt.txt"
 API_PROMPT_PATH: Path = Path(PROMPT_DIR) / "api_prompt.txt"
 STATUS_PROMPT_PATH: Path = Path(PROMPT_DIR) / "status_prompt.txt"
 DISCORD_PROMPT_PATH: Path = Path(PROMPT_DIR) / "discord_prompt.txt"
 
-# Limits Configuration
 MAX_STM_MESSAGES: int = LIMITS_SECTION.get("max_stm_messages", 50)
 MAX_LTM_RESULTS: int = LIMITS_SECTION.get("max_ltm_results", 5)
 MAX_CONVERSATION_HISTORY: int = LIMITS_SECTION.get("max_conversation_history", 10)
