@@ -8,8 +8,7 @@ import requests
 from colorama import Back, Fore, Style, init
 
 from bots.logger_bot import bot
-from config import (CONFIG, GRAFANA_API_KEY, GRAFANA_URL, GRAFANA_USER_ID,
-                    LOGGER_NAME, LOGGING_LEVEL, LOGS_CHANNEL_ID)
+import config
 
 init(autoreset=True)
 logging_components = {}
@@ -145,7 +144,7 @@ class DiscordLogHandler(logging.Handler):
         if self.bot.is_closed():
             return
         try:
-            channel = await self.bot.fetch_channel(LOGS_CHANNEL_ID)
+            channel = await self.bot.fetch_channel(config.LOGS_CHANNEL_ID)
             ts = int(record.created)
             embed = discord.Embed(color=EMBED_COLORS.get(record.levelname, 0x95A5A6))
             embed.add_field(name="", value=f"<t:{ts}:F> (<t:{ts}:R>)", inline=False)

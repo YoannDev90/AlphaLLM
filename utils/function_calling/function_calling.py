@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 from transformers import AutoModelForCausalLM, AutoProcessor
 
 from config import (FUNCTION_CALLING_CACHE_DIR, FUNCTION_CALLING_MODEL,
-                    LOGGER_NAME)
+                    LOGGER_NAME, read_file)
 
 logger = logging.getLogger(LOGGER_NAME)
 CACHE_DIR = Path(FUNCTION_CALLING_CACHE_DIR)
@@ -92,7 +92,7 @@ class FunctionCaller:
         message = [
             {
                 "role": "developer",
-                "content": "You are a helpful assistant with access to various functions. Only call functions when the user explicitly requests an action that clearly requires a function call, such as generating images, editing content, or performing specific operations. Do not call functions for general questions, casual conversation, or when the request can be handled with a normal text response. Be conservative and only use functions when absolutely necessary.",
+                "content": read_file("configs/prompts/function_calling.txt"),
             },
             {"role": "user", "content": user_content},
         ]
