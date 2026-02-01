@@ -120,7 +120,6 @@ MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY")
 NAVY_API_KEY: str = os.environ.get("NAVY_API_KEY")
 LLM7_API_KEY: str = os.environ.get("LLM7_API_KEY")
 LLM_GATEWAY_API_KEY: str = os.environ.get("LLM_GATEWAY_API_KEY")
-MAPLE_AI_API_KEY: str = os.environ.get("MAPLE_AI_API_KEY")
 ZANITY_API_KEY: str = os.environ.get("ZANITY_API_KEY")
 ROUTEWAY_API_KEY: str = os.environ.get("ROUTEWAY_API_KEY")
 

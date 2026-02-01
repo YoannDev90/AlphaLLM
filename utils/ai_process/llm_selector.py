@@ -7,7 +7,7 @@ import requests
 from dotenv import load_dotenv
 
 from config import (AVAILABLE_MODELS, LLM7_API_KEY, LLM_GATEWAY_API_KEY,
-                    LOGGER_NAME, MAPLE_AI_API_KEY, MEGALLM_API_KEY, MODELS,
+                    LOGGER_NAME, MEGALLM_API_KEY, MODELS,
                     OPENROUTER_API_KEY, ZANITY_API_KEY, read_file)
 
 logger = logging.getLogger(LOGGER_NAME)
@@ -26,44 +26,74 @@ class LLMSelector:
         pass
 
     async def _megallm_llm_selector(self, messages: list) -> str:
-        def _sync_request():
-            response = requests.post(
-                "https://ai.megallm.io/v1/chat/completions",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {MEGALLM_API_KEY}",
-                },
-                json={"model": "openai-gpt-oss-20b", "messages": messages},
-                timeout=10,
-            )
-            if response.status_code == 200:
-                return response.json()["choices"][0]["message"]["content"]
-            else:
-                logger.error(
-                    f"Megallm API error: {response.status_code} {response.text}"
+        try:
+            return (
+                litellm.completion(
+                    model="openai/openai-gpt-oss-20b",
+                    base_url="https://ai.megallm.io/v1",
+                    api_key=MEGALLM_API_KEY,
+                    messages=messages,
+                    timeout=15,
                 )
+                .choices[0]
+                .message.content
+            )
+        except Exception as e:
+            logger.error(f"Megallm API error: {e}")
 
-        return await asyncio.to_thread(_sync_request)
+        # def _sync_request():
+        #     response = requests.post(
+        #         "https://ai.megallm.io/v1/chat/completions",
+        #         headers={
+        #             "Content-Type": "application/json",
+        #             "Authorization": f"Bearer {MEGALLM_API_KEY}",
+        #         },
+        #         json={"model": "openai-gpt-oss-20b", "messages": messages},
+        #         timeout=10,
+        #     )
+        #     if response.status_code == 200:
+        #         return response.json()["choices"][0]["message"]["content"]
+        #     else:
+        #         logger.error(
+        #             f"Megallm API error: {response.status_code} {response.text}"
+        #         )
+
+        # return await asyncio.to_thread(_sync_request)
 
     async def _openrouter_llm_selector(self, messages: list) -> str:
-        def _sync_request():
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                },
-                json={"model": "openai/gpt-oss-20b", "messages": messages},
-                timeout=10,
-            )
-            if response.status_code == 200:
-                return response.json()["choices"][0]["message"]["content"]
-            else:
-                logger.error(
-                    f"OpenRouter API error: {response.status_code} {response.text}"
+        try:
+            return (
+                litellm.completion(
+                    model="openai/gpt-oss-20b",
+                    base_url="https://openrouter.ai/api/v1",
+                    api_key=OPENROUTER_API_KEY,
+                    messages=messages,
+                    timeout=15,
                 )
+                .choices[0]
+                .message.content
+            )
+        except Exception as e:
+            logger.error(f"OpenRouter API error: {e}")
 
-        return await asyncio.to_thread(_sync_request)
+        # def _sync_request():
+        #     response = requests.post(
+        #         "https://openrouter.ai/api/v1/chat/completions",
+        #         headers={
+        #             "Content-Type": "application/json",
+        #             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        #         },
+        #         json={"model": "openai/gpt-oss-20b", "messages": messages},
+        #         timeout=10,
+        #     )
+        #     if response.status_code == 200:
+        #         return response.json()["choices"][0]["message"]["content"]
+        #     else:
+        #         logger.error(
+        #             f"OpenRouter API error: {response.status_code} {response.text}"
+        #         )
+
+        # return await asyncio.to_thread(_sync_request)
 
     async def _llm_gateway_llm_selector(self, messages: list) -> str:
         try:
@@ -113,22 +143,6 @@ class LLMSelector:
         except Exception as e:
             logger.error(f"Zanity API error: {e}")
 
-    async def _maple_ai_llm_selector(self, messages: list) -> str:
-        try:
-            return (
-                litellm.completion(
-                    model="openai/gpt-oss-20b",
-                    base_url="https://api.mapleai.de/v1",
-                    api_key=MAPLE_AI_API_KEY,
-                    messages=messages,
-                    timeout=15,
-                )
-                .choices[0]
-                .message.content
-            )
-        except Exception as e:
-            logger.error(f"Maple AI API error: {e}")
-
     async def select_model(self, input: str) -> str:
         messages = [
             {"role": "system", "content": llm_selector_prompt},
@@ -141,7 +155,6 @@ class LLMSelector:
             # self._llm_gateway_llm_selector, #Insufficient credits
             self._llm7_llm_selector,
             # self._zanity_llm_selector, #Regular timeouts
-            # self._maple_ai_llm_selector #URL issues
         ]
         random.shuffle(selectors)
 
