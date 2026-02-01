@@ -51,7 +51,7 @@
         "model_name": "glm-4.5-air",
         "litellm_params": {
             "model": "openai/glm-4.5-air",
-            "api_base": "https://mnnai.ru/v1/",
+            "api_base": "https://api.mnnai.ru/v1/",
             "api_key": "MNN_API_KEY"
         },
         "settings": {

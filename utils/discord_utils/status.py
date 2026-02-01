@@ -100,11 +100,28 @@ async def status_emulation(shutdown_event: asyncio.Event):
     from utils.unified_text import Origin, unified_text_gen
 
     await asyncio.sleep(10 * 60)
-    start_time = time.time()
+    status = load_status()
+    cycle = status.get("cycle", {})
+    current_time = time.time()
+    models = [m for m in AVAILABLE_MODELS if m != "evilgpt"]
+
+    if cycle and current_time - cycle.get("start_time", 0) < 8 * 3600:
+        # Resume cycle
+        current_index = cycle.get("current_index", 0)
+        start_time = cycle["start_time"]
+        logger.info(f"Resuming status cycle from index {current_index}")
+    else:
+        # Start new cycle
+        current_index = 0
+        start_time = current_time
+        cycle = {"start_time": start_time, "current_index": current_index}
+        status["cycle"] = cycle
+        save_status(status)
+        logger.info("Starting new status cycle")
+
     while not shutdown_event.is_set():
-        for model in AVAILABLE_MODELS:
-            if model == "evilgpt":
-                continue  # Skip evilgpt as its status is the same as mistral's
+        for i in range(current_index, len(models)):
+            model = models[i]
             try:
                 results = [
                     r
@@ -143,12 +160,27 @@ async def status_emulation(shutdown_event: asyncio.Event):
                     logger.debug(f"Status check for {model}: no response")
             except Exception as e:
                 logger.error(f"Status check failed for {model}: {e}")
+            
+            # Update cycle index
+            cycle["current_index"] = i + 1
+            status["cycle"] = cycle
+            save_status(status)
+            
             await asyncio.sleep(5 * 60)
-        elapsed = time.time() - start_time
+        
+        # Cycle completed, wait for next cycle
+        elapsed = current_time - start_time
         sleep_time = 8 * 3600 - elapsed
         if sleep_time > 0:
             await asyncio.sleep(sleep_time)
+        
+        # Start new cycle
         start_time = time.time()
+        cycle = {"start_time": start_time, "current_index": 0}
+        status["cycle"] = cycle
+        save_status(status)
+        current_index = 0
+        logger.info("Starting new status cycle")
 
 
 def get_status() -> Dict[str, Dict[str, Any]]:

@@ -37,7 +37,7 @@
     {
         "model_name": "evilgpt",
         "litellm_params": {
-            "model": "openai/mistral-medium-latest",
+            "model": "openai/mistral-small-latest",
             "api_base": "https://api.mnnai.ru/v1/",
             "api_key": "MNN_API_KEY"
         },

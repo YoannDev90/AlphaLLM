@@ -92,7 +92,7 @@ class FunctionCaller:
         message = [
             {
                 "role": "developer",
-                "content": "You are a model that can do function calling with the following functions",
+                "content": "You are a helpful assistant with access to various functions. Only call functions when the user explicitly requests an action that clearly requires a function call, such as generating images, editing content, or performing specific operations. Do not call functions for general questions, casual conversation, or when the request can be handled with a normal text response. Be conservative and only use functions when absolutely necessary.",
             },
             {"role": "user", "content": user_content},
         ]

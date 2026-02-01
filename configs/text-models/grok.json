@@ -51,18 +51,6 @@
         "model_name": "grok-4.1-fast",
         "litellm_params": {
             "model": "openai/grok-4.1-fast",
-            "api_base": "https://mnnai.ru/v1/",
-            "api_key": "MNN_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "grok-4.1-fast",
-        "litellm_params": {
-            "model": "openai/grok-4.1-fast",
             "api_base": "https://api.electronhub.ai/v1/",
             "api_key": "ELECTRONHUB_API_KEY"
         },

@@ -17,8 +17,6 @@ intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 logger = logging.getLogger(LOGGER_NAME)
 
-logging.getLogger("discord.ext.commands").setLevel(logging.CRITICAL)
-
 
 @bot.event
 async def on_ready():

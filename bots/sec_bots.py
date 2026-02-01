@@ -14,17 +14,13 @@ intents = discord.Intents.default()
 intents.message_content = True
 logger = logging.getLogger(LOGGER_NAME)
 
-logging.getLogger("discord.ext.commands").setLevel(logging.CRITICAL)
-
-
 def create_addon_bot():
     bot = commands.Bot(command_prefix="!", owner_ids=DEV_IDS, intents=intents)
 
     @bot.event
     async def on_ready():
         logger.info(f"Addon bot logged in as {bot.user} (ID: {bot.user.id})")
-        activity = discord.CustomActivity(name="Talk to me in #bots")
-        await bot.change_presence(activity=activity, status=discord.Status.online)
+        await bot.change_presence(status=discord.Status.offline)
 
     @bot.event
     async def on_message(message):

@@ -49,7 +49,7 @@
         "model_name": "llama-3.3-70b",
         "litellm_params": {
             "model": "openai/llama-3.3-70b",
-            "api_base": "https://mnnai.ru/v1/",
+            "api_base": "https://api.mnnai.ru/v1/",
             "api_key": "MNN_API_KEY"
         },
         "settings": {

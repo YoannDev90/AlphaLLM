@@ -29,6 +29,7 @@ RUN_MAIN_BOT = True
 RUN_ADMIN_BOT = True
 RUN_SEC_BOTS = True
 
+logging.basicConfig(level=logging.CRITICAL)
 
 async def check_stop_file(restart_pending):
     """Vérifie périodiquement la présence du fichier stop.json"""

@@ -202,8 +202,20 @@ class ChatModel(BaseChatModel):
                             yield chunk
 
                 except Exception as e:
+                    # Extract meaningful error message
+                    error_str = str(e)
+                    try:
+                        import json
+                        if ' - ' in error_str:
+                            json_part = error_str.split(' - ')[-1]
+                            error_dict = json.loads(json_part)
+                            message = error_dict.get('detail', {}).get('error', {}).get('message', error_str)
+                        else:
+                            message = error_str
+                    except (json.JSONDecodeError, KeyError):
+                        message = error_str
                     logger.warning(
-                        f"Streaming failed for {config['litellm_params']['model']}: {type(e).__name__}: {str(e)}"
+                        f"Streaming failed for {config['litellm_params']['model']}: {message}"
                     )
                     continue
 
@@ -283,49 +295,52 @@ class ChatModel(BaseChatModel):
                 fallbacks.append(fb_params)
 
             if fallbacks:
-                params["fallbacks"] = fallbacks
-                logger.info(f"Using {len(fallbacks)} fallback configs")
+                logger.info(f"Using {len(fallbacks)} fallback models")
 
-            logger.debug("About to call litellm.acompletion")
-            try:
-                logger.debug(
-                    f"Calling litellm.acompletion with params: model={params['model']}, api_key_set={bool(params['api_key'])}, messages_count={len(params['messages'])}, fallbacks={len(fallbacks) if 'fallbacks' in params else 0}"
-                )
-                # Increase timeout to allow fallbacks to work (30s per attempt * number of fallbacks)
-                timeout_seconds = 30.0 * (len(fallbacks) + 1) if fallbacks else 30.0
-                response = await asyncio.wait_for(
-                    litellm.acompletion(**params), timeout=timeout_seconds
-                )
-                logger.info("API call successful")
-            except asyncio.TimeoutError:
-                logger.error(
-                    f"Request to {params['model']} with {len(fallbacks)} fallbacks timed out after {timeout_seconds}s"
-                )
-                # Instead of returning error, retry with next config if available
+            models_to_try = []
+            models_to_try.append(params.copy())
+            for fb in fallbacks:
+                fb_full = params.copy()
+                fb_full.update(fb)
+                models_to_try.append(fb_full)
+
+            response = None
+            for attempt_params in models_to_try:
+                try:
+                    logger.debug(f"Trying model {attempt_params['model']}")
+                    response = await asyncio.wait_for(
+                        litellm.acompletion(**attempt_params), timeout=30.0
+                    )
+                    logger.info(f"API call to {attempt_params['model']} successful")
+                    break
+                except asyncio.TimeoutError:
+                    logger.error(f"Request to {attempt_params['model']} timed out after 30s")
+                    continue
+                except Exception as e:
+                    # Extract meaningful error message
+                    error_str = str(e)
+                    try:
+                        import json
+                        # Try to parse the error dict from the message
+                        if ' - ' in error_str:
+                            json_part = error_str.split(' - ')[-1]
+                            error_dict = json.loads(json_part)
+                            message = error_dict.get('detail', {}).get('error', {}).get('message', error_str)
+                        else:
+                            message = error_str
+                    except (json.JSONDecodeError, KeyError):
+                        message = error_str
+                    logger.error(f"API call to {attempt_params['model']} failed: {message}")
+                    continue
+            else:
+                # All models failed for this config
                 if retry_count < len(configs) - 1:
-                    logger.info("Timeout occurred, retrying with next config...")
+                    logger.info("All models for this config failed, retrying with next config...")
                     return await self._non_stream_chat(
                         parameters, start_time, retry_count + 1
                     )
                 else:
-                    logger.error("All retries exhausted due to timeout")
-                    return ChatResult(
-                        response="Request timed out after trying all available models. Please try again later.",
-                        usage=0,
-                        model=parameters.model,
-                        elapsed_time=self._format_elapsed_time(start_time),
-                    )
-            except Exception as e:
-                logger.error(
-                    f"API call to {params['model']} failed with exception: {type(e).__name__}: {e}"
-                )
-                if retry_count < len(configs) - 1:
-                    logger.info("Retrying with next config...")
-                    return await self._non_stream_chat(
-                        parameters, start_time, retry_count + 1
-                    )
-                else:
-                    logger.error("All retries exhausted")
+                    logger.error("All configs exhausted")
                     return ChatResult(
                         response="I'm sorry, but I couldn't generate a response due to an API error. Please try again.",
                         usage=0,
