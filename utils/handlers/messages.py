@@ -33,11 +33,11 @@ async def smart_long_messages_with_view(
 
     for part in parts:
         if part.startswith("```") and part.endswith("```"):
-            result = await send_code_block_with_return(channel, part, max_length)
+            result = await send_code_block_with_return(bot.get_channel(channel.id), part, max_length, bot=bot)
             if result:
                 last_message = result
         else:
-            result = await send_text_with_latex_with_return(channel, part, max_length)
+            result = await send_text_with_latex_with_return(bot.get_channel(channel.id), part, max_length, bot=bot)
             if result:
                 last_message = result
 
@@ -82,7 +82,7 @@ async def send_text_in_chunks(channel, text: str, max_length: int = 2000):
         await channel.send(current_message.rstrip())
 
 
-async def send_text_in_chunks_with_return(channel, text: str, max_length: int = 2000):
+async def send_text_in_chunks_with_return(channel, text: str, max_length: int = 2000, bot=None):
     """
     Sends plain text in chunks, never breaking lines in the middle if possible.
     Returns the last message sent.
@@ -97,12 +97,18 @@ async def send_text_in_chunks_with_return(channel, text: str, max_length: int = 
     for line in lines:
         if len(current_message) + len(line) > max_length:
             if current_message:
-                last_message = await channel.send(current_message.rstrip())
+                if bot:
+                    last_message = await bot.get_channel(channel.id).send(current_message.rstrip())
+                else:
+                    last_message = await channel.send(current_message.rstrip())
             current_message = ""
         current_message += line
 
     if current_message.strip():
-        last_message = await channel.send(current_message.rstrip())
+        if bot:
+            last_message = await bot.get_channel(channel.id).send(current_message.rstrip())
+        else:
+            last_message = await channel.send(current_message.rstrip())
 
     return last_message
 
@@ -153,14 +159,14 @@ async def send_text_with_latex(channel, text: str, max_length: int = 2000):
         await send_text_in_chunks(channel, current_text, max_length)
 
 
-async def send_text_with_latex_with_return(channel, text: str, max_length: int = 2000):
+async def send_text_with_latex_with_return(channel, text: str, max_length: int = 2000, bot=None):
     """
     Sends text, converting LaTeX expressions to images or replacing with emojis.
     Returns the last message sent.
     """
     matches = detect_latex(text)
     if not matches:
-        return await send_text_in_chunks_with_return(channel, text, max_length)
+        return await send_text_in_chunks_with_return(channel if not bot else bot.get_channel(channel.id), text, max_length)
 
     current_text = ""
     last_end = 0
@@ -189,13 +195,13 @@ async def send_text_with_latex_with_return(channel, text: str, max_length: int =
             # Send current text
             if current_text:
                 result = await send_text_in_chunks_with_return(
-                    channel, current_text, max_length
+                    channel if not bot else bot.get_channel(channel.id), current_text, max_length
                 )
                 if result:
                     last_message = result
                 current_text = ""
             # Send LaTeX image
-            result = await send_latex_image_with_return(channel, match)
+            result = await send_latex_image_with_return(channel if not bot else bot.get_channel(channel.id), match, bot=bot)
             if result:
                 last_message = result
         last_end = start + len(match)
@@ -204,7 +210,7 @@ async def send_text_with_latex_with_return(channel, text: str, max_length: int =
     current_text += remaining
     if current_text:
         result = await send_text_in_chunks_with_return(
-            channel, current_text, max_length
+            channel if not bot else bot.get_channel(channel.id), current_text, max_length
         )
         if result:
             last_message = result
@@ -238,7 +244,7 @@ async def send_latex_image(channel, latex_match: str):
         await channel.send(f"Failed to render LaTeX: {latex}")
 
 
-async def send_latex_image_with_return(channel, latex_match: str):
+async def send_latex_image_with_return(channel, latex_match: str, bot=None):
     """
     Sends a LaTeX formula as an image and returns the message.
     """
@@ -257,12 +263,21 @@ async def send_latex_image_with_return(channel, latex_match: str):
     if success:
         if isinstance(result, str):
             # Complex LaTeX that couldn't be rendered, send as code block
-            message = await channel.send(result)
+            if bot:
+                message = await bot.get_channel(channel.id).send(result)
+            else:
+                message = await channel.send(result)
             return message
         else:
             file = discord.File(result, filename="formula.png")
-            message = await channel.send(file=file)
+            if bot:
+                message = await bot.get_channel(channel.id).send(file=file)
+            else:
+                message = await channel.send(file=file)
             return message
     else:
-        message = await channel.send(f"Failed to render LaTeX: {latex}")
+        if bot:
+            message = await bot.get_channel(channel.id).send(f"Failed to render LaTeX: {latex}")
+        else:
+            message = await channel.send(f"Failed to render LaTeX: {latex}")
         return message

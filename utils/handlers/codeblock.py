@@ -1,4 +1,4 @@
-async def send_code_block_with_return(channel, code_block: str, max_length: int = 2000):
+async def send_code_block_with_return(channel, code_block: str, max_length: int = 2000, bot=None):
     """
     Sends a code block, splitting into multiple code blocks if needed but never breaking a line of code.
     Returns the last message sent.
@@ -14,7 +14,7 @@ async def send_code_block_with_return(channel, code_block: str, max_length: int 
     if language.lower() in ["latex", "tex"]:
         from utils.handlers.messages import send_latex_image_with_return
 
-        return await send_latex_image_with_return(channel, code_block)
+        return await send_latex_image_with_return(channel, code_block, bot=bot)
 
     code_lines = code.splitlines(keepends=True)
     code_prefix = f"```{language}\n" if language else "```"
@@ -25,18 +25,24 @@ async def send_code_block_with_return(channel, code_block: str, max_length: int 
     for line in code_lines:
         if len(current_code) + len(line) + len(code_suffix) > max_length:
             current_code += code_suffix
-            last_message = await channel.send(current_code)
+            if bot:
+                last_message = await bot.get_channel(channel.id).send(current_code)
+            else:
+                last_message = await channel.send(current_code)
             current_code = code_prefix
         current_code += line
 
     if len(current_code) > len(code_prefix):
         current_code += code_suffix
-        last_message = await channel.send(current_code)
+        if bot:
+            last_message = await bot.get_channel(channel.id).send(current_code)
+        else:
+            last_message = await channel.send(current_code)
 
     return last_message
 
 
-async def send_code_block(channel, code_block: str, max_length: int = 2000):
+async def send_code_block(channel, code_block: str, max_length: int = 2000, bot=None):
     """
     Sends a code block, splitting into multiple code blocks if needed but never breaking a line of code.
     """
@@ -52,7 +58,7 @@ async def send_code_block(channel, code_block: str, max_length: int = 2000):
         # Treat as LaTeX
         from utils.handlers.messages import send_latex_image
 
-        await send_latex_image(channel, code_block)
+        await send_latex_image(channel, code_block, bot=bot)
         return
 
     code_lines = code.splitlines(keepends=True)
@@ -62,9 +68,15 @@ async def send_code_block(channel, code_block: str, max_length: int = 2000):
     for line in code_lines:
         if len(current_code) + len(line) + len(code_suffix) > max_length:
             current_code += code_suffix
-            await channel.send(current_code)
+            if bot:
+                await bot.get_channel(channel.id).send(current_code)
+            else:
+                await channel.send(current_code)
             current_code = code_prefix
         current_code += line
     if len(current_code) > len(code_prefix):
         current_code += code_suffix
-        await channel.send(current_code)
+        if bot:
+            await bot.get_channel(channel.id).send(current_code)
+        else:
+            await channel.send(current_code)

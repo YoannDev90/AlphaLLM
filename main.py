@@ -11,6 +11,7 @@ from api.api import start_api_async
 from bots.admin_bot import run_admin_bot
 from bots.bot import run_bot
 from bots.logger_bot import run_logger_bot
+from bots.sec_bots import run_addon_bots
 from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.database.db_manager import DatabaseManager
@@ -26,6 +27,7 @@ RUN_API = True
 RUN_LOGGER_BOT = True
 RUN_MAIN_BOT = True
 RUN_ADMIN_BOT = True
+RUN_SEC_BOTS = True
 
 
 async def check_stop_file(restart_pending):
@@ -149,6 +151,11 @@ async def main() -> None:
                 (
                     run_with_shutdown(run_admin_bot(), "Admin Bot")
                     if RUN_ADMIN_BOT
+                    else asyncio.sleep(0)
+                ),
+                (
+                    run_with_shutdown(run_addon_bots(), "Sec Bots")
+                    if RUN_SEC_BOTS
                     else asyncio.sleep(0)
                 ),
                 (

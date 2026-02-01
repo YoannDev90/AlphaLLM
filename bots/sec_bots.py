@@ -4,13 +4,14 @@ import logging
 import discord
 from discord.ext import commands
 
-from bot import bot as main_bot
+from bots.bot import bot as main_bot
 from config import ADDONS_BOTS_TOKENS, DEV_IDS, LOGGER_NAME
 from utils.database.perms_conf import get_blacklist
 from utils.handlers.messages import smart_long_messages_with_view
 from utils.unified_text import Origin, Text_Model, unified_text_gen
 
 intents = discord.Intents.default()
+intents.message_content = True
 logger = logging.getLogger(LOGGER_NAME)
 
 logging.getLogger("discord.ext.commands").setLevel(logging.CRITICAL)
@@ -63,7 +64,7 @@ def create_addon_bot():
                 logger.debug(
                     f"Result model: {result.model}, response length: {len(result.response)}"
                 )
-                async with message.channel.typing():
+                async with main_bot.get_channel(message.channel.id).typing():
                     if result.response.startswith("generated_image"):
                         import base64
                         import io
@@ -76,7 +77,7 @@ def create_addon_bot():
                                 image_file = discord.File(
                                     io.BytesIO(image_bytes), filename="generated_image.png"
                                 )
-                                await message.channel.send(file=image_file)
+                                await main_bot.get_channel(message.channel.id).send(file=image_file)
                             except Exception as e:
                                 logger.error(f"Erreur lors de l'envoi de l'image: {e}")
                                 await smart_long_messages_with_view(
