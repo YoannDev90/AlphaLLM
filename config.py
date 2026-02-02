@@ -103,7 +103,7 @@ ADMIN_BOT_TOKEN: str = (
 )
 LOGGER_BOT_TOKEN: str = os.environ.get("LOGGER_BOT_TOKEN")
 ADDONS_BOTS_TOKENS_ENV_NAMES: list[str] = [
-    "ADDON_1_BOT_TOKEN"
+    "ADDON_1_BOT_TOKEN", "ADDON_2_BOT_TOKEN"
     ]
 ADDONS_BOTS_TOKENS: list[str] = [
     os.environ.get(env_name) for env_name in ADDONS_BOTS_TOKENS_ENV_NAMES

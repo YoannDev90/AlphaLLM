@@ -25,7 +25,7 @@ class ChatModel(BaseChatModel):
         Args:
             model_name: Nom du modèle (ex: "claude", "openai", etc.)
         """
-        config_path = f"configs/text-models/{model_name}.json"
+        config_path = f"configs/text_models/{model_name}.json"
         super().__init__(config_path)
         self.model_name = model_name
 
