@@ -32,6 +32,7 @@ pip install --upgrade pip
 
 # Installer les dépendances
 echo "🔧 Installation des dépendances..."
+pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install -r requirements.txt
 
 # Copier les fichiers de configuration
