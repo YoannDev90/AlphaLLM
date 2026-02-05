@@ -30,7 +30,6 @@ async def setup(bot: discord.Client):
     )
     @app_commands.choices(
         model=[
-            app_commands.Choice(name="Seedream", value="seedream"),
             app_commands.Choice(name="NanoBanana", value="nanobanana"),
             app_commands.Choice(name="GPT Image", value="gptimage"),
         ]

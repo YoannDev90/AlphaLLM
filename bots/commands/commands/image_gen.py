@@ -26,7 +26,6 @@ async def setup(bot: discord.Client):
     @app_commands.choices(
         model=[
             app_commands.Choice(name="Flux", value="flux"),
-            app_commands.Choice(name="Seedream", value="seedream"),
             app_commands.Choice(name="Nano banana", value="nanobanana"),
             app_commands.Choice(name="GPT Image", value="gptimage"),
             app_commands.Choice(name="Z image", value="zimage"),

@@ -49,25 +49,6 @@
       "4096x4096"
     ]
   },
-  "seedream": {
-    "name": "Seedream",
-    "author": "ByteDance",
-    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bytedance-color.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.73.0/icons/bytedance.svg",
-    "supported_sizes": [
-      "1024x1024",
-      "1152x896",
-      "896x1152",
-      "1024x1792",
-      "1792x1024",
-      "1536x1536",
-      "2048x2048",
-      "2048x3072",
-      "3072x2048",
-      "3072x3072",
-      "4096x4096"
-    ]
-  },
   "zimage": {
     "name": "Z-Image",
     "author": "Github",
