@@ -11,7 +11,7 @@ echo "🧹 Suppression des fichiers temporaires..."
 find . -type f -name "*.tmp" -exec rm -f {} \;
 find . -type f -name "*.temp" -exec rm -f {} \;
 
-
+# Supprimer le contenu du dossier 'data' (cache du projet)
 echo "🧹 Nettoyage du cache du projet..."
 find data -exec rm -rf {} \;
 
