@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 from transformers import AutoModelForCausalLM, AutoProcessor
 
 from config import (FUNCTION_CALLING_CACHE_DIR, FUNCTION_CALLING_MODEL,
-                    LOGGER_NAME, read_file)
+                    HF_TOKEN, LOGGER_NAME, read_file)
 
 logger = logging.getLogger(LOGGER_NAME)
 CACHE_DIR = Path(FUNCTION_CALLING_CACHE_DIR)
@@ -27,7 +27,6 @@ class FunctionCaller:
         self._processor: Optional[AutoProcessor] = None
         self._model: Optional[AutoModelForCausalLM] = None
         self._tools: List[Dict[str, Any]] = []
-        # Defer initialization to async method
 
     async def initialize(self) -> None:
         """Async initialize processor and model."""
@@ -40,6 +39,7 @@ class FunctionCaller:
             self.model_name,
             cache_dir=str(CACHE_DIR),
             device_map="auto",
+            token=HF_TOKEN,
         )
         self._model = await asyncio.to_thread(
             AutoModelForCausalLM.from_pretrained,
@@ -47,6 +47,7 @@ class FunctionCaller:
             cache_dir=str(CACHE_DIR),
             dtype="auto",
             device_map="auto",
+            token=HF_TOKEN,
         )
         load_time = time.time() - load_start
         self._logger.info(

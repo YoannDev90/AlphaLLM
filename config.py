@@ -128,6 +128,8 @@ LLM_GATEWAY_API_KEY: str = os.environ.get("LLM_GATEWAY_API_KEY")
 ZANITY_API_KEY: str = os.environ.get("ZANITY_API_KEY")
 ROUTEWAY_API_KEY: str = os.environ.get("ROUTEWAY_API_KEY")
 
+HF_TOKEN: str = os.environ.get("HUGGINGFACE_TOKEN")
+
 GITHUB_TOKEN: str = os.environ.get("GITHUB_TOKEN")
 GITHUB_OWNER: str = CONFIG_SECTION.get("github_owner")
 GITHUB_REPO: str = CONFIG_SECTION.get("github_repo")
