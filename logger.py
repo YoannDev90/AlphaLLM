@@ -3,7 +3,7 @@ import logging
 import logging.handlers
 import queue
 
-from anyio import Path
+from pathlib import Path
 import discord
 import requests
 from colorama import Back, Fore, Style, init
