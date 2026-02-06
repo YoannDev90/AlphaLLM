@@ -3,6 +3,7 @@ import logging
 import logging.handlers
 import queue
 
+from anyio import Path
 import discord
 import requests
 from colorama import Back, Fore, Style, init
@@ -206,6 +207,10 @@ def setup_logging():
     """Setup logging with console, file, and custom handlers."""
     logs_config = config.CONFIG.get("logs", {})
     loki_url = logs_config.get("loki_url")
+
+    log_file = Path("data/bot.log")
+    log_file.parent.mkdir(exist_ok=True)
+    log_file.touch(exist_ok=True)
 
     logger = logging.getLogger()
     logger.setLevel(logging.CRITICAL)

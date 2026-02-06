@@ -8,3 +8,5 @@ TODO.md
 stop.json
 /generated_images/
 alphallm.service
+run.py
+req.txt

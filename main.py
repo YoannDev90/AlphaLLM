@@ -115,6 +115,10 @@ async def main() -> None:
     while True:
         shutdown_event.clear()
 
+        # Créer le dossier data s'il n'existe pas
+        data_dir = Path("data")
+        data_dir.mkdir(exist_ok=True)
+
         setup_logging()
         logger = logging.getLogger(LOGGER_NAME)
         logger.info(f"Booting {LOGGER_NAME}")
