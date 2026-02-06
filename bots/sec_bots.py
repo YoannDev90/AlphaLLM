@@ -20,7 +20,7 @@ def create_addon_bot():
     @bot.event
     async def on_ready():
         logger.info(f"Addon bot logged in as {bot.user} (ID: {bot.user.id})")
-        await bot.change_presence(status=discord.Status.offline)
+        await bot.change_presence(status=discord.Status.dnd, activity=discord.Game("Processing messages..."))
 
     @bot.event
     async def on_message(message):
