@@ -32,6 +32,7 @@ def load_status() -> Dict[str, Dict[str, Any]]:
 def save_status(status: Dict[str, Dict[str, Any]]):
     """Save status to JSON file."""
     try:
+        STATUS_FILE.parent.mkdir(parents=True, exist_ok=True)
         with open(STATUS_FILE, "w") as f:
             json.dump(status, f, indent=4)
     except Exception as e:

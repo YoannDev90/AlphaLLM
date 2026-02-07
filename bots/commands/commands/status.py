@@ -15,6 +15,9 @@ async def setup(bot: discord.Client):
 
         status_data = get_status()
 
+        # Filter out internal keys like 'cycle'
+        status_data = {k: v for k, v in status_data.items() if k != "cycle"}
+
         embed = discord.Embed(
             title="🤖 Models Status",
             description="Current status of all AI models:",
