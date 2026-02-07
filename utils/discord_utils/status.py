@@ -26,7 +26,18 @@ def load_status() -> Dict[str, Dict[str, Any]]:
                 return json.load(f)
         except Exception as e:
             logger.error(f"Failed to load status: {e}")
-    return {}
+    default_status = {}
+    for model in AVAILABLE_MODELS:
+        default_status[model] = {
+            "status": "unknown",
+            "success_rate": 0.0,
+            "uptime": 0.0,
+            "last_check": 0,
+            "total_requests": 0,
+            "successful_requests": 0,
+        }
+    save_status(default_status)
+    return default_status
 
 
 def save_status(status: Dict[str, Dict[str, Any]]):
@@ -42,7 +53,7 @@ def save_status(status: Dict[str, Dict[str, Any]]):
 def update_status_on_success(model: str, elapsed_time: str):
     """Update status for a successful request."""
     if model == "evilgpt":
-        model = "mistral"  # evilgpt uses mistral backend
+        model = "mistral"
     status = load_status()
     if model not in status:
         status[model] = {
