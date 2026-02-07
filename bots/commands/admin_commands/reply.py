@@ -29,7 +29,10 @@ async def setup(bot: discord.Client):
             )
         except discord.HTTPException as e:
             logger.error(f"Error sending message: {e}")
-            await interaction.followup.send("Error sending message.", ephemeral=True)
+            if e.code == 50007:
+                await interaction.followup.send("Cannot send message to this user. They may have blocked the bot or disabled DMs from server members.", ephemeral=True)
+            else:
+                await interaction.followup.send("Error sending message.", ephemeral=True)
             return
         except Exception as e:
             logger.error(f"Unexpected error: {e}")
