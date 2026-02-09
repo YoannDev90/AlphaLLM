@@ -122,3 +122,8 @@ class MemoryManager:
         for doc_id in doc_ids:
             self._db.remove(doc_ids=[doc_id])
         self._logger.debug(f"Deleted {len(doc_ids)} STM messages")
+
+    async def clear_history(self, user_id: int):
+        """Clear all conversation history for a user."""
+        self._db.remove(self._query.user_id == user_id)
+        self._logger.debug(f"Cleared history for user {user_id}")

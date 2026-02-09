@@ -11,7 +11,6 @@ import aiohttp
 from config import LOGGER_NAME
 from models.image.flux import generate_flux
 from models.image.gptimage import generate_gptimage
-from models.image.nanobanana import generate_nanobanana
 from models.image.zimage import generate_zimage
 from utils.ai_process.ai_utils import enhance_image_prompt
 from utils.handlers.images import (auto_enhance_image, enhance_image,
@@ -27,7 +26,6 @@ class Image_Model(Enum):
 
     FLUX = "flux"
     GPT_IMAGE = "gptimage"
-    NANOBANANA = "nanobanana"
     ZIMAGE = "zimage"
 
 
@@ -54,24 +52,20 @@ FALLBACK_ORDER = [
     Image_Model.FLUX.value,
     Image_Model.ZIMAGE.value,
     Image_Model.GPT_IMAGE.value,
-    Image_Model.NANOBANANA.value,
 ]
 
 EDIT_FALLBACK_ORDER = [
     Image_Model.GPT_IMAGE.value,
-    Image_Model.NANOBANANA.value,
 ]
 
 IMAGE_GEN_FUNCTIONS = {
     Image_Model.FLUX.value: generate_flux,
     Image_Model.GPT_IMAGE.value: generate_gptimage,
-    Image_Model.NANOBANANA.value: generate_nanobanana,
     Image_Model.ZIMAGE.value: generate_zimage,
 }
 
 IMAGE_EDIT_FUNCTIONS = {
     Image_Model.GPT_IMAGE.value: generate_gptimage,
-    Image_Model.NANOBANANA.value: generate_nanobanana,
 }
 
 IMAGE_TRANSFORMATION_FUNCTIONS = {

@@ -17,7 +17,7 @@
         "model": {
           "type": "string",
           "description": "The image generation model to use (optional, defaults to auto)",
-          "enum": ["flux", "gptimage", "kontext", "nanobanana", "zimage"]
+          "enum": ["flux", "gptimage", "zimage"]
         },
         "style": {
           "type": "string",

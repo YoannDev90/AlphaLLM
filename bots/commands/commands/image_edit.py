@@ -20,7 +20,7 @@ async def setup(bot: discord.Client):
     )
     @app_commands.describe(
         prompt="The prompt to edit the image (optional if using transformations)",
-        model="The model to use for editing (default: kontext)",
+        model="The model to use for editing (default: gptimage)",
         number="Number of images to generate (1-4, default: 1)",
         enhance="Whether to enhance the image (default: Yes)",
         image_1="Attach the first image to edit",
@@ -30,7 +30,6 @@ async def setup(bot: discord.Client):
     )
     @app_commands.choices(
         model=[
-            app_commands.Choice(name="NanoBanana", value="nanobanana"),
             app_commands.Choice(name="GPT Image", value="gptimage"),
         ]
     )
