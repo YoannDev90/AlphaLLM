@@ -31,7 +31,7 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
-    if message.author == bot.user:
+    if message.author.bot:
         return
     authorized, reason = await perms_checker.is_authorized_msg(message)
     if not authorized:

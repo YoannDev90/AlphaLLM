@@ -20,22 +20,35 @@ STATUS_FILE = Path("data/status.json")
 
 def load_status() -> Dict[str, Dict[str, Any]]:
     """Load status from JSON file."""
+    loaded_status = {}
     if STATUS_FILE.exists():
         try:
             with open(STATUS_FILE, "r") as f:
-                return json.load(f)
+                loaded_status = json.load(f)
         except Exception as e:
             logger.error(f"Failed to load status: {e}")
+    
+    # Ensure all available models have entries
     default_status = {}
     for model in AVAILABLE_MODELS:
-        default_status[model] = {
-            "status": "unknown",
-            "success_rate": 0.0,
-            "uptime": 0.0,
-            "last_check": 0,
-            "total_requests": 0,
-            "successful_requests": 0,
-        }
+        if model in loaded_status:
+            default_status[model] = loaded_status[model]
+        else:
+            default_status[model] = {
+                "status": "unknown",
+                "success_rate": 0.0,
+                "uptime": 0.0,
+                "last_check": 0,
+                "total_requests": 0,
+                "successful_requests": 0,
+            }
+    
+    # Keep non-model keys like 'cycle'
+    for key, value in loaded_status.items():
+        if key not in AVAILABLE_MODELS:
+            default_status[key] = value
+    
+    # Save the merged status back to file
     save_status(default_status)
     return default_status
 

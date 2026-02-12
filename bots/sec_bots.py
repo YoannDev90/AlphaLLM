@@ -24,7 +24,7 @@ def create_addon_bot():
 
     @bot.event
     async def on_message(message):
-        if message.author == bot.user or message.author == main_bot.user:
+        if message.author == bot.user or message.author == main_bot.user or message.author.bot:
             return
         if message.author.id in await get_blacklist():
             await main_bot.get_channel(message.channel.id).send("❌ You are blacklisted from using this bot.")

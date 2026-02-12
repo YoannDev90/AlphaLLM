@@ -33,8 +33,8 @@
   "zimage": {
     "name": "Z-Image",
     "author": "Github",
-    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.77.0/icons/github.svg",
-    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.77.0/icons/github.svg",
+    "icon-color": "https://unpkg.com/@lobehub/icons-static-svg@1.77.0/icons/qwen-color.svg",
+    "icon-bw": "https://unpkg.com/@lobehub/icons-static-svg@1.77.0/icons/qwen.svg",
     "supported_sizes": [
       "768x768",
       "1024x1024",

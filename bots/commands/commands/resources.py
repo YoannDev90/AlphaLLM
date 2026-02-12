@@ -140,7 +140,7 @@ async def setup(bot: discord.Client):
                     embed.add_field(
                         name="⚡ Current Usage",
                         value=(
-                            f"**CPU:** {cpu_percent:.2f}% | {latest_snapshot.cpu_time:.2f}s\n"
+                            f"**CPU:** {cpu_percent:.2f}%\n"
                             f"**RAM:** {memory_percent:.1f}%"
                         ),
                         inline=False,
