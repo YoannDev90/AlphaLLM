@@ -89,6 +89,7 @@ def update_status_on_success(model: str, elapsed_time: str):
         entry["status"] = "online" if elapsed < 30 else "degraded"
     except Exception:
         entry["status"] = "online"
+    logger.info(f"Updated status for {model}: {entry['status']}")
     save_status(status)
 
 
@@ -115,6 +116,7 @@ def update_status_on_failure(model: str):
         else 0.0
     )
     entry["status"] = "offline"
+    logger.info(f"Updated status for {model}: {entry['status']}")
     save_status(status)
 
 
@@ -147,6 +149,7 @@ async def status_emulation(shutdown_event: asyncio.Event):
     while not shutdown_event.is_set():
         for i in range(current_index, len(models)):
             model = models[i]
+            logger.info(f"Status emulation: checking model {model}")
             try:
                 results = [
                     r
@@ -177,15 +180,22 @@ async def status_emulation(shutdown_event: asyncio.Event):
                     )
                     if not is_error:
                         logger.debug(f"Status check for {model}: success")
+                        update_status_on_success(model, results[0].elapsed_time if hasattr(results[0], "elapsed_time") else "0s")
                     else:
                         logger.debug(
                             f"Status check for {model}: error response - {response_text[:50]}..."
                         )
+                        update_status_on_failure(model)
                 else:
                     logger.debug(f"Status check for {model}: no response")
+                    update_status_on_failure(model)
             except Exception as e:
                 logger.error(f"Status check failed for {model}: {e}")
+                update_status_on_failure(model)
             
+            # Reload status to include any updates from the check
+            status = load_status()
+            cycle = status.get("cycle", {})
             # Update cycle index
             cycle["current_index"] = i + 1
             status["cycle"] = cycle
