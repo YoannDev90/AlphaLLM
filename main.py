@@ -19,6 +19,7 @@ from utils.discord_utils.status import status_emulation
 from utils.func_calling import initialize_function_caller
 from utils.memory import initialize_memory_manager
 from utils.ressources import start_monitoring, stop_monitoring
+from utils.uptime_monitor import get_uptime_monitor
 
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
@@ -133,6 +134,10 @@ async def main() -> None:
             logger.debug("Démarrage du monitoring des ressources...")
             monitor = start_monitoring(interval=1.0, csv_file=csv_file)
 
+            logger.debug("Démarrage du monitoring d'uptime...")
+            uptime_monitor = get_uptime_monitor()
+            uptime_monitor.start()
+
             monitor.fill_gaps(datetime.datetime.now())
             await asyncio.gather(
                 initialize_memory_manager(), initialize_function_caller()
@@ -181,6 +186,8 @@ async def main() -> None:
         finally:
             try:
                 stop_monitoring()
+                uptime_monitor = get_uptime_monitor()
+                uptime_monitor.stop()
                 close_logging()
             except Exception as e:
                 logger.warning(f"Erreur lors de l'arrêt du monitoring: {e}")
