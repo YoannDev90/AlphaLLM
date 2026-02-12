@@ -15,13 +15,10 @@ from utils.ressources import get_default_monitor
 router = APIRouter()
 logger = logging.getLogger(LOGGER_NAME)
 
-router = APIRouter()
-logger = logging.getLogger(LOGGER_NAME)
-
 
 def get_daily_data():
     """Aggregate resource data from CSV for the last 24 hours, one point per minute, with deltas for incremental metrics."""
-    csv_file = Path("monitoring.csv")
+    csv_file = Path("data/monitoring.csv")
     if not csv_file.exists():
         return []
 
