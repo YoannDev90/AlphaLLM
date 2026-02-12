@@ -279,10 +279,12 @@ class ResourceMonitor:
                 last_row = None
                 for row in reader:
                     last_row = row
-                if last_row and "timestamp" in last_row:
-                    ts = datetime.fromisoformat(last_row["timestamp"])
-                    logger.debug(f"Last timestamp from CSV: {ts}")
-                    return ts
+                if last_row:
+                    ts_str = last_row.get("timestamp")
+                    if ts_str:
+                        ts = datetime.fromisoformat(ts_str)
+                        logger.debug(f"Last timestamp from CSV: {ts}")
+                        return ts
                 else:
                     logger.debug("No valid last row found in CSV")
         except Exception as e:
@@ -301,9 +303,10 @@ class ResourceMonitor:
                     reader = csv.DictReader(csvfile)
                     rows = list(reader)[-500:]
                     for row in rows:
-                        if "timestamp" in row:
+                        ts_str = row.get("timestamp")
+                        if ts_str:
                             try:
-                                ts = datetime.fromisoformat(row["timestamp"])
+                                ts = datetime.fromisoformat(ts_str)
                                 timestamps.append(ts)
                             except ValueError:
                                 pass
