@@ -3,10 +3,11 @@
 [![GitHub stars](https://img.shields.io/github/stars/YoannDev90/AlphaLLM?style=for-the-badge)](https://github.com/YoannDev90/AlphaLLM/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/YoannDev90/AlphaLLM?style=for-the-badge)](https://github.com/YoannDev90/AlphaLLM/issues)
 [![GitHub license](https://img.shields.io/github/license/YoannDev90/AlphaLLM?style=for-the-badge&type=mit)](https://github.com/YoannDev90/AlphaLLM/blob/dev/LICENSE)
-[![Python](https://img.shields.io/badge/python-3.12+-blue?style=for-the-badge)](https://www.python.org/downloads/)
+[![Wakatime](https://wakatime.com/badge/github/YoannDev90/AlphaLLM.svg?style=for-the-badge)](https://wakatime.com/badge/github/YoannDev90/AlphaLLM)
 [![Discord](https://img.shields.io/discord/1327996079786168441?color=blue&label=Discord&logo=discord&style=for-the-badge)](https://discord.com/invite/QGvyrUgwdK)
 
-![Alt](https://repobeats.axiom.co/api/embed/d1ef951054604efff035919fef4255170881619b.svg "Repobeats analytics image")
+<img src="https://wakatime.com/share/@dfc968e3-fc46-4804-b046-5564e46d093a/cbdb2974-405c-41cd-acbd-c55b6849f294.svg" alt="ChatGPT" style="width: 800px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+<img src="https://repobeats.axiom.co/api/embed/d1ef951054604efff035919fef4255170881619b.svg" alt="ChatGPT" style="width: 800px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
 
 AlphaLLM is an advanced Discord bot that integrates multiple AI models for text and image generation. It provides a REST API, RAG memory system, and administrative features.
 
