@@ -1,16 +1,5 @@
 [
     {
-        "model_name": "llama3.3-70b",
-        "litellm_params": {
-            "model": "cerebras/llama3.3-70b",
-            "api_key": "CEREBRAS_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
         "model_name": "llama-3.3-70b-instruct",
         "litellm_params": {
             "model": "openai/llama-3.3-70b-instruct:free",

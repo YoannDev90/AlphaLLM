@@ -41,8 +41,7 @@ async def setup(bot: discord.Client):
                 name="⚙️ Configuration Commands",
                 value=(
                     f"{command_id_manager.get_command_mention('guild-config')} - Configure server settings (Admin only)\n"
-                    f"{command_id_manager.get_command_mention('clear-history')} - Delete chat history\n"
-                    f"{command_id_manager.get_command_mention('resources')} - Show resources metrics"
+                    f"{command_id_manager.get_command_mention('clear-history')} - Delete chat history"
                 ),
                 inline=False,
             )
@@ -52,7 +51,6 @@ async def setup(bot: discord.Client):
                 name="🆘 Help & Support Commands",
                 value=(
                     f"{command_id_manager.get_command_mention('help-bot')} - Show detailed help information\n"
-                    f"{command_id_manager.get_command_mention('status')} - Show details ping informations\n"
                     f"{command_id_manager.get_command_mention('support')} - Get support server link\n"
                     f"{command_id_manager.get_command_mention('contact-dev')} - Contact the developer directly"
                 ),

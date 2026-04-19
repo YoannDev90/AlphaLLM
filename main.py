@@ -6,8 +6,6 @@ import os
 import signal
 from pathlib import Path
 
-import utils.ressources as ressources
-from api.api import start_api_async
 from bots.admin_bot import run_admin_bot
 from bots.bot import run_bot
 from bots.logger_bot import run_logger_bot
@@ -15,20 +13,16 @@ from bots.sec_bots import run_addon_bots
 from config import LOGGER_NAME
 from logger import close_logging, setup_logging
 from utils.database.db_manager import DatabaseManager
-from utils.discord_utils.status import status_emulation
 from utils.func_calling import initialize_function_caller
 from utils.memory import initialize_memory_manager
-from utils.ressources import start_monitoring, stop_monitoring
-from utils.uptime_monitor import get_uptime_monitor
 
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
 
-RUN_API = True
 RUN_LOGGER_BOT = True
 RUN_MAIN_BOT = True
 RUN_ADMIN_BOT = True
-RUN_SEC_BOTS = True
+RUN_SEC_BOTS = False
 
 logging.basicConfig(level=logging.CRITICAL)
 
@@ -128,17 +122,6 @@ async def main() -> None:
         signal.signal(signal.SIGINT, handle_shutdown_signal)
 
         try:
-            ressources._monitor_instance = None
-
-            csv_file = "data/monitoring.csv"
-            logger.debug("Démarrage du monitoring des ressources...")
-            monitor = start_monitoring(interval=1.0, csv_file=csv_file)
-
-            logger.debug("Démarrage du monitoring d'uptime...")
-            uptime_monitor = get_uptime_monitor()
-            uptime_monitor.start()
-
-            monitor.fill_gaps(datetime.datetime.now())
             await asyncio.gather(
                 initialize_memory_manager(), initialize_function_caller()
             )
@@ -168,15 +151,9 @@ async def main() -> None:
                     if RUN_SEC_BOTS
                     else asyncio.sleep(0)
                 ),
-                (
-                    run_with_shutdown(start_api_async(), "API Server")
-                    if RUN_API
-                    else asyncio.sleep(0)
-                ),
                 run_with_shutdown(
                     check_stop_file(restart_pending), "Stop-File Checker"
                 ),
-                run_with_shutdown(status_emulation(shutdown_event), "Status Emulation"),
             ]
 
             await asyncio.gather(*tasks, return_exceptions=True)
@@ -185,12 +162,9 @@ async def main() -> None:
             logger.info("Arrêt complet du programme.")
         finally:
             try:
-                stop_monitoring()
-                uptime_monitor = get_uptime_monitor()
-                uptime_monitor.stop()
                 close_logging()
             except Exception as e:
-                logger.warning(f"Erreur lors de l'arrêt du monitoring: {e}")
+                logger.warning(f"Erreur lors de l'arrêt du programme: {e}")
 
         break
 
