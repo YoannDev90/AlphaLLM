@@ -58,7 +58,7 @@ class BaseChatModel(ABC):
     @abstractmethod
     async def chat(
         self, parameters: ChatParameters
-    ) -> Union[ChatResult, AsyncGenerator[StreamChunk, None]]:
+    ) -> ChatResult:
         """Méthode principale pour converser avec le modèle"""
         pass
 
