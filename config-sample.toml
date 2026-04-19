@@ -5,18 +5,6 @@ dev_id = [123456789012345678, 123456789012345678]
 admin_server = 123456789012345678
 support_server = "https://discord.com/invite/your_invite_link"
 
-# ===== API Configuration =====
-[api]
-host = "0.0.0.0"
-port = 25692
-ssl_certfile = "certfile.pem"
-ssl_keyfile = "keyfile.pem"
-api_key_required = false
-api_url = "https://your-api-domain.com"
-request_timeout = 300
-allowed_hosts = ["*"]
-cors_origins = ["*"]
-
 # ===== Logs Configuration =====
 [logs]
 logging_level = "INFO"
@@ -108,6 +96,4 @@ allowed_mime_types = ["text/plain", "application/pdf", "image/jpeg", "image/png"
 max_stm_messages = 50  # Maximum short-term memory messages per conversation
 max_ltm_results = 5    # Maximum long-term memory results to fetch
 max_conversation_history = 10  # Maximum messages to include in prompt history
-api_rate_limit = 100   # Requests per minute for API
-api_ban_threshold = 10  # Number of failed requests before banning IP
 discord_rate_limit = 30  # Messages per minute for Discord

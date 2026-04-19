@@ -10,8 +10,6 @@ from config import (AVAILABLE_MODELS, LOGGER_NAME, MAX_CONVERSATION_HISTORY,
 from utils.ai_process.ai_utils import summarize
 from utils.ai_process.llm_selector import LLMSelector
 from utils.discord_utils.permission_checker import PermissionChecker
-from utils.discord_utils.status import (update_status_on_failure,
-                                        update_status_on_success)
 from utils.func_calling import get_function_caller
 from utils.handlers.files import FileHandler
 from utils.memory import get_memory_manager, initialize_memory_manager
@@ -388,11 +386,6 @@ async def unified_text_gen(
         is_error_response = any(
             error_msg in result.response for error_msg in error_messages
         )
-
-        if not is_error_response:
-            update_status_on_success(model, result.elapsed_time)
-        else:
-            update_status_on_failure(model)
 
         logger.info(
             f"Réponse générée - Modèle: {result.model}, Usage: {result.usage} tokens, Temps: {result.elapsed_time}"

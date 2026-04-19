@@ -26,14 +26,14 @@ def read_file(file_path: Union[str, Path]) -> str:
 
 CONFIG = load_toml_config()
 
-CONFIG_SECTION: Dict[str, Any] = CONFIG.get("config")
-API_SECTION: Dict[str, Any] = CONFIG.get("api")
-LOGS_SECTION: Dict[str, Any] = CONFIG.get("logs")
-MEMORY_SECTION: Dict[str, Any] = CONFIG.get("memory")
-MODELS_SECTION: Dict[str, Any] = CONFIG.get("models")
-DATABASE_SECTION: Dict[str, Any] = CONFIG.get("database")
-UNIFIED_TEXT_SECTION: Dict[str, Any] = CONFIG.get("unified_text")
-LIMITS_SECTION: Dict[str, Any] = CONFIG.get("limits")
+CONFIG_SECTION: Dict[str, Any] = CONFIG.get("config", {})
+API_SECTION: Dict[str, Any] = CONFIG.get("api", {})
+LOGS_SECTION: Dict[str, Any] = CONFIG.get("logs", {})
+MEMORY_SECTION: Dict[str, Any] = CONFIG.get("memory", {})
+MODELS_SECTION: Dict[str, Any] = CONFIG.get("models", {})
+DATABASE_SECTION: Dict[str, Any] = CONFIG.get("database", {})
+UNIFIED_TEXT_SECTION: Dict[str, Any] = CONFIG.get("unified_text", {})
+LIMITS_SECTION: Dict[str, Any] = CONFIG.get("limits", {})
 
 LOGGING_LEVEL_STR = LOGS_SECTION.get("logging_level")
 level_mapping = {

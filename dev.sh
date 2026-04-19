@@ -18,13 +18,6 @@ if [ -f "requirements-dev.txt" ]; then
     pip install -r requirements-dev.txt
 fi
 
-# Démarrer en mode développement (avec rechargement automatique si disponible)
+# Démarrer en mode développement
 echo "🚀 Démarrage en mode développement..."
-if command -v uvicorn &> /dev/null; then
-    # Si c'est une app FastAPI, utiliser uvicorn avec reload
-    echo "🔄 Mode rechargement automatique activé (uvicorn)"
-    python -m uvicorn api.api:app --reload --host 0.0.0.0 --port 25692
-else
-    # Sinon, démarrer normalement
-    python main.py
-fi
+python main.py
