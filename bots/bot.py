@@ -8,7 +8,7 @@ from bots.commands.cmds import setup_commands
 from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
 from utils.discord_utils.commands_ids import command_id_manager
 from utils.discord_utils.permission_checker import PermissionChecker
-from utils.handlers.messages import smart_long_messages_with_view
+from utils.handlers.messages import MessageSender
 from utils.unified_text import Origin, Text_Model, unified_text_gen
 
 perms_checker = PermissionChecker()
@@ -85,36 +85,30 @@ async def on_message(message):
                             await message.channel.send(file=image_file)
                         except Exception as e:
                             logger.error(f"Erreur lors de l'envoi de l'image: {e}")
-                            await smart_long_messages_with_view(
-                                message.channel,
+                            await MessageSender(message.channel, bot).send_with_view(
                                 result.response,
                                 message.content,
                                 result.model,
-                                result,
-                                bot,
+                                result
                             )
                     else:
-                        await smart_long_messages_with_view(
-                            message.channel,
+                        await MessageSender(message.channel, bot).send_with_view(
                             result.response,
                             message.content,
                             result.model,
-                            result,
-                            bot,
+                            result
                         )
                 else:
-                    logger.debug("About to call smart_long_messages_with_view")
+                    logger.debug("About to call MessageSender.send_with_view")
                     try:
-                        await smart_long_messages_with_view(
-                            message.channel,
+                        await MessageSender(message.channel, bot).send_with_view(
                             result.response,
                             message.content,
                             result.model,
-                            result,
-                            bot,
+                            result
                         )
                         logger.debug(
-                            "smart_long_messages_with_view completed successfully"
+                            "MessageSender.send_with_view completed successfully"
                         )
                     except Exception as e:
                         logger.error(f"Error sending response: {e}")

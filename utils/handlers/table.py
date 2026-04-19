@@ -151,7 +151,9 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
     }
 
     padding, header_height, min_cell_height = 36, 120, 84
+    logger.debug(f"Rendering table with {len(headers)} columns and {len(rows)} rows")
     col_widths = _calc_col_widths(headers, rows, fonts["reg_reg"], padding)
+    logger.debug(f"Calculated column widths: {col_widths}")
 
     processed_data = []
     for row in rows:
@@ -165,6 +167,7 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
 
     total_width = sum(col_widths) + len(col_widths) + 1
     total_height = header_height + sum(h for _, h in processed_data) + len(processed_data) + 1
+    logger.debug(f"Total image size: {total_width}x{total_height}")
 
     img = Image.new("RGB", (total_width, total_height), colors["bg"])
     
@@ -178,8 +181,14 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
                 
                 # Render full line as a single string to let Pilmoji handle layout and emojis perfectly
                 line_text = " ".join(w for s, w in line)
+                if not line_text.strip():
+                    continue
                 
                 # Use font based on the first style of the line or header status
+                # Safe check if line is empty (shouldn't happen with the strip check above but anyway)
+                if not line:
+                    continue
+                    
                 first_style, _ = line[0]
                 if is_header:
                     f = fonts["header_bold" if first_style["bold"] else "header_reg"]
@@ -220,19 +229,80 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
     buffer = io.BytesIO()
     img.save(buffer, format="PNG", dpi=(300, 300))
     buffer.seek(0)
+    logger.debug(f"Table image rendered successfully, size: {buffer.getbuffer().nbytes} bytes")
     return buffer
 
 
 
-def detect_and_convert_tables(text: str) -> str:
+TABLE_IMAGE_PLACEHOLDER = "TABLE_IMAGE_RENDERED_PLACEHOLDER"
+
+
+def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO]]:
     """Detect Markdown tables and render them as images with alignment support."""
     try:
+        # Pre-process: detect and isolate markdown code blocks containing tables
+        code_block_pattern = re.compile(r"```(?:markdown)?\n((?:\|.*\|(?:\n|$))+)```", re.MULTILINE)
+        
+        table_images = []
+        
+        def replace_table_block(match):
+            logger.debug("Detected markdown table inside code block")
+            table_content = match.group(1).strip()
+            lines = table_content.split("\n")
+            headers, rows, alignments = [], [], []
+            
+            i = 0
+            while i < len(lines):
+                line = lines[i].strip()
+                if not line.startswith("|") or not line.endswith("|"):
+                    i += 1
+                    continue
+                
+                parts = [p.strip() for p in line[1:-1].split("|")]
+                
+                # Check for separator line
+                if all(re.match(r"^[\s\-\:]+$", p) for p in parts) and parts:
+                    for p in parts:
+                        if p.startswith(":") and p.endswith(":"): alignments.append("center")
+                        elif p.endswith(":"): alignments.append("right")
+                        else: alignments.append("left")
+                elif not headers:
+                    headers = parts
+                else:
+                    rows.append(parts)
+                i += 1
+                
+            if headers and rows:
+                num_cols = len(headers)
+                while len(alignments) < num_cols: alignments.append("left")
+                alignments = alignments[:num_cols]
+                
+                # Normalize rows
+                normalized_rows = []
+                for r in rows:
+                    if len(r) < num_cols:
+                        r.extend([""] * (num_cols - len(r)))
+                    normalized_rows.append(r[:num_cols])
+                
+                try:
+                    img_buffer = _render_table_image(headers, normalized_rows, alignments)
+                    table_images.append(img_buffer)
+                    return f"\n{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}\n"
+                except Exception as e:
+                    logger.error(f"Table render failed: {e}")
+                    return match.group(0)
+            return match.group(0)
+
+        text = code_block_pattern.sub(replace_table_block, text)
+
+        # Legacy direct table detection (for tables not in code blocks)
         lines = text.split("\n")
         output_lines, i = [], 0
 
         while i < len(lines):
             line = lines[i].strip()
             if line.startswith("|") and line.endswith("|"):
+                logger.debug(f"Detected potential table start at line {i}")
                 potential_table, alignments = [], []
                 
                 # Group table lines
@@ -250,21 +320,33 @@ def detect_and_convert_tables(text: str) -> str:
                 
                 if len(potential_table) >= 2:
                     headers = [c.strip() for c in potential_table[0].strip()[1:-1].split("|")]
-                    rows = [[c.strip() for c in row.strip()[1:-1].split("|")] for row in potential_table[1:]]
-                    while len(alignments) < len(headers): alignments.append("left")
+                    num_cols = len(headers)
+                    rows = []
+                    for row_str in potential_table[1:]:
+                        cells = [c.strip() for c in row_str.strip()[1:-1].split("|")]
+                        # Pad or truncate row to match header column count
+                        if len(cells) < num_cols:
+                            cells.extend([""] * (num_cols - len(cells)))
+                        elif len(cells) > num_cols:
+                            cells = cells[:num_cols]
+                        rows.append(cells)
+                    
+                    while len(alignments) < num_cols: alignments.append("left")
+                    if len(alignments) > num_cols:
+                        alignments = alignments[:num_cols]
                     
                     try:
-                        # Logic to attach the image would go here in the real bot
-                        # For now we just keep the marker
-                        output_lines.append("```\n[Table Rendered as Image]\n```")
+                        img_buffer = _render_table_image(headers, rows, alignments)
+                        table_images.append(img_buffer)
+                        output_lines.append(f"\n{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}\n")
                     except Exception as e:
                         logger.error(f"Table render failed: {e}")
                         output_lines.extend(potential_table)
                     continue
             output_lines.append(lines[i])
             i += 1
-        return "\n".join(output_lines)
+        return "\n".join(output_lines), table_images
     except Exception as exc:
         logger.error(f"Table detection failed: {exc}")
-        return text
+        return text, []
 

@@ -7,7 +7,7 @@ from discord.ext import commands
 from bots.bot import bot as main_bot
 from config import ADDONS_BOTS_TOKENS, DEV_IDS, LOGGER_NAME
 from utils.database.perms_conf import get_blacklist
-from utils.handlers.messages import smart_long_messages_with_view
+from utils.handlers.messages import MessageSender
 from utils.unified_text import Origin, Text_Model, unified_text_gen
 
 intents = discord.Intents.default()
@@ -76,27 +76,23 @@ def create_addon_bot():
                                 await main_bot.get_channel(message.channel.id).send(file=image_file)
                             except Exception as e:
                                 logger.error(f"Erreur lors de l'envoi de l'image: {e}")
-                                await smart_long_messages_with_view(
-                                    message.channel,
+                                await MessageSender(message.channel, main_bot).send_with_view(
                                     result.response,
                                     message.content,
                                     result.model,
-                                    result,
-                                    main_bot,
+                                    result
                                 )
                     else:
-                        logger.debug("About to call smart_long_messages_with_view")
+                        logger.debug("About to call MessageSender.send_with_view")
                         try:
-                            await smart_long_messages_with_view(
-                                message.channel,
+                            await MessageSender(message.channel, main_bot).send_with_view(
                                 result.response,
                                 message.content,
                                 result.model,
                                 result,
-                                main_bot,
                             )
                             logger.debug(
-                                "smart_long_messages_with_view completed successfully"
+                                "MessageSender.send_with_view completed successfully"
                             )
                         except Exception as e:
                             logger.error(f"Error sending response: {e}")
