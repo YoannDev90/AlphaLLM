@@ -11,21 +11,15 @@
 
 AlphaLLM is an advanced Discord bot that integrates multiple AI models for text and image generation. It provides a RAG memory system and administrative features.
 
-## 📚 Documentation
-
-Detailed documentation is available in the [`docs/`](docs/) folder:
-
-- [Architecture](docs/architecture.md)
-- [Memory System](docs/memory.md)
-- [Configuration](docs/configuration.md)
-- [Deployment](docs/deployment.md)
-
 ## 🚀 Features
 
 - 🤖 Discord bot with text and image generation
 - 🧠 RAG memory system
 - 🎯 Automatic AI model selection
 - 📊 Logging and diagnostics
+
+> [!NOTE]
+> I'm working on a system to allow you to run it (debug/dev purpose) using my own credits (very limited)
 
 ## 🤖 Supported AI Models
 
