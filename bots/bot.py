@@ -27,6 +27,11 @@ async def on_ready():
     command_id_manager.set_bot(bot)
     asyncio.create_task(command_id_manager.fetch_command_ids())
     logger.info("Fetch des IDs de commandes lancé en arrière-plan")
+    
+    # Register persistent views
+    from utils.views.message import TableActionView
+    bot.add_view(TableActionView(table_data={}))
+    logger.info("Persistent views registered")
 
 
 @bot.event

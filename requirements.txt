@@ -26,3 +26,5 @@ transformers
 accelerate
 python-dotenv
 pilmoji
+odfpy
+pandas

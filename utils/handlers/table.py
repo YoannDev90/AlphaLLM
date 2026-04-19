@@ -2,7 +2,8 @@ import io
 import logging
 import re
 import textwrap
-from typing import Any, List
+from typing import Any, List, Tuple
+from urllib.parse import urlparse
 
 from PIL import Image, ImageDraw, ImageFont
 from pilmoji import Pilmoji
@@ -11,6 +12,35 @@ from config import LOGGER_NAME
 
 logger = logging.getLogger(LOGGER_NAME)
 
+URL_REGEX = r'\[([^\]]+)\]\((https?://[^\s\)]+)\)|(https?://[^\s\)]+)'
+
+def _extract_links_and_sanitize(text: str, current_links: List[str]) -> Tuple[str, List[str]]:
+    """
+    Substitutes URLs into placeholders like [n] (domain) and returns the links.
+    Markdown links: [text](url) -> sanitized_text and url
+    Plain URLs: url -> sanitized_url and url
+    current_links: Shared list across the whole table to ensure incremental [n] indices.
+    """
+    def replacer(match):
+        label, url_md, url_plain = match.groups()
+        url = url_md or url_plain
+        
+        # Determine index based on global table links
+        if url in current_links:
+            idx = current_links.index(url) + 1
+        else:
+            current_links.append(url)
+            idx = len(current_links)
+        
+        domain = urlparse(url).netloc
+        if domain.startswith("www."):
+            domain = domain[4:]
+            
+        placeholder = f"[{idx}] ({domain})"
+        return placeholder
+
+    sanitized_text = re.sub(URL_REGEX, replacer, text)
+    return sanitized_text, current_links
 
 def _get_font(size: int, bold: bool = False, italic: bool = False):
     """Load Noto Sans font (regular, bold, italic, or bold-italic)."""
@@ -127,8 +157,24 @@ def _wrap_text_with_formatting(text: str, max_width: int, fonts: dict) -> list:
     return lines
 
 
-def _render_table_image(headers: List[str], rows: List[List[str]], alignments: List[str]) -> io.BytesIO:
-    """Render table as a high-resolution image with formatting and alignment."""
+def _render_table_image(headers: List[str], rows: List[List[str]], alignments: List[str]) -> Tuple[io.BytesIO, List[str]]:
+    """Render table as a high-resolution image and return buffer + extracted links."""
+    # Sanitize content and collect links
+    all_links = []
+    
+    sanitized_headers = []
+    for h in headers:
+        text, all_links = _extract_links_and_sanitize(h, all_links)
+        sanitized_headers.append(text)
+        
+    sanitized_rows = []
+    for row in rows:
+        sanitized_row = []
+        for cell in row:
+            text, all_links = _extract_links_and_sanitize(str(cell), all_links)
+            sanitized_row.append(text)
+        sanitized_rows.append(sanitized_row)
+
     font_size = 42
     fonts = {
         "reg_reg": _get_font(font_size),
@@ -151,12 +197,12 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
     }
 
     padding, header_height, min_cell_height = 36, 120, 84
-    logger.debug(f"Rendering table with {len(headers)} columns and {len(rows)} rows")
-    col_widths = _calc_col_widths(headers, rows, fonts["reg_reg"], padding)
+    logger.debug(f"Rendering table with {len(sanitized_headers)} columns and {len(sanitized_rows)} rows")
+    col_widths = _calc_col_widths(sanitized_headers, sanitized_rows, fonts["reg_reg"], padding)
     logger.debug(f"Calculated column widths: {col_widths}")
 
     processed_data = []
-    for row in rows:
+    for row in sanitized_rows:
         processed_row = []
         row_h = min_cell_height
         for i, cell in enumerate(row):
@@ -209,7 +255,7 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
         draw = ImageDraw.Draw(img)
         # Draw Header
         x = 0
-        for header, width, align in zip(headers, col_widths, alignments):
+        for header, width, align in zip(sanitized_headers, col_widths, alignments):
             draw.rectangle([x, 0, x + width, header_height], fill=colors["header_bg"], outline=colors["border"])
             header_lines = _wrap_text_with_formatting(header, width - padding * 2, fonts)
             draw_cell_text(x, 0, width, header_height, header_lines, align, is_header=True)
@@ -230,20 +276,30 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
     img.save(buffer, format="PNG", dpi=(300, 300))
     buffer.seek(0)
     logger.debug(f"Table image rendered successfully, size: {buffer.getbuffer().nbytes} bytes")
-    return buffer
+    # Return unique links, preserving order if possible
+    unique_links = []
+    seen = set()
+    for link in all_links:
+        if link not in seen:
+            unique_links.append(link)
+            seen.add(link)
+            
+    return buffer, unique_links
 
 
 
 TABLE_IMAGE_PLACEHOLDER = "TABLE_IMAGE_RENDERED_PLACEHOLDER"
 
-
-def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO]]:
-    """Detect Markdown tables and render them as images with alignment support."""
+def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO], list[dict]]:
+    """Detect Markdown tables and render them as images with alignment support.
+    Returns: (modified_text, list_of_images, list_of_table_data)
+    """
     try:
         # Pre-process: detect and isolate markdown code blocks containing tables
         code_block_pattern = re.compile(r"```(?:markdown)?\n((?:\|.*\|(?:\n|$))+)```", re.MULTILINE)
         
         table_images = []
+        table_data_list = []
         
         def replace_table_block(match):
             logger.debug("Detected markdown table inside code block")
@@ -285,8 +341,14 @@ def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO]]:
                     normalized_rows.append(r[:num_cols])
                 
                 try:
-                    img_buffer = _render_table_image(headers, normalized_rows, alignments)
+                    img_buffer, links = _render_table_image(headers, normalized_rows, alignments)
                     table_images.append(img_buffer)
+                    table_data_list.append({
+                        "id": len(table_images) - 1,
+                        "headers": headers,
+                        "rows": normalized_rows,
+                        "links": links
+                    })
                     return f"\n{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}\n"
                 except Exception as e:
                     logger.error(f"Table render failed: {e}")
@@ -336,8 +398,14 @@ def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO]]:
                         alignments = alignments[:num_cols]
                     
                     try:
-                        img_buffer = _render_table_image(headers, rows, alignments)
+                        img_buffer, links = _render_table_image(headers, rows, alignments)
                         table_images.append(img_buffer)
+                        table_data_list.append({
+                            "id": len(table_images) - 1,
+                            "headers": headers,
+                            "rows": rows,
+                            "links": links
+                        })
                         output_lines.append(f"\n{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}\n")
                     except Exception as e:
                         logger.error(f"Table render failed: {e}")
@@ -345,7 +413,10 @@ def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO]]:
                     continue
             output_lines.append(lines[i])
             i += 1
-        return "\n".join(output_lines), table_images
+        return "\n".join(output_lines), table_images, table_data_list
+    except Exception as exc:
+        logger.error(f"Table detection failed: {exc}")
+        return text, [], []
     except Exception as exc:
         logger.error(f"Table detection failed: {exc}")
         return text, []

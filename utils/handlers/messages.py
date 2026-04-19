@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Tuple
 
 import discord
 from config import LOGGER_NAME
@@ -123,9 +123,11 @@ class MessageSender:
             
         return last_message
 
-    async def process_and_send(self, response: str) -> Optional[discord.Message]:
-        """Main entry point for sending complex responses."""
-        response, table_images = detect_and_convert_tables(response)
+    async def process_and_send(self, response: str) -> Tuple[Optional[discord.Message], List[dict]]:
+        """Main entry point for sending complex responses.
+        Returns: (last_message, list_of_table_data)
+        """
+        response, table_images, table_data = detect_and_convert_tables(response)
         pattern = re.compile(f"({TABLE_IMAGE_PLACEHOLDER}_\\d+)|(```[\\s\\S]*?```)")
         parts = pattern.split(response)
         parts = [p for p in parts if p is not None and (p.strip() or p.startswith(TABLE_IMAGE_PLACEHOLDER))]
@@ -138,26 +140,31 @@ class MessageSender:
                 try:
                     idx = int(part.split("_")[-1])
                     img_buffer = table_images[idx]
+                    current_table_data = table_data[idx]
+                    
                     img_buffer.seek(0)
                     file = discord.File(fp=img_buffer, filename="table.png")
-                    last_message = await target.send(file=file)
-                except (IndexError, ValueError):
-                    pass
+                    
+                    from utils.views.message import TableActionView
+                    view = TableActionView(current_table_data)
+                    last_message = await target.send(file=file, view=view)
+                except (IndexError, ValueError) as e:
+                    logger.error(f"Failed to send table message with view: {e}")
             elif part.startswith("```") and part.endswith("```"):
                 last_message = await send_code_block_with_return(target, part, self.max_length, bot=self.bot)
             else:
                 last_message = await self.send_text_with_latex(part)
 
-        return last_message
+        return last_message, table_data
 
     async def send_with_view(self, response: str, original_question: str, model: Any, response_data: Any) -> Optional[discord.Message]:
         """Sends a complex response and attaches a MessageView to the last message."""
         from utils.views.message import MessageView
         
-        last_message = await self.process_and_send(response)
+        last_message, table_data = await self.process_and_send(response)
         
         if last_message:
-            view = MessageView(original_question, model, response_data, self.bot)
+            view = MessageView(original_question, model, response_data, self.bot, table_data=table_data)
             try:
                 await last_message.edit(view=view)
                 view.message = last_message
