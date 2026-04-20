@@ -1,0 +1,23 @@
+{
+  "name": "clone_channel",
+  "description": "Duplicates a channel with its settings and permissions (but without messages)",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "channel_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the channel to clone"
+      },
+      "new_name": {
+        "type": "string",
+        "description": "Optional: A new name for the cloned channel"
+      },
+      "delete_original": {
+        "type": "boolean",
+        "description": "Optional: Whether to delete the original channel after cloning (default: false)",
+        "default": false
+      }
+    },
+    "required": ["channel_id"]
+  }
+}

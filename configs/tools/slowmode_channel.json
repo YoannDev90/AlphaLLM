@@ -1,0 +1,18 @@
+{
+  "name": "slowmode_channel",
+  "description": "Set the slowmode delay for a text channel in the current Discord server",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "seconds": {
+        "type": "integer",
+        "description": "The delay in seconds (0 to disable, up to 21600)"
+      },
+      "channel_id": {
+        "type": "string",
+        "description": "Optional: The Snowflake ID of the channel. Defaults to current if not provided."
+      }
+    },
+    "required": ["seconds"]
+  }
+}
