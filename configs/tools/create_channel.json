@@ -1,0 +1,22 @@
+{
+  "name": "create_channel",
+  "description": "Create a new text channel in a Discord server",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "channel_name": {
+        "type": "string",
+        "description": "The name of the new channel to be created"
+      },
+      "category_id": {
+        "type": "string",
+        "description": "Optional category ID to put the channel in (Snowflake ID)"
+      },
+      "topic": {
+        "type": "string",
+        "description": "Optional topic for the channel"
+      }
+    },
+    "required": ["channel_name"]
+  }
+}

@@ -174,9 +174,11 @@ async def unified_text_gen(
         for call in tool_calls:
             func_name = call["function"]
             params = call["parameters"]
-            from utils.func_calling.tools import execute_tool
+            from utils.func_calling.tool_executor import execute_tool
+            
+            guild = message.guild if message and hasattr(message, "guild") else None
 
-            response = await execute_tool(func_name, params)
+            response = await execute_tool(func_name, params, guild=guild)
             if response is None or response.startswith("error"):
                 break
             tool_responses.append(response)

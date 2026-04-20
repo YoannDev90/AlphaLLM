@@ -1,0 +1,22 @@
+{
+  "name": "kick_member",
+  "description": "Kick a member from a Discord server",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "user_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the user to kick (the 18-digit ID)"
+      },
+      "username": {
+        "type": "string",
+        "description": "The plain username of the member to kick (used as fallback or for search)"
+      },
+      "reason": {
+        "type": "string",
+        "description": "The reason for kicking the member"
+      }
+    },
+    "required": ["user_id"]
+  }
+}
