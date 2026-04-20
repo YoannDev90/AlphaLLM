@@ -39,4 +39,15 @@ async def create_channel_tool(params, guild=None):
         return msg
     except Exception as e:
         logger.error(f"Error creating channel: {e}")
+        if "403 Forbidden" in str(e) or "50013" in str(e):
+             # Precise reasoning (create_channel)
+             if not guild.me.guild_permissions.manage_channels:
+                 error_msg = "error: I do not have the 'Manage Channels' permission in this server."
+             elif category and not category.permissions_for(guild.me).manage_channels:
+                 error_msg = f"error: I do not have permission to create channels in the '{category.name}' category."
+             else:
+                 error_msg = "error: Permission denied (403). Please check my 'Manage Channels' permissions and category access."
+             
+             logger.warning(f"create_channel_tool: {error_msg}")
+             return error_msg
         return f"error: Failed to create channel: {e}"

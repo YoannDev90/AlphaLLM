@@ -19,9 +19,9 @@ from utils.memory import initialize_memory_manager
 shutdown_event = asyncio.Event()
 db_manager = DatabaseManager()
 
-RUN_LOGGER_BOT = True
+RUN_LOGGER_BOT = False
 RUN_MAIN_BOT = True
-RUN_ADMIN_BOT = True
+RUN_ADMIN_BOT = False
 RUN_SEC_BOTS = False
 
 logging.basicConfig(level=logging.CRITICAL)
