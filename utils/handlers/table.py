@@ -288,73 +288,83 @@ def _render_table_image(headers: List[str], rows: List[List[str]], alignments: L
 
 
 
-TABLE_IMAGE_PLACEHOLDER = "TABLE_IMAGE_RENDERED_PLACEHOLDER"
+TABLE_IMAGE_PLACEHOLDER = "__TABLE_IMG"
 
 def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO], list[dict]]:
     """Detect Markdown tables and render them as images with alignment support.
     Returns: (modified_text, list_of_images, list_of_table_data)
     """
     try:
-        # Pre-process: detect and isolate markdown code blocks containing tables
-        code_block_pattern = re.compile(r"```(?:markdown)?\n((?:\|.*\|(?:\n|$))+)```", re.MULTILINE)
-        
         table_images = []
         table_data_list = []
         
+        # Pre-process: detect and isolate markdown code blocks containing tables
+        # Improved pattern to be more flexible with table headers and separators
+        code_block_pattern = re.compile(r"```(markdown|md)?\n((?:\|.*\|(?:\n|$))+)```", re.MULTILINE)
+        
         def replace_table_block(match):
             logger.debug("Detected markdown table inside code block")
-            table_content = match.group(1).strip()
+            table_content = match.group(2).strip()
             lines = table_content.split("\n")
             headers, rows, alignments = [], [], []
             
-            i = 0
-            while i < len(lines):
-                line = lines[i].strip()
-                if not line.startswith("|") or not line.endswith("|"):
-                    i += 1
-                    continue
-                
-                parts = [p.strip() for p in line[1:-1].split("|")]
-                
-                # Check for separator line
-                if all(re.match(r"^[\s\-\:]+$", p) for p in parts) and parts:
-                    for p in parts:
+            # Filter empty lines
+            lines = [l for l in lines if l.strip()]
+            
+            if not lines:
+                return match.group(0)
+
+            # First line is header
+            headers = [p.strip() for p in lines[0].strip()[1:-1].split("|")]
+            num_cols = len(headers)
+            
+            # Check second line for separator/alignments
+            start_row = 1
+            if len(lines) > 1:
+                sep_parts = [p.strip() for p in lines[1].strip()[1:-1].split("|")]
+                if all(re.match(r"^[\s\-\:]+$", p) for p in sep_parts) and sep_parts:
+                    for p in sep_parts:
                         if p.startswith(":") and p.endswith(":"): alignments.append("center")
                         elif p.endswith(":"): alignments.append("right")
                         else: alignments.append("left")
-                elif not headers:
-                    headers = parts
-                else:
-                    rows.append(parts)
-                i += 1
+                    start_row = 2
+            
+            while len(alignments) < num_cols: alignments.append("left")
+            alignments = alignments[:num_cols]
+            
+            # Rest are rows
+            for i in range(start_row, len(lines)):
+                row_raw = lines[i].strip()
+                if not row_raw: continue
                 
-            if headers and rows:
-                num_cols = len(headers)
-                while len(alignments) < num_cols: alignments.append("left")
-                alignments = alignments[:num_cols]
+                row_split = row_raw.split("|")
+                # Remove first and last empty elements if they exist (standard markdown table)
+                if row_raw.startswith("|"): row_split = row_split[1:]
+                if row_raw.endswith("|"): row_split = row_split[:-1]
                 
-                # Normalize rows
-                normalized_rows = []
-                for r in rows:
-                    if len(r) < num_cols:
-                        r.extend([""] * (num_cols - len(r)))
-                    normalized_rows.append(r[:num_cols])
+                row_parts = [p.strip() for p in row_split]
+                # Pad/truncate row
+                if len(row_parts) < num_cols:
+                    row_parts.extend([""] * (num_cols - len(row_parts)))
+                rows.append(row_parts[:num_cols])
                 
+            if headers:
                 try:
-                    img_buffer, links = _render_table_image(headers, normalized_rows, alignments)
+                    img_buffer, links = _render_table_image(headers, rows, alignments)
                     table_images.append(img_buffer)
                     table_data_list.append({
                         "id": len(table_images) - 1,
                         "headers": headers,
-                        "rows": normalized_rows,
+                        "rows": rows,
                         "links": links
                     })
-                    return f"\n{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}\n"
+                    return f"{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}__"
                 except Exception as e:
                     logger.error(f"Table render failed: {e}")
                     return match.group(0)
             return match.group(0)
 
+        # First pass: replace tables in code blocks with a safer placeholder
         text = code_block_pattern.sub(replace_table_block, text)
 
         # Legacy direct table detection (for tables not in code blocks)
@@ -381,11 +391,13 @@ def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO], list[di
                     i += 1
                 
                 if len(potential_table) >= 2:
-                    headers = [c.strip() for c in potential_table[0].strip()[1:-1].split("|")]
+                    headers_raw = potential_table[0].strip()
+                    headers = [c.strip() for c in headers_raw[1:-1].split("|")]
                     num_cols = len(headers)
                     rows = []
                     for row_str in potential_table[1:]:
-                        cells = [c.strip() for c in row_str.strip()[1:-1].split("|")]
+                        row_raw = row_str.strip()
+                        cells = [c.strip() for c in row_raw[1:-1].split("|")]
                         # Pad or truncate row to match header column count
                         if len(cells) < num_cols:
                             cells.extend([""] * (num_cols - len(cells)))
@@ -394,8 +406,7 @@ def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO], list[di
                         rows.append(cells)
                     
                     while len(alignments) < num_cols: alignments.append("left")
-                    if len(alignments) > num_cols:
-                        alignments = alignments[:num_cols]
+                    alignments = alignments[:num_cols]
                     
                     try:
                         img_buffer, links = _render_table_image(headers, rows, alignments)
@@ -406,7 +417,7 @@ def detect_and_convert_tables(text: str) -> tuple[str, list[io.BytesIO], list[di
                             "rows": rows,
                             "links": links
                         })
-                        output_lines.append(f"\n{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}\n")
+                        output_lines.append(f"{TABLE_IMAGE_PLACEHOLDER}_{len(table_images)-1}__")
                     except Exception as e:
                         logger.error(f"Table render failed: {e}")
                         output_lines.extend(potential_table)
