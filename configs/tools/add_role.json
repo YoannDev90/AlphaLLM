@@ -1,0 +1,18 @@
+{
+  "name": "add_role",
+  "description": "Add an existing role to a member in the current Discord server",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "user_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the user (18-digit ID)"
+      },
+      "role_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the role to add"
+      }
+    },
+    "required": ["user_id", "role_id"]
+  }
+}

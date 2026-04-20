@@ -1,0 +1,21 @@
+{
+  "name": "bulk_delete",
+  "description": "Delete a batch of messages in the current text channel",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "amount": {
+        "type": "integer",
+        "description": "Number of messages to delete (between 1 and 100)",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "channel_id": {
+        "type": "string",
+        "description": "Optional: Specific channel ID (if not current)",
+        "default": "current"
+      }
+    },
+    "required": ["amount"]
+  }
+}

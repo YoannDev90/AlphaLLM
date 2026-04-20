@@ -1,0 +1,22 @@
+{
+  "name": "edit_channel",
+  "description": "Rename or edit the topic of a text channel in the current Discord server",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "channel_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the channel to edit (18-digit ID)"
+      },
+      "new_name": {
+        "type": "string",
+        "description": "Optional: New name for the channel"
+      },
+      "new_topic": {
+        "type": "string",
+        "description": "Optional: New topic/description for the channel"
+      }
+    },
+    "required": ["channel_id"]
+  }
+}

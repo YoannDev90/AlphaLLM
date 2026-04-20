@@ -1,0 +1,24 @@
+{
+  "name": "ban_member",
+  "description": "Permanently ban a member from the Discord server",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "user_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the user to ban (18-digit ID)"
+      },
+      "reason": {
+        "type": "string",
+        "description": "Optional: The reason for the ban",
+        "default": "No reason provided"
+      },
+      "delete_message_days": {
+        "type": "integer",
+        "description": "Optional: Number of days of messages to delete (0-7). Defaults to 1.",
+        "default": 1
+      }
+    },
+    "required": ["user_id"]
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "check_permissions",
+  "description": "Verify permissions for a specific member or for the bot themselves in a channel",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "user_id": {
+        "type": "string",
+        "description": "Optional: User to check. Defaults to the bot (me) if not specified."
+      },
+      "channel_id": {
+        "type": "string",
+        "description": "Optional: Target channel Snowflake ID"
+      }
+    },
+    "required": []
+  }
+}

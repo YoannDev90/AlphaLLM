@@ -1,0 +1,26 @@
+{
+  "name": "create_role",
+  "description": "Create a new role in the Discord server with optional color and permissions",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "role_name": {
+        "type": "string",
+        "description": "The name of the role to create"
+      },
+      "color": {
+        "type": "string",
+        "description": "Optional: Hex color code for the role (e.g., '#ff0000' or '0xff0000'). Leave empty for default."
+      },
+      "hoist": {
+        "type": "boolean",
+        "description": "Optional: Whether the role should be displayed separately in the sidebar. Defaults to false."
+      },
+      "reason": {
+        "type": "string",
+        "description": "Optional: Reason for creating the role."
+      }
+    },
+    "required": ["role_name"]
+  }
+}

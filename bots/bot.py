@@ -28,6 +28,11 @@ async def on_ready():
     asyncio.create_task(command_id_manager.fetch_command_ids())
     logger.info("Fetch des IDs de commandes lancé en arrière-plan")
     
+    # Initialize background reminder processing
+    from utils.func_calling.tools.set_reminder import process_reminders
+    asyncio.create_task(process_reminders(bot))
+    logger.info("Background reminder processor started")
+
     # Register persistent views
     from utils.views.message import TableActionView
     bot.add_view(TableActionView(table_data={}))

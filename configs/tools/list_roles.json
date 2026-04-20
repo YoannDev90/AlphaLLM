@@ -1,0 +1,9 @@
+{
+  "name": "list_roles",
+  "description": "Lists all roles in the current Discord server with their IDs and member counts",
+  "parameters": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  }
+}

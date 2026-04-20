@@ -1,0 +1,9 @@
+{
+  "name": "server_stats",
+  "description": "Get an overview of server statistics including member count, boosts, and channel counts",
+  "parameters": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  }
+}

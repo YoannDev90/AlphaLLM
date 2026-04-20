@@ -1,0 +1,14 @@
+{
+  "name": "get_member_info",
+  "description": "Fetch detailed information about a member of the current Discord server",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "user_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the user (18-digit ID)"
+      }
+    },
+    "required": ["user_id"]
+  }
+}

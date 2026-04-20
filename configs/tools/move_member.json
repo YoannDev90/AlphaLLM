@@ -1,0 +1,18 @@
+{
+  "name": "move_member",
+  "description": "Move a member to a different voice channel in the current Discord server (requires Move Members permission)",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "user_id": {
+        "type": "string",
+        "description": "The Snowflake ID of the user (18-digit ID)"
+      },
+      "voice_channel_id": {
+        "type": "string",
+        "description": "The target voice channel ID"
+      }
+    },
+    "required": ["user_id", "voice_channel_id"]
+  }
+}

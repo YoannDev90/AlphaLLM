@@ -8,13 +8,9 @@
         "type": "string",
         "description": "The Snowflake ID of the user to kick (the 18-digit ID)"
       },
-      "username": {
-        "type": "string",
-        "description": "The plain username of the member to kick (used as fallback or for search)"
-      },
       "reason": {
         "type": "string",
-        "description": "The reason for kicking the member"
+        "description": "Optional: The reason for kicking the member. Leave empty if no reason is specified."
       }
     },
     "required": ["user_id"]
