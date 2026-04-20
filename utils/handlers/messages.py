@@ -128,30 +128,52 @@ class MessageSender:
         Returns: (last_message, list_of_table_data)
         """
         response, table_images, table_data = detect_and_convert_tables(response)
-        pattern = re.compile(f"({TABLE_IMAGE_PLACEHOLDER}_\\d+)|(```[\\s\\S]*?```)")
+        
+        # Log for debugging
+        logger.debug(f"Process and send: {len(table_images)} tables detected")
+        
+        # Escape placeholder for regex safely
+        placeholder_escaped = re.escape(TABLE_IMAGE_PLACEHOLDER)
+        pattern = re.compile(f"({placeholder_escaped}_\\d+__)|(```[\\s\\S]*?```)")
+        
+        # Split by placeholders or code blocks
         parts = pattern.split(response)
-        parts = [p for p in parts if p is not None and (p.strip() or p.startswith(TABLE_IMAGE_PLACEHOLDER))]
+        
+        # Filter None and preserve empty strings that might be whitespace between parts
+        parts = [p for p in parts if p is not None]
         
         target = self._get_target_channel()
         last_message = None
 
         for part in parts:
-            if part.startswith(TABLE_IMAGE_PLACEHOLDER):
+            if not part:
+                continue
+                
+            if part.startswith(TABLE_IMAGE_PLACEHOLDER) and part.endswith("__"):
                 try:
-                    idx = int(part.split("_")[-1])
-                    img_buffer = table_images[idx]
-                    current_table_data = table_data[idx]
-                    
-                    img_buffer.seek(0)
-                    file = discord.File(fp=img_buffer, filename="table.png")
-                    
-                    from utils.views.message import TableActionView
-                    view = TableActionView(current_table_data)
-                    last_message = await target.send(file=file, view=view)
-                except (IndexError, ValueError) as e:
-                    logger.error(f"Failed to send table message with view: {e}")
+                    idx_str = part[len(TABLE_IMAGE_PLACEHOLDER)+1:-2]
+                    idx = int(idx_str)
+                    if idx < len(table_images):
+                        logger.debug(f"Sending table image for index {idx}")
+                        img_buffer = table_images[idx]
+                        current_table_data = table_data[idx]
+                        
+                        img_buffer.seek(0)
+                        file = discord.File(fp=img_buffer, filename=f"table_{idx}.png")
+                        
+                        from utils.views.message import TableActionView
+                        view = TableActionView(current_table_data)
+                        last_message = await target.send(file=file, view=view)
+                    else:
+                        logger.error(f"Table index {idx} out of range (total images: {len(table_images)})")
+                        last_message = await self.send_text_with_latex(part)
+                except Exception as e:
+                    logger.error(f"Failed to send table message: {e}")
+                    last_message = await self.send_text_with_latex(part)
             elif part.startswith("```") and part.endswith("```"):
-                last_message = await send_code_block_with_return(target, part, self.max_length, bot=self.bot)
+                # If it's a code block but NOT a table placeholder (since we already extracted them)
+                if TABLE_IMAGE_PLACEHOLDER not in part:
+                    last_message = await send_code_block_with_return(target, part, self.max_length, bot=self.bot)
             else:
                 last_message = await self.send_text_with_latex(part)
 
