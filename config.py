@@ -86,8 +86,6 @@ SUPPORT_SERVER: str = str(CONFIG_SECTION.get("support_server"))
 
 EMBEDDER_MODEL: str = MEMORY_SECTION.get("embedder_model")
 EMBEDDER_CACHE_DIR: str = MEMORY_SECTION.get("embedder_cache_dir")
-FUNCTION_CALLING_MODEL: str = MEMORY_SECTION.get("function_calling_model")
-FUNCTION_CALLING_CACHE_DIR: str = MEMORY_SECTION.get("function_calling_cache_dir")
 RERANKER_MODEL: str = MEMORY_SECTION.get("reranker_model")
 RERANKER_CACHE_DIR: str = MEMORY_SECTION.get("reranker_cache_dir")
 STM_MAX_AGE = MEMORY_SECTION.get("stm_max_age")

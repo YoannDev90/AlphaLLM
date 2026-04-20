@@ -8,7 +8,7 @@ from bots.bot import bot as main_bot
 from config import ADDONS_BOTS_TOKENS, DEV_IDS, LOGGER_NAME
 from utils.database.perms_conf import get_blacklist
 from utils.handlers.messages import MessageSender
-from utils.unified_text import Origin, Text_Model, unified_text_gen
+from utils.unified_text import Text_Model, unified_text_gen
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -47,10 +47,8 @@ def create_addon_bot():
                     input=message.content,
                     model=Text_Model.AUTO,
                     files=files if files else None,
-                    origin=Origin.DISCORD,
                     message=message,
                     bot=bot,
-                    stream=False,
                     use_memory=True,
                 )
             ]

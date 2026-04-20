@@ -9,7 +9,7 @@ from config import BOT_TOKEN, DEBUG, DEV_IDS, LOGGER_NAME
 from utils.discord_utils.commands_ids import command_id_manager
 from utils.discord_utils.permission_checker import PermissionChecker
 from utils.handlers.messages import MessageSender
-from utils.unified_text import Origin, Text_Model, unified_text_gen
+from utils.unified_text import Text_Model, unified_text_gen
 
 perms_checker = PermissionChecker()
 
@@ -61,10 +61,8 @@ async def on_message(message):
                 input=message.content,
                 model=Text_Model.AUTO,
                 files=files if files else None,
-                origin=Origin.DISCORD,
                 message=message,
                 bot=bot,
-                stream=False,
                 use_memory=True,
             )
         ]

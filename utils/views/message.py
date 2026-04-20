@@ -8,7 +8,7 @@ import discord
 import pandas as pd
 
 from config import LOGGER_NAME
-from utils.unified_text import Origin, unified_text_gen
+from utils.unified_text import unified_text_gen
 
 logger = logging.getLogger(LOGGER_NAME)
 
@@ -179,10 +179,8 @@ class MessageView(discord.ui.View):
                     input=self.original_question,
                     model=self.model,
                     files=None,
-                    origin=Origin.DISCORD,
                     message=interaction,
                     bot=self.bot,
-                    stream=False,
                     use_memory=True,
                 )
             ]
