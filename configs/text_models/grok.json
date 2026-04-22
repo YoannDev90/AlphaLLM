@@ -1,74 +1,50 @@
 [
-    {
-        "model_name": "grok-4-fast",
-        "litellm_params": {
-            "model": "openai/grok-4-fast:free",
-            "api_base": "https://api.apertis.ai/v1",
-            "api_key": "APERTIS_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "grok-4.1-fast",
-        "litellm_params": {
-            "model": "openai/grok-4.1-fast-non-reasoning",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "grok-3-mini",
-        "litellm_params": {
-            "model": "openai/grok-3-mini",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "grok-4.1-fast",
-        "litellm_params": {
-            "model": "openai/grok-4-1-fast-non-reasoning",
-            "api_base": "https://api.voidai.app/v1/",
-            "api_key": "VOID_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "grok-4.1-fast",
-        "litellm_params": {
-            "model": "openai/grok-4.1-fast",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "grok-4.1-fast",
-        "litellm_params": {
-            "model": "openai/grok-4.1-fast:free",
-            "api_base": "https://api.apertis.ai/v1",
-            "api_key": "APERTIS_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": false
-        }
+  {
+    "model_name": "grok-4.1",
+    "litellm_params": {
+      "model": "openai/literouter/grok-4.1",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "grok-4-fast-reasoning",
+    "litellm_params": {
+      "model": "openai/navy/grok-4-fast-reasoning",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "grok-3-mini",
+    "litellm_params": {
+      "model": "openai/mnn/grok-3-mini",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "grok-4.1",
+    "litellm_params": {
+      "model": "openai/literouter/grok-free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "grok-4.2",
+    "litellm_params": {
+      "model": "openai/paxsenix/grok-4.20",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "grok-4.1-fast",
+    "litellm_params": {
+      "model": "openai/paxsenix/grok-4.1-fast",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]

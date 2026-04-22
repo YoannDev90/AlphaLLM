@@ -1,50 +1,34 @@
 [
-    {
-        "model_name": "hermes-4-14b",
-        "litellm_params": {
-            "model": "openai/hermes-4-14b",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "hermes-3",
-        "litellm_params": {
-            "model": "openai/hermes-3-llama-3.1-8b",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "hermes-4-405b",
-        "litellm_params": {
-            "model": "openai/hermes-4-405b",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "hermes-4-70b",
-        "litellm_params": {
-            "model": "openai/hermes-4-70b",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
+  {
+    "model_name": "grok-4.1",
+    "litellm_params": {
+      "model": "openai/literouter/hermes-2-pro-llama-3-8b-free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "grok-4-fast-reasoning",
+    "litellm_params": {
+      "model": "openai/navy/hermes-4-70b",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "grok-3-mini",
+    "litellm_params": {
+      "model": "openai/openrouter/nousresearch/hermes-3-llama-3.1-405b:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "grok-4.1",
+    "litellm_params": {
+      "model": "openai/literouter/hermes-4-70b",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]
