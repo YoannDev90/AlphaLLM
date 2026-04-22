@@ -236,15 +236,8 @@ async def unified_text_gen(
     logger.debug(f"Conversation history prepared with {len(history)} messages")
     logger.debug(f"Input prepared for model: {input}")
 
-    system_prompt = ""
-    if model == Text_Model.EVILGPT.value:
-        try:
-            system_prompt = read_file("configs/prompts/evilgpt_prompt.txt")
-        except Exception as e:
-            logger.error(f"Failed to read EvilGPT prompt file: {e}")
-    
     try:
-        system_prompt += read_file("configs/prompts/discord_prompt.txt")
+        system_prompt = read_file("configs/prompts/discord_prompt.txt")
     except Exception as e:
         logger.error(f"Failed to read Discord prompt file: {e}")
 
