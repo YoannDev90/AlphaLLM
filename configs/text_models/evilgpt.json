@@ -1,49 +1,58 @@
 [
-    {
-        "model_name": "evilgpt",
-        "litellm_params": {
-            "model": "mistral/mistral-medium-latest",
-            "api_key": "MISTRAL_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "evilgpt",
-        "litellm_params": {
-            "model": "openai/mistral-medium-latest",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "evilgpt",
-        "litellm_params": {
-            "model": "openai/mistral-small-latest",
-            "api_base": "https://api.voidai.app/v1/",
-            "api_key": "VOID_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "evilgpt",
-        "litellm_params": {
-            "model": "openai/mistral-small-latest",
-            "api_base": "https://api.mnnai.ru/v1/",
-            "api_key": "MNN_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
+  {
+    "model_name": "evilgpt",
+    "litellm_params": {
+      "model": "openai/literouter/mistral-small-latest",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "evilgpt",
+    "litellm_params": {
+      "model": "openai/navy/mistral-small-latest",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "evilgpt",
+    "litellm_params": {
+      "model": "openai/electronhub/mistral-small-24b-instruct:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "evilgpt",
+    "litellm_params": {
+      "model": "openai/paxsenix/mistral-small-3.1-24b",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "evilgpt",
+    "litellm_params": {
+      "model": "openai/mnn/mistral-small-latest",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "evilgpt",
+    "litellm_params": {
+      "model": "openai/meganova/mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "evilgpt",
+    "litellm_params": {
+      "model": "openai/mistral/mistral-large-latest",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]

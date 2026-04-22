@@ -1,6 +1,6 @@
 [
   {
-    "model_name": "grok-4.1",
+    "model_name": "hermes-2-pro",
     "litellm_params": {
       "model": "openai/literouter/hermes-2-pro-llama-3-8b-free",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -8,7 +8,7 @@
     }
   },
   {
-    "model_name": "grok-4-fast-reasoning",
+    "model_name": "hermes-4-70b",
     "litellm_params": {
       "model": "openai/navy/hermes-4-70b",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -16,7 +16,7 @@
     }
   },
   {
-    "model_name": "grok-3-mini",
+    "model_name": "hermes-3-llama-3.1-405b",
     "litellm_params": {
       "model": "openai/openrouter/nousresearch/hermes-3-llama-3.1-405b:free",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -24,7 +24,7 @@
     }
   },
   {
-    "model_name": "grok-4.1",
+    "model_name": "hermes-4-70b",
     "litellm_params": {
       "model": "openai/literouter/hermes-4-70b",
       "api_base": "https://api.gratisfy.xyz/v1/",
