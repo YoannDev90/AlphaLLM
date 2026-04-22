@@ -1,49 +1,82 @@
 [
-    {
-        "model_name": "llama-3.3-70b-instruct",
-        "litellm_params": {
-            "model": "openai/llama-3.3-70b-instruct:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "llama-3.3-70b-instruct",
-        "litellm_params": {
-            "model": "openai/llama-3.3-70b-instruct",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "llama-3.3-70b-versatile",
-        "litellm_params": {
-            "model": "groq/llama-3.3-70b-versatile",
-            "api_key": "GROQ_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "llama-3.3-70b",
-        "litellm_params": {
-            "model": "openai/llama-3.3-70b",
-            "api_base": "https://api.mnnai.ru/v1/",
-            "api_key": "MNN_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
+  {
+    "model_name": "llama-3.3-70b-instruct",
+    "litellm_params": {
+      "model": "openai/literouter/llama-3.3-70b-instruct",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "llama-3.1-8b-instruct",
+    "litellm_params": {
+      "model": "openai/navy/llama-3.1-8b-instruct",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-4-scout",
+    "litellm_params": {
+      "model": "openai/literouter/llama-4-scout",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-3.1-8b-instruct",
+    "litellm_params": {
+      "model": "openai/literouter/llama-3.1-8b-instruct",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-3.3-70b-instruct",
+    "litellm_params": {
+      "model": "openai/zanity/llama-3.1-8b-instruct",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-4-scout",
+    "litellm_params": {
+      "model": "openai/electronhub/llama-4-scout-17b-16e-instruct:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-4-scout",
+    "litellm_params": {
+      "model": "openai/mnn/llama-4-scout",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-4-scout",
+    "litellm_params": {
+      "model": "openai/naga/llama-4-scout-17b-16e-instruct:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-4-scout",
+    "litellm_params": {
+      "model": "openai/paxsenix/llama-4-scout",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "llama-3.3-70b-instruct",
+    "litellm_params": {
+      "model": "openai/openrouter/meta-llama/llama-3.3-70b-instruct:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]

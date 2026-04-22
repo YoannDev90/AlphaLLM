@@ -1,49 +1,66 @@
 [
-    {
-        "model_name": "qwen-3-32b",
-        "litellm_params": {
-            "model": "cerebras/qwen-3-32b",
-            "api_key": "CEREBRAS_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "qwq-32b",
-        "litellm_params": {
-            "model": "openai/qwq-32b:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "qwen3-next-80b",
-        "litellm_params": {
-            "model": "openai/qwen3-next-80b-a3b-instruct:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "qwq-32b",
-        "litellm_params": {
-            "model": "openai/qwq-32b",
-            "api_base": "https://voidai.app/v1/",
-            "api_key": "VOID_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
+  {
+    "model_name": "qwen-3-32b",
+    "litellm_params": {
+      "model": "openai/groq/qwen/qwen3-32b",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "qwen-3-next-80b-a3b-instruct",
+    "litellm_params": {
+      "model": "openai/electronhub/qwen3-next-80b-a3b-instruct:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "qwen-3-next-80b-a3b-instruct",
+    "litellm_params": {
+      "model": "openai/openrouter/qwen/qwen3-next-80b-a3b-instruct:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "qwen-3-next-80b-a3b-thinking",
+    "litellm_params": {
+      "model": "openai/mnn/qwen-3-next-80b-a3b-thinking",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "qwen-3-coder-30b-a3b",
+    "litellm_params": {
+      "model": "openai/paxsenix/qwen-3-coder-30b-a3b",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "qwen-3-32b",
+    "litellm_params": {
+      "model": "openai/literouter/qwen3-32b",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "qwen-3-32b",
+    "litellm_params": {
+      "model": "openai/scitely/qwen3-32b",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "qwen-3-coder-480b-a35b-instruct",
+    "litellm_params": {
+      "model": "openai/nvidia-nim/qwen/qwen3-coder-480b-a35b-instruct",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]

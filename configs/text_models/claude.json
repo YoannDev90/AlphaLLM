@@ -1,50 +1,34 @@
 [
-    {
-        "model_name": "claude-4.5-haiku",
-        "litellm_params": {
-            "model": "openai/claude-haiku-4-5-20251001:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": true
-        }
-    },
-    {
-        "model_name": "claude-4.5-haiku",
-        "litellm_params": {
-            "model": "openai/claude-haiku-4-5-20251001",
-            "api_base": "https://api.voidai.app/v1/",
-            "api_key": "VOID_API_KEY"
-        },
-        "settings": {
-            "tools_support": true,
-            "vision_support": true
-        }
-    },
-    {
-        "model_name": "claude-3.5-haiku",
-        "litellm_params": {
-            "model": "openai/claude-3.5-haiku",
-            "api_base": "https://api.mnnai.ru/v1/",
-            "api_key": "MNN_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "claude-haiku-4.5",
-        "litellm_params": {
-            "model": "openai/claude-haiku-4.5",
-            "api_base": "https://api.airforce/v1/",
-            "api_key": "AIRFORCE_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
+  {
+    "model_name": "claude-haiku-4-5",
+    "litellm_params": {
+      "model": "openai/literouter/claude-free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "claude-haiku-4-5",
+    "litellm_params": {
+      "model": "openai/paxsenix/claude-haiku-4-5",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "claude-sonnet-4-5",
+    "litellm_params": {
+      "model": "openai/paxsenix/claude-sonnet-4-5",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "claude-haiku-4-5",
+    "litellm_params": {
+      "model": "openai/voidai/claude-haiku-4-5-20251001",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]

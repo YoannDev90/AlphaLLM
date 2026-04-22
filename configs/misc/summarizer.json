@@ -1,10 +1,10 @@
 [
-    {
-        "model_name": "bart-large-cnn",
-        "litellm_params": {
-            "model": "@cf/facebook/bart-large-cnn",
-            "api_base": "https://api.cloudflare.com/client/v4/accounts/<CLOUDFLARE_ACCOUNT_ID>/ai",
-            "api_key": "CLOUDFLARE_API_KEY"
-        }
+  {
+    "model_name": "bart-large-cnn",
+    "litellm_params": {
+      "model": "@cf/facebook/bart-large-cnn",
+      "api_base": "https://api.cloudflare.com/client/v4/accounts/<CLOUDFLARE_ACCOUNT_ID>/ai",
+      "api_key": "CLOUDFLARE_API_KEY"
     }
+  }
 ]

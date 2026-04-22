@@ -15,7 +15,6 @@ logger = logging.getLogger(LOGGER_NAME)
 IMG_GEN_ENHANCER_PREPROMPT = read_file("configs/prompts/img_gen_enhancer.txt")
 IMG_GEN_ENHANCER_WITH_STYLE_PREPROMPT = read_file("configs/prompts/style_prompt.txt")
 IMG_EDIT_ENHANCER_PREPROMPT = read_file("configs/prompts/img_edit_enhancer.txt")
-CONV_NAME_PREPROMPT = read_file("configs/prompts/conv_name.txt")
 
 
 def load_configs(config_path: str) -> List[Dict[str, Any]]:
@@ -108,30 +107,3 @@ def summarize(input_text: str, max_length: int = None) -> str:
     except Exception as e:
         logger.error(f"Summarization error: {str(e)}")
         return input_text[:max_length]
-
-
-def conv_name(input_text: str) -> str:
-    """Generate a conversation name."""
-    conv_name_models = load_configs("configs/misc/conv_name.json")
-    try:
-        model_config = conv_name_models[0]["litellm_params"]
-        model = model_config["model"]
-        api_key = os.getenv(model_config["api_key"])
-        api_base = model_config.get("api_base")
-        messages = [
-            {"role": "system", "content": CONV_NAME_PREPROMPT},
-            {"role": "user", "content": input_text},
-        ]
-        fallbacks = [m["litellm_params"]["model"] for m in conv_name_models[1:]]
-        response = litellm.completion(
-            model=model,
-            messages=messages,
-            api_key=api_key,
-            api_base=api_base,
-            fallbacks=fallbacks,
-        )
-        return response.choices[0].message.content.strip().strip('"')
-
-    except Exception as e:
-        logger.error(f"Error generating conversation name: {str(e)}")
-        return "Untitled"

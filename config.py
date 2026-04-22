@@ -107,25 +107,8 @@ ADDONS_BOTS_TOKENS: list[str] = [
     os.environ.get(env_name) for env_name in ADDONS_BOTS_TOKENS_ENV_NAMES
 ]
 
-OPENROUTER_API_KEY: str = os.environ.get("OPENROUTER_API_KEY")
-GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY")
-CEREBRAS_API_KEY: str = os.environ.get("CEREBRAS_API_KEY")
-MEGALLM_API_KEY: str = os.environ.get("MEGALLM_API_KEY")
-VOID_API_KEY: str = os.environ.get("VOID_API_KEY")
-MNN_AI_API_KEY: str = os.environ.get("MNN_AI_API_KEY")
-# NAGA_API_KEY: str = os.environ.get("NAGA_API_KEY")
-ELECTRONHUB_API_KEY: str = os.environ.get("ELECTRONHUB_API_KEY")
-AIRFORCE_API_KEY: str = os.environ.get("AIRFORCE_API_KEY")
-COHERE_API_KEY: str = os.environ.get("COHERE_API_KEY")
-GROQ_API_KEY: str = os.environ.get("GROQ_API_KEY")
 POLLINATIONS_API_KEY: str = os.environ.get("POLLINATIONS_API_KEY")
-MISTRAL_API_KEY: str = os.environ.get("MISTRAL_API_KEY")
-NAVY_API_KEY: str = os.environ.get("NAVY_API_KEY")
-LLM7_API_KEY: str = os.environ.get("LLM7_API_KEY")
-LLM_GATEWAY_API_KEY: str = os.environ.get("LLM_GATEWAY_API_KEY")
-ZANITY_API_KEY: str = os.environ.get("ZANITY_API_KEY")
-ROUTEWAY_API_KEY: str = os.environ.get("ROUTEWAY_API_KEY")
-
+GRATISFY_API_KEY: str = os.environ.get("GRATISFY_API_KEY")
 HF_TOKEN: str = os.environ.get("HUGGINGFACE_TOKEN")
 
 GITHUB_TOKEN: str = os.environ.get("GITHUB_TOKEN")
@@ -148,8 +131,6 @@ TABLES_TO_CLONE: Iterable[str] = DATABASE_SECTION.get("tables_to_clone")
 
 PROMPT_DIR: str = UNIFIED_TEXT_SECTION.get("prompt_dir")
 EVILGPT_PROMPT_PATH: Path = Path(PROMPT_DIR) / "evilgpt_prompt.txt"
-API_PROMPT_PATH: Path = Path(PROMPT_DIR) / "api_prompt.txt"
-STATUS_PROMPT_PATH: Path = Path(PROMPT_DIR) / "status_prompt.txt"
 DISCORD_PROMPT_PATH: Path = Path(PROMPT_DIR) / "discord_prompt.txt"
 
 MAX_STM_MESSAGES: int = LIMITS_SECTION.get("max_stm_messages", 50)

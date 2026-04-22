@@ -1,16 +1,16 @@
 [
-    {
-        "model_name": "llama-3.1-8b-instant",
-        "litellm_params": {
-            "model": "groq/llama-3.1-8b-instant",
-            "api_key": "GROQ_API_KEY"
-        }
-    },
-    {
-        "model_name": "llama3.1-8b",
-        "litellm_params": {
-            "model": "cerebras/llama3.1-8b",
-            "api_key": "CEREBRAS_API_KEY"
-        }
+  {
+    "model_name": "llama-3.1-8b-instant",
+    "litellm_params": {
+      "model": "groq/llama-3.1-8b-instant",
+      "api_key": "GROQ_API_KEY"
     }
+  },
+  {
+    "model_name": "llama3.1-8b",
+    "litellm_params": {
+      "model": "cerebras/llama3.1-8b",
+      "api_key": "CEREBRAS_API_KEY"
+    }
+  }
 ]
