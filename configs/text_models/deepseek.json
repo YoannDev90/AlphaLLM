@@ -1,6 +1,6 @@
 [
   {
-    "model_name": "cohere-command-a",
+    "model_name": "deepseek-v3.1",
     "litellm_params": {
       "model": "openai/literouter/deepseek-v3.1",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -8,7 +8,7 @@
     }
   },
   {
-    "model_name": "cohere-command-r",
+    "model_name": "deepseek-v3.1-nex-n1",
     "litellm_params": {
       "model": "openai/voidai/deepseek-v3.1-nex-n1",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -16,7 +16,7 @@
     }
   },
   {
-    "model_name": "cohere-command-r-plus",
+    "model_name": "deepseek-v4",
     "litellm_params": {
       "model": "openai/navy/deepseek-v4",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -24,7 +24,7 @@
     }
   },
   {
-    "model_name": "cohere-command-r7b",
+    "model_name": "deepseek-v3.1",
     "litellm_params": {
       "model": "openai/ollama/deepseek-v3.1:671b",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -32,7 +32,7 @@
     }
   },
   {
-    "model_name": "cohere-command-r7b",
+    "model_name": "deepseek-v3.2",
     "litellm_params": {
       "model": "openai/mnn/deepseek-v3.2",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -48,7 +48,7 @@
     }
   },
   {
-    "model_name": "deepseek-v3.2-scitely",
+    "model_name": "deepseek-v3.2",
     "litellm_params": {
       "model": "openai/scitely/deepseek-v3.2",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -56,7 +56,7 @@
     }
   },
   {
-    "model_name": "deepseek-v3.2-seraphyn",
+    "model_name": "deepseek-v3.2",
     "litellm_params": {
       "model": "openai/seraphyn/deepseek-v3.2",
       "api_base": "https://api.gratisfy.xyz/v1/",
@@ -72,7 +72,7 @@
     }
   },
   {
-    "model_name": "deepseek-r1-zanity",
+    "model_name": "deepseek-r1",
     "litellm_params": {
       "model": "openai/zanity/deepseek-r1",
       "api_base": "https://api.gratisfy.xyz/v1/",

@@ -1,74 +1,66 @@
 [
-    {
-        "model_name": "glm-4.5-air",
-        "litellm_params": {
-            "model": "openai/glm-4.5-air:free",
-            "api_base": "https://api.routeway.ai/v1",
-            "api_key": "ROUTEWAY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "glm-4.6",
-        "litellm_params": {
-            "model": "openai/GLM-4.6V-Flash",
-            "api_base": "https://api.llm7.io/v1",
-            "api_key": "LLM7_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "glm-4.6",
-        "litellm_params": {
-            "model": "openai/glm-4.6:free",
-            "api_base": "https://api.voidai.app/v1/",
-            "api_key": "VOID_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "glm-4.5",
-        "litellm_params": {
-            "model": "openai/glm-4.5",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "glm-4.5-air",
-        "litellm_params": {
-            "model": "openai/glm-4.5-air",
-            "api_base": "https://api.mnnai.ru/v1/",
-            "api_key": "MNN_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "glm-4.5-air",
-        "litellm_params": {
-            "model": "openai/glm-4.5-air",
-            "api_base": "https://api.airforce/v1/",
-            "api_key": "AIRFORCE_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
+  {
+    "model_name": "glm-4.5-air",
+    "litellm_params": {
+      "model": "openai/literouter/glm-4.5-air",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "glm-4.5-air",
+    "litellm_params": {
+      "model": "openai/navy/glm-4.5-air",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "glm-4.7-flash",
+    "litellm_params": {
+      "model": "openai/aihubmix/glm-4.7-flash-free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "glm-4.7-free",
+    "litellm_params": {
+      "model": "openai/mnn/glm-4.7-free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "glm-5",
+    "litellm_params": {
+      "model": "openai/ollama/glm-5",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "glm-4.5-flash",
+    "litellm_params": {
+      "model": "openai/llmgateway/glm-4.5-flash",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "glm-4.7-flash",
+    "litellm_params": {
+      "model": "openai/electronhub/glm-4.7-flash:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "glm-4.5-air",
+    "litellm_params": {
+      "model": "openai/naga/glm-4.5-air:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]
