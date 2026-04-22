@@ -24,7 +24,7 @@
     }
   },
   {
-    "model_name": "glm-4.7-free",
+    "model_name": "glm-4.7",
     "litellm_params": {
       "model": "openai/mnn/glm-4.7-free",
       "api_base": "https://api.gratisfy.xyz/v1/",

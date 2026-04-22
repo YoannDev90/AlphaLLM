@@ -1,98 +1,58 @@
 [
-    {
-        "model_name": "kimi-k2-instruct",
-        "litellm_params": {
-            "model": "openai/kimi-k2-instruct-0905:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "kimi-k2",
-        "litellm_params": {
-            "model": "openai/kimi-k2-0905:free",
-            "api_base": "https://api.routeway.ai/v1",
-            "api_key": "ROUTEWAY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "kimi-k2-instruct",
-        "litellm_params": {
-            "model": "openai/kimi-k2-instruct-0711:free",
-            "api_base": "https://api.electronhub.ai/v1/",
-            "api_key": "ELECTRONHUB_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "kimi-k2-instruct",
-        "litellm_params": {
-            "model": "openai/kimi-k2-instruct",
-            "api_base": "https://api.voidai.app/v1/",
-            "api_key": "VOID_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "kimi-k2",
-        "litellm_params": {
-            "model": "openai/kimi-k2",
-            "api_base": "https://api.airforce/v1/",
-            "api_key": "AIRFORCE_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "kimi-k2",
-        "litellm_params": {
-            "model": "openai/kimi-k2-0711-preview",
-            "api_base": "https://api.mnnai.ru/v1/",
-            "api_key": "MNN_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "kimi-k2",
-        "litellm_params": {
-            "model": "openai/kimi-k2-0905-preview",
-            "api_base": "https://api.mnnai.ru/v1/",
-            "api_key": "MNN_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
-    },
-    {
-        "model_name": "kimi-k2",
-        "litellm_params": {
-            "model": "openai/kimi-k2",
-            "api_base": "https://api.navy/v1",
-            "api_key": "NAVY_API_KEY"
-        },
-        "settings": {
-            "tools_support": false,
-            "vision_support": false
-        }
+  {
+    "model_name": "kimi-k2",
+    "litellm_params": {
+      "model": "openai/navy/kimi-k2-0905-fast",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
     }
+  },
+  {
+    "model_name": "kimi-k2-thinking",
+    "litellm_params": {
+      "model": "openai/ollama/kimi-k2-thinking",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "kimi-k2",
+    "litellm_params": {
+      "model": "openai/literouter/kimi-k2-0905",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "kimi-k2-instruct",
+    "litellm_params": {
+      "model": "openai/nvidia-nim/moonshotai/kimi-k2-instruct-0905",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "kimi-k2-thinking",
+    "litellm_params": {
+      "model": "openai/electronhub/kimi-k2-thinking:free",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "kimi-k2-thinking",
+    "litellm_params": {
+      "model": "openai/mnn/kimi-k2-thinking",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  },
+  {
+    "model_name": "kimi-k2",
+    "litellm_params": {
+      "model": "openai/scitely/kimi-k2",
+      "api_base": "https://api.gratisfy.xyz/v1/",
+      "api_key": "GRATISFY_API_KEY"
+    }
+  }
 ]
