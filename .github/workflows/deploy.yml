@@ -1,0 +1,31 @@
+name: Deploy AlphaLLM via SFTP
+
+on:
+    # Trigger manually from the Actions tab
+    workflow_dispatch: # Trigger on push to main branch
+
+    push:
+        branches:
+            - prod
+
+jobs:
+    deploy:
+        name: SFTP Upload
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: SFTP uploader
+              uses: wangyucode/sftp-upload-action@v3
+              with:
+                  host: ${{ secrets.SFTP_HOST }}
+                  port: ${{ secrets.SFTP_PORT}}
+                  username: ${{ secrets.SFTP_USERNAME }}
+                  password: ${{ secrets.SFTP_PASSWORD }}
+                  localDir: "."
+                  remoteDir: "/"
+                  exclude: ".github,.agents,__pycache__,*.pyc,*-sample,*.service,.flake8,LICENSE,\
+                      README.md,*.sh"
+                  concurrency: 10
+                  forceUpload: false
