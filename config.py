@@ -107,8 +107,8 @@ ADDONS_BOTS_TOKENS: list[str] = [
     os.environ.get(env_name) for env_name in ADDONS_BOTS_TOKENS_ENV_NAMES
 ]
 
-
-
+POLLINATIONS_API_KEY: str = os.environ.get("POLLINATIONS_API_KEY")
+GRATISFY_API_KEY: str = os.environ.get("GRATISFY_API_KEY")
 HF_TOKEN: str = os.environ.get("HUGGINGFACE_TOKEN")
 
 GITHUB_TOKEN: str = os.environ.get("GITHUB_TOKEN")

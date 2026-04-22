@@ -12,7 +12,7 @@ from utils.ai_process.llm_selector import LLMSelector
 from utils.discord_utils.permission_checker import PermissionChecker
 from utils.func_calling import get_function_caller
 from utils.handlers.files import FileHandler
-from utils.memory import get_memory_manager, initialize_memory_manager
+from utils.memory import get_memory_manager
 
 logger = logging.getLogger(LOGGER_NAME)
 perms_checker = PermissionChecker()
@@ -150,40 +150,40 @@ async def unified_text_gen(
     if parameters.model:
         model = parameters.model
 
-    from utils.ai_process.base_chat_model import ChatResult
-    function_caller = await get_function_caller()
-    tool_calls = await function_caller.check_for_tools(input)
-    if tool_calls:
-        logger.info(f"Tool calls detected: {tool_calls}")
-        tool_responses = []
-        for call in tool_calls:
-            func_name = call["function"]
-            params = call["parameters"]
-            from utils.func_calling.tool_executor import ToolExecContext, execute_tool
+    # from utils.ai_process.base_chat_model import ChatResult
+    # function_caller = await get_function_caller()
+    # tool_calls = await function_caller.check_for_tools(input)
+    # if tool_calls:
+    #     logger.info(f"Tool calls detected: {tool_calls}")
+    #     tool_responses = []
+    #     for call in tool_calls:
+    #         func_name = call["function"]
+    #         params = call["parameters"]
+    #         from utils.func_calling.tool_executor import ToolExecContext, execute_tool
             
-            guild = message.guild if message and hasattr(message, "guild") else None
-            author = message.author if message and hasattr(message, "author") else None
-            context = ToolExecContext(
-                bot=bot,
-                guild=guild,
-                user_id=user_id,
-                channel_id=conv_id,
-                author=author
-            )
+    #         guild = message.guild if message and hasattr(message, "guild") else None
+    #         author = message.author if message and hasattr(message, "author") else None
+    #         context = ToolExecContext(
+    #             bot=bot,
+    #             guild=guild,
+    #             user_id=user_id,
+    #             channel_id=conv_id,
+    #             author=author
+    #         )
 
-            response = await execute_tool(func_name, params, context=context)
-            if response is None or response.startswith("error"):
-                break
-            tool_responses.append(response)
-        tool_response = "\n".join(tool_responses)
-        result = ChatResult(
-            response=tool_response,
-            usage=0,
-            model="function_calling",
-            elapsed_time="0.0s",
-        )
-        yield result
-        return
+    #         response = await execute_tool(func_name, params, context=context)
+    #         if response is None or response.startswith("error"):
+    #             break
+    #         tool_responses.append(response)
+    #     tool_response = "\n".join(tool_responses)
+    #     result = ChatResult(
+    #         response=tool_response,
+    #         usage=0,
+    #         model="function_calling",
+    #         elapsed_time="0.0s",
+    #     )
+    #     yield result
+    #     return
 
     if model == "auto":
         logger.info("Auto-selecting model...")
@@ -194,7 +194,7 @@ async def unified_text_gen(
             logger.debug(f"Model auto-selected: {model}")
 
     if model not in AVAILABLE_MODELS:
-        model = Text_Model.LLAMA.value
+        model = Text_Model.GLM.value
         logger.debug(f"Model not available, defaulting to: {model}")
 
     logger.debug(f"Final model to use: {model}")
