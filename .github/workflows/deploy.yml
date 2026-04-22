@@ -1,26 +1,42 @@
 name: Deploy AlphaLLM via SFTP
 
+# This workflow uploads the entire repository to a remote server using SFTP.
+# First we need to update the prod branch using dev branch, 
+# this is manually done to avoid accidental deployments during development.
+# Then we can trigger the second part when ready, which will upload the code to the server.
+
 on:
     # Trigger manually from the Actions tab
-    workflow_dispatch: # Trigger on push to main branch
+    workflow_dispatch:
 
     push:
         branches:
             - prod
 
 jobs:
-    deploy:
-        name: SFTP Upload
+    sync-and-deploy:
+        name: Sync Dev to Prod and Deploy
         runs-on: ubuntu-latest
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  token: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Merge dev into prod
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+                  git checkout prod
+                  git merge origin/dev --no-ff -m "Auto-merge dev into prod for deployment"
+                  git push origin prod
 
             - name: SFTP uploader
               uses: wangyucode/sftp-upload-action@v3
               with:
                   host: ${{ secrets.SFTP_HOST }}
-                  port: ${{ secrets.SFTP_PORT}}
+                  port: ${{ secrets.SFTP_PORT || 22 }}
                   username: ${{ secrets.SFTP_USERNAME }}
                   password: ${{ secrets.SFTP_PASSWORD }}
                   localDir: "."
