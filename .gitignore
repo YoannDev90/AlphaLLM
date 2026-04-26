@@ -8,5 +8,8 @@ TODO.md
 stop.json
 /generated_images/
 alphallm.service
+
+# CI/CD pipeline files
 run.py
 req.txt
+remote_control.py

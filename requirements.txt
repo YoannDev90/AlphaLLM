@@ -28,3 +28,5 @@ python-dotenv
 pilmoji
 odfpy
 pandas
+groq
+cerebras-cloud-sdk

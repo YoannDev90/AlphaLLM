@@ -32,6 +32,12 @@ jobs:
                   git merge origin/dev --no-ff -m "Auto-merge dev into prod for deployment"
                   git push origin prod
 
+            - name: Stop Bot via API
+              run: |
+                  curl -X POST ${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_CONTROL_PORT }}/stop \
+                  -H "X-API-KEY: ${{ secrets.REMOTE_CONTROL_API_KEY }}" \
+                  --insecure
+
             - name: SFTP uploader
               uses: wangyucode/sftp-upload-action@v3
               with:
@@ -44,3 +50,9 @@ jobs:
                   exclude: ".git/,.github/,.vscode/,*-sample.*,*.sh,**/.*,README.md,LICENSE"
                   concurrency: 10
                   forceUpload: false
+
+            - name: Start/Restart Bot via API
+              run: |
+                  curl -X POST ${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_CONTROL_PORT }}/restart \
+                  -H "X-API-KEY: ${{ secrets.REMOTE_CONTROL_API_KEY }}" \
+                  --insecure
