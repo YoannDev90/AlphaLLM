@@ -34,7 +34,7 @@ jobs:
 
             - name: Stop Bot via API
               run: |
-                  curl -X POST https://${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_CONTROL_PORT }}/stop \
+                  curl -X POST ${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_CONTROL_PORT }}/stop \
                   -H "X-API-KEY: ${{ secrets.REMOTE_CONTROL_API_KEY }}" \
                   --insecure
 
@@ -53,6 +53,6 @@ jobs:
 
             - name: Start/Restart Bot via API
               run: |
-                  curl -X POST https://${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_CONTROL_PORT }}/restart \
+                  curl -X POST ${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_CONTROL_PORT }}/restart \
                   -H "X-API-KEY: ${{ secrets.REMOTE_CONTROL_API_KEY }}" \
                   --insecure
