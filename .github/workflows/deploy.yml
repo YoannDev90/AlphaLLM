@@ -56,6 +56,6 @@ jobs:
                   # Tentative de redémarrage avec retry car l'API peut mettre quelques secondes à être prête
                   for i in {1..5}; do
                     curl -X POST ${{ secrets.REMOTE_HOST }}:${{ secrets.REMOTE_CONTROL_PORT }}/restart \
-                    -H "X-API-KEY: ${{ secrets.CONTROL_API_KEY }}" \
+                    -H "X-API-KEY: ${{ secrets.REMOTE_CONTROL_API_KEY }}" \
                     --insecure && break || sleep 5
                   done
