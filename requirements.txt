@@ -5,7 +5,7 @@ fastapi
 fastembed
 langfuse
 litellm
-markitdown[all]
+markitdown[docx, pdf, pptx, xlsx, xls]
 matplotlib
 optimum[onnxruntime]
 Pillow
