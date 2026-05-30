@@ -44,82 +44,92 @@ async def setup(bot: discord.Client):
         number: int = 1,
         enhance: bool = True,
     ):
-        await interaction.response.defer()
-        perms_checker = PermissionChecker()
-        authorized, reason = await perms_checker.is_authorized_int(interaction)
-        if not authorized:
-            await interaction.followup.send(f"⛔️ {reason}")
-            return
+        
 
-        logger.info(
-            f"Command /image-edit executed by {interaction.user.display_name} ({interaction.user.id})"
-        )
-        logger.info(f"Prompt: {prompt}, model: {model}, number: {number}")
+        await interaction.response.send_message("Deprecated feature, sorry, it's exam time for me and I don't have time to maintain it, but I might bring it back in the future!", ephemeral=True)
 
-        original_number = number
-        warning_message = ""
 
-        if number < 1:
-            number = 1
-            warning_message = "⚠️ Number adjusted from less than 1 to 1.\n"
-        elif number > 4:
-            number = 4
-            warning_message = (
-                f"⚠️ Number adjusted from {original_number} to 4 (maximum allowed).\n"
-            )
-        model = "gptimage" if not model else model
 
-        images_url = [image_1.url]
-        if image_2:
-            images_url.append(image_2.url)
-        if image_3:
-            images_url.append(image_3.url)
-        if image_4:
-            images_url.append(image_4.url)
 
-        try:
-            logger.debug(f"Processing image with prompt: {prompt}")
-            results = await unified_image_edit(
-                prompt,
-                model,
-                number,
-                enhance=enhance,
-                format=Format.BYTES,
-                images_url=images_url,
-                user_id=interaction.user.id,
-            )
-        except Exception as e:
-            logger.error(f"Error editing images: {str(e)}")
-            await interaction.followup.send(f"❌ An error occurred: {str(e)}")
-            return
 
-        logger.info(
-            f"Début de l'envoi de {len(results)} image(s) pour {interaction.user.display_name}"
-        )
 
-        if warning_message:
-            await interaction.followup.send(warning_message.rstrip())
 
-        for idx, (image_data, current_prompt) in enumerate(results, start=1):
-            logger.info(
-                f"Traitement de l'image {idx}/{number} - Données présentes: {image_data is not None}"
-            )
-            if image_data:
-                try:
-                    filename = f"{datetime.now().strftime('%m-%d_%H%-M-%S-%f')}_{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.png"
-                    file = discord.File(image_data, filename=filename)
+        # await interaction.response.defer()
+        # perms_checker = PermissionChecker()
+        # authorized, reason = await perms_checker.is_authorized_int(interaction)
+        # if not authorized:
+        #     await interaction.followup.send(f"⛔️ {reason}")
+        #     return
 
-                    logger.debug(f"Tentative d'envoi de l'image {idx}/{number}")
+        # logger.info(
+        #     f"Command /image-edit executed by {interaction.user.display_name} ({interaction.user.id})"
+        # )
+        # logger.info(f"Prompt: {prompt}, model: {model}, number: {number}")
 
-                    await interaction.followup.send(file=file)
+        # original_number = number
+        # warning_message = ""
 
-                except Exception as e:
-                    logger.error(f"Error sending image {idx}/{number}: {str(e)}")
-                    await interaction.followup.send(
-                        f"❌ Error sending image {idx}: {str(e)}"
-                    )
-            else:
-                logger.error(
-                    f"Failed to generate image {idx}/{number} for {interaction.user.display_name}"
-                )
-                await interaction.followup.send(f"❌ Failed to process image {idx}.")
+        # if number < 1:
+        #     number = 1
+        #     warning_message = "⚠️ Number adjusted from less than 1 to 1.\n"
+        # elif number > 4:
+        #     number = 4
+        #     warning_message = (
+        #         f"⚠️ Number adjusted from {original_number} to 4 (maximum allowed).\n"
+        #     )
+        # model = "gptimage" if not model else model
+
+        # images_url = [image_1.url]
+        # if image_2:
+        #     images_url.append(image_2.url)
+        # if image_3:
+        #     images_url.append(image_3.url)
+        # if image_4:
+        #     images_url.append(image_4.url)
+
+        # try:
+        #     logger.debug(f"Processing image with prompt: {prompt}")
+        #     results = await unified_image_edit(
+        #         prompt,
+        #         model,
+        #         number,
+        #         enhance=enhance,
+        #         format=Format.BYTES,
+        #         images_url=images_url,
+        #         user_id=interaction.user.id,
+        #     )
+        # except Exception as e:
+        #     logger.error(f"Error editing images: {str(e)}")
+        #     await interaction.followup.send(f"❌ An error occurred: {str(e)}")
+        #     return
+
+        # logger.info(
+        #     f"Début de l'envoi de {len(results)} image(s) pour {interaction.user.display_name}"
+        # )
+
+        # if warning_message:
+        #     await interaction.followup.send(warning_message.rstrip())
+
+        # for idx, (image_data, current_prompt) in enumerate(results, start=1):
+        #     logger.info(
+        #         f"Traitement de l'image {idx}/{number} - Données présentes: {image_data is not None}"
+        #     )
+        #     if image_data:
+        #         try:
+        #             filename = f"{datetime.now().strftime('%m-%d_%H%-M-%S-%f')}_{''.join(random.choices(string.ascii_letters + string.digits, k=10))}.png"
+        #             file = discord.File(image_data, filename=filename)
+
+        #             logger.debug(f"Tentative d'envoi de l'image {idx}/{number}")
+
+        #             await interaction.followup.send(file=file)
+
+        #         except Exception as e:
+        #             logger.error(f"Error sending image {idx}/{number}: {str(e)}")
+        #             await interaction.followup.send(
+        #                 f"❌ Error sending image {idx}: {str(e)}"
+        #             )
+        #     else:
+        #         logger.error(
+        #             f"Failed to generate image {idx}/{number} for {interaction.user.display_name}"
+        #         )
+        #         await interaction.followup.send(f"❌ Failed to process image {idx}.")
