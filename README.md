@@ -351,6 +351,30 @@ The bot automatically selects the most appropriate model based on:
 1. Configure the model in `config/models.json`
 2. Ensure the provider has the necessary API credentials
 
+### Tests
+
+The project includes comprehensive tests in `scripts/tests/` to ensure code quality and prevent regressions:
+
+- **CodeBlock Tests** (`test_codeblock.py`): Tests for Discord code block handling
+- **Config Tests** (`test_config.py`): Tests for configuration loading and validation
+- **LaTeX Tests** (`test_latex.py`): Tests for LaTeX rendering and detection
+- **Message Tests** (`test_messages.py`): Tests for message processing and formatting
+- **Table Tests** (`test_table.py`): Tests for markdown table conversion
+- **Model Tests** (`test_models.py`): Tests for model selection and error handling
+
+All tests can be run with:
+
+```bash
+python -m pytest scripts/tests/ -v
+```
+
+To run specific test modules:
+
+```bash
+python -m pytest scripts/tests/test_config.py -v
+python -m pytest scripts/tests/test_models.py -v
+```
+
 ## Important Notes
 
 - The bot ignores messages from other bots and direct messages

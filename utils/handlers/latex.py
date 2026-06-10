@@ -96,7 +96,7 @@ def convert_latex_to_png(latex: str) -> tuple[io.BytesIO | str, bool]:
         PNG buffer or fallback text, plus success flag.
     """
     if not cairosvg:
-        return f"```\n{latex}\n``` (cairosvg missing)", True
+        return f"```\n{latex}\n``` (cairosvg missing)", False
     try:
         svg_bytes = latex_to_svg(latex)
         png_bytes = cairosvg.svg2png(bytestring=svg_bytes, scale=2)

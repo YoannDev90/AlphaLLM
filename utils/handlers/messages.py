@@ -147,7 +147,8 @@ class MessageSender:
             latex = latex[1:-1]
         if latex.startswith(r"\[") and latex.endswith(r"\]"):
             latex = latex[2:-2]
-        return latex
+        # Strip whitespace after removing delimiters
+        return latex.strip()
 
     async def send_text_with_latex(self, text: str) -> Optional[discord.Message]:
         """Send text while converting LaTeX fragments to emoji or images.
