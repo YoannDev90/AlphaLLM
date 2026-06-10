@@ -21,7 +21,7 @@ async def setup(tree: app_commands.CommandTree, bot: discord.Client):
         )
         embed.add_field(
             name="Join support server",
-            value=f"[Click here to join server]({cfg.LINKS.SUPPORT_SERVER})",
+            value=f"[Click here to join server]({cfg.LINKS['support_server']})",
             inline=False,
         )
         embed.set_footer(
