@@ -1,0 +1,57 @@
+[
+  {
+    "api_base": "https://aihubmix.com/v1",
+    "env_key": "AIHUBMIX_API_KEY",
+    "provider": "AIHUBMIX"
+  },
+  {
+    "api_base": "https://api.aquadevs.com/v1",
+    "env_key": "AQUA_API_KEY",
+    "provider": "AQUA"
+  },
+  {
+    "api_base": "https://blazeai.boxu.dev/api",
+    "env_key": "BLAZE_API_KEY",
+    "provider": "BLAZE"
+  },
+  {
+    "api_base": "https://logfare.ai/v1",
+    "env_key": "LOGFLARE_API_KEY",
+    "provider": "LOGFLARE"
+  },
+  {
+    "api_base": "https://api.meganova.ai/v1",
+    "env_key": "MEGANOVA_API_KEY",
+    "provider": "MEGANOVA"
+  },
+  {
+    "api_base": "https://api.mistral.ai/v1",
+    "env_key": "MISTRAL_API_KEY",
+    "provider": "MISTRAL"
+  },
+  {
+    "api_base": "https://api2.mnnai.ru/v1",
+    "env_key": "MNN_API_KEY",
+    "provider": "MNN"
+  },
+  {
+    "api_base": "https://api.navy/v1",
+    "env_key": "NAVY_API_KEY",
+    "provider": "NAVY"
+  },
+  {
+    "api_base": "https://integrate.api.nvidia.com/v1",
+    "env_key": "NVIDIA_NIM_API_KEY",
+    "provider": "NVIDIA_NIM"
+  },
+  {
+    "api_base": "https://api.freetheai.xyz/v1",
+    "env_key": "SECRETS_API_KEY",
+    "provider": "SECRETS"
+  },
+  {
+    "api_base": "https://api.tokenreply.com/v1",
+    "env_key": "TOKEN_REPLY_API_KEY",
+    "provider": "TOKEN_REPLY"
+  }
+]

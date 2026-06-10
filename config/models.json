@@ -1,0 +1,8 @@
+[
+  "mistral/mistral/mistral-medium-3.5",
+  "aqua/mistral",
+  "meganova/mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+  "nvidia-nim/mistralai/mistral-small-4-119b-2603",
+  "navy/navy/mistral-small-2603",
+  "mnn/mistral-small-latest"
+]

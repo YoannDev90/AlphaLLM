@@ -1,0 +1,16 @@
+{
+  "name": "sandbox_stop",
+  "description": "Stop a running sandbox (graceful SIGTERM or force SIGKILL)",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Sandbox name" },
+      "force": {
+        "type": "boolean",
+        "description": "Use force kill",
+        "default": false
+      }
+    },
+    "required": ["name"]
+  }
+}

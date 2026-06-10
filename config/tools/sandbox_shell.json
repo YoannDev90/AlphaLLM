@@ -1,0 +1,13 @@
+{
+  "name": "sandbox_shell",
+  "description": "Execute a shell command string with pipes, redirects, and shell syntax",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Sandbox name" },
+      "command": { "type": "string", "description": "Shell command" },
+      "timeout": { "type": "number", "description": "Timeout in seconds" }
+    },
+    "required": ["name", "command"]
+  }
+}

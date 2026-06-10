@@ -1,0 +1,12 @@
+{
+  "name": "sandbox_fs_mkdir",
+  "description": "Create a directory with parent directories",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string" },
+      "path": { "type": "string" }
+    },
+    "required": ["name", "path"]
+  }
+}

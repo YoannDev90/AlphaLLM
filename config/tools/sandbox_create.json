@@ -1,0 +1,22 @@
+{
+  "name": "sandbox_create",
+  "description": "Create and boot a persistent named sandbox with full configuration",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Unique sandbox name" },
+      "image": { "type": "string", "description": "OCI image reference" },
+      "cpus": { "type": "integer", "default": 1 },
+      "memoryMib": { "type": "integer", "default": 512 },
+      "workdir": { "type": "string" },
+      "env": { "type": "object", "additionalProperties": { "type": "string" } },
+      "volumes": { "type": "array", "items": { "type": "object" } },
+      "patches": { "type": "array", "items": { "type": "object" } },
+      "entrypoint": { "type": "array", "items": { "type": "string" } },
+      "hostname": { "type": "string" },
+      "maxDuration": { "type": "integer" },
+      "idleTimeout": { "type": "integer" }
+    },
+    "required": ["name", "image"]
+  }
+}

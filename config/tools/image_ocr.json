@@ -1,0 +1,35 @@
+{
+  "name": "image_ocr",
+  "description": "Extract text from an image using OCR (path, URL, or base64)",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "image_path": {
+        "type": "string",
+        "description": "Local path to image file"
+      },
+      "image_url": {
+        "type": "string",
+        "description": "Public URL to image"
+      },
+      "image_base64": {
+        "type": "string",
+        "description": "Base64-encoded image bytes"
+      },
+      "lang": {
+        "type": "string",
+        "description": "Tesseract language code (default: eng)",
+        "default": "eng"
+      },
+      "psm": {
+        "type": "integer",
+        "description": "Page segmentation mode (optional)"
+      },
+      "oem": {
+        "type": "integer",
+        "description": "OCR engine mode (optional)"
+      }
+    },
+    "required": []
+  }
+}

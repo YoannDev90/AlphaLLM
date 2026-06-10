@@ -1,0 +1,15 @@
+[Unit]
+Description=AlphaLLM Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+User=user
+Group=group
+WorkingDirectory=/.alphallm
+ExecStart=/.alphallm/.venv/bin/python main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+discord.py==2.7.1
+python-dotenv==1.2.2
+litellm==1.86.1
+requests==2.34.2
+colorama==0.4.6
+cairosvg==2.9.0
+Pillow==12.2.0
+pilmoji==2.0.5
+microsandbox==0.4.6
+aiohttp==3.13.5
+discord-webhook==1.4.1
+cocoindex==1.0.6
+fastmcp==3.3.1
+pytesseract==0.3.13
+pint==0.25.3

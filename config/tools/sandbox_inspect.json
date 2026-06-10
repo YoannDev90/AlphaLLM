@@ -1,0 +1,11 @@
+{
+  "name": "sandbox_inspect",
+  "description": "Get detailed sandbox information including full configuration",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Sandbox name" }
+    },
+    "required": ["name"]
+  }
+}

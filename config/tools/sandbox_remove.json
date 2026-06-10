@@ -1,0 +1,16 @@
+{
+  "name": "sandbox_remove",
+  "description": "Remove a stopped sandbox",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Sandbox name" },
+      "force": {
+        "type": "boolean",
+        "description": "Stop then remove if running",
+        "default": false
+      }
+    },
+    "required": ["name"]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "sandbox_fs_read",
+  "description": "Read a file from the sandbox filesystem",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string" },
+      "path": { "type": "string" }
+    },
+    "required": ["name", "path"]
+  }
+}

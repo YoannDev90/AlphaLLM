@@ -1,0 +1,19 @@
+{
+  "name": "safe_eval_math",
+  "description": "Safely evaluate math expressions and unit conversions",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "expression": {
+        "type": "string",
+        "description": "Math expression, e.g. '2*sin(pi/4)' or '10 km to m'"
+      },
+      "precision": {
+        "type": "integer",
+        "description": "Significant digits for numeric output (default: 10)",
+        "default": 10
+      }
+    },
+    "required": ["expression"]
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "run_python",
+  "description": "Execute Python code in a sandboxed environment using microsandbox",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "code": {
+        "type": "string",
+        "description": "Python code to execute"
+      },
+      "timeout": {
+        "type": "number",
+        "description": "Execution timeout in seconds (default: 10)",
+        "default": 10
+      }
+    },
+    "required": ["code"]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "sandbox_metrics",
+  "description": "Get live CPU, memory, disk I/O, and network metrics",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Sandbox name" }
+    },
+    "required": ["name"]
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "sandbox_fs_stat",
+  "description": "Get file metadata (kind, size, mode, modified time)",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string" },
+      "path": { "type": "string" }
+    },
+    "required": ["name", "path"]
+  }
+}

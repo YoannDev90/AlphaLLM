@@ -1,0 +1,30 @@
+{
+  "name": "sandbox_run",
+  "description": "Create an ephemeral sandbox, run a command, return the output, and destroy it",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "image": { "type": "string", "description": "OCI image reference" },
+      "command": {
+        "type": "string",
+        "description": "Shell command to execute"
+      },
+      "memoryMib": {
+        "type": "integer",
+        "description": "Memory in MiB",
+        "default": 512
+      },
+      "cpus": {
+        "type": "integer",
+        "description": "Virtual CPU count",
+        "default": 1
+      },
+      "env": {
+        "type": "object",
+        "description": "Environment variables",
+        "additionalProperties": { "type": "string" }
+      }
+    },
+    "required": ["image", "command"]
+  }
+}

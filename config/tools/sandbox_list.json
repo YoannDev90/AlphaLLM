@@ -1,0 +1,9 @@
+{
+  "name": "sandbox_list",
+  "description": "List all sandboxes with their current status",
+  "inputSchema": {
+    "type": "object",
+    "properties": {},
+    "required": []
+  }
+}

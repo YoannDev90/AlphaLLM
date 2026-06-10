@@ -1,0 +1,16 @@
+{
+  "name": "sandbox_exec",
+  "description": "Execute a command with arguments inside a running sandbox",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "name": { "type": "string", "description": "Sandbox name" },
+      "command": { "type": "string", "description": "Executable command" },
+      "args": { "type": "array", "items": { "type": "string" } },
+      "cwd": { "type": "string" },
+      "env": { "type": "object", "additionalProperties": { "type": "string" } },
+      "timeout": { "type": "number", "description": "Timeout in seconds" }
+    },
+    "required": ["name", "command"]
+  }
+}

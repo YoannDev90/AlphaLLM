@@ -1,0 +1,16 @@
+[logging]
+
+[[console]]
+enable = true
+level = "DEBUG"
+console_format = "%(asctime)s - %(filename)s:%(lineno)d - %(message)s"
+
+[[file]]
+enable_file_logging = true
+log_file = "logs/alphallm.log"
+file_format = "%(asctime)s - %(filename)s:%(lineno)d - %(levelname)s - %(message)s"
+
+[[discord]]
+enable_discord_logging = true
+discord_webhook = "https://discord.com/api/webhooks/<URL>"
+discord_format = "%(asctime)s - %(filename)s:%(lineno)d\n%(message)s"
