@@ -79,16 +79,16 @@ class TestModelHandlers:
         # Each model should have the required attributes
         for model in models:
             assert isinstance(model, Model)
-            assert hasattr(model, 'litellm_id')
-            assert hasattr(model, 'provider')
-            assert hasattr(model, 'api_base')
-            assert hasattr(model, 'api_key')
+            assert hasattr(model, "litellm_id")
+            assert hasattr(model, "provider")
+            assert hasattr(model, "api_base")
+            assert hasattr(model, "api_key")
 
     @pytest.mark.asyncio
     async def test_model_configuration(self):
         """Test that models are properly configured."""
         models = get_models()
-        
+
         if not models:
             catalog = get_model_catalog()
             # If no models available, at least verify catalog exists
@@ -106,24 +106,24 @@ class TestModelHandlers:
 
         for model in models:
             model_info = self.pretty_model_info(model)
-            
+
             # Mock litellm.acompletion to avoid actual API calls
-            with patch('litellm.acompletion') as mock_completion:
+            with patch("litellm.acompletion") as mock_completion:
                 mock_completion.return_value = MagicMock(
                     choices=[MagicMock(message=MagicMock(content="Test response"))]
                 )
 
                 result = await self._test_model_helper(model, msg, retries=0)
-                
+
                 # Should have attempted to make the call
                 mock_completion.assert_called_once()
-                
+
                 # Verify the correct parameters were used
                 call_kwargs = mock_completion.call_args[1]
-                assert call_kwargs['model'] == model.litellm_id
-                assert call_kwargs['api_key'] == model.api_key
-                assert call_kwargs['messages'] == msg
-                
+                assert call_kwargs["model"] == model.litellm_id
+                assert call_kwargs["api_key"] == model.api_key
+                assert call_kwargs["messages"] == msg
+
                 # Verify result structure
                 assert "status" in result
                 assert "message" in result
@@ -143,9 +143,9 @@ class TestModelHandlers:
         ]
 
         # Mock litellm.acompletion to raise an exception
-        with patch('litellm.acompletion', side_effect=Exception("Test error")):
+        with patch("litellm.acompletion", side_effect=Exception("Test error")):
             result = await self._test_model_helper(mock_model, msg, retries=0)
-            
+
             # Should have failed
             assert result["status"] == "error"
             assert "exception" in result
@@ -172,7 +172,11 @@ class TestModelHandlers:
                 if attempt <= retries:
                     time.sleep(1)
                     continue
-                return {"status": "error", "exception": e, "trace": traceback.format_exc()}
+                return {
+                    "status": "error",
+                    "exception": e,
+                    "trace": traceback.format_exc(),
+                }
 
     def test_exception_classification_missing_api_key(self):
         """Test exception classification for missing API key."""
@@ -251,6 +255,7 @@ class TestModelHandlers:
 
         # Test with retry count
         call_count = 0
+
         def mock_completion(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -258,9 +263,9 @@ class TestModelHandlers:
                 raise Exception("First attempt fails")
             return MagicMock(choices=[MagicMock(message=MagicMock(content="Success"))])
 
-        with patch('litellm.acompletion', side_effect=mock_completion):
+        with patch("litellm.acompletion", side_effect=mock_completion):
             result = await self._test_model_helper(mock_model, msg, retries=1)
-            
+
             # Should have retried
             assert call_count == 2
             assert result["status"] == "ok"
@@ -274,7 +279,7 @@ class TestModelHandlers:
         mock_model.api_key = "sk-test-key"
 
         info = self.pretty_model_info(mock_model)
-        
+
         assert "model=gpt-4" in info
         assert "provider=openai" in info
         assert "api_base=https://api.openai.com/v1" in info
@@ -297,6 +302,7 @@ def mock_model():
     mock_model.api_key = "fake-api-key"
     return mock_model
 
+
 @pytest.fixture
 def test_message():
     """Fixture providing test message."""
@@ -304,19 +310,20 @@ def test_message():
         {"role": "user", "content": "Test message"},
     ]
 
+
 # Standalone test function using the mock model fixture
 @pytest.mark.asyncio
 async def test_model_with_mock_fixture(mock_model, test_message):
     """Test model using pytest fixtures."""
     # Mock litellm.acompletion to avoid actual API calls
-    with patch('litellm.acompletion') as mock_completion:
+    with patch("litellm.acompletion") as mock_completion:
         mock_completion.return_value = MagicMock(
             choices=[MagicMock(message=MagicMock(content="Test response"))]
         )
-        
+
         handler = TestModelHandlers()
         result = await handler._test_model_helper(mock_model, test_message, retries=0)
-        
+
         # Should have attempted to make the call
         mock_completion.assert_called_once()
         assert "status" in result

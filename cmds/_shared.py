@@ -8,6 +8,10 @@ sending interaction responses.
 import time
 from typing import Any, Optional
 
+import discord
+
+from core.config import cfg
+
 
 def interaction_context(interaction: Any) -> str:
     """Build a short textual context string for an interaction.
@@ -32,6 +36,12 @@ def interaction_context(interaction: Any) -> str:
         f"user={interaction.user} (id={interaction.user.id}), "
         f"guild={guild_name}, channel={channel_name}"
     )
+
+
+async def is_user_authorized(interaction: discord.Interaction) -> bool:
+    if cfg.DEV_IDS is None:
+        return False
+    return interaction.user.id in cfg.DEV_IDS
 
 
 def log_command_start(

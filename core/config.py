@@ -1,8 +1,9 @@
 """Configuration loading and prompt helpers for AlphaLLM."""
 
+import json
 import os
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 try:
     import tomllib as _toml
@@ -274,6 +275,10 @@ class Config:
 
     Attributes
     ----------
+    DEV_IDS : List[int]
+        List of Discord user IDs with developer privileges.
+    LINKS : Dict[str, str]
+        Configuration links such as support server and website.
     BOT_TOKEN : Optional[str]
         Discord bot token.
     WEBHOOK_POSTURL : Optional[str]
@@ -293,6 +298,43 @@ class Config:
     CONFIG_PATH : str
         Path to the active config file.
     """
+
+    # Load additional constants from configuration files
+    @staticmethod
+    def _load_perms_config() -> List[int]:
+        """Load permissions configuration from perms.json."""
+        perms_path = os.path.join(
+            os.path.dirname(__file__), "..", "config", "perms.json"
+        )
+        try:
+            with open(perms_path, "r") as f:
+                data = json.load(f)
+                return data.get("dev_ids", [])
+        except Exception:
+            return []
+
+    @staticmethod
+    def _load_links_config() -> Dict[str, str]:
+        """Load links configuration from links.json."""
+        links_path = os.path.join(
+            os.path.dirname(__file__), "..", "config", "links.json"
+        )
+        try:
+            with open(links_path, "r") as f:
+                return json.load(f)
+        except Exception:
+            return {"support_server": "", "website": ""}
+
+    # Class properties to access configuration data
+    @property
+    def DEV_IDS(self) -> List[int]:
+        """Get developer IDs from configuration file."""
+        return self._load_perms_config()
+
+    @property
+    def LINKS(self) -> Dict[str, str]:
+        """Get links configuration from configuration file."""
+        return self._load_links_config()
 
     BOT_TOKEN: Optional[str] = None
     WEBHOOK_POSTURL: Optional[str] = None

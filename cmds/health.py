@@ -34,7 +34,7 @@ def _status_label(ok: bool) -> str:
     return "Healthy" if ok else "Degraded"
 
 
-async def setup(tree: app_commands.CommandTree, bot):
+async def setup(tree: app_commands.CommandTree, bot: discord.Client):
     """Register the `health` command on the provided command tree.
 
     Parameters

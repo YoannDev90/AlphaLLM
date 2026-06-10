@@ -10,7 +10,7 @@ from utils.logger import get_logger
 logger = get_logger()
 
 
-async def setup(tree: app_commands.CommandTree, bot):
+async def setup(tree: app_commands.CommandTree, bot: discord.Client):
     @tree.command(
         name="memory-delete",
         description="Delete a specific turn from conversation history",

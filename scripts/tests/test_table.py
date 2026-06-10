@@ -43,7 +43,10 @@ More text here."""
 
         # Check table data structure
         assert table_data[0]["headers"] == ["Name", "Age", "City"]
-        assert table_data[0]["rows"] == [["Alice", "30", "New York"], ["Bob", "25", "San Francisco"]]
+        assert table_data[0]["rows"] == [
+            ["Alice", "30", "New York"],
+            ["Bob", "25", "San Francisco"],
+        ]
 
     def test_detect_and_convert_tables_no_table(self):
         """Test text without tables."""

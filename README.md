@@ -53,12 +53,15 @@ You can invite the official hosted version of **AlphaLLM** to your server:
 <!-- COMMANDS-START -->
 | Command | Description |
 | :--- | :--- |
+| `/announce` | Send an announcement to all servers |
 | `/health` | Show runtime health for bot subsystems |
 | `/list-tools` | List all tools available to the model |
 | `/memory-clear` | Clear the conversation history for a user |
 | `/memory-delete` | Delete a specific turn from conversation history |
 | `/memory-list` | List the most recent turns in memory |
 | `/ping` | Check bot latency and responsiveness |
+| `/poll` | Create a poll for users to vote on |
+| `/support` | Show the support server link |
 
 <!-- COMMANDS-END -->
 
@@ -177,8 +180,10 @@ Below is current snapshot of repository. This section is auto-updated by `./lint
 │   │   ├── NotoSans-Italic.ttf
 │   │   └── NotoSans-Regular.ttf
 │   └── images
+│       └── alphallm.png
 ├── bot.py
 ├── cmds
+│   ├── annoncements.py
 │   ├── health.py
 │   ├── __init__.py
 │   ├── list_tools.py
@@ -187,14 +192,17 @@ Below is current snapshot of repository. This section is auto-updated by `./lint
 │   ├── memory_delete.py
 │   ├── memory_list.py
 │   ├── ping.py
+│   ├── polls.py
 │   ├── _registry.py
-│   ├── set_mood.py
-│   └── _shared.py
+│   ├── _shared.py
+│   └── support.py
 ├── config
+│   ├── links.json
 │   ├── mcp.json
 │   ├── models.json
 │   ├── moods
 │   │   └── basic.txt
+│   ├── perms.json
 │   ├── providers.json
 │   └── tools
 │       ├── image_ocr.json
@@ -258,12 +266,18 @@ Below is current snapshot of repository. This section is auto-updated by `./lint
 │       ├── sandbox_run.py
 │       ├── sandbox_shell.py
 │       └── sandbox_stop.py
-├── README.md
 ├── requirements.txt
 ├── scripts
 │   ├── generate_docs.py
 │   ├── __init__.py
-│   └── test_models.py
+│   └── tests
+│       ├── __init__.py
+│       ├── test_codeblock.py
+│       ├── test_config.py
+│       ├── test_latex.py
+│       ├── test_messages.py
+│       ├── test_models.py
+│       └── test_table.py
 └── utils
     ├── handlers
     │   ├── codeblock.py
@@ -272,7 +286,7 @@ Below is current snapshot of repository. This section is auto-updated by `./lint
     │   └── table.py
     └── logger.py
 
-16 directories, 88 files
+17 directories, 97 files
 ```
 <!-- TREE-END -->
 
@@ -311,17 +325,17 @@ The bot automatically selects the most appropriate model based on:
 ```markdown
 - `discord.py==2.7.1` - A Python wrapper for the Discord API (latest: 2.7.1)
 - `python-dotenv==1.2.2` - Read key-value pairs from a .env file and set them as environment variables (latest: 1.2.2)
-- `litellm==1.86.1` - Library to easily interface with LLM API providers (latest: 1.88.1)
+- `litellm==1.88.1` - Library to easily interface with LLM API providers (latest: 1.88.1)
 - `requests==2.34.2` - Python HTTP for Humans. (latest: 2.34.2)
 - `colorama==0.4.6` - Cross-platform colored terminal text. (latest: 0.4.6)
 - `cairosvg==2.9.0` - A Simple SVG Converter based on Cairo (latest: 2.9.0)
 - `Pillow==12.2.0` - Python Imaging Library (fork) (latest: 12.2.0)
 - `pilmoji==2.0.5` - Pilmoji is an emoji renderer for Pillow, Python's imaging library. (latest: 2.0.5)
-- `microsandbox==0.4.6` - Python SDK for microsandbox — secure, fast microVM-based sandboxing. (latest: 0.5.6)
-- `aiohttp==3.13.5` - Async http client/server framework (asyncio) (latest: 3.14.1)
+- `microsandbox==0.5.6` - Python SDK for microsandbox — secure, fast microVM-based sandboxing. (latest: 0.5.6)
+- `aiohttp==3.14.1` - Async http client/server framework (asyncio) (latest: 3.14.1)
 - `discord-webhook==1.4.1` - Easily send Discord webhooks with Python (latest: 1.4.1)
-- `cocoindex==1.0.6` - With CocoIndex, users declare the transformation, CocoIndex creates & maintains an index, and keeps the derived index up to date based on source update, with minimal computation and changes. (latest: 1.0.7)
-- `fastmcp==3.3.1` - The fast, Pythonic way to build MCP servers and clients. (latest: 3.4.2)
+- `cocoindex==1.0.7` - With CocoIndex, users declare the transformation, CocoIndex creates & maintains an index, and keeps the derived index up to date based on source update, with minimal computation and changes. (latest: 1.0.7)
+- `fastmcp==3.4.2` - The fast, Pythonic way to build MCP servers and clients. (latest: 3.4.2)
 - `pytesseract==0.3.13` - Python-tesseract is a python wrapper for Google's Tesseract-OCR (latest: 0.3.13)
 - `pint==0.25.3` - Physical quantities module (latest: 0.25.3)
 ```

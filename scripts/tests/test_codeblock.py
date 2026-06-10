@@ -55,13 +55,15 @@ class TestCodeBlockHandlers:
         mock_channel.id = 12345
 
         # Mock MessageSender.send_latex_image to avoid external dependencies
-        with patch('utils.handlers.messages.MessageSender') as mock_sender_class:
+        with patch("utils.handlers.messages.MessageSender") as mock_sender_class:
             mock_sender_instance = AsyncMock()
             mock_sender_class.return_value = mock_sender_instance
             mock_sender_instance.send_latex_image = AsyncMock()
 
             code_block = "```latex\nx = {-b \\pm \\sqrt{b^2 - 4ac} \\over 2a}\n```"
-            result = await send_code_block_with_return(mock_channel, code_block, bot=mock_bot)
+            result = await send_code_block_with_return(
+                mock_channel, code_block, bot=mock_bot
+            )
 
             # Verify MessageSender was instantiated and used
             mock_sender_class.assert_called_once()

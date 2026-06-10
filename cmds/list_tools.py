@@ -12,7 +12,7 @@ from utils.logger import get_logger
 logger = get_logger()
 
 
-async def setup(tree: app_commands.CommandTree, bot):
+async def setup(tree: app_commands.CommandTree, bot: discord.Client):
     @tree.command(
         name="list-tools", description="List all tools available to the model"
     )

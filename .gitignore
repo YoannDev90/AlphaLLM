@@ -1,4 +1,7 @@
 data/
+config/perms.json
+*.md
+!README.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

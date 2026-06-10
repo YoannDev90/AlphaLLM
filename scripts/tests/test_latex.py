@@ -55,7 +55,7 @@ class TestLaTeXHandlers:
 
     def test_convert_latex_to_png_cairosvg_missing(self):
         """Test LaTeX to PNG conversion when cairosvg is missing."""
-        with patch('utils.handlers.latex.cairosvg', None):
+        with patch("utils.handlers.latex.cairosvg", None):
             result, success = convert_latex_to_png("x = y")
 
             assert not success
@@ -64,8 +64,8 @@ class TestLaTeXHandlers:
     @pytest.mark.asyncio
     async def test_convert_latex_to_png_success(self):
         """Test successful LaTeX to PNG conversion."""
-        with patch('utils.handlers.latex.cairosvg') as mock_cairosvg:
-            with patch('utils.handlers.latex.latex_to_svg') as mock_svg:
+        with patch("utils.handlers.latex.cairosvg") as mock_cairosvg:
+            with patch("utils.handlers.latex.latex_to_svg") as mock_svg:
                 mock_svg.return_value = b"fake_svg"
                 mock_cairosvg.svg2png = MagicMock()
 
@@ -76,14 +76,16 @@ class TestLaTeXHandlers:
 
                 # Should return a BytesIO buffer
                 assert success
-                assert hasattr(result, 'read')
+                assert hasattr(result, "read")
                 assert isinstance(result, io.BytesIO)
 
     @pytest.mark.asyncio
     async def test_convert_latex_to_png_failure(self):
         """Test LaTeX to PNG conversion failure."""
-        with patch('utils.handlers.latex.cairosvg') as mock_cairosvg:
-            with patch('utils.handlers.latex.latex_to_svg', side_effect=Exception("SVG error")):
+        with patch("utils.handlers.latex.cairosvg") as mock_cairosvg:
+            with patch(
+                "utils.handlers.latex.latex_to_svg", side_effect=Exception("SVG error")
+            ):
                 result, success = convert_latex_to_png("invalid latex")
 
                 assert success  # Original function returns True even on failure

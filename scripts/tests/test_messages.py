@@ -31,7 +31,9 @@ class TestMessageSender:
         """Test sending simple text chunks."""
         sender = MessageSender(self.mock_channel, self.mock_bot, max_length=100)
 
-        with patch.object(sender, '_get_target_channel', return_value=self.mock_channel):
+        with patch.object(
+            sender, "_get_target_channel", return_value=self.mock_channel
+        ):
             mock_send = AsyncMock()
             self.mock_channel.send = mock_send
 
@@ -48,7 +50,9 @@ class TestMessageSender:
         """Test sending long text that requires splitting."""
         sender = MessageSender(self.mock_channel, self.mock_bot, max_length=50)
 
-        with patch.object(sender, '_get_target_channel', return_value=self.mock_channel):
+        with patch.object(
+            sender, "_get_target_channel", return_value=self.mock_channel
+        ):
             mock_send = AsyncMock()
             self.mock_channel.send = mock_send
 
@@ -64,7 +68,9 @@ class TestMessageSender:
         """Test sending empty text."""
         sender = MessageSender(self.mock_channel, self.mock_bot)
 
-        with patch.object(sender, '_get_target_channel', return_value=self.mock_channel):
+        with patch.object(
+            sender, "_get_target_channel", return_value=self.mock_channel
+        ):
             mock_send = AsyncMock()
             self.mock_channel.send = mock_send
 
@@ -80,8 +86,10 @@ class TestMessageSender:
         """Test successful LaTeX image conversion."""
         sender = MessageSender(self.mock_channel, self.mock_bot)
 
-        with patch.object(sender, '_get_target_channel', return_value=self.mock_channel):
-            with patch('utils.handlers.latex.convert_latex_to_png') as mock_convert:
+        with patch.object(
+            sender, "_get_target_channel", return_value=self.mock_channel
+        ):
+            with patch("utils.handlers.latex.convert_latex_to_png") as mock_convert:
                 mock_convert.return_value = (io.BytesIO(b"fake_png"), True)
 
                 mock_send = AsyncMock()
@@ -99,8 +107,10 @@ class TestMessageSender:
         """Test LaTeX image conversion failure."""
         sender = MessageSender(self.mock_channel, self.mock_bot)
 
-        with patch.object(sender, '_get_target_channel', return_value=self.mock_channel):
-            with patch('utils.handlers.latex.convert_latex_to_png') as mock_convert:
+        with patch.object(
+            sender, "_get_target_channel", return_value=self.mock_channel
+        ):
+            with patch("utils.handlers.latex.convert_latex_to_png") as mock_convert:
                 mock_convert.return_value = ("Failed to render LaTeX", False)
 
                 mock_send = AsyncMock()
