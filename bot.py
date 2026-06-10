@@ -76,17 +76,10 @@ class EvilBot(discord.Client):
             logger.warning("Failed to write command sync state", exc_info=True)
 
     async def _sync_commands_if_needed(self, cmds_path: Path) -> None:
-        force_sync = os.getenv("FORCE_COMMAND_SYNC", "0") == "1"
-        skip_sync = os.getenv("SKIP_COMMAND_SYNC", "0") == "1"
-
-        if skip_sync:
-            logger.info("Skipping slash command sync (SKIP_COMMAND_SYNC=1)")
-            return
-
         current_fingerprint = self._compute_commands_fingerprint(cmds_path)
         previous_fingerprint = self._read_last_commands_fingerprint()
 
-        if not force_sync and previous_fingerprint == current_fingerprint:
+        if previous_fingerprint == current_fingerprint:
             logger.info("Skipping slash command sync (no command changes detected)")
             return
 
