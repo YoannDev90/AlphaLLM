@@ -2,9 +2,9 @@
 
 # AlphaLLM
 
-### *The sophisticated, AI-powered Discord agent with an attitude.*
+### *The sophisticated, AI-powered Discord agent.*
 
-<img src="assets/images/evilgpt.png" alt="AlphaLLM Icon" width="160" style="border-radius:24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin: 20px 0;" />
+<img src="assets/images/alphallm.png" alt="AlphaLLM Icon" width="160" style="border-radius:24px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin: 20px 0;" />
 
 ---
 
@@ -26,7 +26,7 @@
 
 ---
 
-**AlphaLLM** is a powerful Discord bot integrating state-of-the-art AI models to provide intelligent, contextual, and often sarcastic responses.
+**AlphaLLM** is a powerful Discord bot integrating state-of-the-art AI models to provide intelligent and contextual responses.
 
 </div>
 
