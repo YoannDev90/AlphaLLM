@@ -46,7 +46,7 @@
 
 You can invite the official hosted version of **AlphaLLM** to your server:
 
-[**Invite AlphaLLM**](https://discord.com/oauth2/authorize?client_id=1501258658179186748)
+[**Invite AlphaLLM**](https://discord.com/oauth2/authorize?client_id=1513828113627222016)
 
 ## Commands
 
@@ -59,7 +59,6 @@ You can invite the official hosted version of **AlphaLLM** to your server:
 | `/memory-delete` | Delete a specific turn from conversation history |
 | `/memory-list` | List the most recent turns in memory |
 | `/ping` | Check bot latency and responsiveness |
-| `/set-mood` | Change the mood/personality of the AlphaLLM |
 
 <!-- COMMANDS-END -->
 
@@ -171,7 +170,6 @@ Below is current snapshot of repository. This section is auto-updated by `./lint
 ```
 .
 ├── alphallm.service
-├── Archive.tar.gz
 ├── assets
 │   ├── fonts
 │   │   ├── NotoSans-BoldItalic.ttf
@@ -361,28 +359,9 @@ The bot automatically selects the most appropriate model based on:
 - API keys and tokens should never be committed to version control
 - Local memory state lives under `data/memory_state.json` and syncs into a local SQLite store through CocoIndex
 
-## Notes about prompts
-
-These prompts are directly inspired by the Evil model, which was available on Pollinations a few years ago.
-
-These prompts are commonly rejected by most models available via official APIs, given the strict guardrails in place.
-
-It is worth noting, however, that the Mistral and Gemini models are much less likely to reject them. I have not yet tested this with models such as DeepSeek, Kimi, or Minimax, but it goes without saying that the OpenAI and Anthropic models will almost certainly fail.
-
 ## License
 
 This project is provided as-is. Please respect Discord's Terms of Service and API usage policies.
-
-## Disclaimer
-
-**As-is software**: Models may generate illegal or harmful content.
-You are solely responsible for outputs and their use.
-I provide no warranties and accept no liability.
-
-**Your obligations**: Don't use this for illegal purposes.
-Monitor and filter outputs appropriately. Comply with all laws.
-
-**FOR EDUCATIONAL PURPOSES ONLY !**
 
 ## Contributing
 
